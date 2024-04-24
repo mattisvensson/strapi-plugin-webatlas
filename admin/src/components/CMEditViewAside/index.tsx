@@ -5,7 +5,7 @@ import { Combobox, ComboboxOption, BaseCheckbox, Box, TextInput, ToggleInput, Gr
 import { useState } from 'react';
 import transformToUrl from '../../utils/transformToUrl';
 
-const CollectionAside = () => {
+const CMEditViewAside = () => {
   const [title, setTitle] = useState('')
   const [urlTitle, setUrlTitle] = useState('')
   const [isDisabled, setIsDisabled] = useState(true);
@@ -107,4 +107,4 @@ const CollectionAside = () => {
   )
 };
 
-export default CollectionAside;
+export default CMEditViewAside;

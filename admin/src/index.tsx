@@ -4,7 +4,7 @@ import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import Initializer from './components/Initializer';
 import PluginIcon from './components/PluginIcon';
-import CollectionAside from './components/CollectionAside';
+import CMEditViewAside from './components/CMEditViewAside';
 
 const name = pluginPkg.strapi.name;
 
@@ -15,12 +15,10 @@ export default {
       icon: PluginIcon,
       intlLabel: {
         id: `${pluginId}.plugin.name`,
-        defaultMessage: name,
+        defaultMessage: 'Routes',
       },
       Component: async () => {
-        const component = await import('./pages/App');
-
-        return component;
+        return await import('./pages/App');
       },
       permissions: [
         // Uncomment to set the permissions of the plugin here
@@ -47,7 +45,7 @@ export default {
           id: name,
           to: `/settings/${pluginId}`,
           async Component() {
-            return await import('./pages/HomePage');
+            return await import('./pages/Settings');
           },
         },
       ]
@@ -64,8 +62,8 @@ export default {
 
   bootstrap(app: any) {
     app.injectContentManagerComponent('editView', 'right-links', {
-      name: 'CollectionAside',
-      Component: CollectionAside,
+      name: 'CMEditViewAside',
+      Component: CMEditViewAside,
     });
   },
 
