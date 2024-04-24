@@ -29,6 +29,28 @@ export default {
         // },
       ],
     });
+    app.createSettingSection(
+      {
+        id: pluginId,
+        intlLabel: {
+          id: 'url-routes-plugin-title',
+          defaultMessage: 'URL Routes Plugin',
+        },
+      },
+      [
+        {
+          intlLabel: {
+            id: 'url-routes-plugin-item',
+            defaultMessage: 'Configuration',
+          },
+          id: name,
+          to: `/settings/${pluginId}`,
+          async Component() {
+            return await import('./pages/HomePage');
+          },
+        },
+      ]
+    );
     const plugin = {
       id: pluginId,
       initializer: Initializer,
