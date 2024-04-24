@@ -97,7 +97,7 @@ const CollectionAside = () => {
             />
             <label htmlFor='override-url'>
               <Typography textColor="neutral600">
-                Override automactic URL
+                Override automatic URL
               </Typography>
             </label>
           </Flex>
