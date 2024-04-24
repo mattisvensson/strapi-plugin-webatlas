@@ -55,8 +55,9 @@ const CollectionAside = () => {
       >
         <Divider />
       </Box>
-      <GridLayout
-        columns={1}
+      <Flex
+        direction='column'
+        alignItems='stretch'
         gap={4}
       >
         <TextInput
@@ -101,7 +102,7 @@ const CollectionAside = () => {
             </label>
           </Flex>
         </Box>
-      </GridLayout>
+      </Flex>
     </Box>
   )
 };
