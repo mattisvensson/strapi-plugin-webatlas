@@ -4,6 +4,7 @@ import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import Initializer from './components/Initializer';
 import PluginIcon from './components/PluginIcon';
+import CollectionAside from './components/CollectionAside';
 
 const name = pluginPkg.strapi.name;
 
@@ -61,7 +62,12 @@ export default {
     app.registerPlugin(plugin);
   },
 
-  bootstrap(app: any) {},
+  bootstrap(app: any) {
+    app.injectContentManagerComponent('editView', 'right-links', {
+      name: 'CollectionAside',
+      Component: CollectionAside,
+    });
+  },
 
   async registerTrads(app: any) {
     const { locales } = app;
