@@ -18,6 +18,24 @@ export default {
         policies: [],
         auth: false,
       }
+    },
+    {
+      method: 'POST',
+      path: '/route',
+      handler: 'admin.createRoute',
+      config: {
+        policies: [],
+        auth: false,
+      }
+    },
+    {
+      method: 'PUT',
+      path: '/route/:id',
+      handler: 'admin.updateRoute',
+      config: {
+        policies: [],
+        auth: false,
+      }
     }
   ]
 }

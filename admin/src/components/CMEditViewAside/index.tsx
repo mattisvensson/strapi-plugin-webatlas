@@ -1,14 +1,54 @@
 import { Typography } from '@strapi/design-system/Typography';
 import { Divider } from '@strapi/design-system/Divider';
 import { Flex } from '@strapi/design-system/Flex';
-import { Combobox, ComboboxOption, BaseCheckbox, Box, TextInput, ToggleInput, GridLayout  } from '@strapi/design-system';
-import { useState } from 'react';
+import { Combobox, ComboboxOption, BaseCheckbox, Box, TextInput, ToggleInput, Button  } from '@strapi/design-system';
+import { useState, useEffect } from 'react';
 import transformToUrl from '../../utils/transformToUrl';
+import { useFetchClient, useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { createUrlAlias, updateUrlAlias } from '../../utils/api';
 
 const CMEditViewAside = () => {
-  const [title, setTitle] = useState('')
-  const [urlTitle, setUrlTitle] = useState('')
+  const { layout, modifiedData, initialData, slug } = useCMEditViewDataManager()
+  const { get } = useFetchClient();
+
+  const [title, setTitle] = useState(initialData?.url_route?.title || '')
+  const [urlTitle, setUrlTitle] = useState(initialData?.url_route?.url_route || '')
+  const [attachedToMenu, setAttachedToMenu] = useState(initialData?.url_route?.menuAttached || false)
+  const [parent, setParent] = useState(initialData.url_route?.parent || null)
   const [isDisabled, setIsDisabled] = useState(true);
+  const [isHidden, setIsHidden] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+
+
+  useEffect(() => {
+    async function getTypes () {
+      const { data } = await get('/url-routes/config', {
+        method: 'GET',
+      })
+      if (data?.selectedContentTypes?.includes(layout.uid)) {
+        setIsHidden(false);
+      }
+      setIsLoading(false);
+    }
+    getTypes();
+  }, [])
+  
+  const onSubmit = async () => {
+    if (!initialData.id) return;
+    const settings = {
+      id: modifiedData.id,
+      title,
+      menuAttached: attachedToMenu,
+      parent,
+      url_route: urlTitle,
+      routeId: initialData.url_route?.routeId
+    }
+    if (initialData.url_route) {
+      await updateUrlAlias(settings, slug);
+    } else {
+      await createUrlAlias(settings, slug);
+    }
+  };
 
   const handleCheckboxChange = () => {
     setIsDisabled(prev => !prev);
@@ -27,6 +67,8 @@ const CMEditViewAside = () => {
       setUrlTitle(e.target.value);
     }
   }
+
+  if (isHidden || isLoading) return null;
 
   return (
     <Box
@@ -55,6 +97,15 @@ const CMEditViewAside = () => {
       >
         <Divider />
       </Box>
+      {!initialData.id ? 
+      <Typography
+        textColor="neutral600"
+        id="save-first"
+        paddingBottom={4}
+      >
+        Please save the entry to generate a URL
+      </Typography>
+      : 
       <Flex
         direction='column'
         alignItems='stretch'
@@ -65,15 +116,20 @@ const CMEditViewAside = () => {
           label="Title"
           placeholder="Title"
           onChange={handleTitleChange}
+          value={title}
         />
         <ToggleInput
           label="Attach to menu"
           offLabel="No"
           onLabel="Yes"
+          onChange={() => setAttachedToMenu((prev: boolean) => !prev)}
+          checked={attachedToMenu}
         />
         <Combobox
           id="parent-select"
           label="Parent"
+          onChange={(value: string) => setParent(value)}
+          value={parent}
         >
           <ComboboxOption value="internal">Internal</ComboboxOption>
           <ComboboxOption value="external">External</ComboboxOption>
@@ -102,7 +158,8 @@ const CMEditViewAside = () => {
             </label>
           </Flex>
         </Box>
-      </Flex>
+        <Button onClick={() => onSubmit()}>Save</Button>
+      </Flex>}
     </Box>
   )
 };
