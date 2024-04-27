@@ -1,1 +1,7 @@
-export default {};
+"use strict"
+
+import route from "./route";
+
+export default {
+  route,
+};
