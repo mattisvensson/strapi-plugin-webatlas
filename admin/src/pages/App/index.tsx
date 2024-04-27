@@ -8,7 +8,7 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import { AnErrorOccurred } from '@strapi/helper-plugin';
-import pluginId from '../../pluginId';
+import pluginId from '../../../../utils/pluginId';
 import HomePage from '../HomePage';
 
 const App = () => {

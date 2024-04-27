@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import pluginId from '../../pluginId';
+import pluginId from '../../../../utils/pluginId';
 
 const HomePage = () => {
   return (
