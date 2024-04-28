@@ -32,6 +32,15 @@ export default ({strapi}) => ({
     return config
   },
 
+  async getRoutes() {
+    try {
+      const entitys = await strapi.entityService.findMany('plugin::url-routes.route');
+      return entitys;
+    } catch (e) {
+      console.log(e)
+    }
+  },
+
   async createRoute(newData) {
     // const urlPath = await duplicateCheck(data.url_path);
     try {

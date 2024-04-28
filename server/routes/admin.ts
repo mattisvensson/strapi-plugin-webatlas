@@ -20,6 +20,15 @@ export default {
       }
     },
     {
+      method: 'GET',
+      path: '/route',
+      handler: 'admin.getRoutes',
+      config: {
+        policies: [],
+        auth: false,
+      }
+    },
+    {
       method: 'POST',
       path: '/route',
       handler: 'admin.createRoute',
