@@ -4,8 +4,7 @@
  *
  */
 
-import { Link } from '@strapi/icons';
+import { Link, List } from '@strapi/icons';
 
-const PluginIcon = () => <Link />;
-
-export default PluginIcon;
+export const RouteIcon = () => <Link />;
+export const NavigationIcon = () => <List />;

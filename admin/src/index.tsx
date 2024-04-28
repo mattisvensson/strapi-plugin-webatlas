@@ -3,7 +3,7 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginId from '../../utils/pluginId';
 import Initializer from './components/Initializer';
-import PluginIcon from './components/PluginIcon';
+import { RouteIcon, NavigationIcon} from './components/PluginIcon';
 import CMEditViewAside from './components/CMEditViewAside';
 
 const name = pluginPkg.strapi.name;
@@ -11,11 +11,29 @@ const name = pluginPkg.strapi.name;
 export default {
   register(app: any) {
     app.addMenuLink({
-      to: `/plugins/${pluginId}`,
-      icon: PluginIcon,
+      to: `/plugins/${pluginId}/routes`,
+      icon: RouteIcon,
       intlLabel: {
         id: `${pluginId}.plugin.name`,
         defaultMessage: 'Routes',
+      },
+      Component: async () => {
+        return await import('./pages/App');
+      },
+      permissions: [
+        // Uncomment to set the permissions of the plugin here
+        // {
+        //   action: '', // the action name should be plugin::plugin-name.actionType
+        //   subject: null,
+        // },
+      ],
+    });
+    app.addMenuLink({
+      to: `/plugins/${pluginId}/navigation`,
+      icon: NavigationIcon,
+      intlLabel: {
+        id: `${pluginId}.plugin.name`,
+        defaultMessage: 'Navigation',
       },
       Component: async () => {
         return await import('./pages/App');

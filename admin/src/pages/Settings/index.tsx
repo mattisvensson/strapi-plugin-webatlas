@@ -1,3 +1,9 @@
+/*
+ *
+ * Settings
+ *
+ */
+
 import { useEffect, useState } from 'react';
 import {
   CheckPermissions,
