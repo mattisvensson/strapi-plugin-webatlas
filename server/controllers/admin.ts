@@ -26,10 +26,10 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
   async updateRoute (ctx) {
     try {
-      const { data, contenttype } = ctx.request.body;
+      const { data, contentType } = ctx.request.body;
       return await strapi.plugin('url-routes').service('admin').updateRoute(
         data,
-        contenttype,
+        contentType,
       );
     } catch (e) {
       return ctx.throw(500, e)
