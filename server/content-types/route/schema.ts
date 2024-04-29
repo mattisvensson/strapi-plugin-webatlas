@@ -46,5 +46,12 @@ export default {
       default: false,
       configurable: false,
     },
+    master: {
+      type: "relation",
+      relation: "manyToOne",
+      target: "plugin::url-routes.navigation",
+      configurable: false,
+      inversedBy: "items",
+    },
   }
 }
