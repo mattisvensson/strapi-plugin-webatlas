@@ -18,6 +18,7 @@ const CMEditViewAside = () => {
   const [isDisabled, setIsDisabled] = useState(true);
   const [isHidden, setIsHidden] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [entities, setEntities] = useState([])
 
 
   useEffect(() => {
@@ -25,7 +26,20 @@ const CMEditViewAside = () => {
       const { data } = await get('/url-routes/config', {
         method: 'GET',
       })
+      console.log(data)
       if (data?.selectedContentTypes?.includes(layout.uid)) {
+        // Fetch all entities from the selected content types
+        const entities = await Promise.all(
+          data?.selectedContentTypes?.map(async (contentType) => {
+            const { data: entities } = await get(`/content-manager/collection-types/${contentType}`);
+            return entities;
+          }) || []
+        );
+  
+        const mergedEntities = entities.flat(); // Merge the arrays into one
+
+        console.log(mergedEntities); // Log the merged entities
+        setEntities(mergedEntities)
         setIsHidden(false);
       }
       setIsLoading(false);
