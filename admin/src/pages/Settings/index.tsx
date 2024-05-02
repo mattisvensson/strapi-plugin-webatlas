@@ -79,9 +79,6 @@ const Settings = () => {
           paddingTop={6}
           shadow="tableShadow"
         >
-          <Typography fontSIze={24}>
-            Meine Settings
-          </Typography>
           <Select
             name="selectedContentTypes"
             label='Select'
