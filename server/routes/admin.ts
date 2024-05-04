@@ -45,6 +45,15 @@ export default {
         policies: [],
         auth: false,
       }
+    },
+    {
+      method: 'DELETE',
+      path: '/navigation/:id',
+      handler: 'admin.deleteNavigation',
+      config: {
+        policies: [],
+        auth: false,
+      }
     }
   ]
 }

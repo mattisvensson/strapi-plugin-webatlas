@@ -92,5 +92,14 @@ export default ({strapi}) => ({
     } catch (e) {
       console.log(e)
     }
+  },
+
+  async deleteNavigation(id) {
+    try {
+      await strapi.entityService.delete('plugin::url-routes.navigation', id)
+      return true
+    } catch (e) {
+      console.log(e)
+    }
   }
 })
