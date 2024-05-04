@@ -42,6 +42,14 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       return ctx.throw(500, e)
     }
   },
+  async createNavigation (ctx) {
+    try {
+      const data = ctx.request.body;
+      return await strapi.plugin('url-routes').service('admin').createNavigation(data);
+    } catch (e) {
+      return ctx.throw(500, e)
+    }
+  },
   async deleteNavigation (ctx) {
     try {
       const { id } = ctx.params;

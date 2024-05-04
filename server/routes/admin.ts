@@ -47,6 +47,15 @@ export default {
       }
     },
     {
+      method: 'POST',
+      path: '/navigation',
+      handler: 'admin.createNavigation',
+      config: {
+        policies: [],
+        auth: false,
+      }
+    },
+    {
       method: 'DELETE',
       path: '/navigation/:id',
       handler: 'admin.deleteNavigation',

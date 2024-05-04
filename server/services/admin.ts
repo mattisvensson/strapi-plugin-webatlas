@@ -94,6 +94,21 @@ export default ({strapi}) => ({
     }
   },
 
+  async createNavigation(data) {
+    try {
+      await strapi.entityService.create('plugin::url-routes.navigation', {
+        data: {
+          name: data.name,
+          slug: data.name,
+          isVisible: data.isActive,
+        },
+      });
+      return true
+    } catch (e) {
+      console.log(e)
+    }
+  },
+
   async deleteNavigation(id) {
     try {
       await strapi.entityService.delete('plugin::url-routes.navigation', id)
