@@ -8,7 +8,6 @@ import { Plus, Check } from '@strapi/icons';
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layout';
 import { Flex, Button } from '@strapi/design-system';
 import { useEffect, useState } from 'react';
-import { useFetchClient } from '@strapi/helper-plugin';
 import NavOverview from '../../components/modals/NavOverview';
 import NavCreate from '../../components/modals/NavCreate';
 import MainModal from '../../components/modals/MainModal';
@@ -17,28 +16,17 @@ import EmptyNav from '../Navigation/EmptyNav';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
 import Header from './Header';
 import { NavItem } from '../../types';
+import useNavigations from '../../hooks/useNavigations';
 
 const Navigation = () => {
-  const { get } = useFetchClient();
 
-  const [navigations, setNavigations] = useState([]);
+  const [navigations, fetchNavigations] = useNavigations() as [NavItem[], () => Promise<void>];
   const [openModal, setOpenModal] = useState('');
   const [selectedNavigation, setSelectedNavigation] = useState<NavItem>();
   const [actionNavigation, setActionNavigation] = useState<NavItem>();
 
   useEffect(() => {
-    if (openModal !== 'overview') return
-     
-    async function getRoutes () {
-      const { data } = await get('/content-manager/collection-types/plugin::url-routes.navigation')
-      console.log(data.results)
-      setNavigations(data.results)
-    }
-    getRoutes();
-  }, [openModal])
-
-  useEffect(() => {
-    if (navigations.length > 0) {
+    if (Array.isArray(navigations) && navigations.length > 0) {
       setSelectedNavigation(navigations[0]);
     }
   }, [navigations]);
@@ -71,7 +59,7 @@ const Navigation = () => {
                 />
               }
               {openModal === 'delete' && actionNavigation &&
-                <NavDelete item={actionNavigation}/>
+                <NavDelete item={actionNavigation} fetchNavigations={fetchNavigations}/>
               }
               <Button variant="secondary" startIcon={<Plus />} >
                 New Item

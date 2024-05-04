@@ -7,10 +7,11 @@ import { NavItem } from '../../types';
 
 type NavDeleteProps = {
   item: NavItem;
+  fetchNavigations: () => void;
 }
 
 
-export default function NavDelete ({ item }: NavDeleteProps) {
+export default function NavDelete ({ item, fetchNavigations }: NavDeleteProps) {
   const { del } = useFetchClient();
 
   const contextValue = useContext(ModalContext);
@@ -22,6 +23,7 @@ export default function NavDelete ({ item }: NavDeleteProps) {
   
   const handleDelete = async () => {
     await del(`/url-routes/navigation/${item.id}`)
+    fetchNavigations()
     setOpenModal('overview')
   }
 
