@@ -10,7 +10,6 @@ import { Flex, Button } from '@strapi/design-system';
 import { useEffect, useState } from 'react';
 import NavOverview from '../../components/modals/NavOverview';
 import NavCreate from '../../components/modals/NavCreate';
-import MainModal from '../../components/modals/MainModal';
 import NavDelete from '../../components/modals/NavDelete';
 import EmptyNav from '../Navigation/EmptyNav';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
@@ -42,25 +41,6 @@ const Navigation = () => {
           />
           <ContentLayout>
             <Flex gap={4} paddingBottom={6} justifyContent="flex-end">
-              {openModal === 'overview' && 
-                <MainModal 
-                  body={<NavOverview navigations={navigations} setActionNavigation={setActionNavigation}/>}
-                  title="Navigation overview"
-                  startAction={<Button onClick={() => setOpenModal('')} variant="tertiary">Cancel</Button>}
-                  endAction={<Button onClick={() => setOpenModal('create')}>Create new</Button>}
-                />
-              }
-              {openModal === 'create' &&
-                <MainModal 
-                  body={<NavCreate/>}
-                  title="Create new navigation"
-                  startAction={<Button onClick={() => setOpenModal('overview')} variant="tertiary">Cancel</Button>}
-                  endAction={<Button onClick={() => setOpenModal('create')}>Create</Button>}
-                />
-              }
-              {openModal === 'delete' && actionNavigation &&
-                <NavDelete item={actionNavigation} fetchNavigations={fetchNavigations}/>
-              }
               <Button variant="secondary" startIcon={<Plus />} >
                 New Item
               </Button>
@@ -71,6 +51,9 @@ const Navigation = () => {
             {navigations.length === 0 && <EmptyNav/>}
           </ContentLayout> 
         </Layout>
+        {openModal === 'overview' && <NavOverview navigations={navigations} setActionNavigation={setActionNavigation}/>}
+        {openModal === 'create' && <NavCreate fetchNavigations={fetchNavigations}/>}
+        {openModal === 'delete' && actionNavigation && <NavDelete item={actionNavigation} fetchNavigations={fetchNavigations}/>}
       </SelectedNavigationContext.Provider>
     </ModalContext.Provider>
   );
