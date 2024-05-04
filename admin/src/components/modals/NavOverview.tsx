@@ -30,6 +30,11 @@ export default function NavOverview ({ navigations, setActionNavigation }: NavOv
     setOpenModal('')
   }
 
+  const handleEdit = (nav: NavItem) => {
+    setActionNavigation(nav)
+    setOpenModal('edit')
+  }
+
   const handleDelete = (nav: NavItem) => {
     setActionNavigation(nav)
     setOpenModal('delete')
@@ -47,7 +52,7 @@ export default function NavOverview ({ navigations, setActionNavigation }: NavOv
               </Typography>
               <Flex gap={2}>
                 <Button startIcon={<Trash />} variant="secondary" onClick={() => handleDelete(nav)}>Delete</Button>
-                <Button startIcon={<Pencil />} variant="secondary">Edit</Button>
+                <Button startIcon={<Pencil />} variant="secondary" onClick={() => handleEdit(nav)}>Edit</Button>
                 <Button startIcon={<Check />} variant="primary" onClick={() => handleSelect(nav)} disabled={selectedNavigation ? selectedNavigation.slug === nav.slug : false}>Select</Button>
               </Flex>
             </Flex>

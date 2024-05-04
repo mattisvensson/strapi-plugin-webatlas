@@ -100,10 +100,25 @@ export default ({strapi}) => ({
         data: {
           name: data.name,
           slug: data.name,
-          isVisible: data.isActive,
+          visible: data.isActive,
         },
       });
       return true
+    } catch (e) {
+      console.log(e)
+    }
+  },
+
+  async updateNavigation(id, data) {
+    try {
+      const entity = await strapi.entityService.update('plugin::url-routes.navigation', id, {
+        data: {
+          name: data.name,
+          slug: data.slug,
+          visible: data.isActive,
+        },
+      });
+      return entity
     } catch (e) {
       console.log(e)
     }

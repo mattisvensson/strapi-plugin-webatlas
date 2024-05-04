@@ -50,6 +50,15 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       return ctx.throw(500, e)
     }
   },
+  async updateNavigation (ctx) {
+    try {
+      const { id } = ctx.params;
+      const data = ctx.request.body;
+      return await strapi.plugin('url-routes').service('admin').updateNavigation(id, data);
+    } catch (e) {
+      return ctx.throw(500, e)
+    }
+  },
   async deleteNavigation (ctx) {
     try {
       const { id } = ctx.params;

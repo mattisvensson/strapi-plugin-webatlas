@@ -56,6 +56,15 @@ export default {
       }
     },
     {
+      method: 'PUT',
+      path: '/navigation/:id',
+      handler: 'admin.updateNavigation',
+      config: {
+        policies: [],
+        auth: false,
+      }
+    },
+    {
       method: 'DELETE',
       path: '/navigation/:id',
       handler: 'admin.deleteNavigation',

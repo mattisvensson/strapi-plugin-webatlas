@@ -11,6 +11,7 @@ import { useEffect, useState } from 'react';
 import NavOverview from '../../components/modals/NavOverview';
 import NavCreate from '../../components/modals/NavCreate';
 import NavDelete from '../../components/modals/NavDelete';
+import NavEdit from '../../components/modals/NavEdit';
 import EmptyNav from '../Navigation/EmptyNav';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
 import Header from './Header';
@@ -53,6 +54,7 @@ const Navigation = () => {
         </Layout>
         {openModal === 'overview' && <NavOverview navigations={navigations} setActionNavigation={setActionNavigation}/>}
         {openModal === 'create' && <NavCreate fetchNavigations={fetchNavigations}/>}
+        {openModal === 'edit' && actionNavigation && <NavEdit item={actionNavigation} fetchNavigations={fetchNavigations}/>}
         {openModal === 'delete' && actionNavigation && <NavDelete item={actionNavigation} fetchNavigations={fetchNavigations}/>}
       </SelectedNavigationContext.Provider>
     </ModalContext.Provider>
