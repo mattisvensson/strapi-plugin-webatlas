@@ -1,11 +1,22 @@
-import { Flex, Box, Typography, ModalLayout, ModalBody, ModalHeader, ModalFooter, Divider, Button, IconButton } from '@strapi/design-system';
+import { Typography, ModalLayout, ModalBody, ModalHeader, ModalFooter } from '@strapi/design-system';
+import { useContext } from 'react';
+import { ModalContext } from '../../contexts';
+import { MainModal } from '../../types';
 
 
-export default function MainModal ({ setIsVisible, title, body, startAction, endAction }) {
+export default function MainModal ({ title, body, startAction, endAction }: MainModal) {
+
+  const contextValue = useContext(ModalContext);
+  let setOpenModal = (_: string) => {};  
+
+  if (contextValue !== null) {
+    [, setOpenModal] = contextValue;
+  }
+
   return (
-    <ModalLayout onClose={() => setIsVisible('')} labelledBy="title">
+    <ModalLayout onClose={() => setOpenModal('')} labelledBy="title">
       <ModalHeader>
-        <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
+        <Typography fontWeight="bold" textColor="neutral800" as="h2">
           {title}
         </Typography>
       </ModalHeader>
