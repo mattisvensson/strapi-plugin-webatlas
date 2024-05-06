@@ -5,10 +5,10 @@ import { NavItem } from '../types';
 export default function useNavigations () {
   const { get } = useFetchClient();
   const [navigations, setNavigations] = useState<NavItem[]>([]);
-
+  
   const fetchNavigations = async () => {
-    const { data } = await get('/content-manager/collection-types/plugin::url-routes.navigation');
-    setNavigations(data.results);
+    const { data } = await get('/url-routes/navigation?');
+    setNavigations(data || []);
   };
 
   useEffect(() => {
