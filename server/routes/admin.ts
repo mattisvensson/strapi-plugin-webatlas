@@ -47,6 +47,24 @@ export default {
       }
     },
     {
+      method: 'GET',
+      path: '/navigation/:id',
+      handler: 'admin.getNavigation',
+      config: {
+        policies: [],
+        auth: false,
+      }
+    },
+    {
+      method: 'GET',
+      path: '/navigation',
+      handler: 'admin.getAllNavigations',
+      config: {
+        policies: [],
+        auth: false,
+      }
+    },
+    {
       method: 'POST',
       path: '/navigation',
       handler: 'admin.createNavigation',
