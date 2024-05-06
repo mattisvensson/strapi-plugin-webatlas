@@ -49,7 +49,8 @@ const Navigation = () => {
                 Save
               </Button> 
             </Flex>
-            {navigations.length === 0 && <EmptyNav/>}
+            {navigations?.length === 0 && <EmptyNav msg="You don't have any navigations..." buttonText='Create new navigation' modal="create"/>}
+            {selectedNavigation?.items.length === 0 && <EmptyNav msg="Your navigation is empty..." buttonText='Create new item' modal="ItemCreate"/>}
           </ContentLayout> 
         </Layout>
         {openModal === 'overview' && <NavOverview navigations={navigations} setActionNavigation={setActionNavigation}/>}
