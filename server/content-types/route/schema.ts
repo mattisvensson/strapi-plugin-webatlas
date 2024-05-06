@@ -46,6 +46,13 @@ export default {
       default: false,
       configurable: false,
     },
+    parent: {
+      type: "relation",
+      relation: "oneToOne",
+      target: "plugin::url-routes.route",
+      configurable: false,
+      default: null,
+    },
     master: {
       type: "relation",
       relation: "manyToOne",
