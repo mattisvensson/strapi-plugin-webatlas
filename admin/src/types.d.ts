@@ -7,9 +7,7 @@ export type NavItem = {
     username: string | null;
   };
   id: number;
-  items: {
-    count: number;
-  };
+  items: Route[];
   name: string;
   slug: string;
   updatedAt: string;
@@ -21,6 +19,32 @@ export type NavItem = {
   };
   url_route: string | null;
   visible: boolean;
+};
+
+export type Route = {
+  id: number;
+  title: string;
+  path: string;
+  relatedContentType: string;
+  relatedId: number;
+  menuAttached: boolean;
+  url_route: null | string;
+  master?: {
+    id: number;
+    name: string;
+    slug: string;
+    visible: boolean;
+    createdAt: string;
+  };
+  parent?: {
+    id: number;
+    name: string;
+    slug: string;
+    visible: boolean;
+    createdAt: string;
+  }
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type MainModal = {
