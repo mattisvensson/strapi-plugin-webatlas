@@ -7,7 +7,7 @@ export default function useNavigations () {
   const [navigations, setNavigations] = useState<NavItem[]>([]);
   
   const fetchNavigations = async () => {
-    const { data } = await get('/url-routes/navigation?');
+    const { data } = await get('/url-routes/navigation');
     setNavigations(data || []);
   };
 
