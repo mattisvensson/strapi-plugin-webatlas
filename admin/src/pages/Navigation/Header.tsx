@@ -42,7 +42,7 @@ export default function Header ({ navigations }: HeaderProps) {
         }}
         disabled={navigations.length === 0}>
         {navigations.map((nav) => (
-          <SingleSelectOption value={nav.slug}>{nav.name}</SingleSelectOption>
+          <SingleSelectOption key={nav.id} value={nav.slug}>{nav.name}</SingleSelectOption>
         ))}
       </SingleSelect>
     </Flex>
