@@ -53,3 +53,17 @@ export type MainModal = {
   startAction: React.ReactNode;
   endAction: React.ReactNode;
 };
+
+export type ContentType = {
+  uid: string;
+  isDisplayed: boolean;
+  apiID: string;
+  kind: string;
+  info: {
+    name: string;
+    description: string;
+    singularName: string;
+    pluralName: string;
+    displayName: string;
+  };
+};
