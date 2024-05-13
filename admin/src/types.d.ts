@@ -67,3 +67,7 @@ export type ContentType = {
     displayName: string;
   };
 };
+
+export type PluginConfig = {
+  selectedContentTypes: string[];
+};

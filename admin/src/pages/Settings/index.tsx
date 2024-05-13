@@ -16,6 +16,7 @@ import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layou
 import { Box } from '@strapi/design-system';
 import { Typography } from '@strapi/design-system/Typography';
 import { Select, Option } from '@strapi/design-system/Select';
+import usePluginConfig from '../../hooks/usePluginConfig';
 
 import useAllContentTypes from '../../hooks/useAllContentTypes';
 
@@ -24,20 +25,19 @@ const noopFallback = () => {}
 const Settings = () => {
   const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>();
   const { lockApp = noopFallback, unlockApp = noopFallback } = useOverlayBlocker();
-  const { data: allContentTypesData, isLoading: isContentTypesLoading, error: contentTypesErr } = useAllContentTypes();
-
+  const { data: allContentTypesData } = useAllContentTypes();
+  const { data: config, setConfig } = usePluginConfig();
   const allContentTypes = allContentTypesData?.filter(item => item.isDisplayed);
 
   async function save() {
     lockApp();
 
+    if (!selectedContentTypes) {
+      unlockApp();
+      return;
+    }
     try {
-      await request('/url-routes/config', {
-        method: 'PUT',
-        body: { 
-          selectedContentTypes 
-        },
-      });
+      setConfig({ selectedContentTypes })
     } catch (err) {
       console.error(err);
     }
@@ -46,14 +46,9 @@ const Settings = () => {
   }
 
   useEffect(() => {
-    async function getTypes () {
-      const contentTypes = await request('/url-routes/config', {
-        method: 'GET',
-      });
-      setSelectedContentTypes(contentTypes.selectedContentTypes)
-    }
-    getTypes();
-  }, [])
+    if (!config) return
+    setSelectedContentTypes(config.selectedContentTypes)
+  }, [config])
   
   return (
     <Layout>
