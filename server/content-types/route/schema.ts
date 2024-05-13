@@ -46,6 +46,11 @@ export default {
       default: false,
       configurable: false,
     },
+    isInternal: {
+      type: 'boolean',
+      default: true,
+      configurable: false,
+    },
     parent: {
       type: "relation",
       relation: "oneToOne",
