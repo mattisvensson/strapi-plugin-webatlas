@@ -12,17 +12,7 @@ import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layou
 import { Table, Thead, Tbody, Tr, Td, Th, VisuallyHidden, IconButton } from '@strapi/design-system';
 import { Pencil } from '@strapi/icons';
 import { Link } from 'react-router-dom';
-
-interface Route {
-  id: number;
-  title: string;
-  path: string;
-  menuAttached: boolean;
-  createdAt: string;
-  updatedAt: string;
-  relatedContentType: string;
-  relatedId: number;
-}
+import { Route } from '../../types';
 
 const Routes = () => {
   const { get } = useFetchClient();
@@ -31,9 +21,7 @@ const Routes = () => {
 
   useEffect(() => {
     async function getRoutes () {
-      const { data } = await get('/url-routes/route', {
-        method: 'GET',
-      })
+      const { data } = await get('/url-routes/route')
       setRoutes(data)
     }
     getRoutes();
@@ -88,6 +76,7 @@ const Routes = () => {
                 </Td>
                 <Td>
                   <Flex>
+                      {/* @ts-ignore */}
                       <Link to={`/content-manager/collection-types/${route.relatedContentType}/${route.relatedId}`}>
                         <>
                           <VisuallyHidden>Edit</VisuallyHidden>
