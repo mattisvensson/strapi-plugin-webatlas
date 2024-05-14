@@ -1,84 +1,101 @@
-import { Typography } from '@strapi/design-system/Typography';
-import { Divider } from '@strapi/design-system/Divider';
-import { Flex } from '@strapi/design-system/Flex';
-import { Combobox, ComboboxOption, BaseCheckbox, Box, TextInput, ToggleInput, Button  } from '@strapi/design-system';
+import { Combobox, ComboboxOption, BaseCheckbox, Box, TextInput, ToggleInput, Button, Flex, Divider, Typography } from '@strapi/design-system';
 import { useState, useEffect } from 'react';
 import transformToUrl from '../../utils/transformToUrl';
 import { useFetchClient, useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { createUrlAlias, updateUrlAlias } from '../../utils/api';
+import { createRoute, updateRoute } from '../../utils/api';
+import useNavigations from '../../hooks/useNavigations';
+import { NavItem, Route } from '../../types';
+import usePluginConfig from '../../hooks/usePluginConfig';
 
 const CMEditViewAside = () => {
-  const { layout, modifiedData, initialData, slug } = useCMEditViewDataManager()
+  const { layout, modifiedData, initialData } = useCMEditViewDataManager()
   const { get } = useFetchClient();
 
-  const [title, setTitle] = useState(initialData?.url_route?.title || '')
-  const [urlTitle, setUrlTitle] = useState(initialData?.url_route?.url_route || '')
-  const [attachedToMenu, setAttachedToMenu] = useState(initialData?.url_route?.menuAttached || false)
-  const [parent, setParent] = useState(initialData.url_route?.parent || null)
+  const [routeId, setRouteId] = useState()
+  const [title, setTitle] = useState('')
+  const [path, setPath] = useState('')
+  const [attachedToMenu, setAttachedToMenu] = useState(false)
+  const [isInternal, setIsInternal] = useState(false)
+  const [attachedNavigation, setAttachedNavigation] = useState(null)
   const [isDisabled, setIsDisabled] = useState(true);
   const [isHidden, setIsHidden] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  const [entities, setEntities] = useState([])
-
+  // const [entities, setEntities] = useState<string[]>()
+  const [navigations, fetchNavigations] = useNavigations() as [NavItem[], () => Promise<void>]
+  const [isNewRoute, setIsNewRoute] = useState(false)
+  const { data: config } = usePluginConfig()
 
   useEffect(() => {
     async function getTypes () {
-      const { data } = await get('/url-routes/config', {
-        method: 'GET',
-      })
-      console.log(data)
-      if (data?.selectedContentTypes?.includes(layout.uid)) {
-        // Fetch all entities from the selected content types
-        const entities = await Promise.all(
-          data?.selectedContentTypes?.map(async (contentType) => {
-            const { data: entities } = await get(`/content-manager/collection-types/${contentType}`);
-            return entities;
-          }) || []
-        );
-  
-        const mergedEntities = entities.flat(); // Merge the arrays into one
+      if (!config) return
 
-        console.log(mergedEntities); // Log the merged entities
-        setEntities(mergedEntities)
+      if (config?.selectedContentTypes?.includes(layout.uid)) {
+        // const entities = await Promise.all(
+        //   config?.selectedContentTypes?.map(async (contentType: string) => {
+        //     const { data: entities } = await get(`/content-manager/collection-types/${contentType}`);
+        //     return entities;
+        //   }) || []
+        // );
+
+        // const mergedEntities = entities.flat()
+        // setEntities(mergedEntities)
         setIsHidden(false);
+
+        try {
+          const { data } = await get(`/content-manager/collection-types/plugin::url-routes.route?filters[relatedId][$eq]=${initialData.id}`);
+          const route = data.results[0]
+
+          if (!route) setIsNewRoute(true)
+            console.log(route)
+
+          setRouteId(route.id)
+          setTitle(route ? route.title : '')
+          setPath(route ? route.path : '')
+          setAttachedToMenu(route ? route.menuAttached : true)
+          setIsInternal(route ? route.isInternal : true)
+          setAttachedNavigation(route ? route.master.id : null)
+        } catch (err) {
+          console.log(err)
+        }
       }
       setIsLoading(false);
     }
     getTypes();
-  }, [])
-  
+  }, [config])
+
   const onSubmit = async () => {
     if (!initialData.id) return;
-    const settings = {
+    const settings: Route = {
       id: modifiedData.id,
       title,
+      path,
       menuAttached: attachedToMenu,
-      parent,
-      url_route: urlTitle,
-      routeId: initialData.url_route?.routeId
+      master: attachedNavigation,
+      relatedContentType: layout.uid,
+      relatedId: initialData.id,
     }
-    if (initialData.url_route) {
-      await updateUrlAlias(settings, slug);
+    if (isNewRoute) {
+      await createRoute(settings);
     } else {
-      await createUrlAlias(settings, slug);
+      await updateRoute(settings, routeId);
     }
   };
 
   const handleCheckboxChange = () => {
     setIsDisabled(prev => !prev);
-    setUrlTitle(transformToUrl(title))
+    setPath(transformToUrl(title))
   }
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
     if (isDisabled) {
-      setUrlTitle(transformToUrl(e.target.value));
+      setPath(transformToUrl(e.target.value));
     }
   }
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!isDisabled) {
-      setUrlTitle(e.target.value);
+      setPath(e.target.value);
     }
   }
 
@@ -111,7 +128,7 @@ const CMEditViewAside = () => {
       >
         <Divider />
       </Box>
-      {!initialData.id ? 
+      {!initialData.id ?
       <Typography
         textColor="neutral600"
         id="save-first"
@@ -119,7 +136,7 @@ const CMEditViewAside = () => {
       >
         Please save the entry to generate a URL
       </Typography>
-      : 
+      :
       <Flex
         direction='column'
         alignItems='stretch'
@@ -132,27 +149,11 @@ const CMEditViewAside = () => {
           onChange={handleTitleChange}
           value={title}
         />
-        <ToggleInput
-          label="Attach to menu"
-          offLabel="No"
-          onLabel="Yes"
-          onChange={() => setAttachedToMenu((prev: boolean) => !prev)}
-          checked={attachedToMenu}
-        />
-        <Combobox
-          id="parent-select"
-          label="Parent"
-          onChange={(value: string) => setParent(value)}
-          value={parent}
-        >
-          <ComboboxOption value="internal">Internal</ComboboxOption>
-          <ComboboxOption value="external">External</ComboboxOption>
-        </Combobox>
         <Box>
           <TextInput
             id="url-input"
             label="URL"
-            value={urlTitle}
+            value={path}
             onChange={handleUrlChange}
             disabled={isDisabled}
           />
@@ -172,6 +173,36 @@ const CMEditViewAside = () => {
             </label>
           </Flex>
         </Box>
+        <ToggleInput
+          label="Attach to menu"
+          offLabel="No"
+          onLabel="Yes"
+          onChange={() => setAttachedToMenu((prev: boolean) => !prev)}
+          checked={attachedToMenu}
+        />
+        {attachedToMenu &&
+          <>
+            <ToggleInput
+              label="Internal Link"
+              offLabel="No"
+              onLabel="Yes"
+              onChange={() => setIsInternal((prev: boolean) => !prev)}
+              checked={isInternal}
+            />
+            <Combobox
+              id="navigation-select"
+              label="Select Navigation"
+              onChange={(value: string) => setAttachedNavigation(value)}
+              value={attachedNavigation}
+            >
+              {navigations.map((nav) => (
+                <ComboboxOption key={nav.id} value={nav.id}>
+                  {nav.name}
+                </ComboboxOption>
+              ))}
+            </Combobox>
+          </>
+        }
         <Button onClick={() => onSubmit()}>Save</Button>
       </Flex>}
     </Box>

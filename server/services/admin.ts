@@ -43,53 +43,40 @@ export default ({strapi}) => ({
     }
   },
 
-  async createRoute(newData) {
+  async createRoute(data) {
     // const urlPath = await duplicateCheck(data.url_path);
     try {
       const entity = await strapi.entityService.create('plugin::url-routes.route', {
         data: {
-          relatedContentType: newData.contentType,
-          relatedId: newData.id,
-          title: newData.title,
-          path: newData.url_route,
-          menuAttached: newData.menuAttached,
+          relatedContentType: data.relatedContentType,
+          relatedId: data.relatedId,
+          title: data.title,
+          path: data.path,
+          menuAttached: data.menuAttached,
+          master: data.master,
         },
       });
 
-      await strapi.entityService.update(newData.contentType, newData.id, {
-        data: {
-          url_route: {
-            ...newData,
-            routeId: entity.id,
-          }
-        },
-      });
-    
       return entity;
     } catch (e) {
       console.log(e)
     }
   },
 
-  async updateRoute(newData, contentType) {
+  async updateRoute(id, data) {
     // const urlPath = await duplicateCheck(data.url_path, id);
     try {
-      const entity = await strapi.entityService.update('plugin::url-routes.route', newData.routeId, {
+      const entity = await strapi.entityService.update('plugin::url-routes.route', id, {
         data: {
-          relatedContentType: contentType,
-          relatedId: newData.id,
-          title: newData.title,
-          path: newData.url_route,
-          menuAttached: newData.menuAttached,
+          relatedContentType: data.relatedContentType,
+          relatedId: data.relatedId,
+          title: data.title,
+          path: data.path,
+          menuAttached: data.menuAttached,
+          master: data.master,
         },
       });
-  
-      await strapi.entityService.update(contentType, newData.id, {
-        data: {
-          url_route: newData,
-        },
-      });
-    
+
       return entity;
     } catch (e) {
       console.log(e)

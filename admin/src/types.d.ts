@@ -28,7 +28,6 @@ export type Route = {
   relatedContentType: string;
   relatedId: number;
   menuAttached: boolean;
-  url_route: null | string;
   master?: {
     id: number;
     name: string;
@@ -43,8 +42,8 @@ export type Route = {
     visible: boolean;
     createdAt: string;
   }
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type MainModal = {

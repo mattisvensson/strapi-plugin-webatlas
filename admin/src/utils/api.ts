@@ -21,9 +21,9 @@ export const fetchAllEntities = async (contentTypes?: string[]) => {
       const config = await request('/url-routes/config')
       contentTypes = config?.selectedContentTypes || []
     }
-  
+
     const allContentTypes = await fetchAllContentTypes();
-  
+
     let entities: { label: string, entities: ContentType}[] = [];
     if (contentTypes && contentTypes.length > 0) {
       entities = await Promise.all(
@@ -50,24 +50,24 @@ export const fetchAllEntities = async (contentTypes?: string[]) => {
 // export const restartStrapi = () =>
 //   request(`/${pluginId}/settings/restart`);
 
-export const createUrlAlias = async (body: { id: number }, slug: string) => {
+export const createRoute = async (body: { id: number }) => {
   return request('/url-routes/route', {
     method: 'POST',
     body: {
       data: {
         ...body,
-        contentType: slug,
       },
     },
   });
 };
 
-export const updateUrlAlias = async (body: { id: number }, slug: string) => {
-  return request(`/url-routes/route/${body.id}`, {
+export const updateRoute = async (body, id) => {
+  return request(`/url-routes/route/${id}`, {
     method: 'PUT',
     body: {
-      data: body,
-      contentType: slug,
+      data: {
+        ...body,
+      },
     },
   });
 };
