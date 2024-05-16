@@ -37,10 +37,10 @@ export default {
     },
     items: {
       type: "relation",
-      relation: "oneToMany",
+      relation: "manyToMany",
       target: "plugin::url-routes.route",
       configurable: false,
-      mappedBy: "master"
+      mappedBy: "navigation"
     },
   }
 }

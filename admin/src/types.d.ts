@@ -22,7 +22,7 @@ export type NavItem = {
 };
 
 export type Route = {
-  id: number;
+  id?: number;
   title: string;
   path: string;
   relatedContentType: string;

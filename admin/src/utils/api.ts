@@ -1,6 +1,6 @@
 import { request } from '@strapi/helper-plugin';
 import { prop } from 'lodash/fp';
-import { ContentType } from '../types';
+import { ContentType, Route } from '../types';
 // import pluginId from '../pluginId';
 
 // export const fetchNavigationConfig = () =>
@@ -50,7 +50,7 @@ export const fetchAllEntities = async (contentTypes?: string[]) => {
 // export const restartStrapi = () =>
 //   request(`/${pluginId}/settings/restart`);
 
-export const createRoute = async (body: { id: number }) => {
+export const createRoute = async (body: Route) => {
   return request('/url-routes/route', {
     method: 'POST',
     body: {
@@ -61,7 +61,7 @@ export const createRoute = async (body: { id: number }) => {
   });
 };
 
-export const updateRoute = async (body, id) => {
+export const updateRoute = async (body: Route, id: number) => {
   return request(`/url-routes/route/${id}`, {
     method: 'PUT',
     body: {

@@ -35,7 +35,7 @@ export default ({strapi}) => ({
   async getRoutes() {
     try {
       const entitys = await strapi.entityService.findMany('plugin::url-routes.route', {
-        populate: ['parent', 'master'],
+        populate: ['parent', 'navigation'],
       });
       return entitys;
     } catch (e) {
@@ -53,7 +53,7 @@ export default ({strapi}) => ({
           title: data.title,
           path: data.path,
           menuAttached: data.menuAttached,
-          master: data.master,
+          navigation: data.navigation.map((id: string) => ({ id: Number(id) })),
         },
       });
 
@@ -65,6 +65,7 @@ export default ({strapi}) => ({
 
   async updateRoute(id, data) {
     // const urlPath = await duplicateCheck(data.url_path, id);
+    const navs = data.navigation.map((id: string) => ({ id: Number(id) }))
     try {
       const entity = await strapi.entityService.update('plugin::url-routes.route', id, {
         data: {
@@ -73,7 +74,7 @@ export default ({strapi}) => ({
           title: data.title,
           path: data.path,
           menuAttached: data.menuAttached,
-          master: data.master,
+          navigation: navs,
         },
       });
 
@@ -86,7 +87,7 @@ export default ({strapi}) => ({
   async getNavigation(id) {
     try {
       const entity = await strapi.entityService.findOne('plugin::url-routes.navigation', id, {
-        populate: ['items', "items.parent", "items.master"],
+        populate: ['items', "items.parent", "items.navigation"],
       });
       return entity
     } catch (e) {
@@ -97,7 +98,7 @@ export default ({strapi}) => ({
   async getAllNavigations() {
     try {
       const entity = await strapi.entityService.findMany('plugin::url-routes.navigation', {
-        populate: ['items', "items.parent", "items.master"],
+        populate: ['items', "items.parent", "items.navigation"],
       });
       return entity
     } catch (e) {

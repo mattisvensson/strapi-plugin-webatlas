@@ -1,4 +1,4 @@
-import { Combobox, ComboboxOption, BaseCheckbox, Box, TextInput, ToggleInput, Button, Flex, Divider, Typography } from '@strapi/design-system';
+import { MultiSelect, MultiSelectOption, BaseCheckbox, Box, TextInput, ToggleInput, Button, Flex, Divider, Typography } from '@strapi/design-system';
 import { useState, useEffect } from 'react';
 import transformToUrl from '../../utils/transformToUrl';
 import { useFetchClient, useCMEditViewDataManager } from '@strapi/helper-plugin';
@@ -8,7 +8,7 @@ import { NavItem, Route } from '../../types';
 import usePluginConfig from '../../hooks/usePluginConfig';
 
 const CMEditViewAside = () => {
-  const { layout, modifiedData, initialData } = useCMEditViewDataManager()
+  const { layout, initialData } = useCMEditViewDataManager()
   const { get } = useFetchClient();
 
   const [routeId, setRouteId] = useState()
@@ -16,11 +16,10 @@ const CMEditViewAside = () => {
   const [path, setPath] = useState('')
   const [attachedToMenu, setAttachedToMenu] = useState(false)
   const [isInternal, setIsInternal] = useState(false)
-  const [attachedNavigation, setAttachedNavigation] = useState(null)
+  const [attachedNavigation, setAttachedNavigation] = useState<string[]>([])
   const [isDisabled, setIsDisabled] = useState(true);
   const [isHidden, setIsHidden] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
-  // const [entities, setEntities] = useState<string[]>()
   const [navigations, fetchNavigations] = useNavigations() as [NavItem[], () => Promise<void>]
   const [isNewRoute, setIsNewRoute] = useState(false)
   const { data: config } = usePluginConfig()
@@ -30,30 +29,20 @@ const CMEditViewAside = () => {
       if (!config) return
 
       if (config?.selectedContentTypes?.includes(layout.uid)) {
-        // const entities = await Promise.all(
-        //   config?.selectedContentTypes?.map(async (contentType: string) => {
-        //     const { data: entities } = await get(`/content-manager/collection-types/${contentType}`);
-        //     return entities;
-        //   }) || []
-        // );
-
-        // const mergedEntities = entities.flat()
-        // setEntities(mergedEntities)
         setIsHidden(false);
 
         try {
-          const { data } = await get(`/content-manager/collection-types/plugin::url-routes.route?filters[relatedId][$eq]=${initialData.id}`);
+          const { data } = await get(`/content-manager/collection-types/plugin::url-routes.route?filters[relatedId][$eq]=${initialData.id}&populate[navigation]`);
           const route = data.results[0]
 
           if (!route) setIsNewRoute(true)
-            console.log(route)
 
           setRouteId(route.id)
           setTitle(route ? route.title : '')
           setPath(route ? route.path : '')
           setAttachedToMenu(route ? route.menuAttached : true)
           setIsInternal(route ? route.isInternal : true)
-          setAttachedNavigation(route ? route.master.id : null)
+          setAttachedNavigation(route ? route.navigation.map((nav: { id: number }) => JSON.stringify(nav.id)) : [])
         } catch (err) {
           console.log(err)
         }
@@ -66,17 +55,16 @@ const CMEditViewAside = () => {
   const onSubmit = async () => {
     if (!initialData.id) return;
     const settings: Route = {
-      id: modifiedData.id,
       title,
       path,
       menuAttached: attachedToMenu,
-      master: attachedNavigation,
       relatedContentType: layout.uid,
       relatedId: initialData.id,
+      ...(attachedNavigation ? { navigation: attachedNavigation } : {}),
     }
     if (isNewRoute) {
       await createRoute(settings);
-    } else {
+    } else if (routeId) {
       await updateRoute(settings, routeId);
     }
   };
@@ -189,18 +177,19 @@ const CMEditViewAside = () => {
               onChange={() => setIsInternal((prev: boolean) => !prev)}
               checked={isInternal}
             />
-            <Combobox
+            <MultiSelect
               id="navigation-select"
               label="Select Navigation"
-              onChange={(value: string) => setAttachedNavigation(value)}
+              onChange={(value: string[]) => setAttachedNavigation(value)}
               value={attachedNavigation}
+              withTags
             >
               {navigations.map((nav) => (
-                <ComboboxOption key={nav.id} value={nav.id}>
+                <MultiSelectOption key={nav.id} value={nav.id}>
                   {nav.name}
-                </ComboboxOption>
+                </MultiSelectOption>
               ))}
-            </Combobox>
+            </MultiSelect>
           </>
         }
         <Button onClick={() => onSubmit()}>Save</Button>

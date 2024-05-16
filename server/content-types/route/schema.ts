@@ -58,9 +58,9 @@ export default {
       configurable: false,
       default: null,
     },
-    master: {
+    navigation: {
       type: "relation",
-      relation: "manyToOne",
+      relation: "manyToMany",
       target: "plugin::url-routes.navigation",
       configurable: false,
       inversedBy: "items",
