@@ -17,20 +17,19 @@ import { ModalContext, SelectedNavigationContext } from '../../contexts';
 import Header from './Header';
 import { NavItem } from '../../types';
 import useNavigations from '../../hooks/useNavigations';
+import ItemCreate from '../../components/modals/ItemCreate';
 
 const Navigation = () => {
-
   const [navigations, fetchNavigations] = useNavigations() as [NavItem[], () => Promise<void>];
   const [openModal, setOpenModal] = useState('');
   const [selectedNavigation, setSelectedNavigation] = useState<NavItem>();
   const [actionNavigation, setActionNavigation] = useState<NavItem>();
 
   useEffect(() => {
-    if (Array.isArray(navigations) && navigations.length > 0) {
-      setSelectedNavigation(navigations[0]);
-    }
+    if (Array.isArray(navigations) && navigations?.length > 0)
+      setSelectedNavigation(navigations[0])
   }, [navigations]);
-  
+
   return (
     <ModalContext.Provider value={[openModal, setOpenModal]}>
       <SelectedNavigationContext.Provider value={[selectedNavigation, setSelectedNavigation]}>
@@ -42,17 +41,21 @@ const Navigation = () => {
           />
           <ContentLayout>
             <Flex gap={4} paddingBottom={6} justifyContent="flex-end">
-              <Button variant="secondary" startIcon={<Plus />} >
+              <Button variant="secondary" startIcon={<Plus />} onClick={() => setOpenModal('ItemCreate')}>
                 New Item
               </Button>
               <Button startIcon={<Check />} >
                 Save
-              </Button> 
+              </Button>
             </Flex>
+            {selectedNavigation?.items.map((item, index) => (
+              <p key={index}>{item.title}</p>
+            ))}
             {navigations?.length === 0 && <EmptyNav msg="You don't have any navigations..." buttonText='Create new navigation' modal="create"/>}
-            {selectedNavigation?.items.length === 0 && <EmptyNav msg="Your navigation is empty..." buttonText='Create new item' modal="ItemCreate"/>}
-          </ContentLayout> 
+            {selectedNavigation?.items?.length === 0 && <EmptyNav msg="Your navigation is empty..." buttonText='Create new item' modal="ItemCreate"/>}
+          </ContentLayout>
         </Layout>
+        {openModal === 'ItemCreate' && selectedNavigation && <ItemCreate fetchNavigations={fetchNavigations} navigation={selectedNavigation}/>}
         {openModal === 'overview' && <NavOverview navigations={navigations} setActionNavigation={setActionNavigation}/>}
         {openModal === 'create' && <NavCreate fetchNavigations={fetchNavigations}/>}
         {openModal === 'edit' && actionNavigation && <NavEdit item={actionNavigation} fetchNavigations={fetchNavigations}/>}

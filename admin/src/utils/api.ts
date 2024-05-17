@@ -1,6 +1,6 @@
 import { request } from '@strapi/helper-plugin';
 import { prop } from 'lodash/fp';
-import { ContentType, Route } from '../types';
+import { ContentType, Entity, RouteSettings } from '../types';
 // import pluginId from '../pluginId';
 
 // export const fetchNavigationConfig = () =>
@@ -24,7 +24,7 @@ export const fetchAllEntities = async (contentTypes?: string[]) => {
 
     const allContentTypes = await fetchAllContentTypes();
 
-    let entities: { label: string, entities: ContentType}[] = [];
+    let entities: { label: string, entities: Entity[]}[] = [];
     if (contentTypes && contentTypes.length > 0) {
       entities = await Promise.all(
         contentTypes.map(async (contentType: string) => {
@@ -40,6 +40,7 @@ export const fetchAllEntities = async (contentTypes?: string[]) => {
         })
       );
     }
+    console.log(entities)
     return entities;
   } catch (err) {
     console.error(err);
@@ -50,7 +51,13 @@ export const fetchAllEntities = async (contentTypes?: string[]) => {
 // export const restartStrapi = () =>
 //   request(`/${pluginId}/settings/restart`);
 
-export const createRoute = async (body: Route) => {
+export const getRouteByRelated = async (relatedId: number, populate?: string) => {
+  return request(`/content-manager/collection-types/plugin::url-routes.route?filters[relatedId][$eq]=${relatedId}${populate ? '&populate' + populate : ''}`, {
+    method: 'GET',
+  });
+};
+
+export const createRoute = async (body: RouteSettings) => {
   return request('/url-routes/route', {
     method: 'POST',
     body: {
@@ -61,7 +68,7 @@ export const createRoute = async (body: Route) => {
   });
 };
 
-export const updateRoute = async (body: Route, id: number) => {
+export const updateRoute = async (body: RouteSettings, id: number) => {
   return request(`/url-routes/route/${id}`, {
     method: 'PUT',
     body: {

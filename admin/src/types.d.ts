@@ -22,28 +22,38 @@ export type NavItem = {
 };
 
 export type Route = {
-  id?: number;
+  id: number;
   title: string;
   path: string;
   relatedContentType: string;
   relatedId: number;
   menuAttached: boolean;
-  master?: {
+  navigation: {
     id: number;
     name: string;
     slug: string;
     visible: boolean;
     createdAt: string;
-  };
-  parent?: {
+  } | null;
+  parent: {
     id: number;
     name: string;
     slug: string;
     visible: boolean;
     createdAt: string;
-  }
-  createdAt?: string;
-  updatedAt?: string;
+  } | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type RouteSettings = {
+  title: string;
+  path: string;
+  relatedContentType: string;
+  relatedId: number;
+  menuAttached: boolean;
+  navigation?: number[];
+  parent?: number;
 };
 
 export type MainModal = {
@@ -70,3 +80,30 @@ export type ContentType = {
 export type PluginConfig = {
   selectedContentTypes: string[];
 };
+
+export type Navigation = {
+  id: number;
+  name: string;
+  slug: string;
+  visible: boolean;
+  items: Route[];
+  updatedAt: string;
+  createdAt: string;
+};
+
+export type Entity = {
+  id: number;
+  createdAt: string;
+  createdBy: User;
+  updatedAt: string | null;
+  updatedBy: User | null;
+  publishedAt: string | null;
+  [key: string]: any;
+}
+
+export type User = {
+  id: number;
+  firstname: string;
+  lastname: string;
+  username: string | null;
+}
