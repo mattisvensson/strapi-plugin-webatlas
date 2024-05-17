@@ -2,14 +2,9 @@ import { ModalLayout, ModalBody, ModalFooter, Button, SingleSelect, SingleSelect
 import { useState, useContext, useEffect } from 'react';
 import { ModalContext } from '../../contexts';
 import ModalHeader from './ModalHeader';
-import { ContentType, Route, RouteSettings, Navigation, Entity } from '../../types';
+import { Route, RouteSettings, Navigation, Entity, GroupedEntities } from '../../types';
 import useAllEntities from '../../hooks/useAllEntities';
-import { createRoute, updateRoute, getRouteByRelated } from '../../utils/api';
-
-type GroupedEntities = {
-  entities: Entity[],
-  label: string,
-}
+import useApi from '../../hooks/useApi';
 
 export default function ItemCreate ({ fetchNavigations, navigation }: { fetchNavigations: () => void, navigation: Navigation}){
   const [availableEntities, setAvailableEntities] = useState<GroupedEntities[]>([])
@@ -21,7 +16,8 @@ export default function ItemCreate ({ fetchNavigations, navigation }: { fetchNav
   const [isVisible, setIsVisible] = useState(true)
   const [isInternal, setIsInternal] = useState(true)
   const [isNewRoute, setIsNewRoute] = useState(false)
-  const { data: entities } = useAllEntities();
+  const { entities } = useAllEntities();
+  const { createRoute, updateRoute, getRouteByRelated } = useApi();
 
   const contextValue = useContext(ModalContext);
   let setOpenModal = (_: string) => {};
@@ -29,10 +25,6 @@ export default function ItemCreate ({ fetchNavigations, navigation }: { fetchNav
   if (contextValue !== null) {
     [, setOpenModal] = contextValue;
   }
-
-  useEffect(() => {
-    console.log(selectedContentType)
-  }, [selectedContentType])
 
   useEffect(() => {
     if (!entities) return
@@ -46,7 +38,6 @@ export default function ItemCreate ({ fetchNavigations, navigation }: { fetchNav
           const { results } = await getRouteByRelated(selectedEntity.id)
           const route = results[0]
 
-          console.log(route)
           if (!route) setIsNewRoute(true)
 
           setEntityRoute(route)

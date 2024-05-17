@@ -5,17 +5,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import {
-  CheckPermissions,
-  useOverlayBlocker,
-  request
-} from '@strapi/helper-plugin';
+import { CheckPermissions, useOverlayBlocker } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Button } from '@strapi/design-system/Button';
-import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layout';
-import { Box } from '@strapi/design-system';
-import { Typography } from '@strapi/design-system/Typography';
-import { Select, Option } from '@strapi/design-system/Select';
+import { Button, HeaderLayout, Layout, ContentLayout, Box, Select, Option } from '@strapi/design-system';
 import usePluginConfig from '../../hooks/usePluginConfig';
 
 import useAllContentTypes from '../../hooks/useAllContentTypes';
@@ -25,7 +17,7 @@ const noopFallback = () => {}
 const Settings = () => {
   const [selectedContentTypes, setSelectedContentTypes] = useState<string[]>();
   const { lockApp = noopFallback, unlockApp = noopFallback } = useOverlayBlocker();
-  const { data: allContentTypesData } = useAllContentTypes();
+  const { contentTypes: allContentTypesData } = useAllContentTypes();
   const { data: config, setConfig } = usePluginConfig();
   const allContentTypes = allContentTypesData?.filter(item => item.isDisplayed);
 
@@ -49,7 +41,7 @@ const Settings = () => {
     if (!config) return
     setSelectedContentTypes(config.selectedContentTypes)
   }, [config])
-  
+
   return (
     <Layout>
       <HeaderLayout
@@ -87,7 +79,7 @@ const Settings = () => {
             {allContentTypes && allContentTypes.map(item => <Option key={item.uid} value={item.uid}>{item.info.displayName}</Option>)}
           </Select>
         </Box>
-      </ContentLayout> 
+      </ContentLayout>
     </Layout>
   );
 };

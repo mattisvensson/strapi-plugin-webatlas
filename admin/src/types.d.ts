@@ -101,6 +101,11 @@ export type Entity = {
   [key: string]: any;
 }
 
+export type GroupedEntities = {
+  entities: Entity[],
+  label: string,
+}
+
 export type User = {
   id: number;
   firstname: string;

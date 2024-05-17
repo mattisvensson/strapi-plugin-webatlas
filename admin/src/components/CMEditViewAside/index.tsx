@@ -2,7 +2,7 @@ import { MultiSelect, MultiSelectOption, BaseCheckbox, Box, TextInput, ToggleInp
 import { useState, useEffect } from 'react';
 import transformToUrl from '../../utils/transformToUrl';
 import { useFetchClient, useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { createRoute, updateRoute } from '../../utils/api';
+import useApi from '../../hooks/useApi';
 import useNavigations from '../../hooks/useNavigations';
 import { NavItem, RouteSettings } from '../../types';
 import usePluginConfig from '../../hooks/usePluginConfig';
@@ -23,6 +23,7 @@ const CMEditViewAside = () => {
   const [navigations, fetchNavigations] = useNavigations() as [NavItem[], () => Promise<void>]
   const [isNewRoute, setIsNewRoute] = useState(false)
   const { data: config } = usePluginConfig()
+  const { createRoute, updateRoute } = useApi();
 
   useEffect(() => {
     async function getTypes () {
