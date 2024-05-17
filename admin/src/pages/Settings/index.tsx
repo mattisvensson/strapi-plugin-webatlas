@@ -9,6 +9,7 @@ import { CheckPermissions, useOverlayBlocker } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { Button, HeaderLayout, Layout, ContentLayout, Box, Select, Option } from '@strapi/design-system';
 import usePluginConfig from '../../hooks/usePluginConfig';
+import { ContentType } from '../../types';
 
 import useAllContentTypes from '../../hooks/useAllContentTypes';
 
@@ -19,7 +20,7 @@ const Settings = () => {
   const { lockApp = noopFallback, unlockApp = noopFallback } = useOverlayBlocker();
   const { contentTypes: allContentTypesData } = useAllContentTypes();
   const { data: config, setConfig } = usePluginConfig();
-  const allContentTypes = allContentTypesData?.filter(item => item.isDisplayed);
+  const allContentTypes = allContentTypesData?.filter((ct: ContentType) => ct.isDisplayed);
 
   async function save() {
     lockApp();

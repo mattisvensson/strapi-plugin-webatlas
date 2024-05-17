@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import useApi from './useApi';
-import { GroupedEntities } from '../types';
+import { ContentType } from '../types';
 
 const useAllContentTypes = () => {
   const { fetchAllContentTypes } = useApi();
-  const [contentTypes, setContentTypes] = useState<GroupedEntities[]>([]);
+  const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
