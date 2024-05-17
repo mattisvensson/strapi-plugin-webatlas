@@ -65,7 +65,6 @@ export default ({strapi}) => ({
 
   async updateRoute(id, data) {
     // const urlPath = await duplicateCheck(data.url_path, id);
-    const navs = data.navigation.map((id: string) => ({ id: Number(id) }))
     try {
       const entity = await strapi.entityService.update('plugin::url-routes.route', id, {
         data: {
@@ -74,7 +73,7 @@ export default ({strapi}) => ({
           title: data.title,
           path: data.path,
           menuAttached: data.menuAttached,
-          navigation: navs,
+          navigation: data.navigation.map((id: string) => ({ id: Number(id) })),
         },
       });
 

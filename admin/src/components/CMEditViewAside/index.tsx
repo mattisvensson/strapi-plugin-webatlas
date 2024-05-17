@@ -4,7 +4,7 @@ import transformToUrl from '../../utils/transformToUrl';
 import { useFetchClient, useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { createRoute, updateRoute } from '../../utils/api';
 import useNavigations from '../../hooks/useNavigations';
-import { NavItem, Route } from '../../types';
+import { NavItem, RouteSettings } from '../../types';
 import usePluginConfig from '../../hooks/usePluginConfig';
 
 const CMEditViewAside = () => {
@@ -16,7 +16,7 @@ const CMEditViewAside = () => {
   const [path, setPath] = useState('')
   const [attachedToMenu, setAttachedToMenu] = useState(false)
   const [isInternal, setIsInternal] = useState(false)
-  const [attachedNavigation, setAttachedNavigation] = useState<string[]>([])
+  const [attachedNavigation, setAttachedNavigation] = useState<number[]>([])
   const [isDisabled, setIsDisabled] = useState(true);
   const [isHidden, setIsHidden] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,13 +54,13 @@ const CMEditViewAside = () => {
 
   const onSubmit = async () => {
     if (!initialData.id) return;
-    const settings: Route = {
+    const settings: RouteSettings = {
       title,
       path,
       menuAttached: attachedToMenu,
       relatedContentType: layout.uid,
       relatedId: initialData.id,
-      ...(attachedNavigation ? { navigation: attachedNavigation } : {}),
+      navigation: attachedNavigation,
     }
     if (isNewRoute) {
       await createRoute(settings);
@@ -180,7 +180,7 @@ const CMEditViewAside = () => {
             <MultiSelect
               id="navigation-select"
               label="Select Navigation"
-              onChange={(value: string[]) => setAttachedNavigation(value)}
+              onChange={(value: number[]) => setAttachedNavigation(value)}
               value={attachedNavigation}
               withTags
             >
