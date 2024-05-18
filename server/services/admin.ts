@@ -83,6 +83,15 @@ export default ({strapi}) => ({
     }
   },
 
+  async deleteRoute(id: number) {
+    try {
+      const entity = await strapi.entityService.delete('plugin::url-routes.route', id);
+      return entity;
+    } catch (e) {
+      console.log(e)
+    }
+  },
+
   async getNavigation(id) {
     try {
       const entity = await strapi.entityService.findOne('plugin::url-routes.navigation', id, {

@@ -47,6 +47,15 @@ export default {
       }
     },
     {
+      method: 'DELETE',
+      path: '/route/:id',
+      handler: 'admin.deleteRoute',
+      config: {
+        policies: [],
+        auth: false,
+      }
+    },
+    {
       method: 'GET',
       path: '/navigation/:id',
       handler: 'admin.getNavigation',
