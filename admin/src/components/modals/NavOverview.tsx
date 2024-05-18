@@ -13,13 +13,13 @@ type NavOverviewProps = {
 export default function NavOverview ({ navigations, setActionNavigation }: NavOverviewProps) {
 
   const ModalContextValue = useContext(ModalContext);
-  let setOpenModal = (_: string) => {};  
+  let setOpenModal = (_: string) => {};
   if (ModalContextValue !== null) {
     [, setOpenModal] = ModalContextValue;
   }
 
   const SelectedContextValue = useContext(SelectedNavigationContext);
-  let setSelectedNavigation = (_: NavItem) => {};  
+  let setSelectedNavigation = (_: NavItem) => {};
   let selectedNavigation: NavItem | undefined = undefined;
   if (SelectedContextValue !== null) {
     [selectedNavigation, setSelectedNavigation] = SelectedContextValue;
@@ -51,7 +51,7 @@ export default function NavOverview ({ navigations, setActionNavigation }: NavOv
                 {nav.name}
               </Typography>
               <Flex gap={2}>
-                <Button startIcon={<Trash />} variant="secondary" onClick={() => handleDelete(nav)}>Delete</Button>
+                <Button startIcon={<Trash />} variant="danger-light" onClick={() => handleDelete(nav)}>Delete</Button>
                 <Button startIcon={<Pencil />} variant="secondary" onClick={() => handleEdit(nav)}>Edit</Button>
                 <Button startIcon={<Check />} variant="primary" onClick={() => handleSelect(nav)} disabled={selectedNavigation ? selectedNavigation.slug === nav.slug : false}>Select</Button>
               </Flex>
@@ -65,7 +65,7 @@ export default function NavOverview ({ navigations, setActionNavigation }: NavOv
           </>
         ))}
       </ModalBody>
-      <ModalFooter 
+      <ModalFooter
         startActions={<Button onClick={() => setOpenModal('')} variant="tertiary">Cancel</Button>}
         endActions={<Button onClick={() => setOpenModal('create')}>Create new</Button>}
       />
