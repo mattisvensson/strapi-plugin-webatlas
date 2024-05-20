@@ -2,15 +2,15 @@ import { Flex, Box, Typography, Divider, Button, ModalLayout, ModalBody, ModalFo
 import { Check, Pencil, Trash } from '@strapi/icons';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
 import { useContext } from 'react';
-import { NavItem } from '../../types';
+import { NavItem, Route } from '../../types';
 import ModalHeader from './ModalHeader';
 
 type NavOverviewProps = {
   navigations: NavItem[],
-  setActionNavigation: React.Dispatch<React.SetStateAction<NavItem |undefined>>
+  setActionItem: React.Dispatch<React.SetStateAction<NavItem | Route | undefined>>
 }
 
-export default function NavOverview ({ navigations, setActionNavigation }: NavOverviewProps) {
+export default function NavOverview ({ navigations, setActionItem }: NavOverviewProps) {
 
   const ModalContextValue = useContext(ModalContext);
   let setOpenModal = (_: string) => {};
@@ -31,13 +31,13 @@ export default function NavOverview ({ navigations, setActionNavigation }: NavOv
   }
 
   const handleEdit = (nav: NavItem) => {
-    setActionNavigation(nav)
+    setActionItem(nav)
     setOpenModal('edit')
   }
 
   const handleDelete = (nav: NavItem) => {
-    setActionNavigation(nav)
-    setOpenModal('delete')
+    setActionItem(nav)
+    setOpenModal('NavDelete')
   }
 
   return (

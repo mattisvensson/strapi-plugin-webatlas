@@ -4,7 +4,7 @@ import { useState, useContext } from 'react';
 import { ModalContext } from '../../contexts';
 import ModalHeader from './ModalHeader';
 import { useFetchClient } from '@strapi/helper-plugin';
-import { NavItem } from '../../types';
+import { NavItem, Route } from '../../types';
 
 type NavEdit = {
   item: NavItem;
@@ -18,7 +18,7 @@ export default function NavEdit ({ item, fetchNavigations }: NavEdit){
   const [isActive, setIsActive] = useState(item.visible)
 
   const contextValue = useContext(ModalContext);
-  let setOpenModal = (_: string) => {};  
+  let setOpenModal = (_: string) => {};
 
   if (contextValue !== null) {
     [, setOpenModal] = contextValue;
@@ -47,7 +47,7 @@ export default function NavEdit ({ item, fetchNavigations }: NavEdit){
           </GridItem>
         </Grid>
       </ModalBody>
-      <ModalFooter 
+      <ModalFooter
         startActions={<Button onClick={() => setOpenModal('overview')} variant="tertiary">Cancel</Button>}
         endActions={<Button onClick={() => updateNavigation()}>Update</Button>}
       />

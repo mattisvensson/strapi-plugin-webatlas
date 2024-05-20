@@ -1,23 +1,12 @@
 export type NavItem = {
   createdAt: string;
-  createdBy: {
-    id: number;
-    firstname: string;
-    lastname: string;
-    username: string | null;
-  };
+  createdBy: User;
   id: number;
   items: Route[];
   name: string;
   slug: string;
   updatedAt: string;
-  updatedBy: {
-    id: number;
-    firstname: string;
-    lastname: string;
-    username: string | null;
-  };
-  url_route: string | null;
+  updatedBy: User;
   visible: boolean;
 };
 
@@ -53,7 +42,7 @@ export type RouteSettings = {
   relatedId: number;
   menuAttached: boolean;
   navigation?: number[];
-  parent?: number;
+  parent?: number | null;
 };
 
 export type MainModal = {

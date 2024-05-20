@@ -54,6 +54,7 @@ export default ({strapi}) => ({
           path: data.path,
           menuAttached: data.menuAttached,
           navigation: data.navigation.map((id: string) => ({ id: Number(id) })),
+          parent: data.parent ? { id: Number(data.parent) } : null,
         },
       });
 
@@ -74,6 +75,7 @@ export default ({strapi}) => ({
           path: data.path,
           menuAttached: data.menuAttached,
           navigation: data.navigation.map((id: string) => ({ id: Number(id) })),
+          parent: data.parent ? { id: Number(data.parent) } : null,
         },
       });
 

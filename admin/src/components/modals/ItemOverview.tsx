@@ -6,7 +6,14 @@ import { Route, RouteSettings, Navigation, Entity, GroupedEntities } from '../..
 import useAllEntities from '../../hooks/useAllEntities';
 import useApi from '../../hooks/useApi';
 
-export default function ItemCreate ({ fetchNavigations, navigation }: { fetchNavigations: () => void, navigation: Navigation}){
+type ItemOverviewProps = {
+  variant: "ItemCreate" | "ItemEdit";
+  fetchNavigations: () => void;
+  navigation: Navigation;
+  parentId?: number;
+}
+
+export default function ItemOverview ({ variant, fetchNavigations, navigation, parentId }: ItemOverviewProps){
   const [availableEntities, setAvailableEntities] = useState<GroupedEntities[]>([])
   const [selectedEntity, setSelectedEntity] = useState<Entity | null>()
   const [selectedContentType, setSelectedContentType] = useState<GroupedEntities>()
@@ -60,11 +67,12 @@ export default function ItemCreate ({ fetchNavigations, navigation }: { fetchNav
         title,
         path,
         menuAttached: true,
+        parent: parentId ?? null,
         navigation: [navigation.id],
         relatedContentType: entityRoute.relatedContentType,
         relatedId: entityRoute.relatedId,
       }
-      if (isNewRoute) {
+      if (isNewRoute || parentId) {
         await createRoute(settings);
       } else {
         await updateRoute(settings, entityRoute.id);
@@ -77,7 +85,7 @@ export default function ItemCreate ({ fetchNavigations, navigation }: { fetchNav
   }
   return (
     <ModalLayout onClose={() => setOpenModal('')}>
-      <ModalHeader title="Add new navigation item"/>
+      <ModalHeader title={`${variant === "ItemCreate" ? "Add new" : "Edit"} navigation item`}/>
       <ModalBody>
         <Grid gap={8}>
           <GridItem col={6}>
@@ -176,7 +184,12 @@ export default function ItemCreate ({ fetchNavigations, navigation }: { fetchNav
         }
       </ModalBody>
       <ModalFooter
-        startActions={<Button onClick={() => setOpenModal('')} variant="tertiary">Cancel</Button>}
+        startActions={
+          <>
+            <Button onClick={() => setOpenModal('')} variant="tertiary">Cancel</Button>
+            {variant === "ItemEdit" && <Button onClick={() => setOpenModal('')} variant="danger">Delete</Button>}
+          </>
+      }
         endActions={<Button onClick={() => addItem()}>Add item</Button>}
       />
     </ModalLayout>
