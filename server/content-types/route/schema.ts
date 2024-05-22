@@ -51,19 +51,12 @@ export default {
       default: true,
       configurable: false,
     },
-    parent: {
+    navitem: {
       type: "relation",
-      relation: "oneToOne",
-      target: "plugin::url-routes.route",
+      relation: "oneToMany",
+      target: "plugin::url-routes.navitem",
       configurable: false,
-      default: null,
-    },
-    navigation: {
-      type: "relation",
-      relation: "manyToMany",
-      target: "plugin::url-routes.navigation",
-      configurable: false,
-      inversedBy: "items",
+      mappedBy: "route"
     },
   }
 }

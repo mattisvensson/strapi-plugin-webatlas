@@ -21,15 +21,18 @@ export default {
   attributes: {
     navigation: {
       type: "relation",
-      relation: "oneToOne",
+      relation: "manyToOne",
       target: "plugin::url-routes.navigation",
       configurable: false,
+      inversedBy: 'items',
     },
     route: {
       type: "relation",
-      relation: "oneToOne",
+      relation: "manyToOne",
       target: "plugin::url-routes.route",
       configurable: false,
+      inversedBy: 'navitem',
+
     },
     parent: {
       type: "relation",

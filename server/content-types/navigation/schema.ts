@@ -37,7 +37,7 @@ export default {
     },
     items: {
       type: "relation",
-      relation: "manyToMany",
+      relation: "oneToMany",
       target: "plugin::url-routes.route",
       configurable: false,
       mappedBy: "navigation"
