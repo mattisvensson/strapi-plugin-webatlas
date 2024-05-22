@@ -30,6 +30,7 @@ export default function useApi() {
             return {
               entities: data.results,
               label: entity.info.displayName,
+              contentType
             }
           })
         );
