@@ -38,9 +38,9 @@ export default {
     items: {
       type: "relation",
       relation: "oneToMany",
-      target: "plugin::url-routes.route",
+      target: "plugin::url-routes.navitem",
       configurable: false,
-      mappedBy: "navigation"
+      mappedBy: 'navigation',
     },
   }
 }

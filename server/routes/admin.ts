@@ -99,6 +99,24 @@ export default {
         policies: [],
         auth: false,
       }
+    },
+    {
+      method: 'POST',
+      path: '/navitem',
+      handler: 'admin.createNavItem',
+      config: {
+        policies: [],
+        auth: false,
+      }
+    },
+    {
+      method: 'PUT',
+      path: '/navitem/:id',
+      handler: 'admin.updateNavItem',
+      config: {
+        policies: [],
+        auth: false,
+      }
     }
   ]
 }

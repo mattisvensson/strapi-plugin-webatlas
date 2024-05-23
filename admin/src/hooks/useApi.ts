@@ -1,4 +1,4 @@
-import { ContentType, GroupedEntities, RouteSettings } from '../types';
+import { ContentType, GroupedEntities, RouteSettings, NavItemSettings } from '../types';
 import { useFetchClient } from '@strapi/helper-plugin';
 
 export default function useApi() {
@@ -42,8 +42,8 @@ export default function useApi() {
     }
   }
 
-  const getRouteByRelated = async (relatedId: number, populate?: string) => {
-    const { data } = await get(`/content-manager/collection-types/plugin::url-routes.route?filters[relatedId][$eq]=${relatedId}${populate ? '&populate' + populate : ''}`);
+  const getRouteByRelated = async (relatedCt: string, relatedId: number, populate?: string) => {
+    const { data } = await get(`/content-manager/collection-types/plugin::url-routes.route?filters[relatedId][$eq]=${relatedId}&filters[relatedContentType][$eq]=${relatedCt}${populate ? '&populate' + populate : ''}`);
     return data;
   };
 
@@ -65,5 +65,25 @@ export default function useApi() {
     return data
   };
 
-  return { fetchAllContentTypes, fetchAllEntities, getRouteByRelated, createRoute, updateRoute}
+  const createNavItem = async (body: NavItemSettings) => {
+    const { data } = await post('/url-routes/navitem', {
+      data: {
+        ...body,
+      },
+    });
+    return data
+  };
+
+  const updateNavItem = async (body: NavItemSettings, id: number) => {
+    const { data } = await put(`/url-routes/navitem/${id}`, {
+      data: {
+        ...body,
+      },
+    });
+    return data
+  };
+
+
+
+  return { fetchAllContentTypes, fetchAllEntities, getRouteByRelated, createRoute, updateRoute, createNavItem, updateNavItem}
 }

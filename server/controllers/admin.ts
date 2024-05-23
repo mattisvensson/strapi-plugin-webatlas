@@ -91,4 +91,21 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       return ctx.throw(500, e)
     }
   },
+  async createNavItem (ctx) {
+    try {
+      const { data } = ctx.request.body;
+      return await strapi.plugin('url-routes').service('admin').createNavItem(data);
+    } catch (e) {
+      return ctx.throw(500, e)
+    }
+  },
+  async updateNavItem (ctx) {
+    try {
+      const { id } = ctx.params;
+      const { data } = ctx.request.body;
+      return await strapi.plugin('url-routes').service('admin').createNavItem(id, data);
+    } catch (e) {
+      return ctx.throw(500, e)
+    }
+  },
 });

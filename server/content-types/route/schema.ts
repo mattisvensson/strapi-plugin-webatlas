@@ -53,10 +53,9 @@ export default {
     },
     navitem: {
       type: "relation",
-      relation: "oneToMany",
+      relation: "oneToOne",
       target: "plugin::url-routes.navitem",
       configurable: false,
-      mappedBy: "route"
     },
   }
 }

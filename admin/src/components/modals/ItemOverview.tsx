@@ -2,7 +2,7 @@ import { ModalLayout, ModalBody, ModalFooter, Button, SingleSelect, SingleSelect
 import { useState, useContext, useEffect } from 'react';
 import { ModalContext } from '../../contexts';
 import ModalHeader from './ModalHeader';
-import { Route, RouteSettings, Navigation, Entity, GroupedEntities } from '../../types';
+import { Route, NavItemSettings, RouteSettings, Navigation, Entity, GroupedEntities } from '../../types';
 import useAllEntities from '../../hooks/useAllEntities';
 import useApi from '../../hooks/useApi';
 
@@ -24,7 +24,7 @@ export default function ItemOverview ({ variant, fetchNavigations, navigation, p
   const [isInternal, setIsInternal] = useState(true)
   const [isNewRoute, setIsNewRoute] = useState(false)
   const { entities } = useAllEntities();
-  const { createRoute, updateRoute, getRouteByRelated } = useApi();
+  const { createNavItem, updateNavItem, getRouteByRelated } = useApi();
 
   const contextValue = useContext(ModalContext);
   let setOpenModal = (_: string) => {};
@@ -40,9 +40,9 @@ export default function ItemOverview ({ variant, fetchNavigations, navigation, p
 
   useEffect(() => {
     async function fetchRoute() {
-      if (selectedEntity && selectedEntity.id) {
+      if (selectedContentType?.contentType && selectedEntity?.id) {
         try {
-          const { results } = await getRouteByRelated(selectedEntity.id)
+          const { results } = await getRouteByRelated(selectedContentType.contentType, selectedEntity.id)
           const route = results[0]
 
           if (!route) setIsNewRoute(true)
@@ -63,19 +63,15 @@ export default function ItemOverview ({ variant, fetchNavigations, navigation, p
   const addItem = async () => {
     try {
       if (!entityRoute) return
-      const settings: RouteSettings = {
-        title,
-        path,
-        menuAttached: true,
+      const settings: NavItemSettings = {
+        route: entityRoute.id ?? null,
         parent: parentId ?? null,
-        navigation: [navigation.id],
-        relatedContentType: entityRoute.relatedContentType,
-        relatedId: entityRoute.relatedId,
+        navigation: navigation.id,
       }
       if (isNewRoute || parentId) {
-        await createRoute(settings);
+        await createNavItem(settings);
       } else {
-        await updateRoute(settings, entityRoute.id);
+        await updateNavItem(settings, entityRoute.id);
       }
       fetchNavigations()
       setOpenModal('')

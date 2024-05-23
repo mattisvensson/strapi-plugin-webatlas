@@ -10,6 +10,12 @@ export type NavItem = {
   visible: boolean;
 };
 
+export type NavItemSettings = {
+  route: number | null;
+  navigation: number | null;
+  parent: number | null;
+};
+
 export type Route = {
   id: number;
   title: string;

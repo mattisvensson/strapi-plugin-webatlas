@@ -153,5 +153,37 @@ export default ({strapi}) => ({
     } catch (e) {
       console.log(e)
     }
-  }
+  },
+
+  async createNavItem(data) {
+    try {
+      const entity = await strapi.entityService.create('plugin::url-routes.navitem', {
+        data: {
+          navigation: data.navigation ? Number(data.navigation) : null,
+          route: data.route ? Number(data.route) : null,
+          parent: data.parent ? Number(data.parent) : null,
+        },
+      });
+
+      return entity;
+    } catch (e) {
+      console.log(e)
+    }
+  },
+
+  async updateNavItem(id, data) {
+    try {
+      const entity = await strapi.entityService.update('plugin::url-routes.navitem', id, {
+        data: {
+          navigation: data.navigation ? Number(data.navigation) : null,
+          route: data.route ? Number(data.route) : null,
+          parent: data.parent ? Number(data.parent) : null,
+        },
+      });
+
+      return entity;
+    } catch (e) {
+      console.log(e)
+    }
+  },
 })

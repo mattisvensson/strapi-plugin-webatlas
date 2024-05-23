@@ -24,14 +24,13 @@ export default {
       relation: "manyToOne",
       target: "plugin::url-routes.navigation",
       configurable: false,
-      inversedBy: 'items',
+      inversedBy: "items",
     },
     route: {
       type: "relation",
-      relation: "manyToOne",
+      relation: "oneToOne",
       target: "plugin::url-routes.route",
       configurable: false,
-      inversedBy: 'navitem',
 
     },
     parent: {
