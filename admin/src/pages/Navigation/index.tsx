@@ -20,6 +20,7 @@ import useNavigations from '../../hooks/useNavigations';
 import ItemOverview from '../../components/modals/ItemOverview';
 import RouteItem from './RouteItem';
 import isNavItem from '../../utils/isNavItem';
+import useApi from '../../hooks/useApi';
 
 const Navigation = () => {
   const [navigations, fetchNavigations] = useNavigations() as [NavItem[], () => Promise<void>];
@@ -27,6 +28,7 @@ const Navigation = () => {
   const [selectedNavigation, setSelectedNavigation] = useState<NavItem>();
   const [actionItem, setActionItem] = useState<NavItem | Route>();
   const [parentId, setParentId] = useState<number>();
+  const { getNestedNavigation } = useApi();
 
   useEffect(() => {
     if (openModal === 'overview' || openModal === '') {
@@ -36,7 +38,11 @@ const Navigation = () => {
   }, [openModal]);
 
   useEffect(() => {
+    async function test () {
+      console.log(await getNestedNavigation(navigations[0].id))
+    }
     if (Array.isArray(navigations) && navigations?.length > 0)
+      test()
       setSelectedNavigation(navigations[0])
   }, [navigations]);
 

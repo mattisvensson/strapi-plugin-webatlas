@@ -155,6 +155,18 @@ export default ({strapi}) => ({
     }
   },
 
+  async nestedNavigation(id) {
+    try {
+      const navigation = await strapi.entityService.findMany('plugin::url-routes.navitem', {
+        filters: { 'navigation.id': id },
+        populate: { route: true },
+      })
+      return navigation
+    } catch (e) {
+      console.log(e)
+    }
+  },
+
   async createNavItem(data) {
     try {
       const entity = await strapi.entityService.create('plugin::url-routes.navitem', {

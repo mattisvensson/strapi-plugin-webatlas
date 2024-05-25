@@ -117,6 +117,15 @@ export default {
         policies: [],
         auth: false,
       }
+    },
+    {
+      method: 'GET',
+      path: '/navigation/:id/nested',
+      handler: 'admin.nestedNavigation',
+      config: {
+        policies: [],
+        auth: false,
+      }
     }
   ]
 }
