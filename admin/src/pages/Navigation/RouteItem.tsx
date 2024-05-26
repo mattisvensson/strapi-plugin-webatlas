@@ -1,7 +1,7 @@
 import { Box, Typography, Divider, Button, Flex } from '@strapi/design-system';
 import { NestedNavItem, NestedNavigation } from '../../../../types';
 import { ModalContext } from '../../contexts';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useRef } from 'react';
 import { Trash } from '@strapi/icons';
 
 type RouteItemProps = {
@@ -12,7 +12,7 @@ type RouteItemProps = {
 }
 
 export default function RouteItem({item, setParentId, setActionItem, parentPath}: RouteItemProps) {
-  const [fullPath, setFullPath] = useState<string>('');
+  const fullPath = useRef<string>(parentPath ? `${parentPath}/${item.route.path}` : item.route.path);
 
   const contextValue = useContext(ModalContext);
   let setOpenModal = (_: string) => {};
@@ -20,10 +20,6 @@ export default function RouteItem({item, setParentId, setActionItem, parentPath}
   if (contextValue !== null) {
     [, setOpenModal] = contextValue;
   }
-
-  useEffect(() => {
-    setFullPath(parentPath ? `${parentPath}/${item.route?.path}` : item.route?.path)
-  }, [])
 
   const handleAddChildren = () => {
     setParentId(item.id)
@@ -49,10 +45,10 @@ export default function RouteItem({item, setParentId, setActionItem, parentPath}
         paddingBottom={4}
         paddingLeft={4}
         paddingRight={4}
-        paddingTop={6}
+        paddingTop={4}
         shadow="tableShadow"
       >
-        <Typography>{item.route?.title} / {fullPath}</Typography>
+        <Typography>{item.route?.title} - {fullPath.current}</Typography>
         <Box paddingBottom={2} paddingTop={2}>
           <Divider/>
         </Box>
@@ -63,7 +59,7 @@ export default function RouteItem({item, setParentId, setActionItem, parentPath}
         </Flex>
       </Box>
       {item.items.map((childItem: NestedNavItem, index) => (
-        <RouteItem key={index} item={childItem} setParentId={setParentId} setActionItem={setActionItem} parentPath={fullPath}/>  
+        <RouteItem key={index} item={childItem} setParentId={setParentId} setActionItem={setActionItem} parentPath={fullPath.current}/>  
       ))}
     </Flex>
   );
