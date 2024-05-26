@@ -116,4 +116,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       return ctx.throw(500, e)
     }
   },
+  async deleteNavItem (ctx) {
+    try {
+      const { id } = ctx.params;
+      return await strapi.plugin('url-routes').service('admin').deleteNavItem(id);
+    } catch (e) {
+      return ctx.throw(500, e)
+    }
+  },
 });

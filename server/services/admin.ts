@@ -200,4 +200,13 @@ export default ({strapi}) => ({
       console.log(e)
     }
   },
+
+  async deleteNavItem(id) {
+    try {
+      await strapi.entityService.delete('plugin::url-routes.navitem', id)
+      return true
+    } catch (e) {
+      console.log(e)
+    }
+  },
 })

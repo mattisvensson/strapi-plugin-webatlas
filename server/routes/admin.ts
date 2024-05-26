@@ -101,6 +101,15 @@ export default {
       }
     },
     {
+      method: 'GET',
+      path: '/navigation/:id/nested',
+      handler: 'admin.nestedNavigation',
+      config: {
+        policies: [],
+        auth: false,
+      }
+    },
+    {
       method: 'POST',
       path: '/navitem',
       handler: 'admin.createNavItem',
@@ -119,13 +128,13 @@ export default {
       }
     },
     {
-      method: 'GET',
-      path: '/navigation/:id/nested',
-      handler: 'admin.nestedNavigation',
+      method: 'DELETE',
+      path: '/navitem/:id',
+      handler: 'admin.deleteNavItem',
       config: {
         policies: [],
         auth: false,
       }
-    }
+    },
   ]
 }
