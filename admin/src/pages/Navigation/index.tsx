@@ -26,6 +26,7 @@ const Navigation = () => {
   const [navigations, fetchNavigations] = useNavigations() as [NestedNavigation[], () => Promise<void>];
   const [openModal, setOpenModal] = useState('');
   const [selectedNavigation, setSelectedNavigation] = useState<NestedNavigation>();
+  const [navigationItems, setNavigationItems] = useState<NestedNavItem[]>();
   const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>();
   const [parentId, setParentId] = useState<number>();
   const { getNestedNavigation } = useApi();
@@ -39,12 +40,45 @@ const Navigation = () => {
 
   useEffect(() => {
     async function fetchNestedNavigation () {
-      const nestedNav = await getNestedNavigation(navigations[0].id)
-      setSelectedNavigation(nestedNav)
+      const id = selectedNavigation ? selectedNavigation.id : navigations[0].id
+      const { items } = await getNestedNavigation(id)
+      setNavigationItems(items)
     }
     if (Array.isArray(navigations) && navigations?.length > 0)
       fetchNestedNavigation()
+  }, [navigations, selectedNavigation]);
+
+  useEffect(() => {
+    if (!selectedNavigation && navigations.length > 0)
+      setSelectedNavigation(navigations[0])
   }, [navigations]);
+
+  const renderModal = () => {
+    if (openModal === 'ItemCreate' || openModal === 'ItemEdit') {
+      if ((isNestedNavItem(actionItem) || actionItem === undefined) && selectedNavigation) {
+        return (
+          <ItemOverview
+            variant={openModal}
+            item={actionItem}
+            fetchNavigations={fetchNavigations}
+            navigation={selectedNavigation}
+            parentId={parentId}
+          />
+        );
+      }
+    } else if (openModal === 'overview') {
+      return <NavOverview navigations={navigations} setActionItem={setActionItem} />;
+    } else if (openModal === 'create') {
+      return <NavCreate fetchNavigations={fetchNavigations} />;
+    } else if (openModal === 'edit' && isNestedNavigation(actionItem)) {
+      return <NavEdit item={actionItem} fetchNavigations={fetchNavigations} />;
+    } else if (openModal === "NavDelete" && isNestedNavigation(actionItem)) {
+      return <Delete variant="NavDelete" item={actionItem} fetchNavigations={fetchNavigations} />;
+    } else if (openModal === "ItemDelete" && isNestedNavItem(actionItem)) {
+      return <Delete variant="ItemDelete" item={actionItem} fetchNavigations={fetchNavigations} />;
+    }
+    return null;
+  };
 
   return (
     <ModalContext.Provider value={[openModal, setOpenModal]}>
@@ -64,9 +98,9 @@ const Navigation = () => {
                 Save
               </Button>
             </Flex>
-            {selectedNavigation && selectedNavigation.items?.length > 0 &&
+            {navigationItems && navigationItems.length > 0 &&
               <Flex direction="column" alignItems="stretch" gap={4}>
-                {selectedNavigation.items.map((item, index) => (
+                {navigationItems.map((item, index) => (
                   <RouteItem key={index} item={item} setParentId={setParentId} setActionItem={setActionItem}/>
                 ))}
               </Flex>
@@ -75,12 +109,7 @@ const Navigation = () => {
             {selectedNavigation?.items?.length === 0 && <EmptyNav msg="Your navigation is empty..." buttonText='Create new item' modal="ItemCreate"/>}
           </ContentLayout>
         </Layout>
-        {(openModal === 'ItemCreate' || openModal === 'ItemEdit') && isNestedNavItem(actionItem) && selectedNavigation && <ItemOverview variant={openModal} item={actionItem} fetchNavigations={fetchNavigations} navigation={selectedNavigation} parentId={parentId}/>}
-        {openModal === 'overview' && isNestedNavigation(actionItem) && <NavOverview navigations={navigations} setActionItem={setActionItem}/>}
-        {openModal === 'create' && <NavCreate fetchNavigations={fetchNavigations}/>}
-        {openModal === 'edit' && isNestedNavigation(actionItem) && <NavEdit item={actionItem} fetchNavigations={fetchNavigations}/>}
-        {openModal === "NavDelete" && isNestedNavigation(actionItem) &&<Delete variant="NavDelete" item={actionItem} fetchNavigations={fetchNavigations}/>}
-        {openModal === "ItemDelete" && isNestedNavItem(actionItem) && <Delete variant="ItemDelete" item={actionItem} fetchNavigations={fetchNavigations}/>}      
+        {renderModal()}
       </SelectedNavigationContext.Provider>
     </ModalContext.Provider>
   );

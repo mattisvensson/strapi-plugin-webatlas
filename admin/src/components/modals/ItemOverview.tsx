@@ -8,7 +8,7 @@ import useApi from '../../hooks/useApi';
 
 type ItemOverviewProps = {
   variant: "ItemCreate" | "ItemEdit";
-  item: NestedNavItem;
+  item: NestedNavItem | undefined;
   fetchNavigations: () => void;
   navigation: NestedNavigation;
   parentId?: number;
