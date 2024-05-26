@@ -36,6 +36,14 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
   useEffect(() => {
     if (!entities) return
     setAvailableEntities(entities)
+
+    if (variant === "ItemEdit" && item) {
+      const contentType = entities.find((group: GroupedEntities) => group.contentType === item.route.relatedContentType)
+      if (contentType) {
+        setSelectedContentType(contentType)
+        const entity = contentType.entities.find((entity: Entity) => entity.id === item.route.relatedId)
+        if (entity) setSelectedEntity(entity)
+    }}
   }, [entities])
 
   useEffect(() => {
