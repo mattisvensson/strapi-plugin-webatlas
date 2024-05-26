@@ -2,18 +2,19 @@ import { ModalLayout, ModalBody, ModalFooter, Button, SingleSelect, SingleSelect
 import { useState, useContext, useEffect } from 'react';
 import { ModalContext } from '../../contexts';
 import ModalHeader from './ModalHeader';
-import { Route, NavItemSettings, RouteSettings, Navigation, Entity, GroupedEntities } from '../../types';
+import { Route, NavItemSettings, NestedNavigation, Entity, GroupedEntities, NestedNavItem } from '../../types';
 import useAllEntities from '../../hooks/useAllEntities';
 import useApi from '../../hooks/useApi';
 
 type ItemOverviewProps = {
   variant: "ItemCreate" | "ItemEdit";
+  item: NestedNavItem;
   fetchNavigations: () => void;
-  navigation: Navigation;
+  navigation: NestedNavigation;
   parentId?: number;
 }
 
-export default function ItemOverview ({ variant, fetchNavigations, navigation, parentId }: ItemOverviewProps){
+export default function ItemOverview ({ variant, item, fetchNavigations, navigation, parentId }: ItemOverviewProps){
   const [availableEntities, setAvailableEntities] = useState<GroupedEntities[]>([])
   const [selectedEntity, setSelectedEntity] = useState<Entity | null>()
   const [selectedContentType, setSelectedContentType] = useState<GroupedEntities>()
@@ -22,7 +23,6 @@ export default function ItemOverview ({ variant, fetchNavigations, navigation, p
   const [path, setPath] = useState('')
   const [isVisible, setIsVisible] = useState(true)
   const [isInternal, setIsInternal] = useState(true)
-  const [isNewRoute, setIsNewRoute] = useState(false)
   const { entities } = useAllEntities();
   const { createNavItem, updateNavItem, getRouteByRelated } = useApi();
 
@@ -45,7 +45,7 @@ export default function ItemOverview ({ variant, fetchNavigations, navigation, p
           const { results } = await getRouteByRelated(selectedContentType.contentType, selectedEntity.id)
           const route = results[0]
 
-          if (!route) setIsNewRoute(true)
+          if (!route) return
 
           setEntityRoute(route)
           setTitle(route ? route.title : '')
@@ -68,7 +68,7 @@ export default function ItemOverview ({ variant, fetchNavigations, navigation, p
         parent: parentId ?? null,
         navigation: navigation.id,
       }
-      if (isNewRoute || parentId) {
+      if (variant === "ItemCreate") {
         await createNavItem(settings);
       } else {
         await updateNavItem(settings, entityRoute.id);

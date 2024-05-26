@@ -23,19 +23,9 @@ export type Route = {
   relatedContentType: string;
   relatedId: number;
   menuAttached: boolean;
-  navigation: {
+  isInternal: boolean;
+  navitem: {
     id: number;
-    name: string;
-    slug: string;
-    visible: boolean;
-    createdAt: string;
-  } | null;
-  parent: {
-    id: number;
-    name: string;
-    slug: string;
-    visible: boolean;
-    createdAt: string;
   } | null;
   createdAt: string;
   updatedAt: string;
@@ -107,4 +97,27 @@ export type User = {
   firstname: string;
   lastname: string;
   username: string | null;
+}
+
+
+export type NestedNavigation = {
+  id: number;
+  name: string;
+  slug: string;
+  visible: boolean;
+  items: NestedNavItem[];
+  updatedAt: string;
+  createdAt: string;
+
+}
+
+export type NestedNavItem = {
+  id: number;
+  items: NestedNavItem[];
+  parent: {
+    id: number;
+  } | null;
+  route: Route;
+  updatedAt: string;
+  createdAt: string;
 }

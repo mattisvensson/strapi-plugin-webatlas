@@ -1,22 +1,29 @@
 import { ModalContext } from '../../contexts';
-import { useContext, useEffect, useRef } from 'react';
+import { useContext, useRef } from 'react';
 import { Dialog, DialogBody, DialogFooter, Flex, Typography, Button } from '@strapi/design-system';
 import { ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { useFetchClient } from '@strapi/helper-plugin';
-import { NavItem, Route } from '../../types';
-import isNavItem from '../../utils/isNavItem';
+import { NestedNavigation, NestedNavItem } from '../../types';
 
-type NavDeleteProps = {
-  variant: "NavDelete" | "ItemDelete";
-  item: NavItem | Route;
+type NavDelete = {
+  variant: "NavDelete";
+  item: NestedNavigation;
   fetchNavigations: () => void;
 }
 
-export default function Delete ({ variant, item, fetchNavigations }: NavDeleteProps) {
+type ItemDelete = {
+  variant: "ItemDelete";
+  item: NestedNavItem;
+  fetchNavigations: () => void;
+}
+
+type DeleteProps = NavDelete | ItemDelete;
+
+export default function Delete ({ variant, item, fetchNavigations }: DeleteProps) {
   const { del } = useFetchClient();
 
-  const itemName = useRef(isNavItem(item) ? item.name : item.title)
-  const closeModalState = useRef(isNavItem(item) ? 'overview' : '')
+  const itemName = useRef(variant === "NavDelete" ? item.name : item.route.title)
+  const closeModalState = useRef(variant === "NavDelete" ? 'overview' : '')
 
   const contextValue = useContext(ModalContext);
   let setOpenModal = (_: string) => {};
@@ -27,7 +34,7 @@ export default function Delete ({ variant, item, fetchNavigations }: NavDeletePr
 
   const handleDelete = async () => {
     try {
-        await del(`/url-routes/${variant === "NavDelete" ? 'navigation' : 'route'}/${item.id}`)
+        await del(`/url-routes/${variant === "NavDelete" ? 'navigation' : 'navitem'}/${item.id}`)
     } catch (err) {
       console.log(err)
     }
@@ -35,9 +42,6 @@ export default function Delete ({ variant, item, fetchNavigations }: NavDeletePr
     fetchNavigations()
     setOpenModal(closeModalState.current)
   }
-
-  useEffect(() => {
-  }, [])
 
   return (
     <>
@@ -51,9 +55,9 @@ export default function Delete ({ variant, item, fetchNavigations }: NavDeletePr
         </DialogBody>
         <DialogFooter
           startAction={
-          <Button onClick={() => setOpenModal(closeModalState.current)} variant="tertiary">
-            No, keep
-          </Button>
+            <Button onClick={() => setOpenModal(closeModalState.current)} variant="tertiary">
+              No, keep
+            </Button>
           }
           endAction={
             <Button variant="danger-light" onClick={() => handleDelete()} startIcon={<Trash />}>

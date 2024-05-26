@@ -3,12 +3,12 @@ import {
   SingleSelectOption,
 } from '@strapi/design-system';
 import { Flex, Button } from '@strapi/design-system';
-import { NavItem } from '../../types';
+import { NestedNavigation } from '../../types';
 import { useContext } from 'react';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
 
 type HeaderProps = {
-  navigations: NavItem[]
+  navigations: NestedNavigation[]
 }
 
 export default function Header ({ navigations }: HeaderProps) {
@@ -20,8 +20,8 @@ export default function Header ({ navigations }: HeaderProps) {
   }
 
   const SelectedContextValue = useContext(SelectedNavigationContext);
-  let setSelectedNavigation = (_: NavItem) => {};  
-  let selectedNavigation: NavItem | undefined = undefined
+  let setSelectedNavigation = (_: NestedNavigation) => {};  
+  let selectedNavigation: NestedNavigation | undefined = undefined
   if (SelectedContextValue !== null) {
     [selectedNavigation, setSelectedNavigation] = SelectedContextValue;
   }

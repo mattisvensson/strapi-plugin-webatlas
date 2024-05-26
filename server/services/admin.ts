@@ -1,3 +1,5 @@
+import getNestedNavigation from "../../utils/getNestedNavigation";
+
 /**
  * Finds a path from the original path that is unique
  */
@@ -157,11 +159,11 @@ export default ({strapi}) => ({
 
   async nestedNavigation(id) {
     try {
-      const navigation = await strapi.entityService.findMany('plugin::url-routes.navitem', {
-        filters: { 'navigation.id': id },
-        populate: { route: true },
-      })
-      return navigation
+      const navigation = await strapi.entityService.findOne('plugin::url-routes.navigation', id, {
+        populate: ['items', "items.parent", "items.route"],
+      });
+
+      return getNestedNavigation(navigation)
     } catch (e) {
       console.log(e)
     }

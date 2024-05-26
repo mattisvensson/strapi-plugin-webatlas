@@ -84,8 +84,7 @@ export default function useApi() {
   };
 
   const getNestedNavigation = async (id: number) => {
-    const { data } = await get(`/url-routes/navigation/${id}`);
-    console.log(data)
+    const { data } = await get(`/url-routes/navigation/${id}/nested`);
     return data
   }
 

@@ -1,13 +1,13 @@
 import { Flex, Box, Typography, Divider, Button, ModalLayout, ModalBody, ModalFooter } from '@strapi/design-system';
 import { Check, Pencil, Trash } from '@strapi/icons';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
-import { useContext } from 'react';
-import { NavItem, Route } from '../../types';
+import { useContext, useEffect } from 'react';
+import { NestedNavItem, NestedNavigation } from '../../types';
 import ModalHeader from './ModalHeader';
 
 type NavOverviewProps = {
-  navigations: NavItem[],
-  setActionItem: React.Dispatch<React.SetStateAction<NavItem | Route | undefined>>
+  navigations: NestedNavigation[],
+  setActionItem: React.Dispatch<React.SetStateAction<NestedNavItem | NestedNavigation | undefined>>
 }
 
 export default function NavOverview ({ navigations, setActionItem }: NavOverviewProps) {
@@ -19,33 +19,37 @@ export default function NavOverview ({ navigations, setActionItem }: NavOverview
   }
 
   const SelectedContextValue = useContext(SelectedNavigationContext);
-  let setSelectedNavigation = (_: NavItem) => {};
-  let selectedNavigation: NavItem | undefined = undefined;
+  let setSelectedNavigation = (_: NestedNavigation) => {};
+  let selectedNavigation: NestedNavigation | undefined = undefined;
   if (SelectedContextValue !== null) {
     [selectedNavigation, setSelectedNavigation] = SelectedContextValue;
   }
 
-  const handleSelect = (nav: NavItem) => {
+  const handleSelect = (nav: NestedNavigation) => {
     setSelectedNavigation(nav)
     setOpenModal('')
   }
 
-  const handleEdit = (nav: NavItem) => {
+  const handleEdit = (nav: NestedNavigation) => {
     setActionItem(nav)
     setOpenModal('edit')
   }
 
-  const handleDelete = (nav: NavItem) => {
+  const handleDelete = (nav: NestedNavigation) => {
     setActionItem(nav)
     setOpenModal('NavDelete')
   }
+
+  useEffect(() => {
+    console.log(navigations)
+  }, [])
 
   return (
     <ModalLayout onClose={() => setOpenModal('')}>
       <ModalHeader title="Navigation overview"/>
       <ModalBody>
-        {navigations.map((nav, index: number) => (
-          <>
+        {navigations.map((nav, index) => (
+          <Box key={nav.id}>
             <Flex justifyContent="space-between" key={`box-${nav.slug}`}>
               <Typography textColor="neutral800">
                 {nav.name}
@@ -62,7 +66,7 @@ export default function NavOverview ({ navigations, setActionItem }: NavOverview
             >
               <Divider />
             </Box>}
-          </>
+          </Box>
         ))}
       </ModalBody>
       <ModalFooter

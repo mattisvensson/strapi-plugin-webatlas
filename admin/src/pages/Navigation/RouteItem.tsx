@@ -1,16 +1,18 @@
-import { Box, Typography, Divider, Button } from '@strapi/design-system';
-import { Route, NavItem } from '../../types';
+import { Box, Typography, Divider, Button, Flex } from '@strapi/design-system';
+import { NestedNavItem, NestedNavigation } from '../../types';
 import { ModalContext } from '../../contexts';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Trash } from '@strapi/icons';
 
 type RouteItemProps = {
-  item: Route;
+  item: NestedNavItem;
   setParentId: (id: number) => void;
-  setActionItem: React.Dispatch<React.SetStateAction<NavItem | Route | undefined>>
+  setActionItem: React.Dispatch<React.SetStateAction<NestedNavItem | NestedNavigation | undefined>>;
+  parentPath?: string;
 }
 
-export default function RouteItem({item, setParentId, setActionItem}: RouteItemProps) {
+export default function RouteItem({item, setParentId, setActionItem, parentPath}: RouteItemProps) {
+  const [fullPath, setFullPath] = useState<string>('');
 
   const contextValue = useContext(ModalContext);
   let setOpenModal = (_: string) => {};
@@ -19,9 +21,18 @@ export default function RouteItem({item, setParentId, setActionItem}: RouteItemP
     [, setOpenModal] = contextValue;
   }
 
+  useEffect(() => {
+    setFullPath(parentPath ? `${parentPath}/${item.route?.path}` : item.route?.path)
+  }, [])
+
   const handleAddChildren = () => {
     setParentId(item.id)
     setOpenModal('ItemCreate')
+  }
+
+  const handleEdit = () => {
+    setActionItem(item)
+    setOpenModal('ItemEdit')
   }
 
   const handleDelete = () => {
@@ -30,20 +41,30 @@ export default function RouteItem({item, setParentId, setActionItem}: RouteItemP
   }
 
   return (
-    <Box
-      background='neutral0'
-      borderColor="neutral150"
-      hasRadius
-      paddingBottom={4}
-      paddingLeft={4}
-      paddingRight={4}
-      paddingTop={6}
-      shadow="tableShadow"
-    >
-      <Typography>{item.title} / Parent: {item.parent?.title}</Typography>
-      <Divider/>
-      <Button onClick={() => handleAddChildren()}>Add children</Button>
-      <Button variant="danger-light" onClick={() => handleDelete()} startIcon={<Trash />}>Delete</Button>
-    </Box>
+    <Flex direction="column" alignItems="stretch" gap={4} marginLeft={parentPath ? 4 : 0}>
+      <Box
+        background='neutral0'
+        borderColor="neutral150"
+        hasRadius
+        paddingBottom={4}
+        paddingLeft={4}
+        paddingRight={4}
+        paddingTop={6}
+        shadow="tableShadow"
+      >
+        <Typography>{item.route?.title} / {fullPath}</Typography>
+        <Box paddingBottom={2} paddingTop={2}>
+          <Divider/>
+        </Box>
+        <Flex direction="row" gap={4}>
+          <Button onClick={() => handleEdit()}>Edit</Button>
+          <Button onClick={() => handleAddChildren()}>Add children</Button>
+          <Button variant="danger-light" onClick={() => handleDelete()} startIcon={<Trash />}>Delete</Button>
+        </Flex>
+      </Box>
+      {item.items.map((childItem: NestedNavItem, index) => (
+        <RouteItem key={index} item={childItem} setParentId={setParentId} setActionItem={setActionItem} parentPath={fullPath}/>  
+      ))}
+    </Flex>
   );
 }

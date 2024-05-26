@@ -4,14 +4,14 @@ import { useState, useContext } from 'react';
 import { ModalContext } from '../../contexts';
 import ModalHeader from './ModalHeader';
 import { useFetchClient } from '@strapi/helper-plugin';
-import { NavItem, Route } from '../../types';
+import { NestedNavigation } from '../../types';
 
-type NavEdit = {
-  item: NavItem;
+type NavEditProps = {
+  item: NestedNavigation;
   fetchNavigations: () => void;
 }
 
-export default function NavEdit ({ item, fetchNavigations }: NavEdit){
+export default function NavEdit ({ item, fetchNavigations }: NavEditProps){
   const { put } = useFetchClient();
 
   const [name, setName] = useState(item.name)
