@@ -3,7 +3,7 @@ import { useContext, useRef } from 'react';
 import { Dialog, DialogBody, DialogFooter, Flex, Typography, Button } from '@strapi/design-system';
 import { ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { useFetchClient } from '@strapi/helper-plugin';
-import { NestedNavigation, NestedNavItem } from '../../types';
+import { NestedNavigation, NestedNavItem } from '../../../../types';
 
 type NavDelete = {
   variant: "NavDelete";

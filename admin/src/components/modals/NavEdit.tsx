@@ -4,7 +4,7 @@ import { useState, useContext } from 'react';
 import { ModalContext } from '../../contexts';
 import ModalHeader from './ModalHeader';
 import { useFetchClient } from '@strapi/helper-plugin';
-import { NestedNavigation } from '../../types';
+import { NestedNavigation } from '../../../../types';
 
 type NavEditProps = {
   item: NestedNavigation;

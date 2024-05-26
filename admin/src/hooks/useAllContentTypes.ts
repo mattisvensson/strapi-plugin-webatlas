@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import useApi from './useApi';
-import { ContentType } from '../types';
+import { ContentType } from '../../../types';
 
 const useAllContentTypes = () => {
   const { fetchAllContentTypes } = useApi();

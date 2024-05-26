@@ -12,7 +12,7 @@ import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layou
 import { Table, Thead, Tbody, Tr, Td, Th, VisuallyHidden, IconButton } from '@strapi/design-system';
 import { Pencil } from '@strapi/icons';
 import { Link } from 'react-router-dom';
-import { Route } from '../../types';
+import { Route } from '../../../../types';
 
 const Routes = () => {
   const { get } = useFetchClient();

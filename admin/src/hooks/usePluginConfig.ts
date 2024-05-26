@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PluginConfig } from '../types';
+import { PluginConfig } from '../../../types';
 import { useFetchClient } from '@strapi/helper-plugin';
 
 type UsePluginConfigResponse = {

@@ -3,7 +3,7 @@ import {
   SingleSelectOption,
 } from '@strapi/design-system';
 import { Flex, Button } from '@strapi/design-system';
-import { NestedNavigation } from '../../types';
+import { NestedNavigation } from '../../../../types';
 import { useContext } from 'react';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
 

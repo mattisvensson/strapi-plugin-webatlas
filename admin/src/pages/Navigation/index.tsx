@@ -15,7 +15,7 @@ import NavEdit from '../../components/modals/NavEdit';
 import EmptyNav from '../Navigation/EmptyNav';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
 import Header from './Header';
-import { NestedNavigation, NestedNavItem } from '../../types';
+import { NestedNavigation, NestedNavItem } from '../../../../types';
 import useNavigations from '../../hooks/useNavigations';
 import ItemOverview from '../../components/modals/ItemOverview';
 import RouteItem from './RouteItem';

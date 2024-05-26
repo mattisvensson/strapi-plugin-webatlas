@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useFetchClient } from '@strapi/helper-plugin';
-import { NavItem } from '../types';
+import { NavItem } from '../../../types';
 
 export default function useNavigations () {
   const { get } = useFetchClient();

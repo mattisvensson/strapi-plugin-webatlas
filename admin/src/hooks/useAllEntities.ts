@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import useApi from './useApi';
-import { GroupedEntities } from '../types';
+import { GroupedEntities } from '../../../types';
 
 const useAllEntities = () => {
   const { fetchAllEntities } = useApi();

@@ -2,7 +2,7 @@ import { Flex, Box, Typography, Divider, Button, ModalLayout, ModalBody, ModalFo
 import { Check, Pencil, Trash } from '@strapi/icons';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
 import { useContext, useEffect } from 'react';
-import { NestedNavItem, NestedNavigation } from '../../types';
+import { NestedNavItem, NestedNavigation } from '../../../../types';
 import ModalHeader from './ModalHeader';
 
 type NavOverviewProps = {

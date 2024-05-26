@@ -4,7 +4,7 @@ import transformToUrl from '../../utils/transformToUrl';
 import { useFetchClient, useCMEditViewDataManager } from '@strapi/helper-plugin';
 import useApi from '../../hooks/useApi';
 import useNavigations from '../../hooks/useNavigations';
-import { NavItem, RouteSettings } from '../../types';
+import { NavItem, RouteSettings } from '../../../../types';
 import usePluginConfig from '../../hooks/usePluginConfig';
 
 const CMEditViewAside = () => {

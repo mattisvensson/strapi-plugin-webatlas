@@ -9,7 +9,7 @@ import { CheckPermissions, useOverlayBlocker } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { Button, HeaderLayout, Layout, ContentLayout, Box, Select, Option } from '@strapi/design-system';
 import usePluginConfig from '../../hooks/usePluginConfig';
-import { ContentType } from '../../types';
+import { ContentType } from '../../../../types';
 
 import useAllContentTypes from '../../hooks/useAllContentTypes';
 

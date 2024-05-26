@@ -1,4 +1,4 @@
-import { NestedNavItem, NestedNavigation } from '../types';
+import { NestedNavItem, NestedNavigation } from '../../../types';
 
 export function isNestedNavigation(item: NestedNavItem | NestedNavigation | undefined): item is NestedNavigation {
   return (item as NestedNavigation).slug !== undefined;

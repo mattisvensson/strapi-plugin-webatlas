@@ -1,5 +1,5 @@
 import { Box, Typography, Divider, Button, Flex } from '@strapi/design-system';
-import { NestedNavItem, NestedNavigation } from '../../types';
+import { NestedNavItem, NestedNavigation } from '../../../../types';
 import { ModalContext } from '../../contexts';
 import { useContext, useEffect, useState } from 'react';
 import { Trash } from '@strapi/icons';

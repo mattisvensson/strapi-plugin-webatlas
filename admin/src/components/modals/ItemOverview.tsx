@@ -2,7 +2,7 @@ import { ModalLayout, ModalBody, ModalFooter, Button, SingleSelect, SingleSelect
 import { useState, useContext, useEffect } from 'react';
 import { ModalContext } from '../../contexts';
 import ModalHeader from './ModalHeader';
-import { Route, NavItemSettings, NestedNavigation, Entity, GroupedEntities, NestedNavItem } from '../../types';
+import { Route, NavItemSettings, NestedNavigation, Entity, GroupedEntities, NestedNavItem } from '../../../../types';
 import useAllEntities from '../../hooks/useAllEntities';
 import useApi from '../../hooks/useApi';
 

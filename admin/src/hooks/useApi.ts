@@ -1,4 +1,4 @@
-import { ContentType, GroupedEntities, RouteSettings, NavItemSettings } from '../types';
+import { ContentType, GroupedEntities, RouteSettings, NavItemSettings } from '../../../types';
 import { useFetchClient } from '@strapi/helper-plugin';
 
 export default function useApi() {

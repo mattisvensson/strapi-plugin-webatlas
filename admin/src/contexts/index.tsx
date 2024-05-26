@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, createContext } from 'react';
-import { NestedNavigation } from '../types';
+import { NestedNavigation } from '../../../types';
 
 type ModalContextType = [string, Dispatch<SetStateAction<string>>];
 type SelectedNavigationContextType = [NestedNavigation | undefined, React.Dispatch<React.SetStateAction<NestedNavigation | undefined>>];
