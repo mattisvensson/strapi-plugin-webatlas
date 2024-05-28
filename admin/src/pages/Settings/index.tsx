@@ -28,7 +28,7 @@ const Settings = () => {
       case 'SET_SELECTED_CONTENT_TYPES':
         return { ...settingsState, selectedContentTypes: action.payload };
         case 'SET_DEFAULT_FIELD':
-        const updatedContentTypes = settingsState.selectedContentTypes.map(ct =>
+        const updatedContentTypes = settingsState.selectedContentTypes.map(ct => 
           ct.uid === action.payload.ctUid ? { ...ct, default: action.payload.field } : ct
         );
         return { ...settingsState, selectedContentTypes: updatedContentTypes };
@@ -119,10 +119,9 @@ const Settings = () => {
                           name={`defaultField-${ct.uid}`}
                           label='Default URL Alias field'
                           hint='If you leave this empty, the system will use the content type plus the ID as the default value for the URL alias. For example: /api::page.page/1'
-                          onClear={() => dispatch({ type: 'SET_DEFAULT_FIELD', payload: { ctId: ct.uid, field: '' } })}
-                          value={(settingsState.selectedContentTypes.find(cta => cta.uid === ct.uid) || {}).default || ''}
+                          onClear={() => dispatch({ type: 'SET_DEFAULT_FIELD', payload: { ctUid: ct.uid, field: '' } })}
+                          value={settingsState.selectedContentTypes.find(cta => cta.uid === ct.uid).default || ''}
                           onChange={(value: string) => dispatch({ type: 'SET_DEFAULT_FIELD', payload: { ctUid: ct.uid, field: value } })}
-                          disabled={false}
                         >
                           {Object.entries(ct.attributes).map(([key], index) => {
                             if (key === 'id' || key === 'createdAt' || key === 'updatedAt' || key === 'createdBy' || key === 'updatedBy') return null
