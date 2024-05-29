@@ -7,30 +7,45 @@
 import { useEffect, useState, useReducer } from 'react';
 import { CheckPermissions, useOverlayBlocker } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Button, HeaderLayout, Layout, ContentLayout, Box, Select, Option, Accordion, AccordionToggle, AccordionContent, AccordionGroup, Typography, Divider } from '@strapi/design-system';
+import { Button, HeaderLayout, Layout, ContentLayout, Box, Select, Option, Accordion, AccordionToggle, AccordionContent, AccordionGroup, Typography, Divider, TextInput } from '@strapi/design-system';
 import usePluginConfig from '../../hooks/usePluginConfig';
-import { ContentType } from '../../../../types';
+import { ContentType, ConfigContentType, PluginConfig } from '../../../../types';
 
 import useAllContentTypes from '../../hooks/useAllContentTypes';
+
+type Action = 
+  | { type: 'SET_SELECTED_CONTENT_TYPES'; payload: ConfigContentType[] }
+  | { type: 'SET_DEFAULT_FIELD'; payload: { ctUid: string; field: string } }
+  | { type: 'SET_PATTERN'; payload: { ctUid: string; pattern: string } };
+
 
 const noopFallback = () => {}
 
 const Settings = () => {
   const [expandedID, setExpandedID] = useState<string | null>(null);
-  const [settingsState, dispatch] = useReducer(reducer, { selectedContentTypes: []});
+  const initialState: PluginConfig = { selectedContentTypes: [] };
+  const [settingsState, dispatch] = useReducer(reducer, initialState);
   const { lockApp = noopFallback, unlockApp = noopFallback } = useOverlayBlocker();
   const { contentTypes: allContentTypesData } = useAllContentTypes();
   const { data: config, setConfig } = usePluginConfig();
   const allContentTypes = allContentTypesData?.filter((ct: ContentType) => ct.isDisplayed);
 
-  function reducer(settingsState, action) {
+  function reducer(settingsState: PluginConfig, action: Action): PluginConfig {
+    console.log(action.payload)
+    let updatedContentTypes
     switch (action.type) {
       case 'SET_SELECTED_CONTENT_TYPES':
         return { ...settingsState, selectedContentTypes: action.payload };
-        case 'SET_DEFAULT_FIELD':
-        const updatedContentTypes = settingsState.selectedContentTypes.map(ct => 
+      case 'SET_DEFAULT_FIELD':
+        updatedContentTypes = settingsState.selectedContentTypes.map(ct => 
           ct.uid === action.payload.ctUid ? { ...ct, default: action.payload.field } : ct
         );
+        return { ...settingsState, selectedContentTypes: updatedContentTypes };
+      case 'SET_PATTERN':
+        updatedContentTypes = settingsState.selectedContentTypes.map(ct => 
+          ct.uid === action.payload.ctUid ? { ...ct, pattern: action.payload.pattern } : ct
+        );
+        console.log(updatedContentTypes)
         return { ...settingsState, selectedContentTypes: updatedContentTypes };
       default:
         throw new Error();
@@ -96,8 +111,8 @@ const Settings = () => {
             label='Enabled Content Types'
             hint='Select the content types you want to enable for URL aliases and navigations'
             onClear={() => dispatch({ type: 'SET_SELECTED_CONTENT_TYPES', payload: [] })}
-            value={[...settingsState.selectedContentTypes.map(ct => ct.uid)]}
-            onChange={(value: string[]) => dispatch({ type: 'SET_SELECTED_CONTENT_TYPES', payload: value.map(v => ({ uid: v })) })}
+            value={[...settingsState.selectedContentTypes.map((ct: ConfigContentType) => ct.uid)]}
+            onChange={(value: string[]) => dispatch({ type: 'SET_SELECTED_CONTENT_TYPES', payload: value.map(v => ({ uid: v, default: '', pattern: '' })) })}
             multi
             withTags
             disabled={false}
@@ -106,21 +121,21 @@ const Settings = () => {
           </Select>
           {settingsState.selectedContentTypes && settingsState.selectedContentTypes.length > 0 && <Box paddingTop={4}>
             <AccordionGroup label="Content Type settings">
-              {settingsState.selectedContentTypes?.map((contentType) => {
-                const ct = allContentTypes?.find((item) => item.uid === contentType.uid)
+              {settingsState.selectedContentTypes?.map((contentType: ConfigContentType) => {
+                const ct: ContentType | undefined = allContentTypes?.find((item) => item.uid === contentType.uid)
+                console.log("CT:", ct)
                 if (!ct) return null
                 return (
                   <Accordion key={ct.uid} expanded={expandedID === ct.uid} onToggle={handleToggle(ct.uid)} id={ct.uid} size="S">
                     <AccordionToggle title={ct?.info.displayName} togglePosition="left" />
                     <AccordionContent>
                       <Box padding={3}>
-                        <Typography>
                         <Select
                           name={`defaultField-${ct.uid}`}
                           label='Default URL Alias field'
                           hint='If you leave this empty, the system will use the content type plus the ID as the default value for the URL alias. For example: /api::page.page/1'
                           onClear={() => dispatch({ type: 'SET_DEFAULT_FIELD', payload: { ctUid: ct.uid, field: '' } })}
-                          value={settingsState.selectedContentTypes.find(cta => cta.uid === ct.uid).default || ''}
+                          value={settingsState.selectedContentTypes.find((cta: ConfigContentType) => cta.uid === ct.uid)?.default || ''}
                           onChange={(value: string) => dispatch({ type: 'SET_DEFAULT_FIELD', payload: { ctUid: ct.uid, field: value } })}
                         >
                           {Object.entries(ct.attributes).map(([key], index) => {
@@ -128,7 +143,16 @@ const Settings = () => {
                             return <Option key={index} value={key}>{key}</Option>
                           })}
                         </Select>
-                        </Typography>
+                        <Box paddingTop={4}>
+                          <TextInput
+                            label="URL Alias pattern"
+                            placeholder="e.g. /blog/"
+                            hint="Define the pattern for the URL alias. The default field will be appended to this pattern."
+                            value={settingsState.selectedContentTypes.find((cta: ConfigContentType) => cta.uid === ct.uid)?.pattern}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_PATTERN', payload: { ctUid: ct.uid, pattern: e.target.value } })}                
+                            disabled={settingsState.selectedContentTypes.find((cta: ConfigContentType) => cta.uid === ct.uid)?.default ? false : true}
+                          />
+                        </Box>
                       </Box>
                     </AccordionContent>
                   </Accordion>

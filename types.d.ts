@@ -60,10 +60,19 @@ export type ContentType = {
     pluralName: string;
     displayName: string;
   };
+  attributes: {
+    [key: string]: any;
+  }
 };
 
+export type ConfigContentType = {
+  uid: string;
+  default: string;
+  pattern: string;
+}
+
 export type PluginConfig = {
-  selectedContentTypes: string[];
+  selectedContentTypes: ConfigContentType[];
 };
 
 export type Navigation = {
