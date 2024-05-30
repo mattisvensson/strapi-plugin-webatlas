@@ -1,6 +1,6 @@
 import { MultiSelect, MultiSelectOption, BaseCheckbox, Box, TextInput, ToggleInput, Button, Flex, Divider, Typography } from '@strapi/design-system';
 import { useState, useEffect } from 'react';
-import transformToUrl from '../../utils/transformToUrl';
+import transformToUrl from '../../../../utils/transformToUrl';
 import { useFetchClient, useCMEditViewDataManager } from '@strapi/helper-plugin';
 import useApi from '../../hooks/useApi';
 import useNavigations from '../../hooks/useNavigations';
