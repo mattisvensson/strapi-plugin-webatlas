@@ -5,6 +5,8 @@ export default function transformToUrl(input: string): string {
       'ö': 'oe',
     };
 
+    if (!input) return input;
+
     input = input.toLowerCase();
 
     // Remove leading slash
@@ -16,10 +18,13 @@ export default function transformToUrl(input: string): string {
       const regex = new RegExp(char, 'g');
       input = input.replace(regex, specialCharMap[char]);
     }
-  
+    
     // Replace spaces with hyphens
     input = input.replace(/\s+/g, '-');
-    
+
+    // Replace multiple consecutive dashes with a single dash
+    input = input.replace(/-+/g, '-');
+
     // Remove leading and trailing spaces
     input = input.trim();
 
