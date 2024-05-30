@@ -6,10 +6,11 @@
 
 import { useEffect, useState, useReducer } from 'react';
 import { CheckPermissions, useOverlayBlocker } from '@strapi/helper-plugin';
-import { Check } from '@strapi/icons';
-import { Button, HeaderLayout, Layout, ContentLayout, Box, Select, Option, Accordion, AccordionToggle, AccordionContent, AccordionGroup, Typography, Divider, TextInput } from '@strapi/design-system';
+import { Check, Information } from '@strapi/icons';
+import { Button, HeaderLayout, Layout, ContentLayout, Box, Select, Option, Accordion, AccordionToggle, AccordionContent, AccordionGroup, Typography, Divider, TextInput, Tooltip } from '@strapi/design-system';
 import usePluginConfig from '../../hooks/usePluginConfig';
 import { ContentType, ConfigContentType, PluginConfig } from '../../../../types';
+import transformToUrl from '../../../../utils/transformToUrl';
 
 import useAllContentTypes from '../../hooks/useAllContentTypes';
 
@@ -22,20 +23,23 @@ type Action =
 const noopFallback = () => {}
 
 const Settings = () => {
+  const { data: config, setConfig } = usePluginConfig();
   const [expandedID, setExpandedID] = useState<string | null>(null);
-  const initialState: PluginConfig = { selectedContentTypes: [] };
+  const initialState: PluginConfig = config || { selectedContentTypes: [] };
   const [settingsState, dispatch] = useReducer(reducer, initialState);
   const { lockApp = noopFallback, unlockApp = noopFallback } = useOverlayBlocker();
   const { contentTypes: allContentTypesData } = useAllContentTypes();
-  const { data: config, setConfig } = usePluginConfig();
   const allContentTypes = allContentTypesData?.filter((ct: ContentType) => ct.isDisplayed);
 
   function reducer(settingsState: PluginConfig, action: Action): PluginConfig {
-    console.log(action.payload)
     let updatedContentTypes
     switch (action.type) {
       case 'SET_SELECTED_CONTENT_TYPES':
-        return { ...settingsState, selectedContentTypes: action.payload };
+        setExpandedID(null)
+        updatedContentTypes = action.payload.map(ct => {
+          return settingsState.selectedContentTypes.find((cta: ConfigContentType) => cta.uid === ct.uid) || ct
+        })
+        return { ...settingsState, selectedContentTypes: updatedContentTypes };
       case 'SET_DEFAULT_FIELD':
         updatedContentTypes = settingsState.selectedContentTypes.map(ct => 
           ct.uid === action.payload.ctUid ? { ...ct, default: action.payload.field } : ct
@@ -43,7 +47,7 @@ const Settings = () => {
         return { ...settingsState, selectedContentTypes: updatedContentTypes };
       case 'SET_PATTERN':
         updatedContentTypes = settingsState.selectedContentTypes.map(ct => 
-          ct.uid === action.payload.ctUid ? { ...ct, pattern: action.payload.pattern } : ct
+          ct.uid === action.payload.ctUid ? { ...ct, pattern: transformToUrl(action.payload.pattern) } : ct
         );
         console.log(updatedContentTypes)
         return { ...settingsState, selectedContentTypes: updatedContentTypes };
@@ -73,10 +77,15 @@ const Settings = () => {
     dispatch({ type: 'SET_SELECTED_CONTENT_TYPES', payload: config.selectedContentTypes });
   }, [config]);
 
-
   const handleToggle = (id: string) => () => {
     setExpandedID(s => s === id ? null : id);
   };
+
+  function InputTooltip({ description }: { description: string }) {
+    return <Tooltip description={description}>
+      <Information aria-hidden="true"/>
+    </Tooltip>
+  }
 
   return (
     <Layout>
@@ -85,7 +94,7 @@ const Settings = () => {
         subtitle='Settings'
         primaryAction={
           <CheckPermissions permissions={false}>
-            <Button type="submit" startIcon={<Check />} onClick={save} disabled={false}>
+            <Button type="submit" startIcon={<Check />} onClick={save} disabled={JSON.stringify(settingsState) === JSON.stringify(initialState)}>
               Save
             </Button>
           </CheckPermissions>
@@ -112,7 +121,7 @@ const Settings = () => {
             hint='Select the content types you want to enable for URL aliases and navigations'
             onClear={() => dispatch({ type: 'SET_SELECTED_CONTENT_TYPES', payload: [] })}
             value={[...settingsState.selectedContentTypes.map((ct: ConfigContentType) => ct.uid)]}
-            onChange={(value: string[]) => dispatch({ type: 'SET_SELECTED_CONTENT_TYPES', payload: value.map(v => ({ uid: v, default: '', pattern: '' })) })}
+            onChange={(value: string[]) => dispatch({ type: 'SET_SELECTED_CONTENT_TYPES', payload: value.map(v => ({ uid: v })) })}
             multi
             withTags
             disabled={false}
@@ -123,7 +132,6 @@ const Settings = () => {
             <AccordionGroup label="Content Type settings">
               {settingsState.selectedContentTypes?.map((contentType: ConfigContentType) => {
                 const ct: ContentType | undefined = allContentTypes?.find((item) => item.uid === contentType.uid)
-                console.log("CT:", ct)
                 if (!ct) return null
                 return (
                   <Accordion key={ct.uid} expanded={expandedID === ct.uid} onToggle={handleToggle(ct.uid)} id={ct.uid} size="S">
@@ -146,7 +154,8 @@ const Settings = () => {
                         <Box paddingTop={4}>
                           <TextInput
                             label="URL Alias pattern"
-                            placeholder="e.g. /blog/"
+                            placeholder="e.g. blog"
+                            labelAction={<InputTooltip description="Leading and trailing slashes will be removed. Spaces will be replaced with hyphens. Special characters will be encoded."/>}
                             hint="Define the pattern for the URL alias. The default field will be appended to this pattern."
                             value={settingsState.selectedContentTypes.find((cta: ConfigContentType) => cta.uid === ct.uid)?.pattern}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_PATTERN', payload: { ctUid: ct.uid, pattern: e.target.value } })}                

@@ -67,8 +67,8 @@ export type ContentType = {
 
 export type ConfigContentType = {
   uid: string;
-  default: string;
-  pattern: string;
+  default?: string;
+  pattern?: string;
 }
 
 export type PluginConfig = {
