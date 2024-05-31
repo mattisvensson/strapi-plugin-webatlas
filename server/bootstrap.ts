@@ -7,7 +7,7 @@ export default async ({ strapi }: { strapi: Strapi }) => {
   }
 
   const pluginStore = strapi.store({ type: 'plugin', name: 'url-routes' });
-  
+
   const config = await pluginStore.get({
     key: "config",
   }) as PluginConfig;
@@ -16,11 +16,11 @@ export default async ({ strapi }: { strapi: Strapi }) => {
 
   strapi.db?.lifecycles.subscribe({
     models: config.selectedContentTypes.map((type: any) => type.uid),
-    
+
     async afterCreate(event: any) {
       const ctSettings: ConfigContentType | undefined = config.selectedContentTypes.find((type: any) => type.uid === event.model.uid);
 
-      const { 
+      const {
         url_alias_path,
         url_alias_isOverride,
       } = event.params.data;
@@ -43,11 +43,11 @@ export default async ({ strapi }: { strapi: Strapi }) => {
 
     async afterUpdate(event: any) {
       const ctSettings = config.selectedContentTypes.find((type: any) => type.uid === event.model.uid);
-      
-      const { 
-        url_alias_path, 
-        url_alias_routeId, 
-        url_alias_relatedContentType, 
+
+      const {
+        url_alias_path,
+        url_alias_routeId,
+        url_alias_relatedContentType,
         url_alias_relatedId,
         url_alias_isOverride
       } = event.params.data;
@@ -64,12 +64,37 @@ export default async ({ strapi }: { strapi: Strapi }) => {
         if (url_alias_isOverride !== undefined) data.isOverride = url_alias_isOverride;
         if (url_alias_relatedContentType) data.relatedContentType = url_alias_relatedContentType;
         if (url_alias_relatedId) data.relatedId = url_alias_relatedId;
-        
+
         await strapi.db?.query('plugin::url-routes.route').update({
           where: { id: url_alias_routeId },
           data,
         });
       }
     },
+
+    async afterDelete(event: any) {
+      await strapi.db?.query('plugin::url-routes.route').delete({
+        where: {
+          relatedId: event.result.id,
+          relatedContentType: event.model.uid
+        },
+      });
+    },
+
+    async afterDeleteMany(event: any) {
+      const deletedArr = event.params.where['$and']
+
+      deletedArr.map((item: {id: {'$in': number[]}}) => {
+        const ids = item.id['$in']
+        ids.map(async (id: number) => {
+          await strapi.db?.query('plugin::url-routes.route').delete({
+            where: {
+              relatedId: id,
+              relatedContentType: event.model.uid
+            },
+          });
+        })
+      })
+    }
   });
 };
