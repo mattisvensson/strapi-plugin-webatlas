@@ -41,14 +41,10 @@ export default {
       configurable: false,
       targetField: "title",
     },
-    menuAttached: {
+
+    isOverride: {
       type: 'boolean',
       default: false,
-      configurable: false,
-    },
-    isInternal: {
-      type: 'boolean',
-      default: true,
       configurable: false,
     },
     navitem: {
