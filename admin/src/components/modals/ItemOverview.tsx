@@ -38,7 +38,7 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
     setAvailableEntities(entities)
 
     if (variant === "ItemEdit" && item) {
-      const contentType = entities.find((group: GroupedEntities) => group.contentType === item.route.relatedContentType)
+      const contentType = entities.find((group: GroupedEntities) => group.contentType.uid === item.route.relatedContentType)
       if (contentType) {
         setSelectedContentType(contentType)
         const entity = contentType.entities.find((entity: Entity) => entity.id === item.route.relatedId)
@@ -50,7 +50,7 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
     async function fetchRoute() {
       if (selectedContentType?.contentType && selectedEntity?.id) {
         try {
-          const { results } = await getRouteByRelated(selectedContentType.contentType, selectedEntity.id)
+          const { results } = await getRouteByRelated(selectedContentType.contentType.uid, selectedEntity.id)
           const route = results[0]
 
           if (!route) return
@@ -188,13 +188,8 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
         }
       </ModalBody>
       <ModalFooter
-        startActions={
-          <>
-            <Button onClick={() => setOpenModal('')} variant="tertiary">Cancel</Button>
-            {variant === "ItemEdit" && <Button onClick={() => setOpenModal('')} variant="danger">Delete</Button>}
-          </>
-      }
-        endActions={<Button onClick={() => addItem()}>Add item</Button>}
+        startActions={<Button onClick={() => setOpenModal('')} variant="tertiary">Cancel</Button>}
+        endActions={<Button onClick={() => addItem()}>{variant === "ItemCreate" ? 'Add item' : 'Save'}</Button>}
       />
     </ModalLayout>
   )

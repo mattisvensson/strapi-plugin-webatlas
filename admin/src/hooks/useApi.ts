@@ -1,4 +1,4 @@
-import { ContentType, GroupedEntities, RouteSettings, NavItemSettings } from '../../../types';
+import { ContentType, GroupedEntities, RouteSettings, NavItemSettings, ConfigContentType } from '../../../types';
 import { useFetchClient } from '@strapi/helper-plugin';
 
 export default function useApi() {
@@ -9,7 +9,7 @@ export default function useApi() {
     return data.data
   }
 
-  const fetchAllEntities = async (contentTypes?: string[]) => {
+  const fetchAllEntities = async (contentTypes?: ConfigContentType[]) => {
     try {
       if (!contentTypes) {
         const { data } = await get('/url-routes/config')
@@ -21,9 +21,9 @@ export default function useApi() {
       let entities: GroupedEntities[] = [];
       if (contentTypes && contentTypes.length > 0) {
         entities = await Promise.all(
-          contentTypes.map(async (contentType: string) => {
-            const { data } = await get(`/content-manager/collection-types/${contentType}`);
-            const entity = allContentTypes.find((ct: ContentType) => ct.uid === contentType);
+          contentTypes.map(async (contentType: ConfigContentType) => {
+            const { data } = await get(`/content-manager/collection-types/${contentType.uid}`);
+            const entity = allContentTypes.find((ct: ContentType) => ct.uid === contentType.uid);
             if (!entity) {
               throw new Error(`Content type ${contentType} not found`);
             }

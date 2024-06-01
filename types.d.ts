@@ -98,7 +98,7 @@ export type Entity = {
 export type GroupedEntities = {
   entities: Entity[],
   label: string,
-  contentType: string,
+  contentType: ConfigContentType,
 }
 
 export type User = {
