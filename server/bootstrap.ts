@@ -34,8 +34,12 @@ export default async ({ strapi }: { strapi: Strapi }) => {
         data: {
           relatedContentType: event.model.uid,
           relatedId: event.result.id,
-          path: url_alias_path,
+          slug: url_alias_path,
+          fullPath: url_alias_path,
+          uidPath: `/${event.model.uid}/${event.result.id}`,
           isOverride: url_alias_isOverride,
+          internal: true,
+          active: true,
           title: title
         },
       });
@@ -47,23 +51,17 @@ export default async ({ strapi }: { strapi: Strapi }) => {
       const {
         url_alias_path,
         url_alias_routeId,
-        url_alias_relatedContentType,
-        url_alias_relatedId,
         url_alias_isOverride
       } = event.params.data;
-
-      let title = '';
-      if (ctSettings?.default) {
-        title = event.params.data[ctSettings.default];
-      }
-
+      
       if (url_alias_routeId) {
         const data: any = {};
-        if (title) data.title = title;
-        if (url_alias_path) data.path = url_alias_path;
+        if (ctSettings?.default) data.title = event.params.data[ctSettings.default];
         if (url_alias_isOverride !== undefined) data.isOverride = url_alias_isOverride;
-        if (url_alias_relatedContentType) data.relatedContentType = url_alias_relatedContentType;
-        if (url_alias_relatedId) data.relatedId = url_alias_relatedId;
+        if (url_alias_path) {
+          data.slug = url_alias_path;
+          data.fullPath = url_alias_path;
+        }
 
         await strapi.db?.query('plugin::url-routes.route').update({
           where: { id: url_alias_routeId },

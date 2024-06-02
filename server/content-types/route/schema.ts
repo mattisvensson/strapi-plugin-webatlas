@@ -35,16 +35,31 @@ export default {
       required: true,
       configurable: false,
     },
-    path: {
+    fullPath: {
       type: "string",
-      required: true,
       configurable: false,
-      targetField: "title",
     },
-
+    slug: {
+      type: "string",
+      configurable: false,
+    },
+    uidPath: {
+      type: "string",
+      configurable: false,
+    },
     isOverride: {
       type: 'boolean',
       default: false,
+      configurable: false,
+    },
+    internal: {
+      type: 'boolean',
+      default: true,
+      configurable: false,
+    },
+    active: {
+      type: 'boolean',
+      default: true,
       configurable: false,
     },
     navitem: {

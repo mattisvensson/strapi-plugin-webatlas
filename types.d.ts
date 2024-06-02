@@ -130,3 +130,15 @@ export type NestedNavItem = {
   updatedAt: string;
   createdAt: string;
 }
+
+export type NavOverviewState = {
+  route: NavOverviewRoute;
+  navitem: NavItemSettings;
+}
+
+export type NavOverviewRoute = {
+  title: string;
+  slug: string;
+  active: boolean;
+  internal: boolean;
+}

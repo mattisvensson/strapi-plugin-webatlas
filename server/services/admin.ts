@@ -46,17 +46,24 @@ export default ({strapi}) => ({
   },
 
   async createRoute(data) {
-    // const urlPath = await duplicateCheck(data.url_path);
+    const parent = data.parent ? await strapi.entityService.findOne('plugin::url-routes.navitem', data.parent, {
+      populate: ['route'],
+    }) : null;
+
+    const parentPath = parent?.fullPath ? parent.fullPath : parent?.route?.path
+    let fullPath = parentPath ? `${parentPath}${data.slug}` : data.slug;
+    
+    if (data.isOverride) fullPath = data.slug;
+
     try {
       const entity = await strapi.entityService.create('plugin::url-routes.route', {
         data: {
           relatedContentType: data.relatedContentType,
           relatedId: data.relatedId,
           title: data.title,
-          path: data.path,
-          menuAttached: data.menuAttached,
-          navigation: data.navigation.map((id: string) => ({ id: Number(id) })),
-          parent: data.parent ? { id: Number(data.parent) } : null,
+          uidPath: `/${data.relatedContentType}/${data.relatedId}`,
+          slug: data.slug,
+          fullPath,
         },
       });
 
@@ -75,9 +82,7 @@ export default ({strapi}) => ({
           relatedId: data.relatedId,
           title: data.title,
           path: data.path,
-          menuAttached: data.menuAttached,
-          navigation: data.navigation.map((id: string) => ({ id: Number(id) })),
-          parent: data.parent ? { id: Number(data.parent) } : null,
+          uidPath: `/${data.relatedContentType}/${data.relatedId}`,
         },
       });
 
@@ -171,11 +176,43 @@ export default ({strapi}) => ({
 
   async createNavItem(data) {
     try {
+      if (!data.route || !data.navigation) return false
+
       const entity = await strapi.entityService.create('plugin::url-routes.navitem', {
         data: {
-          navigation: data.navigation ? Number(data.navigation) : null,
-          route: data.route ? Number(data.route) : null,
+          navigation: Number(data.navigation),
+          route: Number(data.route),
           parent: data.parent ? Number(data.parent) : null,
+        },
+      });
+
+      return entity;
+    } catch (e) {
+      console.log(e)
+    }
+  },
+
+  async createNavItemRoute(data) {
+    try {
+      const route = await strapi.entityService.findOne('plugin::url-routes.route', data.navitem.route);
+
+      const newRouteData = {
+        relatedContentType: route.relatedContentType,
+        relatedId: route.relatedId,
+        title: data.route.title,
+        slug: data.route.slug,
+        isOverride: true,
+        internal: data.route.internal,
+        active: data.route.active,      
+      }
+
+      const newRoute = await this.createRoute(newRouteData)
+
+      const entity = await strapi.entityService.create('plugin::url-routes.navitem', {
+        data: {
+          navigation: Number(data.navitem.navigation),
+          route: Number(newRoute.id),
+          parent: data.parent ? Number(data.navite.parent) : null,
         },
       });
 

@@ -1,4 +1,4 @@
-import { ContentType, GroupedEntities, RouteSettings, NavItemSettings, ConfigContentType } from '../../../types';
+import { ContentType, GroupedEntities, RouteSettings, NavItemSettings, ConfigContentType, NavOverviewState } from '../../../types';
 import { useFetchClient } from '@strapi/helper-plugin';
 
 export default function useApi() {
@@ -74,6 +74,15 @@ export default function useApi() {
     return data
   };
 
+  const createNavItemRoute = async (body: NavOverviewState) => {
+    const { data } = await post('/url-routes/navitemroute', {
+      data: {
+        ...body,
+      },
+    });
+    return data
+  };
+
   const updateNavItem = async (body: NavItemSettings, id: number) => {
     const { data } = await put(`/url-routes/navitem/${id}`, {
       data: {
@@ -88,5 +97,5 @@ export default function useApi() {
     return data
   }
 
-  return { fetchAllContentTypes, fetchAllEntities, getRouteByRelated, createRoute, updateRoute, createNavItem, updateNavItem, getNestedNavigation}
+  return { fetchAllContentTypes, fetchAllEntities, getRouteByRelated, createRoute, updateRoute, createNavItem, updateNavItem, getNestedNavigation, createNavItemRoute}
 }

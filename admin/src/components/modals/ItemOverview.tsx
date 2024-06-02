@@ -1,8 +1,8 @@
 import { ModalLayout, ModalBody, ModalFooter, Button, SingleSelect, SingleSelectOption, TextInput, ToggleInput, Box, Divider, Grid, GridItem } from '@strapi/design-system';
-import { useState, useContext, useEffect } from 'react';
+import { useState, useContext, useEffect, useReducer, useRef } from 'react';
 import { ModalContext } from '../../contexts';
 import ModalHeader from './ModalHeader';
-import { Route, NavItemSettings, NestedNavigation, Entity, GroupedEntities, NestedNavItem } from '../../../../types';
+import { Route, NavItemSettings, NestedNavigation, Entity, GroupedEntities, NestedNavItem, NavOverviewState, NavOverviewRoute } from '../../../../types';
 import useAllEntities from '../../hooks/useAllEntities';
 import useApi from '../../hooks/useApi';
 
@@ -14,17 +14,44 @@ type ItemOverviewProps = {
   parentId?: number;
 }
 
+type Action = 
+  | { type: 'SET_TITLE'; payload: string }
+  | { type: 'SET_SLUG'; payload: string }
+  | { type: 'SET_ACTIVE'; payload: boolean }
+  | { type: 'SET_INTERNAL'; payload: boolean };
+
+
 export default function ItemOverview ({ variant, item, fetchNavigations, navigation, parentId }: ItemOverviewProps){
   const [availableEntities, setAvailableEntities] = useState<GroupedEntities[]>([])
   const [selectedEntity, setSelectedEntity] = useState<Entity | null>()
   const [selectedContentType, setSelectedContentType] = useState<GroupedEntities>()
   const [entityRoute, setEntityRoute] = useState<Route>()
-  const [title, setTitle] = useState('')
-  const [path, setPath] = useState('')
-  const [isVisible, setIsVisible] = useState(true)
-  const [isInternal, setIsInternal] = useState(true)
   const { entities } = useAllEntities();
-  const { createNavItem, updateNavItem, getRouteByRelated } = useApi();
+  const { createNavItem, updateNavItem, createNavItemRoute, getRouteByRelated } = useApi();
+
+  const initialState: React.MutableRefObject<NavOverviewRoute> = useRef({
+    title: '',
+    slug: '',
+    active: true,
+    internal: true,
+  })
+
+  const [navItemState, dispatch] = useReducer(reducer, initialState.current);
+
+  function reducer(navItemState: NavOverviewRoute, action: Action): NavOverviewRoute {
+    switch (action.type) {
+      case 'SET_TITLE':
+        return { ...navItemState, title: action.payload };
+      case 'SET_SLUG':
+        return { ...navItemState, slug: action.payload };
+      case 'SET_ACTIVE':
+        return { ...navItemState, active: action.payload };
+      case 'SET_INTERNAL':
+        return { ...navItemState, internal: action.payload };
+      default:
+        throw new Error();
+    }
+  }
 
   const contextValue = useContext(ModalContext);
   let setOpenModal = (_: string) => {};
@@ -55,11 +82,19 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
 
           if (!route) return
 
+          dispatch({ type: 'SET_TITLE', payload: route.title })
+          dispatch({ type: 'SET_SLUG', payload: route.fullPath })
+          dispatch({ type: 'SET_ACTIVE', payload: route.active })
+          dispatch({ type: 'SET_INTERNAL', payload: route.internal })
+          
+          initialState.current = {
+            title: route.title,
+            slug: route.fullPath,
+            active: route.active,
+            internal: route.internal,
+          }
+
           setEntityRoute(route)
-          setTitle(route ? route.title : '')
-          setPath(route ? route.path : '')
-          setIsVisible(route ? route.isVisible : true)
-          setIsInternal(route ? route.isInternal : true)
         } catch (err) {
           console.log(err)
         }
@@ -71,13 +106,23 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
   const addItem = async () => {
     try {
       if (!entityRoute) return
+
       const settings: NavItemSettings = {
         route: entityRoute.id ?? null,
         parent: parentId ?? null,
         navigation: navigation.id,
       }
+
       if (variant === "ItemCreate") {
-        await createNavItem(settings);
+        if (JSON.stringify(navItemState) === JSON.stringify(initialState.current)) {
+          await createNavItem(settings);
+        } else {
+          const body = {
+            route: navItemState,
+            navitem: settings
+          }
+          await createNavItemRoute(body)
+        }
       } else {
         await updateNavItem(settings, entityRoute.id);
       }
@@ -145,8 +190,8 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
                     placeholder="My Title"
                     label="Title"
                     name="title"
-                    value={title}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
+                    value={navItemState.title}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_TITLE', payload: e.target.value })}
                     required
                   />
                 </GridItem>
@@ -154,9 +199,9 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
                   <TextInput
                     placeholder="about/"
                     label="Path"
-                    name="path"
-                    value={path}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPath(e.target.value)}
+                    name="slug"
+                    value={navItemState.slug}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_SLUG', payload: e.target.value })}
                     required
                   />
                 </GridItem>
@@ -168,8 +213,8 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
                     onLabel="Yes"
                     offLabel="No"
                     hint='This menu item does not show on your site, if set to "no".'
-                    checked={isVisible}
-                    onClick={() => setIsVisible(prev => !prev)}
+                    checked={navItemState.active}
+                    onClick={() => dispatch({ type: 'SET_ACTIVE', payload: !navItemState.active })}
                   />
                 </GridItem>
                 <GridItem col={6}>
@@ -178,8 +223,8 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
                     onLabel="Yes"
                     offLabel="No"
                     hint='If the url points to a page of your site, select "Yes". Else select "no".'
-                    checked={isInternal}
-                    onClick={() => setIsInternal(prev => !prev)}
+                    checked={navItemState.internal}
+                    onClick={() => dispatch({ type: 'SET_INTERNAL', payload: !navItemState.internal })}
                   />
                 </GridItem>
               </Grid>
@@ -189,7 +234,7 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
       </ModalBody>
       <ModalFooter
         startActions={<Button onClick={() => setOpenModal('')} variant="tertiary">Cancel</Button>}
-        endActions={<Button onClick={() => addItem()}>{variant === "ItemCreate" ? 'Add item' : 'Save'}</Button>}
+        endActions={<Button onClick={() => addItem()} disabled={variant === "ItemEdit" && JSON.stringify(navItemState) === JSON.stringify(initialState.current)}>{variant === "ItemCreate" ? 'Add item' : 'Save'}</Button>}
       />
     </ModalLayout>
   )
