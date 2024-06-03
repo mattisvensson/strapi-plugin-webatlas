@@ -5,6 +5,7 @@ import ModalHeader from './ModalHeader';
 import { Route, NavItemSettings, NestedNavigation, Entity, GroupedEntities, NestedNavItem, NavOverviewState, NavOverviewRoute } from '../../../../types';
 import useAllEntities from '../../hooks/useAllEntities';
 import useApi from '../../hooks/useApi';
+import transformToUrl from '../../../../utils/transformToUrl';
 
 type ItemOverviewProps = {
   variant: "ItemCreate" | "ItemEdit";
@@ -43,7 +44,7 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
       case 'SET_TITLE':
         return { ...navItemState, title: action.payload };
       case 'SET_SLUG':
-        return { ...navItemState, slug: action.payload };
+        return { ...navItemState, slug: transformToUrl(action.payload) };
       case 'SET_ACTIVE':
         return { ...navItemState, active: action.payload };
       case 'SET_INTERNAL':
