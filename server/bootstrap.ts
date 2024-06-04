@@ -40,6 +40,7 @@ export default async ({ strapi }: { strapi: Strapi }) => {
           isOverride: url_alias_isOverride,
           internal: true,
           active: true,
+          defaultRoute: true,
           title: title
         },
       });

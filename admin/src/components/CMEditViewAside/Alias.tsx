@@ -54,11 +54,11 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 			if (!initialData.id) return setIsLoading(false);
 			try {
 				const { data } = await get(`/content-manager/collection-types/plugin::url-routes.route?filters[relatedId][$eq]=${initialData.id}`);
-				const route = data.results[0]
-
+				const route = data.results.find((route: any) => route.defaultRoute === true)
+				
 				setRouteId(route.id)
 				setIsOverride(route.isOverride || false)
-				if (route.path) setPath(route.path)
+				if (route.fullPath) setPath(route.fullPath)
 			} catch (err) {
 				setRouteId(null)
 				console.log(err)
@@ -70,7 +70,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
 	const updateUrl = (value: string, fromInput?: boolean) => {
 		if (isOverride && !fromInput) return;
-		
+
 		fromInput ? 
 			setPath(transformToUrl(value)) :
 			setPath(`${config.pattern}/${transformToUrl(value)}`);
