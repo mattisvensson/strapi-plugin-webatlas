@@ -19,11 +19,14 @@ export type NavItemSettings = {
 export type Route = {
   id: number;
   title: string;
-  path: string;
+  slug: string;
+  fullPath: string;
+  uidPath: string;
   relatedContentType: string;
   relatedId: number;
-  menuAttached: boolean;
-  isInternal: boolean;
+  internal: boolean;
+  active: boolean;
+  isOverride: boolean;
   navitem: {
     id: number;
   } | null;
@@ -141,4 +144,5 @@ export type NavOverviewRoute = {
   slug: string;
   active: boolean;
   internal: boolean;
+  isOverride: boolean;
 }

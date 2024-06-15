@@ -25,6 +25,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	}, [])
 
 	useEffect(() => {
+		console.log(path)
 		if (!finished || isLoading) return
 		onChange({ target: { name: "url_alias_path", value: path } })
 		onChange({ target: { name: "url_alias_relatedContentType", value: layout.uid } })
@@ -55,7 +56,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 			try {
 				const { data } = await get(`/content-manager/collection-types/plugin::url-routes.route?filters[relatedId][$eq]=${initialData.id}`);
 				const route = data.results.find((route: any) => route.defaultRoute === true)
-				
+
 				setRouteId(route.id)
 				setIsOverride(route.isOverride || false)
 				if (route.fullPath) setPath(route.fullPath)
@@ -73,7 +74,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
 		fromInput ? 
 			setPath(transformToUrl(value)) :
-			setPath(`${config.pattern}/${transformToUrl(value)}`);
+			setPath(`${config.pattern}${transformToUrl(value)}`);
 	}
 
 	if (isLoading) return null;
@@ -117,8 +118,6 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 						value={path}
 						onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateUrl(e.target.value, true)}
 						disabled={!isOverride}
-						error={path === '' ? 'This field is required' : undefined}
-						required
 					/>
 					<Flex
 						gap={2}

@@ -19,7 +19,8 @@ type Action =
   | { type: 'SET_TITLE'; payload: string }
   | { type: 'SET_SLUG'; payload: string }
   | { type: 'SET_ACTIVE'; payload: boolean }
-  | { type: 'SET_INTERNAL'; payload: boolean };
+  | { type: 'SET_INTERNAL'; payload: boolean }
+  | { type: 'SET_OVERRIDE'; payload: boolean };
 
 
 export default function ItemOverview ({ variant, item, fetchNavigations, navigation, parentId }: ItemOverviewProps){
@@ -35,6 +36,7 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
     slug: '',
     active: true,
     internal: true,
+    isOverride: false,
   })
 
   const [navItemState, dispatch] = useReducer(reducer, initialState.current);
@@ -49,6 +51,8 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
         return { ...navItemState, active: action.payload };
       case 'SET_INTERNAL':
         return { ...navItemState, internal: action.payload };
+      case 'SET_OVERRIDE':
+        return { ...navItemState, isOverride: action.payload };
       default:
         throw new Error();
     }
@@ -93,6 +97,7 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
             slug: route.fullPath,
             active: route.active,
             internal: route.internal,
+            isOverride: route.isOverride,
           }
 
           setEntityRoute(route)
@@ -115,15 +120,15 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
       }
 
       if (variant === "ItemCreate") {
-        if (JSON.stringify(navItemState) === JSON.stringify(initialState.current)) {
+        // if (JSON.stringify(navItemState) === JSON.stringify(initialState.current)) {
           await createNavItem(settings);
-        } else {
-          const body = {
-            route: navItemState,
-            navitem: settings
-          }
-          await createNavItemRoute(body)
-        }
+        // } else {
+        //   const body = {
+        //     route: navItemState,
+        //     navitem: settings
+        //   }
+        //   await createNavItemRoute(body)
+        // }
       } else {
         await updateNavItem(settings, entityRoute.id);
       }

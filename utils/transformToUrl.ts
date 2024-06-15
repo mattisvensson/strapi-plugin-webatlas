@@ -5,12 +5,12 @@ export default function transformToUrl(input: string): string {
       'ö': 'oe',
     };
 
-    if (!input) return input;
+    if (!input) return '';
 
     input = input.toLowerCase();
 
     // Remove leading slash
-    input = input.startsWith('/') ? input.slice(1) : input;
+    input = input.startsWith('/') ? input : `/${input}`;
     input = input.endsWith('/') ? input.slice(0, -1) : input;
   
     // Replace special characters

@@ -1,3 +1,4 @@
+import getFullPath from "../../utils/getFullPath";
 import getNestedNavigation from "../../utils/getNestedNavigation";
 
 /**
@@ -50,8 +51,7 @@ export default ({strapi}) => ({
       populate: ['route'],
     }) : null;
 
-    const parentPath = parent?.fullPath ? parent.fullPath : parent?.route?.path
-    let fullPath = parentPath ? `${parentPath}${data.slug}` : data.slug;
+    let fullPath = getFullPath(parent?.fullPath, data.slug)
     
     if (data.isOverride) fullPath = data.slug;
 
@@ -178,10 +178,29 @@ export default ({strapi}) => ({
     try {
       if (!data.route || !data.navigation) return false
 
+      const routeId = Number(data.route)
+
+      const parent = data.parent ? await strapi.entityService.findOne('plugin::url-routes.navitem', data.parent, {
+        populate: ['route'],
+      }) : null;
+
+      const route = routeId ? await strapi.entityService.findOne('plugin::url-routes.route', routeId, {
+        populate: ['route'],
+      }) : null;
+
+      const fullPath = route.isOverride ? route.fullPath : getFullPath(parent?.route?.fullPath, route.fullPath)
+
+      await strapi.entityService.update('plugin::url-routes.route', routeId, {
+        data: {
+          fullPath,
+        },
+      });
+      console.log(route)
+
       const entity = await strapi.entityService.create('plugin::url-routes.navitem', {
         data: {
           navigation: Number(data.navigation),
-          route: Number(data.route),
+          route: routeId,
           parent: data.parent ? Number(data.parent) : null,
         },
       });
