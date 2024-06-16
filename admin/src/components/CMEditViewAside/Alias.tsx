@@ -25,7 +25,6 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	}, [])
 
 	useEffect(() => {
-		console.log(path)
 		if (!finished || isLoading) return
 		onChange({ target: { name: "url_alias_path", value: path } })
 		onChange({ target: { name: "url_alias_relatedContentType", value: layout.uid } })
@@ -40,7 +39,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	}, [modifiedData[config?.default]]);
 
 	useEffect(() => {
-		if (!config?.default) return
+		if (!config?.default || initialData.id) return
 		modifiedDataCopy.current = JSON.stringify(modifiedData)
 		updateUrl(modifiedData[config?.default])
 	}, [modifiedData])
