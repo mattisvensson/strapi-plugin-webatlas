@@ -35,13 +35,16 @@ export type Route = {
 };
 
 export type RouteSettings = {
-  title: string;
-  path: string;
-  relatedContentType: string;
-  relatedId: number;
-  menuAttached: boolean;
-  navigation?: number[];
-  parent?: number | null;
+  relatedContentType?: string;
+  relatedId?: number;
+  title?: string;
+  fullPath?: string;
+  slug?: string;
+  uidPath?: string;
+  isOverride?: boolean;
+  internal?: boolean;
+  active?: boolean;
+  navitem?: number;
 };
 
 export type MainModal = {

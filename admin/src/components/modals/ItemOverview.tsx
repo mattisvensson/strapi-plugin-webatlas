@@ -2,7 +2,7 @@ import { ModalLayout, ModalBody, ModalFooter, Button, SingleSelect, SingleSelect
 import { useState, useContext, useEffect, useReducer, useRef } from 'react';
 import { ModalContext } from '../../contexts';
 import ModalHeader from './ModalHeader';
-import { Route, NavItemSettings, NestedNavigation, Entity, GroupedEntities, NestedNavItem, NavOverviewState, NavOverviewRoute } from '../../../../types';
+import { Route, NavItemSettings, NestedNavigation, Entity, GroupedEntities, NestedNavItem, RouteSettings } from '../../../../types';
 import useAllEntities from '../../hooks/useAllEntities';
 import useApi from '../../hooks/useApi';
 import transformToUrl from '../../../../utils/transformToUrl';
@@ -29,9 +29,9 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
   const [selectedContentType, setSelectedContentType] = useState<GroupedEntities>()
   const [entityRoute, setEntityRoute] = useState<Route>()
   const { entities } = useAllEntities();
-  const { createNavItem, updateNavItem, createNavItemRoute, getRouteByRelated } = useApi();
+  const { createNavItem, updateNavItem, createNavItemRoute, getRouteByRelated, updateRoute } = useApi();
 
-  const initialState: React.MutableRefObject<NavOverviewRoute> = useRef({
+  const initialState: React.MutableRefObject<RouteSettings> = useRef({
     title: '',
     slug: '',
     active: true,
@@ -41,7 +41,7 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
 
   const [navItemState, dispatch] = useReducer(reducer, initialState.current);
 
-  function reducer(navItemState: NavOverviewRoute, action: Action): NavOverviewRoute {
+  function reducer(navItemState: RouteSettings, action: Action): RouteSettings {
     switch (action.type) {
       case 'SET_TITLE':
         return { ...navItemState, title: action.payload };
@@ -91,6 +91,7 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
           dispatch({ type: 'SET_SLUG', payload: route.fullPath })
           dispatch({ type: 'SET_ACTIVE', payload: route.active })
           dispatch({ type: 'SET_INTERNAL', payload: route.internal })
+          dispatch({ type: 'SET_OVERRIDE', payload: route.isOverride })
           
           initialState.current = {
             title: route.title,
@@ -120,18 +121,14 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
       }
 
       if (variant === "ItemCreate") {
-        // if (JSON.stringify(navItemState) === JSON.stringify(initialState.current)) {
-          await createNavItem(settings);
-        // } else {
-        //   const body = {
-        //     route: navItemState,
-        //     navitem: settings
-        //   }
-        //   await createNavItemRoute(body)
-        // }
-      } else {
-        await updateNavItem(settings, entityRoute.id);
+        await createNavItem(settings);
       }
+
+      if (JSON.stringify(navItemState) !== JSON.stringify(initialState.current)) {
+        if (navItemState.slug !== entityRoute.fullPath) navItemState.isOverride = true
+        await updateRoute(navItemState, entityRoute.id)
+      }
+
       fetchNavigations()
       setOpenModal('')
     } catch (err) {
