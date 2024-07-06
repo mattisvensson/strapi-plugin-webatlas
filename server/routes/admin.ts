@@ -29,27 +29,9 @@ export default {
       }
     },
     {
-      method: 'POST',
-      path: '/route',
-      handler: 'admin.createRoute',
-      config: {
-        policies: [],
-        auth: false,
-      }
-    },
-    {
       method: 'PUT',
       path: '/route/:id',
       handler: 'admin.updateRoute',
-      config: {
-        policies: [],
-        auth: false,
-      }
-    },
-    {
-      method: 'DELETE',
-      path: '/route/:id',
-      handler: 'admin.deleteRoute',
       config: {
         policies: [],
         auth: false,

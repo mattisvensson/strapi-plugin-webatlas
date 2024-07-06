@@ -46,7 +46,7 @@ export default ({strapi}) => ({
     }
   },
 
-  async createRoute(data) {
+  async updateRoute(id, data) {
     const parent = data.parent ? await strapi.entityService.findOne('plugin::url-routes.navitem', data.parent, {
       populate: ['route'],
     }) : null;
@@ -56,45 +56,18 @@ export default ({strapi}) => ({
     if (data.isOverride) fullPath = data.slug;
 
     try {
-      const entity = await strapi.entityService.create('plugin::url-routes.route', {
-        data: {
-          relatedContentType: data.relatedContentType,
-          relatedId: data.relatedId,
-          title: data.title,
-          uidPath: `/${data.relatedContentType}/${data.relatedId}`,
-          slug: data.slug,
-          fullPath,
-        },
-      });
-
-      return entity;
-    } catch (e) {
-      console.log(e)
-    }
-  },
-
-  async updateRoute(id, data) {
-    // const urlPath = await duplicateCheck(data.url_path, id);
-    try {
       const entity = await strapi.entityService.update('plugin::url-routes.route', id, {
         data: {
           relatedContentType: data.relatedContentType,
           relatedId: data.relatedId,
           title: data.title,
-          path: data.path,
+          slug: data.slug,
           uidPath: `/${data.relatedContentType}/${data.relatedId}`,
+          isOverride: data.isOverride,
+          fullPath,
         },
       });
 
-      return entity;
-    } catch (e) {
-      console.log(e)
-    }
-  },
-
-  async deleteRoute(id: number) {
-    try {
-      const entity = await strapi.entityService.delete('plugin::url-routes.route', id);
       return entity;
     } catch (e) {
       console.log(e)
