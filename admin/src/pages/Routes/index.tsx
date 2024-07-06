@@ -7,11 +7,10 @@
 import { useState, useEffect } from 'react';
 import { useFetchClient } from '@strapi/helper-plugin';
 import { Flex } from '@strapi/design-system/Flex';
-import { BaseCheckbox, Typography  } from '@strapi/design-system';
+import { Typography } from '@strapi/design-system';
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layout';
-import { Table, Thead, Tbody, Tr, Td, Th, VisuallyHidden, IconButton } from '@strapi/design-system';
+import { Table, Thead, Tbody, Tr, Td, Th, VisuallyHidden, LinkButton, Button } from '@strapi/design-system';
 import { Pencil } from '@strapi/icons';
-import { Link } from 'react-router-dom';
 import { Route } from '../../../../types';
 
 const Routes = () => {
@@ -20,7 +19,7 @@ const Routes = () => {
   const [routes, setRoutes] = useState([]);
 
   useEffect(() => {
-    async function getRoutes () {
+    async function getRoutes() {
       const { data } = await get('/url-routes/route')
       setRoutes(data)
     }
@@ -38,9 +37,6 @@ const Routes = () => {
           <Thead>
             <Tr>
               <Th>
-                <BaseCheckbox aria-label="Select all entries" />
-              </Th>
-              <Th>
                 <Typography variant="sigma">ID</Typography>
               </Th>
               <Th>
@@ -50,7 +46,10 @@ const Routes = () => {
                 <Typography variant="sigma">Route</Typography>
               </Th>
               <Th>
-                <Typography variant="sigma">Attached to menu</Typography>
+                <Typography variant="sigma">Internal</Typography>
+              </Th>
+              <Th>
+                <Typography variant="sigma">Active</Typography>
               </Th>
               <Th>
                 <VisuallyHidden>Actions</VisuallyHidden>
@@ -59,33 +58,28 @@ const Routes = () => {
           </Thead>
           <Tbody>
             {routes.map((route: Route) => <Tr key={route.id}>
-                <Td>
-                  <BaseCheckbox aria-label={`Select ${route.title}`} />
-                </Td>
-                <Td>
-                  <Typography textColor="neutral800">{route.id}</Typography>
-                </Td>
-                <Td>
-                  <Typography textColor="neutral800">{route.title}</Typography>
-                </Td>
-                <Td>
-                  <Typography textColor="neutral800">{route.path}</Typography>
-                </Td>
-                <Td>
-                  <Typography textColor="neutral800">{route.menuAttached ? 'Yes' : 'No'}</Typography>
-                </Td>
-                <Td>
-                  <Flex>
-                      {/* @ts-ignore */}
-                      <Link to={`/content-manager/collection-types/${route.relatedContentType}/${route.relatedId}`}>
-                        <>
-                          <VisuallyHidden>Edit</VisuallyHidden>
-                          <IconButton onClick={() => console.log('edit')} label="Edit" noBorder icon={<Pencil />} />
-                        </>
-                      </Link>
-                  </Flex>
-                </Td>
-              </Tr>)}
+              <Td>
+                <Typography textColor="neutral800">{route.id}</Typography>
+              </Td>
+              <Td>
+                <Typography textColor="neutral800">{route.title}</Typography>
+              </Td>
+              <Td>
+                <Typography textColor="neutral800">{route.fullPath}</Typography>
+              </Td>
+              <Td>
+                <Typography textColor="neutral800">{route.internal ? 'Yes' : 'No'}</Typography>
+              </Td>
+              <Td>
+                <Typography textColor="neutral800">{route.active ? 'Yes' : 'No'}</Typography>
+              </Td>
+              <Td>
+                <Flex gap={2} justifyContent="end">
+                  {/* <Button variant="secondary">More info</Button> */}
+                  <LinkButton variant="secondary" startIcon={<Pencil />} href={`/admin/content-manager/collection-types/${route.relatedContentType}/${route.relatedId}`}>Edit</LinkButton>
+                </Flex>
+              </Td>
+            </Tr>)}
           </Tbody>
         </Table>
       </ContentLayout>
