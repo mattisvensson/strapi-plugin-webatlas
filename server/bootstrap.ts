@@ -17,6 +17,11 @@ export default async ({ strapi }: { strapi: Strapi }) => {
   strapi.db?.lifecycles.subscribe({
     models: config.selectedContentTypes.map((type: any) => type.uid),
 
+    async beforeCreate() {
+      const validContentTypes = config.selectedContentTypes.filter((type: any) => strapi.contentTypes[type.uid]);
+      await pluginStore.set({ key: "config", value: {selectedContentTypes: validContentTypes} });
+    },
+    
     async afterCreate(event: any) {
       const ctSettings: ConfigContentType | undefined = config.selectedContentTypes.find((type: any) => type.uid === event.model.uid);
 

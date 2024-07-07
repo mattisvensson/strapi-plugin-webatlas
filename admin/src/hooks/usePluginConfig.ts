@@ -10,7 +10,7 @@ type UsePluginConfigResponse = {
 };
 
 export default function usePluginConfig(): UsePluginConfigResponse {
-  const { put } = useFetchClient();
+  const { put, get } = useFetchClient();
 
   const [data, setData] = useState<PluginConfig | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -20,12 +20,20 @@ export default function usePluginConfig(): UsePluginConfigResponse {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await fetch('/url-routes/config');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        const { data: { data: contentTypesArray} } = await get('/content-manager/content-types');
+        let { data: config } = await get('/url-routes/config');
+        if (!config || !config.selectedContentTypes) {
+          throw new Error(`HTTP error! Couldn't fetch plugin config`);
         }
-        const data = await response.json();
-        setData(data);
+        const contentTypeUids = new Set(contentTypesArray.map((type: any) => type.uid));
+        const validContentTypes = config.selectedContentTypes.filter((type: any) => contentTypeUids.has(type.uid));        
+
+        if (JSON.stringify(validContentTypes) !== JSON.stringify(config.selectedContentTypes)) {
+          config = { ...config, selectedContentTypes: validContentTypes}
+          setConfig(config);
+        }
+
+        setData(config);
         setLoading(false);
       } catch (error) {
         setError((error as Error).message);
