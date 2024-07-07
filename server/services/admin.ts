@@ -1,3 +1,4 @@
+import { ContentType, Route } from "../../types";
 import getFullPath from "../../utils/getFullPath";
 import getNestedNavigation from "../../utils/getNestedNavigation";
 
@@ -23,6 +24,20 @@ import getNestedNavigation from "../../utils/getNestedNavigation";
 export default ({strapi}) => ({
 
   async updateConfig(newConfig) {
+    if (!newConfig || !newConfig.selectedContentTypes) return
+    
+    try {
+    const routes = await strapi.entityService.findMany('plugin::url-routes.route');
+    const invalidRoutes = routes.filter((route: Route) => !newConfig.selectedContentTypes.find((type: ContentType) => type.uid === route.relatedContentType));
+
+    invalidRoutes?.map(async (route: Route) => {
+      await strapi.entityService.delete('plugin::url-routes.route', route.id)
+    })
+    } catch (err) {
+      console.log(err)
+      return "Error. Couldn't delete invalid routes"
+    }
+
     const pluginStore = await strapi.store({ type: 'plugin', name: 'url-routes' });
     await pluginStore.set({ key: "config", value: newConfig });
   },
