@@ -58,11 +58,8 @@ export default ({strapi}) => ({
     try {
       const entity = await strapi.entityService.update('plugin::url-routes.route', id, {
         data: {
-          relatedContentType: data.relatedContentType,
-          relatedId: data.relatedId,
           title: data.title,
           slug: data.slug,
-          uidPath: `/${data.relatedContentType}/${data.relatedId}`,
           isOverride: data.isOverride,
           fullPath,
         },

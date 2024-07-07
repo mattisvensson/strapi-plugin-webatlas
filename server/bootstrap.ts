@@ -36,7 +36,7 @@ export default async ({ strapi }: { strapi: Strapi }) => {
           relatedId: event.result.id,
           slug: url_alias_path,
           fullPath: url_alias_path,
-          uidPath: `/${event.model.uid}/${event.result.id}`,
+          uidPath: `/${event.model.apiName}/${event.result.id}`,
           isOverride: url_alias_isOverride,
           internal: true,
           active: true,
