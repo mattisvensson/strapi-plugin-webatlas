@@ -19,17 +19,16 @@ type Action =
   | { type: 'SET_DEFAULT_FIELD'; payload: { ctUid: string; field: string } }
   | { type: 'SET_PATTERN'; payload: { ctUid: string; pattern: string } };
 
-
 const noopFallback = () => {}
 
 const Settings = () => {
   const { data: config, setConfig } = usePluginConfig();
   const [expandedID, setExpandedID] = useState<string | null>(null);
-  const initialState: PluginConfig = config || { selectedContentTypes: [] };
-  const [settingsState, dispatch] = useReducer(reducer, initialState);
+  const [settingsState, dispatch] = useReducer(reducer, config || { selectedContentTypes: [] });
   const { lockApp = noopFallback, unlockApp = noopFallback } = useOverlayBlocker();
   const { contentTypes: allContentTypesData } = useAllContentTypes();
   const allContentTypes = allContentTypesData?.filter((ct: ContentType) => ct.isDisplayed);
+  const [initialState, setInitialState] = useState(config || { selectedContentTypes: [] })
 
   function reducer(settingsState: PluginConfig, action: Action): PluginConfig {
     let updatedContentTypes
@@ -49,12 +48,15 @@ const Settings = () => {
         updatedContentTypes = settingsState.selectedContentTypes.map(ct => 
           ct.uid === action.payload.ctUid ? { ...ct, pattern: transformToUrl(action.payload.pattern) } : ct
         );
-        console.log(updatedContentTypes)
         return { ...settingsState, selectedContentTypes: updatedContentTypes };
       default:
         throw new Error();
     }
   }
+
+  useEffect(() => {
+    setInitialState(config || { selectedContentTypes: [] })
+  }, [config]);
 
   async function save() {
     lockApp();
@@ -65,6 +67,7 @@ const Settings = () => {
     }
     try {
       setConfig(settingsState)
+      setInitialState(settingsState)
     } catch (err) {
       console.error(err);
     }
