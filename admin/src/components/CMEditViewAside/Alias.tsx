@@ -1,5 +1,5 @@
 import { BaseCheckbox, Box, TextInput, Flex, Divider, Typography } from '@strapi/design-system';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import transformToUrl from '../../../../utils/transformToUrl';
 import { useFetchClient, useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { ConfigContentType } from '../../../../types';
@@ -13,9 +13,8 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	const [isOverride, setIsOverride] = useState(false);
 	const [isLoading,setIsLoading] = useState(true);
 	const [finished, setFinished] = useState(false);
-	const modifiedDataCopy = useRef('')
 
-	if (!config || !config.default) return null
+	if (!config) return null
 
 	useEffect(() => {
 		setTimeout(() => {
@@ -40,7 +39,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
 	useEffect(() => {
 		if (!config?.default || initialData.id) return
-		modifiedDataCopy.current = JSON.stringify(modifiedData)
+		console.log(modifiedData, config)
 		updateUrl(modifiedData[config?.default])
 	}, [modifiedData])
 
@@ -55,6 +54,8 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 			try {
 				const { data } = await get(`/content-manager/collection-types/plugin::url-routes.route?filters[relatedId][$eq]=${initialData.id}`);
 				const route = data.results.find((route: any) => route.defaultRoute === true)
+				
+				if (!route) return setIsLoading(false);
 
 				setRouteId(route.id)
 				setIsOverride(route.isOverride || false)
@@ -69,11 +70,15 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	}, [config])
 
 	const updateUrl = (value: string, fromInput?: boolean) => {
-		if (isOverride && !fromInput) return;
+		if ((isOverride && !fromInput)) return;
 
-		fromInput ? 
-			setPath(transformToUrl(value)) :
-			setPath(`${config.pattern}${transformToUrl(value)}`);
+		if (value) {
+			fromInput ? 
+				setPath(transformToUrl(value)) :
+				setPath(`${config.pattern ? config.pattern : '' }${transformToUrl(value)}`);
+		} else {
+			setPath(config.default ? `Edit the "${config.default}" field to generate a URL` : `${layout.apiID}/[id]`);
+		}
 	}
 
 	if (isLoading) return null;
@@ -114,7 +119,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 					<TextInput
 						id="url-input"
 						label="URL"
-						value={path}
+						value={path ? path : `${layout.apiID}/[id]`}
 						onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateUrl(e.target.value, true)}
 						disabled={!isOverride}
 					/>
