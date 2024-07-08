@@ -116,4 +116,17 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       return ctx.throw(500, e)
     }
   },
+  async checkUniquePath (ctx) {
+    try {
+      const { path } = ctx.query
+
+      if (!path) {
+        return ctx.throw(400, 'Path is required')
+      }
+      
+      return await strapi.plugin('url-routes').service('admin').checkUniquePath(path);
+    } catch (e) {
+      return ctx.throw(500, e)
+    }
+  },
 });

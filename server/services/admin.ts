@@ -2,25 +2,6 @@ import { ContentType, Route } from "../../types";
 import getFullPath from "../../utils/getFullPath";
 import getNestedNavigation from "../../utils/getNestedNavigation";
 
-/**
- * Finds a path from the original path that is unique
- */
-// const duplicateCheck = async (
-//   originalPath: string,
-//   ignoreId?: Entity.ID,
-//   ext: number = -1,
-// ): Promise<string> => {
-//   const extension = ext >= 0 ? `-${ext}` : '';
-//   const newPath = originalPath + extension;
-//   const pathAlreadyExists = await getPluginService('urlAliasService').findByPath(newPath, ignoreId);
-
-//   if (pathAlreadyExists) {
-//     return duplicateCheck(originalPath, ignoreId, ext + 1);
-//   }
-
-//   return newPath;
-// };
-
 export default ({strapi}) => ({
 
   async updateConfig(newConfig) {
@@ -250,4 +231,47 @@ export default ({strapi}) => ({
       console.log(e)
     }
   },
+
+  async checkUniquePath(initialPath: string) {
+
+    async function checkPathExists(path: string): Promise<boolean> {
+      const entities = await strapi.entityService.findMany('plugin::url-routes.route', {
+        filters: { 
+          $or: [
+            {
+              fullPath: path,
+            },
+            {
+              slug: path,
+            },
+            {
+              uidPath: path,
+            },
+          ], 
+        },
+      });
+      return entities.length > 0;
+    }
+
+    try {
+      let uniquePath = initialPath;
+      let counter = 1;
+    
+      // Check if the path exists
+      let exists = await checkPathExists(uniquePath);
+    
+      // While the path exists, append/increment a number and check again
+      while (exists) {
+        uniquePath = `${initialPath}-${counter}`;
+        exists = await checkPathExists(uniquePath);
+        counter++;
+      }
+    
+      // Return the unique path
+      return uniquePath;
+    } catch (e) {
+      console.log(e)
+    }
+  },
 })
+

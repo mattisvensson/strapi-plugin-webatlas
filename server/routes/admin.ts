@@ -127,5 +127,14 @@ export default {
         auth: false,
       }
     },
+    {
+      method: 'POST',
+      path: '/checkUniquePath',
+      handler: 'admin.checkUniquePath',
+      config: {
+        policies: [],
+        auth: false,
+      }
+    },
   ]
 }
