@@ -6,11 +6,12 @@
 
 import { useEffect, useState, useReducer } from 'react';
 import { CheckPermissions, useOverlayBlocker } from '@strapi/helper-plugin';
-import { Check, Information } from '@strapi/icons';
-import { Button, HeaderLayout, Layout, ContentLayout, Box, Select, Option, Accordion, AccordionToggle, AccordionContent, AccordionGroup, Typography, Divider, TextInput, Tooltip } from '@strapi/design-system';
+import { Check } from '@strapi/icons';
+import { Button, HeaderLayout, Layout, ContentLayout, Box, Select, Option, Accordion, AccordionToggle, AccordionContent, AccordionGroup, Typography, Divider, TextInput } from '@strapi/design-system';
 import usePluginConfig from '../../hooks/usePluginConfig';
 import { ContentType, ConfigContentType, PluginConfig } from '../../../../types';
 import transformToUrl from '../../../../utils/transformToUrl';
+import Tooltip from '../../components/Tooltip';
 
 import useAllContentTypes from '../../hooks/useAllContentTypes';
 
@@ -84,12 +85,6 @@ const Settings = () => {
     setExpandedID(s => s === id ? null : id);
   };
 
-  function InputTooltip({ description }: { description: string }) {
-    return <Tooltip description={description}>
-      <Information aria-hidden="true"/>
-    </Tooltip>
-  }
-
   return (
     <Layout>
       <HeaderLayout
@@ -158,7 +153,7 @@ const Settings = () => {
                           <TextInput
                             label="URL Alias pattern"
                             placeholder="e.g. blog"
-                            labelAction={<InputTooltip description="Leading and trailing slashes will be removed. Spaces will be replaced with hyphens. Special characters will be encoded."/>}
+                            labelAction={<Tooltip description="Leading and trailing slashes will be removed. Spaces will be replaced with hyphens. Special characters will be encoded."/>}
                             hint="Define the pattern for the URL alias. The default field will be appended to this pattern."
                             value={settingsState.selectedContentTypes.find((cta: ConfigContentType) => cta.uid === ct.uid)?.pattern}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_PATTERN', payload: { ctUid: ct.uid, pattern: e.target.value } })}                
