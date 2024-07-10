@@ -26,7 +26,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
 	useEffect(() => {
 		if (!finished || isLoading) return
-		onChange({ target: { name: "url_alias_path", value: path.endsWith('/') ? path.slice(1) : path } })
+		onChange({ target: { name: "url_alias_path", value: path } })
 		onChange({ target: { name: "url_alias_relatedContentType", value: layout.uid } })
 		onChange({ target: { name: "url_alias_routeId", value: routeId || null } })
 		onChange({ target: { name: "url_alias_relatedId", value: initialData.id || null } })

@@ -41,7 +41,7 @@ export default async ({ strapi }: { strapi: Strapi }) => {
           relatedId: event.result.id,
           slug: url_alias_path,
           fullPath: url_alias_path,
-          uidPath: `/${event.model.apiName}/${event.result.id}`,
+          uidPath: `${event.model.apiName}/${event.result.id}`,
           isOverride: url_alias_isOverride,
           internal: true,
           active: true,
@@ -65,8 +65,12 @@ export default async ({ strapi }: { strapi: Strapi }) => {
         if (ctSettings?.default) data.title = event.params.data[ctSettings.default];
         if (url_alias_isOverride !== undefined) data.isOverride = url_alias_isOverride;
         if (url_alias_path) {
-          data.slug = url_alias_path;
-          data.fullPath = url_alias_path;
+          let path = url_alias_path;
+          path = path.replace(/\/+/g, '/');
+          path = path.startsWith('/') ? path.slice(1) : path;
+          path = path.endsWith('/') ? path.slice(0, -1) : path;
+          data.slug = path;
+          data.fullPath = path;
         }
 
         await strapi.db?.query('plugin::url-routes.route').update({
