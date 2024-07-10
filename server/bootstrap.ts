@@ -1,5 +1,6 @@
 import { Strapi } from "@strapi/strapi";
 import { PluginConfig, ConfigContentType } from "../types";
+import transformToUrl from "../utils/transformToUrl";
 
 export default async ({ strapi }: { strapi: Strapi }) => {
   if (!strapi.store) {
@@ -39,8 +40,8 @@ export default async ({ strapi }: { strapi: Strapi }) => {
         data: {
           relatedContentType: event.model.uid,
           relatedId: event.result.id,
-          slug: url_alias_path,
-          fullPath: url_alias_path,
+          slug: transformToUrl(url_alias_path),
+          fullPath: transformToUrl(url_alias_path),
           uidPath: `${event.model.apiName}/${event.result.id}`,
           isOverride: url_alias_isOverride,
           internal: true,
@@ -65,12 +66,8 @@ export default async ({ strapi }: { strapi: Strapi }) => {
         if (ctSettings?.default) data.title = event.params.data[ctSettings.default];
         if (url_alias_isOverride !== undefined) data.isOverride = url_alias_isOverride;
         if (url_alias_path) {
-          let path = url_alias_path;
-          path = path.replace(/\/+/g, '/');
-          path = path.startsWith('/') ? path.slice(1) : path;
-          path = path.endsWith('/') ? path.slice(0, -1) : path;
-          data.slug = path;
-          data.fullPath = path;
+          data.slug = transformToUrl(url_alias_path);
+          data.fullPath = transformToUrl(url_alias_path);
         }
 
         await strapi.db?.query('plugin::url-routes.route').update({
