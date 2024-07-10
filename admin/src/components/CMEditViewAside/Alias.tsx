@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import transformToUrl from '../../../../utils/transformToUrl';
 import { useFetchClient, useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { ConfigContentType } from '../../../../types';
+import Tooltip from '../../components/Tooltip';
 
 const Alias = ({ config }: { config: ConfigContentType }) => {
 	const { layout, initialData, modifiedData, onChange } = useCMEditViewDataManager()
@@ -25,21 +26,20 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
 	useEffect(() => {
 		if (!finished || isLoading) return
-		onChange({ target: { name: "url_alias_path", value: path } })
+		onChange({ target: { name: "url_alias_path", value: path.endsWith('/') ? path.slice(1) : path } })
 		onChange({ target: { name: "url_alias_relatedContentType", value: layout.uid } })
 		onChange({ target: { name: "url_alias_routeId", value: routeId || null } })
 		onChange({ target: { name: "url_alias_relatedId", value: initialData.id || null } })
 		onChange({ target: { name: "url_alias_isOverride", value: isOverride } })
 	}, [path, isOverride])
-
+	
 	useEffect(() => {
 		if (!finished || isLoading) return
 		onChange({ target: { name: "url_alias_routeId", value: routeId || null } });
 	}, [modifiedData[config?.default]]);
 
 	useEffect(() => {
-		if (!config?.default || initialData.id) return
-		console.log(modifiedData, config)
+		if (!config?.default) return
 		updateUrl(modifiedData[config?.default])
 	}, [modifiedData])
 
@@ -59,7 +59,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
 				setRouteId(route.id)
 				setIsOverride(route.isOverride || false)
-				if (route.fullPath) setPath(route.fullPath)
+				setPath(route.fullPath ?? route.uidPath)
 			} catch (err) {
 				setRouteId(null)
 				console.log(err)
@@ -72,12 +72,14 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	const updateUrl = (value: string, fromInput?: boolean) => {
 		if ((isOverride && !fromInput)) return;
 
-		if (value) {
-			fromInput ? 
-				setPath(transformToUrl(value)) :
-				setPath(`${config.pattern ? config.pattern : '' }${transformToUrl(value)}`);
-		} else {
-			setPath(config.default ? `Edit the "${config.default}" field to generate a URL` : `${layout.apiID}/[id]`);
+		if (value && fromInput) {
+			setPath(transformToUrl(value))
+		} else if (value) {
+			setPath(`${config.pattern ? config.pattern : '' }${transformToUrl(value)}`);
+		} else if (!value && fromInput) {
+			setPath('')
+		} else if (!fromInput) {
+			setPath(config.default ? `Edit the "${config.default}" field to generate a URL` : `${layout.apiID}/id`);
 		}
 	}
 
@@ -119,9 +121,13 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 					<TextInput
 						id="url-input"
 						label="URL"
-						value={path ? path : `${layout.apiID}/[id]`}
+						hint={!initialData.id && !config.default && '"id" will be replaced with the entry ID'}
+						labelAction={<Tooltip description="The following characters are valid: A-Z, a-z, 0-9, /, -, _, $, ., +, !, *, ', (, )"/>}
+						value={path}
 						onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateUrl(e.target.value, true)}
 						disabled={!isOverride}
+						error={path === '' && "Please enter a URL"}
+						onBlur={() => path.endsWith('/') && setPath(path.slice(0, -1))}
 					/>
 					<Flex
 						gap={2}

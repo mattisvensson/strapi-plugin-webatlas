@@ -10,8 +10,7 @@ export default function transformToUrl(input: string): string {
     input = input.toLowerCase();
 
     // Remove leading slash
-    input = input.startsWith('/') ? input : `/${input}`;
-    input = input.endsWith('/') ? input.slice(0, -1) : input;
+    input = input.startsWith('/') ? input.slice(1) : input;
   
     // Replace special characters
     for (const char in specialCharMap) {
@@ -29,13 +28,10 @@ export default function transformToUrl(input: string): string {
     input = input.trim();
 
     // Encode special characters
-    input = encodeURIComponent(input);
-  
-    // Decode slashes
-    input = input.replace(/%2F/g, '/');
-  
+    // input = encodeURIComponent(input);
+    
     // Remove any characters that are not alphanumeric, hyphens, underscores, or slashes
-    input = input.replace(/[^a-zA-Z0-9-_\/]/g, '');
-  
+    input = input.replace(/[^A-Za-z0-9$\-_.+!*'()/]/g, '');
+
     return input;
   }
