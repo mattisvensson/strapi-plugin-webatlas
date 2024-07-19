@@ -37,16 +37,14 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 		onChange({ target: { name: "url_alias_routeId", value: routeId || null } })
 		onChange({ target: { name: "url_alias_relatedId", value: initialData.id || null } })
 		onChange({ target: { name: "url_alias_isOverride", value: isOverride } })
-	}, [path, isOverride])
+	}, [path, routeId, isOverride])
 
 	useEffect(() => {
 		const key = config?.default
 		if (!finished || isLoading || key === undefined) return
-
-		onChange({ target: { name: "url_alias_routeId", value: routeId || null } });
 		
 		const currentModifiedDataValue = modifiedData[key];
-
+		
 		if (prevModifiedDataValueRef.current !== currentModifiedDataValue) {
 			updateUrl(modifiedData[key])	
 			prevModifiedDataValueRef.current = currentModifiedDataValue;
@@ -63,7 +61,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 			if (!initialData.id) return setIsLoading(false);
 			try {
 				const { data } = await get(`/content-manager/collection-types/plugin::url-routes.route?filters[relatedId][$eq]=${initialData.id}`);
-				const route = data.results.find((route: any) => route.defaultRoute === true)
+				const route = data.results[0]
 				if (!route) return setIsLoading(false);
 
 				initialPath.current = route.fullPath ?? route.uidPath
