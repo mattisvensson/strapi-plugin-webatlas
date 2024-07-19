@@ -16,9 +16,10 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	const [isOverride, setIsOverride] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [finished, setFinished] = useState(false);
-	const initialPath = useRef('')
 	const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
 	const [replacement, setReplacement] = useState<string>('');
+	const initialPath = useRef('')
+	const prevModifiedDataValueRef = useRef();
 
 	if (!config) return null
 
@@ -39,12 +40,18 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	}, [path, isOverride])
 
 	useEffect(() => {
-		if (!finished || isLoading) return
-		onChange({ target: { name: "url_alias_routeId", value: routeId || null } });
+		const key = config?.default
+		if (!finished || isLoading || key === undefined) return
 
-		if (!config?.default) return
-		updateUrl(modifiedData[config?.default])
-	}, [modifiedData[config?.default]]);
+		onChange({ target: { name: "url_alias_routeId", value: routeId || null } });
+		
+		const currentModifiedDataValue = modifiedData[key];
+
+		if (prevModifiedDataValueRef.current !== currentModifiedDataValue) {
+			updateUrl(modifiedData[key])	
+			prevModifiedDataValueRef.current = currentModifiedDataValue;
+		}
+	}, [modifiedData, config?.default, finished, isLoading, routeId])
 
 	useEffect(() => {
 		if (!config) return
@@ -57,7 +64,6 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 			try {
 				const { data } = await get(`/content-manager/collection-types/plugin::url-routes.route?filters[relatedId][$eq]=${initialData.id}`);
 				const route = data.results.find((route: any) => route.defaultRoute === true)
-				// console.log(route)
 				if (!route) return setIsLoading(false);
 
 				initialPath.current = route.fullPath ?? route.uidPath
@@ -75,15 +81,17 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
 	async function checkUrl(url: string) {
 		if (!url) return
+		
 		setValidationState('checking')
 		setReplacement('')
+		
 		try {
 			const { data } = await post('/url-routes/checkUniquePath', {
 				path: transformToUrl(url)
 			});
 
 			if (!data || data === url) return 
-			console.log("new url", data)
+			
 			setPath(data)
 			setReplacement(data)
 		} catch (err) {
@@ -100,7 +108,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
 		if (value && fromInput) {
 			setPath(transformToUrl(value))
-		} else if (value) {
+		} else if (value !== undefined) {
 			setPath(`${config.pattern ? config.pattern : ''}${transformToUrl(value)}`);
 		} else if (!value && fromInput) {
 			setPath('')
