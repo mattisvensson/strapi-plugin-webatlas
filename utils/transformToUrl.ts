@@ -5,7 +5,7 @@ export default function transformToUrl(input: string): string {
       'ö': 'oe',
     };
 
-    if (!input) return '';
+    if (!input || typeof input !== 'string') return '';
 
     input = input.toLowerCase();
 
@@ -26,14 +26,14 @@ export default function transformToUrl(input: string): string {
     // Replace spaces with hyphens
     input = input.replace(/\s+/g, '-');
 
-    // Replace multiple consecutive dashes with a single dash
-    input = input.replace(/-+/g, '-');
-
     // Encode special characters
     // input = encodeURIComponent(input);
     
     // Remove any characters that are not alphanumeric, hyphens, underscores, or slashes
     input = input.replace(/[^A-Za-z0-9$\-_.+!*'()/]/g, '');
+
+    // Replace multiple consecutive dashes with a single dash
+    input = input.replace(/-+/g, '-');
 
     return input;
   }
