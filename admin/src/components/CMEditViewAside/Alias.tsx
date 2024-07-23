@@ -14,12 +14,12 @@ type Action =
   | { type: 'RESET_URL_CHECK_FLAG'; }
   | { type: 'SET_UIDPATH'; payload: string }
 
-	type PathState = {
-		value?: string;
-		prevValue?: string,
-		uidPath?: string,
-		needsUrlCheck: boolean;
-	};
+type PathState = {
+	value?: string;
+	prevValue?: string,
+	uidPath?: string,
+	needsUrlCheck: boolean;
+};
 
 function reducer(state: PathState, action: Action): PathState {
 	switch (action.type) {
@@ -184,7 +184,6 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 			>
 				<Box>
 					<TextInput
-						borderColor="success500"
 						id="url-input"
 						label="URL"
 						hint={!initialData.id && !config.default && '[id] will be replaced with the entry ID'}
