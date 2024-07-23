@@ -1,18 +1,55 @@
 import { BaseCheckbox, Box, TextInput, Flex, Divider, Typography } from '@strapi/design-system';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useReducer } from 'react';
 import transformToUrl from '../../../../utils/transformToUrl';
 import { useFetchClient, useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { ConfigContentType } from '../../../../types';
 import Tooltip from '../../components/Tooltip';
 import debounce from '../../utils/debounce';
 import URLInfo from '../../components/URLInfo';
+import duplicateCheck from '../../utils/duplicateCheck';
+
+type Action = 
+  | { type: 'DEFAULT'; payload: string }
+  | { type: 'NO_URL_CHECK'; payload: string }
+  | { type: 'RESET_URL_CHECK_FLAG'; }
+  | { type: 'SET_UIDPATH'; payload: string }
+
+	type PathState = {
+		value?: string;
+		prevValue?: string,
+		uidPath?: string,
+		needsUrlCheck: boolean;
+	};
+
+function reducer(state: PathState, action: Action): PathState {
+	switch (action.type) {
+		case 'DEFAULT':
+      return { 
+				...state,
+				value: transformToUrl(action.payload), 
+				prevValue: state.value,
+				needsUrlCheck: true 
+			};
+		case 'NO_URL_CHECK':
+			return { 
+				...state,
+				value: transformToUrl(action.payload), 
+				prevValue: state.value,
+				needsUrlCheck: false };
+		case 'RESET_URL_CHECK_FLAG':
+			return { ...state, needsUrlCheck: false };
+		case 'SET_UIDPATH':
+			return { ...state, uidPath: action.payload };
+		default:
+			throw new Error();
+	}
+}
 
 const Alias = ({ config }: { config: ConfigContentType }) => {
 	const { layout, initialData, modifiedData, onChange } = useCMEditViewDataManager()
-	const { get, post } = useFetchClient();
+	const { get } = useFetchClient();
 
 	const [routeId, setRouteId] = useState<number | null>()
-	const [path, setPath] = useState('')
 	const [isOverride, setIsOverride] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
 	const [finished, setFinished] = useState(false);
@@ -20,8 +57,11 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	const [replacement, setReplacement] = useState<string>('');
 	const initialPath = useRef('')
 	const prevModifiedDataValueRef = useRef();
+	const [path, dispatchPath] = useReducer(reducer, {needsUrlCheck: false});
 
 	if (!config) return null
+
+	const debouncedCheckUrl = useCallback(debounce(checkUrl, 500), []);
 
 	useEffect(() => {
 		setTimeout(() => {
@@ -32,42 +72,54 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
 	useEffect(() => {
 		if (!finished || isLoading) return
-		onChange({ target: { name: "url_alias_path", value: path } })
+		onChange({ target: { name: "url_alias_path", value: path.value } })
 		onChange({ target: { name: "url_alias_relatedContentType", value: layout.uid } })
 		onChange({ target: { name: "url_alias_routeId", value: routeId || null } })
 		onChange({ target: { name: "url_alias_relatedId", value: initialData.id || null } })
 		onChange({ target: { name: "url_alias_isOverride", value: isOverride } })
-	}, [path, routeId, isOverride])
+	}, [path.value, routeId, isOverride])
 
 	useEffect(() => {
 		const key = config?.default
-		if (!finished || isLoading || key === undefined) return
-		
+		if (!key) return
+
 		const currentModifiedDataValue = modifiedData[key];
-		
-		if (prevModifiedDataValueRef.current !== currentModifiedDataValue) {
-			updateUrl(modifiedData[key])	
+
+		if (prevModifiedDataValueRef.current !== currentModifiedDataValue && !isOverride) {
+			if (modifiedData[key] === initialData[key]) {
+				dispatchPath({ type: 'NO_URL_CHECK', payload: modifiedData[key] });
+			} else {
+				dispatchPath({ type: 'DEFAULT', payload: modifiedData[key] });
+			}
 			prevModifiedDataValueRef.current = currentModifiedDataValue;
 		}
-	}, [modifiedData, config?.default, finished, isLoading, routeId])
+	}, [modifiedData, config?.default, isOverride]);
+
+  useEffect(() => {
+		if (path.needsUrlCheck && path.value) {
+			if (path.uidPath === path.value) return
+			debouncedCheckUrl(path.value);
+			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
+    }
+  }, [path.needsUrlCheck]);
 
 	useEffect(() => {
 		if (!config) return
 		setIsLoading(true)
-
-		updateUrl('')
 
 		async function getTypes() {
 			if (!initialData.id) return setIsLoading(false);
 			try {
 				const { data } = await get(`/content-manager/collection-types/plugin::url-routes.route?filters[relatedId][$eq]=${initialData.id}`);
 				const route = data.results[0]
+
 				if (!route) return setIsLoading(false);
 
-				initialPath.current = route.fullPath ?? route.uidPath
+				initialPath.current = route.fullPath || route.uidPath
 				setRouteId(route.id)
 				setIsOverride(route.isOverride || false)
-				setPath(route.fullPath ?? route.uidPath)
+				dispatchPath({ type: 'NO_URL_CHECK', payload: initialPath.current });
+				dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath });
 			} catch (err) {
 				setRouteId(null)
 				console.log(err)
@@ -79,39 +131,21 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
 	async function checkUrl(url: string) {
 		if (!url) return
-		
 		setValidationState('checking')
 		setReplacement('')
 		
 		try {
-			const { data } = await post('/url-routes/checkUniquePath', {
-				path: transformToUrl(url)
-			});
+			const data = await duplicateCheck(url)
 
 			if (!data || data === url) return 
-			
-			setPath(data)
+
+			dispatchPath({ type: 'NO_URL_CHECK', payload: data });
 			setReplacement(data)
 		} catch (err) {
 			console.log(err)
 		} finally {
 			setValidationState('done')
 		}
-	}
-
-	const debouncedCheckUrl = useCallback(debounce(checkUrl, 500), []);
-
-	const updateUrl = (value: string, fromInput?: boolean) => {
-		if ((isOverride && !fromInput)) return;
-
-		if (value && fromInput) {
-			setPath(transformToUrl(value))
-		} else if (value !== undefined) {
-			setPath(`${config.pattern ? config.pattern : ''}${transformToUrl(value)}`);
-		} else if (!value && fromInput) {
-			setPath('')
-		}
-		if (!fromInput) debouncedCheckUrl(value)
 	}
 
 	if (isLoading) return null;
@@ -155,11 +189,14 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 						label="URL"
 						hint={!initialData.id && !config.default && '[id] will be replaced with the entry ID'}
 						labelAction={<Tooltip description="The following characters are valid: A-Z, a-z, 0-9, /, -, _, $, ., +, !, *, ', (, )" />}
-						value={path}
+						value={path.value}
 						placeholder={config.default ? `Edit the "${config.default}" field to generate a URL` : `${layout.apiID}/[id]`}
-						onChange={(e: React.ChangeEvent<HTMLInputElement>) => updateUrl(e.target.value, true)}
+						onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_URL_CHECK', payload: e.target.value })}
 						disabled={!isOverride}
-						onBlur={() => debouncedCheckUrl(path)}
+						onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+							if (e.target.value === path.prevValue) return
+							dispatchPath({ type: 'DEFAULT', payload: e.target.value })}
+						}
 					/>
 					<URLInfo validationState={validationState} replacement={replacement} />
 					<Flex
