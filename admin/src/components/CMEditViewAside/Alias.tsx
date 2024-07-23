@@ -11,6 +11,7 @@ import duplicateCheck from '../../utils/duplicateCheck';
 type Action = 
   | { type: 'DEFAULT'; payload: string }
   | { type: 'NO_URL_CHECK'; payload: string }
+  | { type: 'NO_TRANSFORM_AND_CHECK'; payload: string }
   | { type: 'RESET_URL_CHECK_FLAG'; }
   | { type: 'SET_UIDPATH'; payload: string }
 
@@ -35,7 +36,15 @@ function reducer(state: PathState, action: Action): PathState {
 				...state,
 				value: transformToUrl(action.payload), 
 				prevValue: state.value,
-				needsUrlCheck: false };
+				needsUrlCheck: false 
+			};
+		case 'NO_TRANSFORM_AND_CHECK':
+			return { 
+				...state,
+				value: action.payload, 
+				prevValue: state.value,
+				needsUrlCheck: false 
+			};
 		case 'RESET_URL_CHECK_FLAG':
 			return { ...state, needsUrlCheck: false };
 		case 'SET_UIDPATH':
@@ -190,7 +199,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 						labelAction={<Tooltip description="The following characters are valid: A-Z, a-z, 0-9, /, -, _, $, ., +, !, *, ', (, )" />}
 						value={path.value}
 						placeholder={config.default ? `Edit the "${config.default}" field to generate a URL` : `${layout.apiID}/[id]`}
-						onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_URL_CHECK', payload: e.target.value })}
+						onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}
 						disabled={!isOverride}
 						onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
 							if (e.target.value === path.prevValue) return
