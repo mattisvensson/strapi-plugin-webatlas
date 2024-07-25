@@ -17,7 +17,8 @@ import { ModalContext, SelectedNavigationContext } from '../../contexts';
 import Header from './Header';
 import { NestedNavigation, NestedNavItem } from '../../../../types';
 import useNavigations from '../../hooks/useNavigations';
-import ItemOverview from '../../components/modals/ItemOverview';
+import ItemCreate from '../../components/modals/ItemCreate';
+import ItemEdit from '../../components/modals/ItemEdit';
 import RouteItem from './RouteItem';
 import useApi from '../../hooks/useApi';
 import { isNestedNavigation, isNestedNavItem} from '../../utils/typeChecks';
@@ -54,11 +55,19 @@ const Navigation = () => {
   }, [navigations]);
 
   const renderModal = () => {
-    if (openModal === 'ItemCreate' || openModal === 'ItemEdit') {
+    if (!selectedNavigation) return
+    if (openModal === 'ItemCreate' ) {
+        return (
+          <ItemCreate
+            fetchNavigations={fetchNavigations}
+            navigation={selectedNavigation}
+            parentId={parentId}
+          />
+        );
+    } else if (openModal === 'ItemEdit') {
       if ((isNestedNavItem(actionItem) || actionItem === undefined) && selectedNavigation) {
         return (
-          <ItemOverview
-            variant={openModal}
+          <ItemEdit
             item={actionItem}
             fetchNavigations={fetchNavigations}
             navigation={selectedNavigation}

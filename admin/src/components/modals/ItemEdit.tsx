@@ -8,7 +8,6 @@ import useApi from '../../hooks/useApi';
 import transformToUrl from '../../../../utils/transformToUrl';
 
 type ItemOverviewProps = {
-  variant: "ItemCreate" | "ItemEdit";
   item: NestedNavItem | undefined;
   fetchNavigations: () => void;
   navigation: NestedNavigation;
@@ -23,13 +22,13 @@ type Action =
   | { type: 'SET_OVERRIDE'; payload: boolean };
 
 
-export default function ItemOverview ({ variant, item, fetchNavigations, navigation, parentId }: ItemOverviewProps){
+export default function ItemEdit ({ item, fetchNavigations, navigation, parentId }: ItemOverviewProps){
   const [availableEntities, setAvailableEntities] = useState<GroupedEntities[]>([])
   const [selectedEntity, setSelectedEntity] = useState<Entity | null>()
   const [selectedContentType, setSelectedContentType] = useState<GroupedEntities>()
   const [entityRoute, setEntityRoute] = useState<Route>()
   const { entities } = useAllEntities();
-  const { createNavItem, updateNavItem, createNavItemRoute, getRouteByRelated, updateRoute } = useApi();
+  const { getRouteByRelated, updateRoute } = useApi();
 
   const initialState: React.MutableRefObject<RouteSettings> = useRef({
     title: '',
@@ -69,13 +68,14 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
     if (!entities) return
     setAvailableEntities(entities)
 
-    if (variant === "ItemEdit" && item) {
-      const contentType = entities.find((group: GroupedEntities) => group.contentType.uid === item.route.relatedContentType)
-      if (contentType) {
-        setSelectedContentType(contentType)
-        const entity = contentType.entities.find((entity: Entity) => entity.id === item.route.relatedId)
-        if (entity) setSelectedEntity(entity)
-    }}
+    if (!item) return
+
+    const contentType = entities.find((group: GroupedEntities) => group.contentType.uid === item.route.relatedContentType)
+    if (contentType) {
+      setSelectedContentType(contentType)
+      const entity = contentType.entities.find((entity: Entity) => entity.id === item.route.relatedId)
+      if (entity) setSelectedEntity(entity)
+    }
   }, [entities])
 
   useEffect(() => {
@@ -110,19 +110,9 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
     fetchRoute()
   }, [selectedEntity])
 
-  const addItem = async () => {
+  const updateItem = async () => {
     try {
       if (!entityRoute) return
-
-      const settings: NavItemSettings = {
-        route: entityRoute.id ?? null,
-        parent: parentId ?? null,
-        navigation: navigation.id,
-      }
-
-      if (variant === "ItemCreate") {
-        await createNavItem(settings);
-      }
 
       if (JSON.stringify(navItemState) !== JSON.stringify(initialState.current)) {
         if (navItemState.slug !== entityRoute.fullPath) navItemState.isOverride = true
@@ -137,7 +127,7 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
   }
   return (
     <ModalLayout onClose={() => setOpenModal('')}>
-      <ModalHeader title={`${variant === "ItemCreate" ? "Add new" : "Edit"} navigation item`}/>
+      <ModalHeader title="Edit navigation item"/>
       <ModalBody>
         <Grid gap={8}>
           <GridItem col={6}>
@@ -148,6 +138,7 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
               onChange={(value: string) => {
                 const [contentType] = availableEntities.filter((group: GroupedEntities) => group.label === value)
                 if (contentType) {
+                  console.log(contentType)
                   setSelectedContentType(contentType)
                   setSelectedEntity(null)
                 }
@@ -175,7 +166,7 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
             >
               {selectedContentType &&
                 selectedContentType.entities?.map((entity: Entity) =>
-                  <SingleSelectOption key={entity.id} value={entity.id}>{entity.Title}</SingleSelectOption>
+                  <SingleSelectOption key={entity.id} value={entity.id}>{entity.id} - {entity.Title}</SingleSelectOption>
                 )
               }
             </SingleSelect>
@@ -220,16 +211,6 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
                     onClick={() => dispatch({ type: 'SET_ACTIVE', payload: !navItemState.active })}
                   />
                 </GridItem>
-                <GridItem col={6}>
-                  <ToggleInput
-                    label="Internal link?"
-                    onLabel="Yes"
-                    offLabel="No"
-                    hint='If the url points to a page of your site, select "Yes". Else select "no".'
-                    checked={navItemState.internal}
-                    onClick={() => dispatch({ type: 'SET_INTERNAL', payload: !navItemState.internal })}
-                  />
-                </GridItem>
               </Grid>
             </Box>
           </>
@@ -237,7 +218,7 @@ export default function ItemOverview ({ variant, item, fetchNavigations, navigat
       </ModalBody>
       <ModalFooter
         startActions={<Button onClick={() => setOpenModal('')} variant="tertiary">Cancel</Button>}
-        endActions={<Button onClick={() => addItem()} disabled={variant === "ItemEdit" && JSON.stringify(navItemState) === JSON.stringify(initialState.current)}>{variant === "ItemCreate" ? 'Add item' : 'Save'}</Button>}
+        endActions={<Button onClick={() => updateItem()} disabled={JSON.stringify(navItemState) === JSON.stringify(initialState.current)}>Save</Button>}
       />
     </ModalLayout>
   )
