@@ -44,9 +44,6 @@ export default async ({ strapi }: { strapi: Strapi }) => {
           fullPath: transformToUrl(url_alias_path),
           uidPath: `${event.model.apiName}/${event.result.id}`,
           isOverride: url_alias_isOverride,
-          internal: true,
-          active: true,
-          defaultRoute: true,
           title: title
         },
       });
