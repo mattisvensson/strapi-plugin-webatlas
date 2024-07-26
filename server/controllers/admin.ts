@@ -118,13 +118,14 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
   async checkUniquePath (ctx) {
     try {
-      const { path } = ctx.query
+      const queryPath = ctx.query.path
+      const bodyPath = ctx.request.body.path
 
-      if (!path) {
+      if (!queryPath && !bodyPath) {
         return ctx.throw(400, 'Path is required')
       }
       
-      return await strapi.plugin('url-routes').service('admin').checkUniquePath(path);
+      return await strapi.plugin('url-routes').service('admin').checkUniquePath(bodyPath || queryPath);
     } catch (e) {
       return ctx.throw(500, e)
     }
