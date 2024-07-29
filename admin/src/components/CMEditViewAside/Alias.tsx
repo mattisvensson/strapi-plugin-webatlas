@@ -106,7 +106,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
   useEffect(() => {
 		if (path.needsUrlCheck && path.value) {
-			if (path.uidPath === path.value) return
+			if (path.uidPath === path.value || initialPath.current === path.value) return
 			debouncedCheckUrl(path.value);
 			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
     }
