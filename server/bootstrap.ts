@@ -1,6 +1,7 @@
 import { Strapi } from "@strapi/strapi";
 import { PluginConfig, ConfigContentType } from "../types";
 import transformToUrl from "../utils/transformToUrl";
+import duplicateCheck from "./utils/duplicateCheck";
 
 export default async ({ strapi }: { strapi: Strapi }) => {
   if (!strapi.store) {
@@ -31,19 +32,23 @@ export default async ({ strapi }: { strapi: Strapi }) => {
         url_alias_isOverride,
       } = event.params.data;
 
+      if (!url_alias_path) return;
+
       let title = '';
       if (ctSettings?.default) {
         title = event.params.data[ctSettings.default];
       }
 
+      const path = await duplicateCheck(transformToUrl(url_alias_path));
+
       await strapi.db?.query('plugin::url-routes.route').create({
         data: {
           relatedContentType: event.model.uid,
           relatedId: event.result.id,
-          slug: transformToUrl(url_alias_path),
-          fullPath: transformToUrl(url_alias_path),
+          slug: path,
+          fullPath: path,
           uidPath: `${event.model.apiName}/${event.result.id}`,
-          isOverride: url_alias_isOverride,
+          isOverride: url_alias_isOverride || false,
           title: title
         },
       });
@@ -63,8 +68,10 @@ export default async ({ strapi }: { strapi: Strapi }) => {
         if (ctSettings?.default) data.title = event.params.data[ctSettings.default];
         if (url_alias_isOverride !== undefined) data.isOverride = url_alias_isOverride;
         if (url_alias_path) {
-          data.slug = transformToUrl(url_alias_path);
-          data.fullPath = transformToUrl(url_alias_path);
+          const path = await duplicateCheck(transformToUrl(url_alias_path), url_alias_routeId) ;
+    
+          data.slug = path;
+          data.fullPath = path;
         }
 
         await strapi.db?.query('plugin::url-routes.route').update({

@@ -120,12 +120,14 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     try {
       const queryPath = ctx.query.path
       const bodyPath = ctx.request.body.path
+      const queryTargetRouteId = ctx.query.targetRouteId
+      const bodyTargetRouteId = ctx.request.body.targetRouteId
 
       if (!queryPath && !bodyPath) {
         return ctx.throw(400, 'Path is required')
       }
       
-      return await strapi.plugin('url-routes').service('admin').checkUniquePath(bodyPath || queryPath);
+      return await strapi.plugin('url-routes').service('admin').checkUniquePath(bodyPath || queryPath, bodyTargetRouteId || queryTargetRouteId || null);
     } catch (e) {
       return ctx.throw(500, e)
     }

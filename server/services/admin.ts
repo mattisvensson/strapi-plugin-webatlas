@@ -1,6 +1,7 @@
 import { ContentType, Route } from "../../types";
 import getFullPath from "../../utils/getFullPath";
 import getNestedNavigation from "../../utils/getNestedNavigation";
+import duplicateCheck from "../utils/duplicateCheck";
 
 export default ({strapi}) => ({
 
@@ -232,43 +233,9 @@ export default ({strapi}) => ({
     }
   },
 
-  async checkUniquePath(initialPath: string) {
-
-    async function checkPathExists(path: string): Promise<boolean> {
-      const entities = await strapi.entityService.findMany('plugin::url-routes.route', {
-        filters: { 
-          $or: [
-            {
-              fullPath: path,
-            },
-            {
-              slug: path,
-            },
-            {
-              uidPath: path,
-            },
-          ], 
-        },
-      });
-      return entities.length > 0;
-    }
-
+  async checkUniquePath(initialPath: string, targetRouteId: number | null = null) {
     try {
-      let uniquePath = initialPath;
-      let counter = 1;
-    
-      // Check if the path exists
-      let exists = await checkPathExists(uniquePath);
-    
-      // While the path exists, append/increment a number and check again
-      while (exists) {
-        uniquePath = `${initialPath}-${counter}`;
-        exists = await checkPathExists(uniquePath);
-        counter++;
-      }
-    
-      // Return the unique path
-      return uniquePath;
+      return await duplicateCheck(initialPath, targetRouteId);
     } catch (e) {
       console.log(e)
     }
