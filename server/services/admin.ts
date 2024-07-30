@@ -43,6 +43,25 @@ export default ({strapi}) => ({
     }
   },
 
+  async createExternalRoute(data) {
+    try {
+      const newRoute = await strapi.entityService.create('plugin::url-routes.route', {
+        data: {
+          title: data.title,
+          slug: data.fullPath,
+          fullPath: data.fullPath,
+          relatedContentType: '',
+          relatedId: 0,
+          uidPath: '',
+          internal: false,
+        },
+      });
+      return newRoute
+    } catch (e) {
+      console.log(e)
+    }
+  },
+
   async updateRoute(id, data) {
     const parent = data.parent ? await strapi.entityService.findOne('plugin::url-routes.navitem', data.parent, {
       populate: ['route'],

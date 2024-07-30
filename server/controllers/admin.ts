@@ -23,6 +23,16 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       return ctx.throw(500, e)
     }
   },
+  async createExternalRoute (ctx) {
+    try {
+      const { data } = ctx.request.body;
+      return await strapi.plugin('url-routes').service('admin').createExternalRoute(
+        data,
+      );
+    } catch (e) {
+      return ctx.throw(500, e)
+    }
+  },
   async updateRoute (ctx) {
     try {
       const { id } = ctx.params;

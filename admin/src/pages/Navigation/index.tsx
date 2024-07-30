@@ -22,6 +22,7 @@ import ItemEdit from '../../components/modals/ItemEdit';
 import RouteItem from './RouteItem';
 import useApi from '../../hooks/useApi';
 import { isNestedNavigation, isNestedNavItem} from '../../utils/typeChecks';
+import ExternalCreate from '../../components/modals/ExternalCreate';
 
 const Navigation = () => {
   const [navigations, fetchNavigations] = useNavigations() as [NestedNavigation[], () => Promise<void>];
@@ -79,6 +80,14 @@ const Navigation = () => {
       return <NavOverview navigations={navigations} setActionItem={setActionItem} />;
     } else if (openModal === 'create') {
       return <NavCreate fetchNavigations={fetchNavigations} />;
+    } else if (openModal === 'externalCreate') {
+      return (
+        <ExternalCreate
+          fetchNavigations={fetchNavigations}
+          navigation={selectedNavigation}
+          parentId={parentId}
+        />
+      )
     } else if (openModal === 'edit' && isNestedNavigation(actionItem)) {
       return <NavEdit item={actionItem} fetchNavigations={fetchNavigations} />;
     } else if (openModal === "NavDelete" && isNestedNavigation(actionItem)) {

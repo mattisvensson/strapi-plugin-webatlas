@@ -47,8 +47,8 @@ export default function useApi() {
     return data;
   };
 
-  const createRoute = async (body: RouteSettings) => {
-    const { data } = await post('/url-routes/route', {
+  const createExternalRoute = async (body: RouteSettings) => {
+    const { data } = await post('/url-routes/route/external', {
       data: {
         ...body,
       },
@@ -97,5 +97,5 @@ export default function useApi() {
     return data
   }
 
-  return { fetchAllContentTypes, fetchAllEntities, getRouteByRelated, createRoute, updateRoute, createNavItem, updateNavItem, getNestedNavigation, createNavItemRoute}
+  return { fetchAllContentTypes, fetchAllEntities, getRouteByRelated, createExternalRoute, updateRoute, createNavItem, updateNavItem, getNestedNavigation, createNavItemRoute}
 }
