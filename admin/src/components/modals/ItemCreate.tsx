@@ -1,11 +1,14 @@
 import { ModalLayout, ModalBody, ModalFooter, Button, SingleSelect, SingleSelectOption, TextInput, ToggleInput, Box, Divider, Grid, GridItem } from '@strapi/design-system';
-import { useState, useContext, useEffect, useReducer, useRef } from 'react';
+import { useState, useContext, useEffect, useReducer, useRef, useCallback } from 'react';
 import { ModalContext } from '../../contexts';
 import ModalHeader from './ModalHeader';
 import { Route, NavItemSettings, NestedNavigation, Entity, GroupedEntities, NestedNavItem, RouteSettings } from '../../../../types';
 import useAllEntities from '../../hooks/useAllEntities';
 import useApi from '../../hooks/useApi';
 import transformToUrl from '../../../../utils/transformToUrl';
+import duplicateCheck from '../../utils/duplicateCheck';
+import debounce from '../../utils/debounce';
+import URLInfo from '../../components/URLInfo';
 
 type ItemOverviewProps = {
   fetchNavigations: () => void;
@@ -13,13 +16,77 @@ type ItemOverviewProps = {
   parentId?: number;
 }
 
+type PathState = {
+	value?: string;
+	prevValue?: string,
+	uidPath?: string,
+	initialPath?: string,
+	needsUrlCheck: boolean;
+};
+
 type Action = 
   | { type: 'SET_TITLE'; payload: string }
-  | { type: 'SET_SLUG'; payload: string }
   | { type: 'SET_ACTIVE'; payload: boolean }
   | { type: 'SET_INTERNAL'; payload: boolean }
   | { type: 'SET_OVERRIDE'; payload: boolean };
 
+type PathAction = 
+  | { type: 'DEFAULT'; payload: string }
+  | { type: 'NO_URL_CHECK'; payload: string }
+  | { type: 'NO_TRANSFORM_AND_CHECK'; payload: string }
+  | { type: 'RESET_URL_CHECK_FLAG'; }
+  | { type: 'SET_UIDPATH'; payload: string }
+  | { type: 'SET_INITIALPATH'; payload: string }
+
+
+function reducer(navItemState: RouteSettings, action: Action): RouteSettings {
+  switch (action.type) {
+    case 'SET_TITLE':
+      return { ...navItemState, title: action.payload };
+    case 'SET_ACTIVE':
+      return { ...navItemState, active: action.payload };
+    case 'SET_INTERNAL':
+      return { ...navItemState, internal: action.payload };
+    case 'SET_OVERRIDE':
+      return { ...navItemState, isOverride: action.payload };
+    default:
+      throw new Error();
+  }
+}
+
+function pathReducer(state: PathState, action: PathAction): PathState {
+  switch (action.type) {
+    case 'DEFAULT':
+      return { 
+        ...state,
+        value: transformToUrl(action.payload), 
+        prevValue: state.value,
+        needsUrlCheck: true 
+      };
+    case 'NO_URL_CHECK':
+      return { 
+        ...state,
+        value: transformToUrl(action.payload), 
+        prevValue: state.value,
+        needsUrlCheck: false 
+      };
+    case 'NO_TRANSFORM_AND_CHECK':
+      return { 
+        ...state,
+        value: action.payload, 
+        prevValue: state.value,
+        needsUrlCheck: false 
+      };
+    case 'RESET_URL_CHECK_FLAG':
+      return { ...state, needsUrlCheck: false };
+    case 'SET_UIDPATH':
+      return { ...state, uidPath: action.payload };  
+    case 'SET_INITIALPATH':
+      return { ...state, initialPath: action.payload };  
+    default:
+      throw new Error();
+  }
+}
 
 export default function ItemCreate ({ fetchNavigations, navigation, parentId }: ItemOverviewProps){
   const [availableEntities, setAvailableEntities] = useState<GroupedEntities[]>([])
@@ -27,7 +94,9 @@ export default function ItemCreate ({ fetchNavigations, navigation, parentId }: 
   const [selectedContentType, setSelectedContentType] = useState<GroupedEntities>()
   const [entityRoute, setEntityRoute] = useState<Route>()
   const { entities } = useAllEntities();
-  const { createNavItem, getRouteByRelated } = useApi();
+  const { createNavItem, updateRoute, getRouteByRelated } = useApi();
+  const [replacement, setReplacement] = useState<string>('')
+  const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
 
   const initialState: React.MutableRefObject<RouteSettings> = useRef({
     title: '',
@@ -38,23 +107,9 @@ export default function ItemCreate ({ fetchNavigations, navigation, parentId }: 
   })
 
   const [navItemState, dispatch] = useReducer(reducer, initialState.current);
+  const [path, dispatchPath] = useReducer(pathReducer, {needsUrlCheck: false});
 
-  function reducer(navItemState: RouteSettings, action: Action): RouteSettings {
-    switch (action.type) {
-      case 'SET_TITLE':
-        return { ...navItemState, title: action.payload };
-      case 'SET_SLUG':
-        return { ...navItemState, slug: transformToUrl(action.payload) };
-      case 'SET_ACTIVE':
-        return { ...navItemState, active: action.payload };
-      case 'SET_INTERNAL':
-        return { ...navItemState, internal: action.payload };
-      case 'SET_OVERRIDE':
-        return { ...navItemState, isOverride: action.payload };
-      default:
-        throw new Error();
-    }
-  }
+  const debouncedCheckUrl = useCallback(debounce(checkUrl, 500), []);
 
   const contextValue = useContext(ModalContext);
   let setOpenModal = (_: string) => {};
@@ -74,11 +129,15 @@ export default function ItemCreate ({ fetchNavigations, navigation, parentId }: 
         try {
           const { results } = await getRouteByRelated(selectedContentType.contentType.uid, selectedEntity.id)
           const route = results[0]
-          console.log(results)
+
           if (!route) return
+          console.log(route)
+
+          dispatchPath({ type: 'NO_URL_CHECK', payload: route.fullPath });
+          dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath });
+          dispatchPath({ type: 'SET_INITIALPATH', payload: route.fullPath });
 
           dispatch({ type: 'SET_TITLE', payload: route.title })
-          dispatch({ type: 'SET_SLUG', payload: route.fullPath })
           dispatch({ type: 'SET_ACTIVE', payload: route.active })
           dispatch({ type: 'SET_INTERNAL', payload: route.internal })
           dispatch({ type: 'SET_OVERRIDE', payload: route.isOverride })
@@ -99,6 +158,34 @@ export default function ItemCreate ({ fetchNavigations, navigation, parentId }: 
     }
     fetchRoute()
   }, [selectedEntity])
+  
+  useEffect(() => {
+		if (path.needsUrlCheck && path.value) {
+			if (path.uidPath === path.value || path.initialPath === path.value) return
+			debouncedCheckUrl(path.value);
+			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
+    }
+  }, [path.needsUrlCheck]);
+
+  async function checkUrl(url: string) {
+		if (!url) return
+    setValidationState('checking')
+		setReplacement('')
+		
+		try {
+			const data = await duplicateCheck(url)
+
+			if (!data || data === url) return 
+
+			dispatchPath({ type: 'NO_URL_CHECK', payload: data });
+			setReplacement(data)
+		} catch (err) {
+			console.log(err)
+		} finally {
+      setValidationState('done')
+    }
+	}
+
 
   const addItem = async () => {
     try {
@@ -108,6 +195,11 @@ export default function ItemCreate ({ fetchNavigations, navigation, parentId }: 
         route: entityRoute.id ?? null,
         parent: parentId ?? null,
         navigation: navigation.id,
+      }
+
+      if (path.value !== path.initialPath) {
+        if (navItemState.slug !== entityRoute.fullPath) navItemState.isOverride = true
+        await updateRoute({fullPath: path.value}, entityRoute.id)
       }
 
       await createNavItem(settings);
@@ -131,7 +223,6 @@ export default function ItemCreate ({ fetchNavigations, navigation, parentId }: 
               onChange={(value: string) => {
                 const [contentType] = availableEntities.filter((group: GroupedEntities) => group.label === value)
                 if (contentType) {
-                  console.log(contentType)
                   setSelectedContentType(contentType)
                   setSelectedEntity(null)
                 }
@@ -183,13 +274,18 @@ export default function ItemCreate ({ fetchNavigations, navigation, parentId }: 
                 </GridItem>
                 <GridItem col={6}>
                   <TextInput
+                    required
                     placeholder="about/"
                     label="Path"
                     name="slug"
-                    value={navItemState.slug}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_SLUG', payload: e.target.value })}
-                    required
+                    value={path.value}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}
+                    onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      if (e.target.value === path.prevValue) return
+                      dispatchPath({ type: 'DEFAULT', payload: e.target.value })}
+                    }
                   />
+                  <URLInfo validationState={validationState} replacement={replacement} />
                 </GridItem>
               </Grid>
               <Grid gap={8}>
@@ -212,7 +308,7 @@ export default function ItemCreate ({ fetchNavigations, navigation, parentId }: 
         startActions={<Button onClick={() => setOpenModal('')} variant="tertiary">Cancel</Button>}
         endActions={
           <>
-            <Button variant="secondary" onClick="">Add external link</Button>
+            <Button variant="secondary" onClick={() => setOpenModal('externalCreate')}>Add external link</Button>
             <Button variant="secondary" onClick="">Add wrapper component</Button>
             <Button disabled={!selectedEntity} onClick={() => addItem()}>Add item</Button>
           </>
