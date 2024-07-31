@@ -245,7 +245,7 @@ export default function ItemCreate ({ fetchNavigations, navigation, parentId }: 
                 const route = flatEntities.find((route: Entity) => route.id === Number(value));
                 if (route) setSelectedEntity(route);
               }}
-              disabled={selectedContentType?.entities && selectedContentType?.entities.length === 0}
+              disabled={!selectedContentType || (selectedContentType?.entities && selectedContentType?.entities.length === 0)}
             >
               {selectedContentType &&
                 selectedContentType.entities?.map((entity: Entity) =>
