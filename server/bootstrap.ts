@@ -17,6 +17,46 @@ export default async ({ strapi }: { strapi: Strapi }) => {
   if (!config?.selectedContentTypes) return
 
   strapi.db?.lifecycles.subscribe({
+    models: ['plugin::url-routes.navitem'],
+
+    async beforeDelete(event: any) {
+      const id = event.params.where['id']
+
+      if (!id) return
+
+      try {
+        const navitem = await strapi.db?.query('plugin::url-routes.navitem').findOne({
+          where: {
+            id: id
+          },
+          populate: ['route']
+        });
+  
+        if (navitem.route.id) event.state = navitem.route.id
+      } catch (err) {
+        console.log(err)
+      }
+    },
+
+    async afterDelete(event: any) {
+      const id = event.state
+
+      if (!id) return
+
+      try {
+        await strapi.db?.query('plugin::url-routes.route').delete({
+          where: {
+            id: id
+          },
+        });
+      } catch (err) {
+        console.log(err)
+      }
+
+    },
+  })
+
+  strapi.db?.lifecycles.subscribe({
     models: config.selectedContentTypes.map((type: any) => type.uid),
 
     async beforeCreate() {
