@@ -32,6 +32,7 @@ export default async ({ strapi }: { strapi: Strapi }) => {
           populate: ['route']
         });
   
+        if (navitem.route.internal) return
         if (navitem.route.id) event.state = navitem.route.id
       } catch (err) {
         console.log(err)
