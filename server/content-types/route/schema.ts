@@ -62,11 +62,6 @@ export default {
       default: true,
       configurable: false,
     },
-    defaultRoute: {
-      type: 'boolean',
-      default: false,
-      configurable: false,
-    },
     navitem: {
       type: "relation",
       relation: "oneToOne",
