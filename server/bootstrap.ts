@@ -32,15 +32,14 @@ export default async ({ strapi }: { strapi: Strapi }) => {
           populate: ['route']
         });
   
-        if (navitem.route.internal) return
-        if (navitem.route.id) event.state = navitem.route.id
+        event.state = navitem.route.id && !navitem.route.internal ? { id: navitem.route.id } : null
       } catch (err) {
         console.log(err)
       }
     },
 
     async afterDelete(event: any) {
-      const id = event.state
+      const { id } = event.state
 
       if (!id) return
 
