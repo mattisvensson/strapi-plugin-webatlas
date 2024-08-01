@@ -12,9 +12,7 @@ type RouteItemProps = {
 }
 
 export default function RouteItem({item, setParentId, setActionItem, parentPath}: RouteItemProps) {
-  const fullPath = useRef<string>(parentPath ? `${parentPath}/${item.route?.slug}` : item.route?.fullPath);
-
-  if (!item.route?.internal) fullPath.current = item.route?.fullPath;
+  const fullPath = useRef<string>(item.route.fullPath);
 
   const contextValue = useContext(ModalContext);
   let setOpenModal = (_: string) => {};

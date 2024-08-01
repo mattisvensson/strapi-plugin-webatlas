@@ -9,12 +9,12 @@ export default ({strapi}) => ({
     if (!newConfig || !newConfig.selectedContentTypes) return
     
     try {
-    const routes = await strapi.entityService.findMany('plugin::url-routes.route');
-    const invalidRoutes = routes.filter((route: Route) => !newConfig.selectedContentTypes.find((type: ContentType) => type.uid === route.relatedContentType));
-
-    invalidRoutes?.map(async (route: Route) => {
-      await strapi.entityService.delete('plugin::url-routes.route', route.id)
-    })
+      const routes = await strapi.entityService.findMany('plugin::url-routes.route');
+      const invalidRoutes = routes.filter((route: Route) => !newConfig.selectedContentTypes.find((type: ContentType) => type.uid === route.relatedContentType));
+  
+      invalidRoutes?.map(async (route: Route) => {
+        await strapi.entityService.delete('plugin::url-routes.route', route.id)
+      })
     } catch (err) {
       console.log(err)
       return "Error. Couldn't delete invalid routes"
@@ -63,20 +63,15 @@ export default ({strapi}) => ({
   },
 
   async updateRoute(id, data) {
-    const parent = data.parent ? await strapi.entityService.findOne('plugin::url-routes.navitem', data.parent, {
-      populate: ['route'],
-    }) : null;
-
-    let fullPath = getFullPath(parent?.fullPath, data.slug)
     
-    if (data.isOverride) fullPath = data.slug;
+    const parent = data.parent ? await strapi.entityService.findOne('plugin::url-routes.navitem', data.parent) : null;
+
+    const fullPath = data.isOverride ? data.slug : getFullPath(parent?.fullPath, data.slug)
 
     try {
       const entity = await strapi.entityService.update('plugin::url-routes.route', id, {
         data: {
-          title: data.title,
-          slug: data.slug,
-          isOverride: data.isOverride,
+          ...data,
           fullPath,
         },
       });
@@ -174,14 +169,15 @@ export default ({strapi}) => ({
         populate: ['route'],
       }) : null;
 
-      const fullPath = route.isOverride ? route.fullPath : getFullPath(parent?.route?.fullPath, route.fullPath)
+      let fullPath = route.slug
+
+      if (route.internal && !route.isOverride) fullPath = getFullPath(parent?.route?.fullPath, route.slug)
 
       await strapi.entityService.update('plugin::url-routes.route', routeId, {
         data: {
           fullPath,
         },
       });
-      console.log(route)
 
       const entity = await strapi.entityService.create('plugin::url-routes.navitem', {
         data: {
