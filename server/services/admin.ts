@@ -197,36 +197,6 @@ export default ({strapi}) => ({
     }
   },
 
-  async createNavItemRoute(data) {
-    try {
-      const route = await strapi.entityService.findOne('plugin::url-routes.route', data.navitem.route);
-
-      const newRouteData = {
-        relatedContentType: route.relatedContentType,
-        relatedId: route.relatedId,
-        title: data.route.title,
-        slug: data.route.slug,
-        isOverride: true,
-        internal: data.route.internal,
-        active: data.route.active,      
-      }
-
-      const newRoute = await this.createRoute(newRouteData)
-
-      const entity = await strapi.entityService.create('plugin::url-routes.navitem', {
-        data: {
-          navigation: Number(data.navitem.navigation),
-          route: Number(newRoute.id),
-          parent: data.parent ? Number(data.navite.parent) : null,
-        },
-      });
-
-      return entity;
-    } catch (e) {
-      console.log(e)
-    }
-  },
-
   async updateNavItem(id, data) {
     try {
       const entity = await strapi.entityService.update('plugin::url-routes.navitem', id, {

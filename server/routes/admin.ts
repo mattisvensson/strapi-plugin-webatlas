@@ -110,15 +110,6 @@ export default {
       }
     },
     {
-      method: 'POST',
-      path: '/navitemroute',
-      handler: 'admin.createNavItemRoute',
-      config: {
-        policies: [],
-        auth: false,
-      }
-    },
-    {
       method: 'PUT',
       path: '/navitem/:id',
       handler: 'admin.updateNavItem',

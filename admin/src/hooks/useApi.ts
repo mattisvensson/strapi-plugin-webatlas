@@ -74,15 +74,6 @@ export default function useApi() {
     return data
   };
 
-  const createNavItemRoute = async (body: NavOverviewState) => {
-    const { data } = await post('/url-routes/navitemroute', {
-      data: {
-        ...body,
-      },
-    });
-    return data
-  };
-
   const updateNavItem = async (body: NavItemSettings, id: number) => {
     const { data } = await put(`/url-routes/navitem/${id}`, {
       data: {
@@ -97,5 +88,5 @@ export default function useApi() {
     return data
   }
 
-  return { fetchAllContentTypes, fetchAllEntities, getRouteByRelated, createExternalRoute, updateRoute, createNavItem, updateNavItem, getNestedNavigation, createNavItemRoute}
+  return { fetchAllContentTypes, fetchAllEntities, getRouteByRelated, createExternalRoute, updateRoute, createNavItem, updateNavItem, getNestedNavigation}
 }

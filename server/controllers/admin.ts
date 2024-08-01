@@ -101,14 +101,6 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       return ctx.throw(500, e)
     }
   },
-  async createNavItemRoute (ctx) {
-    try {
-      const { data } = ctx.request.body;
-      return await strapi.plugin('url-routes').service('admin').createNavItemRoute(data);
-    } catch (e) {
-      return ctx.throw(500, e)
-    }
-  },
   async updateNavItem (ctx) {
     try {
       const { id } = ctx.params;
