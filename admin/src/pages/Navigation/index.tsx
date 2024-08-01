@@ -124,7 +124,7 @@ const Navigation = () => {
               </Flex>
             }
             {navigations?.length === 0 && <EmptyNav msg="You don't have any navigations..." buttonText='Create new navigation' modal="create"/>}
-            {selectedNavigation?.items?.length === 0 && <EmptyNav msg="Your navigation is empty..." buttonText='Create new item' modal="ItemCreate"/>}
+            {navigationItems?.length === 0 && <EmptyNav msg="Your navigation is empty..." buttonText='Add new item' modal="ItemCreate"/>}
           </ContentLayout>
         </Layout>
         {renderModal()}
