@@ -13,22 +13,12 @@ type HeaderProps = {
 
 export default function Header ({ navigations }: HeaderProps) {
 
-  const ModalContextValue = useContext(ModalContext);
-  let setOpenModal = (_: string) => {};  
-  if (ModalContextValue !== null) {
-    [, setOpenModal] = ModalContextValue;
-  }
+  const { setModal } = useContext(ModalContext);
+  const { selectedNavigation, setSelectedNavigation } = useContext(SelectedNavigationContext);
 
-  const SelectedContextValue = useContext(SelectedNavigationContext);
-  let setSelectedNavigation = (_: NestedNavigation) => {};  
-  let selectedNavigation: NestedNavigation | undefined = undefined
-  if (SelectedContextValue !== null) {
-    [selectedNavigation, setSelectedNavigation] = SelectedContextValue;
-  }
-  
   return (
     <Flex gap={4}>
-      <Button variant="secondary" onClick={() => setOpenModal('overview')}>
+      <Button variant="secondary" onClick={() => setModal('overview')}>
         Manage
       </Button>
       <SingleSelect

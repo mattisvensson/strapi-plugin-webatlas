@@ -1,38 +1,29 @@
 import { ModalLayout, ModalBody, ModalFooter, Button, TextInput, Grid, GridItem } from '@strapi/design-system';
 import { useState, useContext } from 'react';
-import { ModalContext } from '../../contexts';
+import { ModalContext, SelectedNavigationContext } from '../../contexts';
+
 import ModalHeader from './ModalHeader';
-import { NavItemSettings, NestedNavigation } from '../../../../types';
+import { NavItemSettings } from '../../../../types';
 import useApi from '../../hooks/useApi';
 
 type ItemOverviewProps = {
   fetchNavigations: () => void;
-  navigation: NestedNavigation;
   parentId?: number;
 }
 
-export default function ExternalCreate ({ fetchNavigations, navigation, parentId }: ItemOverviewProps){
+export default function ExternalCreate ({ fetchNavigations, parentId }: ItemOverviewProps){
   const { createNavItem, createExternalRoute} = useApi();
 
   const [title, setTitle] = useState('');
   const [path, setPath] = useState('');
 
-
-  const contextValue = useContext(ModalContext);
-  let setOpenModal = (_: string) => {};
-
-  if (contextValue !== null) {
-    [, setOpenModal] = contextValue;
-  }
-
-
-
+  const { setModal } = useContext(ModalContext);
+  const { selectedNavigation } = useContext(SelectedNavigationContext);
 
   const addItem = async () => {
     try {
 
-      console.log(path, title)
-      if (!path || !title) return
+      if (!path || !title || !selectedNavigation) return
 
       const route = await createExternalRoute({
         title,
@@ -49,19 +40,19 @@ export default function ExternalCreate ({ fetchNavigations, navigation, parentId
       const settings: NavItemSettings = {
         route: route.id,
         parent: parentId ?? null,
-        navigation: navigation.id,
+        navigation: selectedNavigation.id,
       }
 
       await createNavItem(settings);
 
       fetchNavigations()
-      setOpenModal('')
+      setModal('')
     } catch (err) {
       console.log(err)
     }
   }
   return (
-    <ModalLayout onClose={() => setOpenModal('')}>
+    <ModalLayout onClose={() => setModal('')}>
       <ModalHeader title="Add new navigation item"/>
       <ModalBody>
         <Grid gap={8}>
@@ -89,10 +80,10 @@ export default function ExternalCreate ({ fetchNavigations, navigation, parentId
         </Grid>
       </ModalBody>
       <ModalFooter
-        startActions={<Button onClick={() => setOpenModal('')} variant="tertiary">Cancel</Button>}
+        startActions={<Button onClick={() => setModal('')} variant="tertiary">Cancel</Button>}
         endActions={
           <>
-            <Button variant="secondary" onClick={() => setOpenModal('ItemCreate')}>Add internal link</Button>
+            <Button variant="secondary" onClick={() => setModal('ItemCreate')}>Add internal link</Button>
             <Button variant="secondary" onClick="">Add wrapper component</Button>
             <Button disabled={!title || !path} onClick={() => addItem()}>Add item</Button>
           </>

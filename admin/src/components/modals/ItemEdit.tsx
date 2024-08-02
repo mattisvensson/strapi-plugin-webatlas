@@ -57,12 +57,7 @@ export default function ItemEdit ({ item, fetchNavigations, navigation, parentId
     }
   }
 
-  const contextValue = useContext(ModalContext);
-  let setOpenModal = (_: string) => {};
-
-  if (contextValue !== null) {
-    [, setOpenModal] = contextValue;
-  }
+  const { setModal } = useContext(ModalContext);
 
   useEffect(() => {
     if (!entities) return
@@ -120,13 +115,13 @@ export default function ItemEdit ({ item, fetchNavigations, navigation, parentId
       }
 
       fetchNavigations()
-      setOpenModal('')
+      setModal('')
     } catch (err) {
       console.log(err)
     }
   }
   return (
-    <ModalLayout onClose={() => setOpenModal('')}>
+    <ModalLayout onClose={() => setModal('')}>
       <ModalHeader title="Edit navigation item"/>
       <ModalBody>
         <Grid gap={8}>
@@ -217,7 +212,7 @@ export default function ItemEdit ({ item, fetchNavigations, navigation, parentId
         }
       </ModalBody>
       <ModalFooter
-        startActions={<Button onClick={() => setOpenModal('')} variant="tertiary">Cancel</Button>}
+        startActions={<Button onClick={() => setModal('')} variant="tertiary">Cancel</Button>}
         endActions={<Button onClick={() => updateItem()} disabled={JSON.stringify(navItemState) === JSON.stringify(initialState.current)}>Save</Button>}
       />
     </ModalLayout>

@@ -26,7 +26,7 @@ import ExternalCreate from '../../components/modals/ExternalCreate';
 
 const Navigation = () => {
   const [navigations, fetchNavigations] = useNavigations() as [NestedNavigation[], () => Promise<void>];
-  const [openModal, setOpenModal] = useState('');
+  const [modal, setModal] = useState<string>('');
   const [selectedNavigation, setSelectedNavigation] = useState<NestedNavigation>();
   const [navigationItems, setNavigationItems] = useState<NestedNavItem[]>();
   const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>();
@@ -34,11 +34,11 @@ const Navigation = () => {
   const { getNestedNavigation } = useApi();
 
   useEffect(() => {
-    if (openModal === 'overview' || openModal === '') {
+    if (modal === 'overview' || modal === '') {
       setActionItem(undefined)
       setParentId(undefined)
     }
-  }, [openModal]);
+  }, [modal]);
 
   useEffect(() => {
     async function fetchNestedNavigation () {
@@ -99,8 +99,8 @@ const Navigation = () => {
   };
 
   return (
-    <ModalContext.Provider value={[openModal, setOpenModal]}>
-      <SelectedNavigationContext.Provider value={[selectedNavigation, setSelectedNavigation]}>
+    <ModalContext.Provider value={{modal, setModal}}>
+      <SelectedNavigationContext.Provider value={{selectedNavigation, setSelectedNavigation}}>
         <Layout>
           <HeaderLayout
             title='Navigation'
@@ -109,7 +109,7 @@ const Navigation = () => {
           />
           <ContentLayout>
             <Flex gap={4} paddingBottom={6} justifyContent="flex-end">
-              <Button variant="secondary" startIcon={<Plus />} onClick={() => setOpenModal('ItemCreate')}>
+              <Button variant="secondary" startIcon={<Plus />} onClick={() => setModal('ItemCreate')}>
                 New Item
               </Button>
               <Button startIcon={<Check />} >

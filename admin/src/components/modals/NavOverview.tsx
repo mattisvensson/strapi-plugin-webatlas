@@ -12,32 +12,22 @@ type NavOverviewProps = {
 
 export default function NavOverview ({ navigations, setActionItem }: NavOverviewProps) {
 
-  const ModalContextValue = useContext(ModalContext);
-  let setOpenModal = (_: string) => {};
-  if (ModalContextValue !== null) {
-    [, setOpenModal] = ModalContextValue;
-  }
-
-  const SelectedContextValue = useContext(SelectedNavigationContext);
-  let setSelectedNavigation = (_: NestedNavigation) => {};
-  let selectedNavigation: NestedNavigation | undefined = undefined;
-  if (SelectedContextValue !== null) {
-    [selectedNavigation, setSelectedNavigation] = SelectedContextValue;
-  }
+  const { setModal } = useContext(ModalContext);
+  const { selectedNavigation, setSelectedNavigation } = useContext(SelectedNavigationContext);
 
   const handleSelect = (nav: NestedNavigation) => {
     setSelectedNavigation(nav)
-    setOpenModal('')
+    setModal('')
   }
 
   const handleEdit = (nav: NestedNavigation) => {
     setActionItem(nav)
-    setOpenModal('edit')
+    setModal('edit')
   }
 
   const handleDelete = (nav: NestedNavigation) => {
     setActionItem(nav)
-    setOpenModal('NavDelete')
+    setModal('NavDelete')
   }
 
   useEffect(() => {
@@ -45,7 +35,7 @@ export default function NavOverview ({ navigations, setActionItem }: NavOverview
   }, [])
 
   return (
-    <ModalLayout onClose={() => setOpenModal('')}>
+    <ModalLayout onClose={() => setModal('')}>
       <ModalHeader title="Navigation overview"/>
       <ModalBody>
         {navigations.map((nav, index) => (
@@ -70,8 +60,8 @@ export default function NavOverview ({ navigations, setActionItem }: NavOverview
         ))}
       </ModalBody>
       <ModalFooter
-        startActions={<Button onClick={() => setOpenModal('')} variant="tertiary">Cancel</Button>}
-        endActions={<Button onClick={() => setOpenModal('create')}>Create new</Button>}
+        startActions={<Button onClick={() => setModal('')} variant="tertiary">Cancel</Button>}
+        endActions={<Button onClick={() => setModal('create')}>Create new</Button>}
       />
     </ModalLayout>
   )

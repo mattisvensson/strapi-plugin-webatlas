@@ -11,25 +11,20 @@ export default function NavCreate ({ fetchNavigations }: { fetchNavigations: () 
   const [name, setName] = useState('')
   const [isActive, setIsActive] = useState(true)
 
-  const contextValue = useContext(ModalContext);
-  let setOpenModal = (_: string) => {};  
-
-  if (contextValue !== null) {
-    [, setOpenModal] = contextValue;
-  }
+  const { setModal } = useContext(ModalContext);
 
   const createNavigation = async () => {
     try {
       await post('/url-routes/navigation', { name, isActive });
       fetchNavigations()
-      setOpenModal('overview')
+      setModal('overview')
     } catch (err) {
       console.log(err)
     }
   }
 
   return (
-    <ModalLayout onClose={() => setOpenModal('')}>
+    <ModalLayout onClose={() => setModal('')}>
       <ModalHeader title="Create new navigation"/>
       <ModalBody>
         <Grid gap={4}>
@@ -42,7 +37,7 @@ export default function NavCreate ({ fetchNavigations }: { fetchNavigations: () 
         </Grid>
       </ModalBody>
       <ModalFooter 
-        startActions={<Button onClick={() => setOpenModal('overview')} variant="tertiary">Cancel</Button>}
+        startActions={<Button onClick={() => setModal('overview')} variant="tertiary">Cancel</Button>}
         endActions={<Button onClick={() => createNavigation()}>Create</Button>}
       />
     </ModalLayout>

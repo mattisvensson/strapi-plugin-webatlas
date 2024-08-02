@@ -17,25 +17,20 @@ export default function NavEdit ({ item, fetchNavigations }: NavEditProps){
   const [name, setName] = useState(item.name)
   const [isActive, setIsActive] = useState(item.visible)
 
-  const contextValue = useContext(ModalContext);
-  let setOpenModal = (_: string) => {};
-
-  if (contextValue !== null) {
-    [, setOpenModal] = contextValue;
-  }
+  const { setModal } = useContext(ModalContext);
 
   const updateNavigation = async () => {
     try {
       await put(`/url-routes/navigation/${item.id}`, { name, isActive });
       fetchNavigations()
-      setOpenModal('overview')
+      setModal('overview')
     } catch (err) {
       console.log(err)
     }
   }
 
   return (
-    <ModalLayout onClose={() => setOpenModal('')}>
+    <ModalLayout onClose={() => setModal('')}>
       <ModalHeader title={`Edit navigation: ${item.name}`}/>
       <ModalBody>
         <Grid gap={4}>
@@ -48,7 +43,7 @@ export default function NavEdit ({ item, fetchNavigations }: NavEditProps){
         </Grid>
       </ModalBody>
       <ModalFooter
-        startActions={<Button onClick={() => setOpenModal('overview')} variant="tertiary">Cancel</Button>}
+        startActions={<Button onClick={() => setModal('overview')} variant="tertiary">Cancel</Button>}
         endActions={<Button onClick={() => updateNavigation()}>Update</Button>}
       />
     </ModalLayout>

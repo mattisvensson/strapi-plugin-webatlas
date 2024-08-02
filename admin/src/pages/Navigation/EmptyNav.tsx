@@ -11,12 +11,8 @@ type EmptyNavProps = {
 
 export default function EmptyNav ({ msg, buttonText, modal }: EmptyNavProps) {
 
-  const contextValue = useContext(ModalContext);
-  let setOpenModal = (_: string) => {};  
+  const { setModal } = useContext(ModalContext);
 
-  if (contextValue !== null) {
-    [, setOpenModal] = contextValue;
-  }
   return (
     <Flex direction="column" minHeight="400px" justifyContent="center">
       <EmptyDocuments width="10rem" height="6rem"/>
@@ -27,7 +23,7 @@ export default function EmptyNav ({ msg, buttonText, modal }: EmptyNavProps) {
         variant='secondary'
         startIcon={<Plus/>}
         label="Label"
-        onClick={() => setOpenModal(modal)}
+        onClick={() => setModal(modal)}
       >
         {buttonText}
       </Button>

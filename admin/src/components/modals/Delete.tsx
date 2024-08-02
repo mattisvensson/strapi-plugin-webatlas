@@ -25,12 +25,7 @@ export default function Delete ({ variant, item, fetchNavigations }: DeleteProps
   const itemName = useRef(variant === "NavDelete" ? item.name : item.route.title)
   const closeModalState = useRef(variant === "NavDelete" ? 'overview' : '')
 
-  const contextValue = useContext(ModalContext);
-  let setOpenModal = (_: string) => {};
-
-  if (contextValue !== null) {
-    [, setOpenModal] = contextValue;
-  }
+  const { setModal } = useContext(ModalContext);
 
   const handleDelete = async () => {
     try {
@@ -40,12 +35,12 @@ export default function Delete ({ variant, item, fetchNavigations }: DeleteProps
     }
 
     fetchNavigations()
-    setOpenModal(closeModalState.current)
+    setModal(closeModalState.current)
   }
 
   return (
     <>
-      <Dialog onClose={() => setOpenModal(closeModalState.current)} title={`Delete ${itemName.current}?`} isOpen={true}>
+      <Dialog onClose={() => setModal(closeModalState.current)} title={`Delete ${itemName.current}?`} isOpen={true}>
         <DialogBody icon={<ExclamationMarkCircle />}>
           <Flex direction="column" alignItems="center" gap={2}>
             <Flex justifyContent="center">
@@ -55,7 +50,7 @@ export default function Delete ({ variant, item, fetchNavigations }: DeleteProps
         </DialogBody>
         <DialogFooter
           startAction={
-            <Button onClick={() => setOpenModal(closeModalState.current)} variant="tertiary">
+            <Button onClick={() => setModal(closeModalState.current)} variant="tertiary">
               No, keep
             </Button>
           }
