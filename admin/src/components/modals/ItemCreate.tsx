@@ -1,8 +1,8 @@
 import { ModalLayout, ModalBody, ModalFooter, Button, SingleSelect, SingleSelectOption, TextInput, ToggleInput, Box, Divider, Grid, GridItem } from '@strapi/design-system';
 import { useState, useContext, useEffect, useReducer, useRef, useCallback } from 'react';
-import { ModalContext } from '../../contexts';
+import { ModalContext, SelectedNavigationContext } from '../../contexts';
 import ModalHeader from './ModalHeader';
-import { Route, NavItemSettings, NestedNavigation, Entity, GroupedEntities, NestedNavItem, RouteSettings } from '../../../../types';
+import { Route, NavItemSettings, Entity, GroupedEntities, RouteSettings } from '../../../../types';
 import useAllEntities from '../../hooks/useAllEntities';
 import useApi from '../../hooks/useApi';
 import transformToUrl from '../../../../utils/transformToUrl';
@@ -12,7 +12,6 @@ import URLInfo from '../../components/URLInfo';
 
 type ItemOverviewProps = {
   fetchNavigations: () => void;
-  navigation: NestedNavigation;
   parentId?: number;
 }
 
@@ -88,7 +87,7 @@ function pathReducer(state: PathState, action: PathAction): PathState {
   }
 }
 
-export default function ItemCreate ({ fetchNavigations, navigation, parentId }: ItemOverviewProps){
+export default function ItemCreate ({ fetchNavigations, parentId }: ItemOverviewProps){
   const [availableEntities, setAvailableEntities] = useState<GroupedEntities[]>([])
   const [selectedEntity, setSelectedEntity] = useState<Entity | null>()
   const [selectedContentType, setSelectedContentType] = useState<GroupedEntities>()
@@ -112,6 +111,8 @@ export default function ItemCreate ({ fetchNavigations, navigation, parentId }: 
   const debouncedCheckUrl = useCallback(debounce(checkUrl, 500), []);
 
   const { setModal } = useContext(ModalContext);
+  const { selectedNavigation } = useContext(SelectedNavigationContext);
+
 
   useEffect(() => {
     if (!entities) return
@@ -126,7 +127,6 @@ export default function ItemCreate ({ fetchNavigations, navigation, parentId }: 
           const route = results[0]
 
           if (!route) return
-          console.log(route)
 
           dispatchPath({ type: 'NO_URL_CHECK', payload: route.fullPath });
           dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath });
@@ -184,12 +184,12 @@ export default function ItemCreate ({ fetchNavigations, navigation, parentId }: 
 
   const addItem = async () => {
     try {
-      if (!entityRoute) return
+      if (!entityRoute || !selectedNavigation) return
 
       const settings: NavItemSettings = {
         route: entityRoute.id ?? null,
         parent: parentId ?? null,
-        navigation: navigation.id,
+        navigation: selectedNavigation.id,
       }
 
       if (path.value !== path.initialPath) {

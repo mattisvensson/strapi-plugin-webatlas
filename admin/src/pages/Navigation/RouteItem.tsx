@@ -14,26 +14,21 @@ type RouteItemProps = {
 export default function RouteItem({item, setParentId, setActionItem, parentPath}: RouteItemProps) {
   const fullPath = useRef<string>(item.route.fullPath);
 
-  const contextValue = useContext(ModalContext);
-  let setOpenModal = (_: string) => {};
-
-  if (contextValue !== null) {
-    [, setOpenModal] = contextValue;
-  }
+  const { setModal } = useContext(ModalContext);
 
   const handleAddChildren = () => {
     setParentId(item.id)
-    setOpenModal('ItemCreate')
+    setModal('ItemCreate')
   }
 
   const handleEdit = () => {
     setActionItem(item)
-    setOpenModal('ItemEdit')
+    setModal('ItemEdit')
   }
 
   const handleDelete = () => {
     setActionItem(item)
-    setOpenModal('ItemDelete')
+    setModal('ItemDelete')
   }
 
   return (
