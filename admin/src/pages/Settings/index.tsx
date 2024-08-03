@@ -60,12 +60,9 @@ const Settings = () => {
   }, [config]);
 
   async function save() {
+    if (!settingsState || settingsState.selectedContentTypes.find((cta: ConfigContentType) => !cta.default) !== undefined) return
     lockApp();
 
-    if (!settingsState) {
-      unlockApp();
-      return;
-    }
     try {
       setConfig(settingsState)
       setInitialState(settingsState)
@@ -92,7 +89,12 @@ const Settings = () => {
         subtitle='Settings'
         primaryAction={
           <CheckPermissions permissions={false}>
-            <Button type="submit" startIcon={<Check />} onClick={save} disabled={JSON.stringify(settingsState) === JSON.stringify(initialState)}>
+            <Button
+              type="submit"
+              startIcon={<Check />}
+              onClick={save}
+              disabled={JSON.stringify(settingsState) === JSON.stringify(initialState) || settingsState.selectedContentTypes.find((cta: ConfigContentType) => !cta.default) !== undefined}
+            >
               Save
             </Button>
           </CheckPermissions>
@@ -109,10 +111,6 @@ const Settings = () => {
           paddingTop={6}
           shadow="tableShadow"
         >
-          <Typography variant="h2">Settings</Typography>
-          <Box paddingTop={4} paddingBottom={4}>
-            <Divider/>
-          </Box>
           <Select
             name="selectedContentTypes"
             label='Enabled Content Types'
@@ -133,15 +131,19 @@ const Settings = () => {
                 if (!ct) return null
                 return (
                   <Accordion key={ct.uid} expanded={expandedID === ct.uid} onToggle={handleToggle(ct.uid)} id={ct.uid} size="S">
-                    <AccordionToggle title={ct?.info.displayName} togglePosition="left" />
+                    <Box borderColor={!contentType.default && 'danger500'}>
+                      <AccordionToggle title={ct?.info.displayName} togglePosition="left" />
+                    </Box>
                     <AccordionContent>
                       <Box padding={3}>
                         <Select
+                          required
+                          error={!contentType.default && 'Please select a default field'}
                           name={`defaultField-${ct.uid}`}
                           label='Default URL Alias field'
-                          hint='If you leave this empty, the system will use the content type plus the ID as the default value for the URL alias. For example: /api::page.page/1'
+                          hint='The selected field will be used to generate the URL alias. Use a field that is unique and descriptive, such as a "title" or "name".'
                           onClear={() => dispatch({ type: 'SET_DEFAULT_FIELD', payload: { ctUid: ct.uid, field: '' } })}
-                          value={settingsState.selectedContentTypes.find((cta: ConfigContentType) => cta.uid === ct.uid)?.default || ''}
+                          value={contentType?.default || ''}
                           onChange={(value: string) => dispatch({ type: 'SET_DEFAULT_FIELD', payload: { ctUid: ct.uid, field: value } })}
                         >
                           {Object.entries(ct.attributes).map(([key], index) => {
@@ -155,9 +157,9 @@ const Settings = () => {
                             placeholder="e.g. blog"
                             labelAction={<Tooltip description="Leading and trailing slashes will be removed. Spaces will be replaced with hyphens. Special characters will be encoded."/>}
                             hint="Define the pattern for the URL alias. The default field will be appended to this pattern."
-                            value={settingsState.selectedContentTypes.find((cta: ConfigContentType) => cta.uid === ct.uid)?.pattern}
+                            value={contentType.pattern}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_PATTERN', payload: { ctUid: ct.uid, pattern: e.target.value } })}                
-                            disabled={settingsState.selectedContentTypes.find((cta: ConfigContentType) => cta.uid === ct.uid)?.default ? false : true}
+                            disabled={!contentType.default}
                           />
                         </Box>
                       </Box>
