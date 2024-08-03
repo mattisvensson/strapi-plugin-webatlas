@@ -1,13 +1,9 @@
 export default function getFullPath(parentPath: string, slug: string) {
 
-    if (!slug) return null;
+	if (!slug) return null;
+	if (!parentPath) return slug;
 
-    const newSlug = slug.startsWith('/') ? slug : `/${slug}`;
+	const newPath = parentPath.endsWith('/') ? parentPath : `${parentPath}/`;
 
-    if (!parentPath) return newSlug;
-
-    let newPath = parentPath.startsWith('/') ? parentPath : `/${parentPath}`;
-    newPath = newPath.endsWith('/') ? newPath.slice(0, -1) : newPath;
-
-    return `${newPath}${newSlug}`;
+	return `${newPath}${slug}`;
 }
