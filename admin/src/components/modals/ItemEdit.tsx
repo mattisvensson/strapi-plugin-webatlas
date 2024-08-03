@@ -1,220 +1,233 @@
-import { ModalLayout, ModalBody, ModalFooter, Button, SingleSelect, SingleSelectOption, TextInput, ToggleInput, Box, Divider, Grid, GridItem } from '@strapi/design-system';
-import { useState, useContext, useEffect, useReducer, useRef } from 'react';
-import { ModalContext } from '../../contexts';
-import ModalHeader from './ModalHeader';
-import { Route, NavItemSettings, NestedNavigation, Entity, GroupedEntities, NestedNavItem, RouteSettings } from '../../../../types';
-import useAllEntities from '../../hooks/useAllEntities';
-import useApi from '../../hooks/useApi';
-import transformToUrl from '../../../../utils/transformToUrl';
+  import { ModalLayout, ModalBody, ModalFooter, Button, TextInput, ToggleInput, Box, Divider, Grid, GridItem } from '@strapi/design-system';
+  import { useState, useContext, useEffect, useReducer, useRef, useCallback } from 'react';
+  import { ModalContext } from '../../contexts';
+  import ModalHeader from './ModalHeader';
+  import { GroupedEntities, NestedNavItem, RouteSettings } from '../../../../types';
+  import useAllEntities from '../../hooks/useAllEntities';
+  import useApi from '../../hooks/useApi';
+  import transformToUrl from '../../../../utils/transformToUrl';
+  import debounce from '../../utils/debounce';
+  import duplicateCheck from '../../utils/duplicateCheck';
+  import URLInfo from '../../components/URLInfo';
 
-type ItemOverviewProps = {
-  item: NestedNavItem | undefined;
-  fetchNavigations: () => void;
-  navigation: NestedNavigation;
-  parentId?: number;
-}
+  type ItemOverviewProps = {
+    item: NestedNavItem | undefined;
+    fetchNavigations: () => void;
+  }
 
-type Action = 
-  | { type: 'SET_TITLE'; payload: string }
-  | { type: 'SET_SLUG'; payload: string }
-  | { type: 'SET_ACTIVE'; payload: boolean }
-  | { type: 'SET_INTERNAL'; payload: boolean }
-  | { type: 'SET_OVERRIDE'; payload: boolean };
+  type PathState = {
+    value?: string;
+    prevValue?: string,
+    uidPath?: string,
+    initialPath?: string,
+    needsUrlCheck: boolean;
+  };
 
+  type Action = 
+    | { type: 'SET_TITLE'; payload: string }
+    | { type: 'SET_ACTIVE'; payload: boolean }
+    | { type: 'SET_OVERRIDE'; payload: boolean };
 
-export default function ItemEdit ({ item, fetchNavigations, navigation, parentId }: ItemOverviewProps){
-  const [availableEntities, setAvailableEntities] = useState<GroupedEntities[]>([])
-  const [selectedEntity, setSelectedEntity] = useState<Entity | null>()
-  const [selectedContentType, setSelectedContentType] = useState<GroupedEntities>()
-  const [entityRoute, setEntityRoute] = useState<Route>()
-  const { entities } = useAllEntities();
-  const { getRouteByRelated, updateRoute } = useApi();
+  type PathAction = 
+    | { type: 'DEFAULT'; payload: string }
+    | { type: 'NO_URL_CHECK'; payload: string }
+    | { type: 'NO_TRANSFORM_AND_CHECK'; payload: string }
+    | { type: 'RESET_URL_CHECK_FLAG'; }
+    | { type: 'SET_INITIALPATH'; payload: string }
 
-  const initialState: React.MutableRefObject<RouteSettings> = useRef({
-    title: '',
-    slug: '',
-    active: true,
-    internal: true,
-    isOverride: false,
-  })
-
-  const [navItemState, dispatch] = useReducer(reducer, initialState.current);
-
-  function reducer(navItemState: RouteSettings, action: Action): RouteSettings {
+  function reducer(itemState: RouteSettings, action: Action): RouteSettings {
     switch (action.type) {
       case 'SET_TITLE':
-        return { ...navItemState, title: action.payload };
-      case 'SET_SLUG':
-        return { ...navItemState, slug: transformToUrl(action.payload) };
+        return { ...itemState, title: action.payload };
       case 'SET_ACTIVE':
-        return { ...navItemState, active: action.payload };
-      case 'SET_INTERNAL':
-        return { ...navItemState, internal: action.payload };
+        return { ...itemState, active: action.payload };
       case 'SET_OVERRIDE':
-        return { ...navItemState, isOverride: action.payload };
+        return { ...itemState, isOverride: action.payload };
       default:
         throw new Error();
     }
   }
 
-  const { setModal } = useContext(ModalContext);
-
-  useEffect(() => {
-    if (!entities) return
-    setAvailableEntities(entities)
-
-    if (!item) return
-
-    const contentType = entities.find((group: GroupedEntities) => group.contentType.uid === item.route.relatedContentType)
-    if (contentType) {
-      setSelectedContentType(contentType)
-      const entity = contentType.entities.find((entity: Entity) => entity.id === item.route.relatedId)
-      if (entity) setSelectedEntity(entity)
-    }
-  }, [entities])
-
-  useEffect(() => {
-    async function fetchRoute() {
-      if (selectedContentType?.contentType && selectedEntity?.id) {
-        try {
-          const { results } = await getRouteByRelated(selectedContentType.contentType.uid, selectedEntity.id)
-          const route = results[0]
-
-          if (!route) return
-
-          dispatch({ type: 'SET_TITLE', payload: route.title })
-          dispatch({ type: 'SET_SLUG', payload: route.fullPath })
-          dispatch({ type: 'SET_ACTIVE', payload: route.active })
-          dispatch({ type: 'SET_INTERNAL', payload: route.internal })
-          dispatch({ type: 'SET_OVERRIDE', payload: route.isOverride })
-          
-          initialState.current = {
-            title: route.title,
-            slug: route.fullPath,
-            active: route.active,
-            internal: route.internal,
-            isOverride: route.isOverride,
-          }
-
-          setEntityRoute(route)
-        } catch (err) {
-          console.log(err)
-        }
-      }
-    }
-    fetchRoute()
-  }, [selectedEntity])
-
-  const updateItem = async () => {
-    try {
-      if (!entityRoute) return
-
-      if (JSON.stringify(navItemState) !== JSON.stringify(initialState.current)) {
-        if (navItemState.slug !== entityRoute.fullPath) navItemState.isOverride = true
-        await updateRoute(navItemState, entityRoute.id)
-      }
-
-      fetchNavigations()
-      setModal('')
-    } catch (err) {
-      console.log(err)
+  function pathReducer(state: PathState, action: PathAction): PathState {
+    switch (action.type) {
+      case 'DEFAULT':
+        return { 
+          ...state,
+          value: transformToUrl(action.payload), 
+          prevValue: state.value,
+          needsUrlCheck: true 
+        };
+      case 'NO_URL_CHECK':
+        return { 
+          ...state,
+          value: transformToUrl(action.payload), 
+          prevValue: state.value,
+          needsUrlCheck: false 
+        };
+      case 'NO_TRANSFORM_AND_CHECK':
+        return { 
+          ...state,
+          value: action.payload, 
+          prevValue: state.value,
+          needsUrlCheck: false 
+        };
+      case 'RESET_URL_CHECK_FLAG':
+        return { ...state, needsUrlCheck: false };
+      case 'SET_INITIALPATH':
+        return { ...state, initialPath: action.payload };  
+      default:
+        throw new Error();
     }
   }
-  return (
-    <ModalLayout onClose={() => setModal('')}>
-      <ModalHeader title="Edit navigation item"/>
-      <ModalBody>
-        <Grid gap={8}>
-          <GridItem col={6}>
-            <SingleSelect
-              value={selectedContentType ? selectedContentType.label : ''}
-              label="Content Type"
-              placeholder="Select a content type"
-              onChange={(value: string) => {
-                const [contentType] = availableEntities.filter((group: GroupedEntities) => group.label === value)
-                if (contentType) {
-                  console.log(contentType)
-                  setSelectedContentType(contentType)
-                  setSelectedEntity(null)
-                }
-              }}
-              disabled={availableEntities && availableEntities.length === 0}
-            >
-              {availableEntities &&
-                availableEntities.map((group: GroupedEntities, index) =>
-                  <SingleSelectOption key={index} value={group.label}>{group.label}</SingleSelectOption>)
-              }
-            </SingleSelect>
-          </GridItem>
-          <GridItem col={6}>
-            <SingleSelect
-              value={selectedEntity ? selectedEntity.id : ''}
-              label="Entity"
-              placeholder="Select a entity"
-              onChange={(value: number) => {
-                const flatEntities = availableEntities.flatMap((group: GroupedEntities) => group.entities);
-                const route = flatEntities.find((route: Entity) => route.id === Number(value));
-                console.log(route)
-                if (route) setSelectedEntity(route);
-              }}
-              disabled={selectedContentType?.entities && selectedContentType?.entities.length === 0}
-            >
-              {selectedContentType &&
-                selectedContentType.entities?.map((entity: Entity) =>
-                  <SingleSelectOption key={entity.id} value={entity.id}>{entity.id} - {entity.Title}</SingleSelectOption>
-                )
-              }
-            </SingleSelect>
-          </GridItem>
-        </Grid>
-        {selectedEntity && selectedContentType &&
-          <>
-            <Box paddingBottom={6} paddingTop={6}>
-              <Divider/>
-            </Box>
-            <Box>
-              <Grid gap={8} paddingBottom={6} >
-                <GridItem col={6}>
-                  <TextInput
-                    placeholder="My Title"
-                    label="Title"
-                    name="title"
-                    value={navItemState.title}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_TITLE', payload: e.target.value })}
+
+  export default function ItemEdit ({ item, fetchNavigations }: ItemOverviewProps){
+    const initialState: React.MutableRefObject<RouteSettings> = useRef({
+      title: item?.route.title,
+      active: item?.route.active,
+      isOverride: item?.route.isOverride,
+    })
+    
+    const [selectedContentType, setSelectedContentType] = useState<GroupedEntities>()
+    const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
+    const [replacement, setReplacement] = useState<string>('')
+    const { entities } = useAllEntities();
+    const { updateRoute } = useApi();
+    const [itemState, dispatch] = useReducer(reducer, initialState.current);
+    const [path, dispatchPath] = useReducer(pathReducer, {
+      value: item?.route.fullPath,
+      initialPath: item?.route.fullPath,
+      needsUrlCheck: false
+    });
+    const { setModal } = useContext(ModalContext);
+
+    const debouncedCheckUrl = useCallback(debounce(checkUrl, 500), []);
+
+    if (!item) return null
+
+    useEffect(() => {
+      if (!entities) return
+
+      const contentType = entities.find((group: GroupedEntities) => group.contentType.uid === item.route.relatedContentType)
+      if (contentType) setSelectedContentType(contentType)
+    }, [entities])
+
+    useEffect(() => {
+      if (path.needsUrlCheck && path.value) {
+        if (path.uidPath === path.value || path.initialPath === path.value) return
+        debouncedCheckUrl(path.value, item.route.id);
+        dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
+      }
+    }, [path.needsUrlCheck, item.route.id]);
+
+    
+    async function checkUrl(url: string, routeId?: number | null) {
+      if (!url) return
+      setValidationState('checking')
+      setReplacement('')
+      
+      try {
+        const data = await duplicateCheck(url, routeId)
+
+        if (!data || data === url) return 
+
+        dispatchPath({ type: 'NO_URL_CHECK', payload: data });
+        setReplacement(data)
+      } catch (err) {
+        console.log(err)
+      } finally {
+        setValidationState('done')
+      }
+    }
+
+    const updateItem = async () => {
+      try {
+        if (JSON.stringify(itemState) === JSON.stringify(initialState.current) && path.value === path.initialPath) return
+        
+        if (itemState.slug !== item.route.fullPath) dispatch({ type: 'SET_OVERRIDE', payload: true })
+        
+        await updateRoute({
+          ...itemState,
+          slug: path.value
+        }, item.route.id)
+
+        fetchNavigations()
+        setModal('')
+      } catch (err) {
+        console.log(err)
+      }
+    }
+
+    if (!selectedContentType) return null
+
+    return (
+      <ModalLayout onClose={() => setModal('')}>
+        <ModalHeader title={`Edit ${selectedContentType.label} "${item.route.title}"`}/>
+        <ModalBody>
+          <Grid gap={8}>
+            <GridItem col={6}>
+              <TextInput
+                value={selectedContentType.label}
+                label="Content Type"
+                disabled
+              />
+            </GridItem>
+            <GridItem col={6}>
+              <TextInput
+                value={`${item.route.relatedId} - ${item.route.title}`}
+                label="Entity"
+                disabled
+              />
+            </GridItem>
+          </Grid>
+          <Box paddingBottom={6} paddingTop={6}>
+            <Divider/>
+          </Box>
+          <Box>
+            <Grid gap={8} paddingBottom={6} >
+              <GridItem col={6}>
+                <TextInput
+                  placeholder="My Title"
+                  label="Title"
+                  name="title"
+                  value={itemState.title}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_TITLE', payload: e.target.value })}
+                  required
+                />
+              </GridItem>
+              <GridItem col={6}>
+                <TextInput
                     required
-                  />
-                </GridItem>
-                <GridItem col={6}>
-                  <TextInput
                     placeholder="about/"
                     label="Path"
                     name="slug"
-                    value={navItemState.slug}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_SLUG', payload: e.target.value })}
-                    required
+                    value={path.value}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}
+                    onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      if (e.target.value === path.prevValue) return
+                      dispatchPath({ type: 'DEFAULT', payload: e.target.value })}
+                    }
                   />
-                </GridItem>
-              </Grid>
-              <Grid gap={8}>
-                <GridItem col={6}>
-                  <ToggleInput
-                    label="Is visible?"
-                    onLabel="Yes"
-                    offLabel="No"
-                    hint='This menu item does not show on your site, if set to "no".'
-                    checked={navItemState.active}
-                    onClick={() => dispatch({ type: 'SET_ACTIVE', payload: !navItemState.active })}
-                  />
-                </GridItem>
-              </Grid>
-            </Box>
-          </>
-        }
-      </ModalBody>
-      <ModalFooter
-        startActions={<Button onClick={() => setModal('')} variant="tertiary">Cancel</Button>}
-        endActions={<Button onClick={() => updateItem()} disabled={JSON.stringify(navItemState) === JSON.stringify(initialState.current)}>Save</Button>}
-      />
-    </ModalLayout>
-  )
-}
+                  <URLInfo validationState={validationState} replacement={replacement} />
+              </GridItem>
+            </Grid>
+            <Grid gap={8}>
+              <GridItem col={6}>
+                <ToggleInput
+                  label="Is visible?"
+                  onLabel="Yes"
+                  offLabel="No"
+                  hint='This menu item does not show on your site, if set to "no".'
+                  checked={itemState.active}
+                  onClick={() => dispatch({ type: 'SET_ACTIVE', payload: !itemState.active })}
+                />
+              </GridItem>
+            </Grid>
+          </Box>
+        </ModalBody>
+        <ModalFooter
+          startActions={<Button onClick={() => setModal('')} variant="tertiary">Cancel</Button>}
+          endActions={<Button onClick={() => updateItem()} disabled={JSON.stringify(itemState) === JSON.stringify(initialState.current) && path.value === path.initialPath}>Save</Button>}
+        />
+      </ModalLayout>
+    )
+  }
