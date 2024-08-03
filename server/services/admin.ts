@@ -63,16 +63,16 @@ export default ({strapi}) => ({
   },
 
   async updateRoute(id, data) {
-    
-    const parent = data.parent ? await strapi.entityService.findOne('plugin::url-routes.navitem', data.parent) : null;
-
-    const fullPath = data.isOverride ? data.slug : getFullPath(parent?.fullPath, data.slug)
-
     try {
+      const parent = data.parent ? await strapi.entityService.findOne('plugin::url-routes.navitem', data.parent) : null;
+      
+      const fullPath = data.isOverride ? data.slug : getFullPath(parent?.fullPath, data.slug)
+      const checkedPath = await duplicateCheck(fullPath, id);
+
       const entity = await strapi.entityService.update('plugin::url-routes.route', id, {
         data: {
           ...data,
-          fullPath,
+          fullPath: checkedPath,
         },
       });
 
@@ -148,6 +148,8 @@ export default ({strapi}) => ({
       const navigation = await strapi.entityService.findOne('plugin::url-routes.navigation', id, {
         populate: ['items', "items.parent", "items.route"],
       });
+
+      console.log(navigation)
 
       return getNestedNavigation(navigation)
     } catch (e) {
