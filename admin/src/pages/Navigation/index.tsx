@@ -55,49 +55,6 @@ const Navigation = () => {
       setSelectedNavigation(navigations[0])
   }, [navigations]);
 
-  const renderModal = () => {
-    if (!selectedNavigation) return
-    if (openModal === 'ItemCreate' ) {
-        return (
-          <ItemCreate
-            fetchNavigations={fetchNavigations}
-            navigation={selectedNavigation}
-            parentId={parentId}
-          />
-        );
-    } else if (openModal === 'ItemEdit') {
-      if ((isNestedNavItem(actionItem) || actionItem === undefined) && selectedNavigation) {
-        return (
-          <ItemEdit
-            item={actionItem}
-            fetchNavigations={fetchNavigations}
-            navigation={selectedNavigation}
-            parentId={parentId}
-          />
-        );
-      }
-    } else if (openModal === 'overview') {
-      return <NavOverview navigations={navigations} setActionItem={setActionItem} />;
-    } else if (openModal === 'create') {
-      return <NavCreate fetchNavigations={fetchNavigations} />;
-    } else if (openModal === 'externalCreate') {
-      return (
-        <ExternalCreate
-          fetchNavigations={fetchNavigations}
-          navigation={selectedNavigation}
-          parentId={parentId}
-        />
-      )
-    } else if (openModal === 'edit' && isNestedNavigation(actionItem)) {
-      return <NavEdit item={actionItem} fetchNavigations={fetchNavigations} />;
-    } else if (openModal === "NavDelete" && isNestedNavigation(actionItem)) {
-      return <Delete variant="NavDelete" item={actionItem} fetchNavigations={fetchNavigations} />;
-    } else if (openModal === "ItemDelete" && isNestedNavItem(actionItem)) {
-      return <Delete variant="ItemDelete" item={actionItem} fetchNavigations={fetchNavigations} />;
-    }
-    return null;
-  };
-
   return (
     <ModalContext.Provider value={{modal, setModal}}>
       <SelectedNavigationContext.Provider value={{selectedNavigation, setSelectedNavigation}}>
@@ -127,7 +84,14 @@ const Navigation = () => {
             {navigationItems?.length === 0 && <EmptyNav msg="Your navigation is empty..." buttonText='Add new item' modal="ItemCreate"/>}
           </ContentLayout>
         </Layout>
-        {renderModal()}
+        {modal === 'overview' && <NavOverview navigations={navigations} setActionItem={setActionItem} />}
+        {modal === 'create' && <NavCreate fetchNavigations={fetchNavigations} />}
+        {modal === 'edit' && isNestedNavigation(actionItem) && <NavEdit item={actionItem} fetchNavigations={fetchNavigations} />}
+        {modal === "NavDelete" && isNestedNavigation(actionItem) && <Delete variant="NavDelete" item={actionItem} fetchNavigations={fetchNavigations} />}
+        {modal === "ItemDelete" && isNestedNavItem(actionItem) && <Delete variant="ItemDelete" item={actionItem} fetchNavigations={fetchNavigations} />}
+        {modal === 'ItemCreate' && <ItemCreate fetchNavigations={fetchNavigations} parentId={parentId}/>}
+        {modal === 'ItemEdit' && isNestedNavItem(actionItem) && <ItemEdit item={actionItem} fetchNavigations={fetchNavigations}/>}
+        {modal === 'externalCreate' && <ExternalCreate fetchNavigations={fetchNavigations} parentId={parentId}/>}
       </SelectedNavigationContext.Provider>
     </ModalContext.Provider>
   );
