@@ -31,7 +31,6 @@ export default {
       relation: "oneToOne",
       target: "plugin::url-routes.route",
       configurable: false,
-
     },
     parent: {
       type: "relation",
