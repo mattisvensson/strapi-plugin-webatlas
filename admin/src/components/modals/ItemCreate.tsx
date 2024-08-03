@@ -157,18 +157,18 @@ export default function ItemCreate ({ fetchNavigations, parentId }: ItemOverview
   useEffect(() => {
 		if (path.needsUrlCheck && path.value) {
 			if (path.uidPath === path.value || path.initialPath === path.value) return
-			debouncedCheckUrl(path.value);
+			debouncedCheckUrl(path.value, entityRoute?.id);
 			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
     }
-  }, [path.needsUrlCheck]);
+  }, [path.needsUrlCheck, entityRoute?.id]);
 
-  async function checkUrl(url: string) {
+  async function checkUrl(url: string, routeId?: number | null) {
 		if (!url) return
     setValidationState('checking')
 		setReplacement('')
 		
 		try {
-			const data = await duplicateCheck(url)
+			const data = await duplicateCheck(url, routeId)
 
 			if (!data || data === url) return 
 
