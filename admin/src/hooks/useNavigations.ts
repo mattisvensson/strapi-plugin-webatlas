@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useFetchClient } from '@strapi/helper-plugin';
-import { NavItem } from '../../../types';
+import { NestedNavigation } from '../../../types';
 
 export default function useNavigations () {
   const { get } = useFetchClient();
-  const [navigations, setNavigations] = useState<NavItem[]>([]);
+  const [navigations, setNavigations] = useState<NestedNavigation[]>([]);
   
   const fetchNavigations = async () => {
     const { data } = await get('/url-routes/navigation');
@@ -15,5 +15,5 @@ export default function useNavigations () {
     fetchNavigations();
   }, []);
 
-  return [navigations, fetchNavigations];
+  return { navigations, fetchNavigations };
 };

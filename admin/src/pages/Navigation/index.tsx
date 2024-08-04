@@ -25,7 +25,7 @@ import { isNestedNavigation, isNestedNavItem} from '../../utils/typeChecks';
 import ExternalCreate from '../../components/modals/ExternalCreate';
 
 const Navigation = () => {
-  const [navigations, fetchNavigations] = useNavigations() as [NestedNavigation[], () => Promise<void>];
+  const { navigations, fetchNavigations } = useNavigations();
   const [modal, setModal] = useState<string>('');
   const [selectedNavigation, setSelectedNavigation] = useState<NestedNavigation>();
   const [navigationItems, setNavigationItems] = useState<NestedNavItem[]>();
