@@ -149,3 +149,43 @@ export type NavOverviewRoute = {
   internal: boolean;
   isOverride: boolean;
 }
+
+
+// Modals
+type ModalItem_VariantCreate = {
+  variant: 'ItemCreate';
+  parentId?: number;
+}
+
+type ModalItem_VariantEdit = {
+  variant: 'ItemEdit';
+  item: NestedNavItem;
+}
+
+type modalSharedLogic = {
+  availableEntities: GroupedEntities[],
+  setAvailableEntities: (value: GroupedEntities[]) => void,
+  selectedEntity: Entity | null | undefined,
+  setSelectedEntity: (value: Entity | null | undefined) => void,
+  selectedContentType: GroupedEntities | undefined,
+  setSelectedContentType: (value: GroupedEntities) => void,
+  entityRoute: Route | undefined,
+  setEntityRoute: (value: Route) => void,
+  entities: GroupedEntities[],
+  createNavItem: (NavItemSettings) => Promise<any>,
+  updateRoute: (body: RouteSettings, id: number) => Promise<any>,
+  getRouteByRelated: (relatedCt: string, relatedId: number, populate?: string) => Promise<any>,
+  replacement: string,
+  setReplacement: (value: string) => void,
+  validationState: 'initial' | 'checking' | 'done',
+  setValidationState: (value: 'initial' | 'checking' | 'done') => void,
+  initialState: React.MutableRefObject<RouteSettings>,
+  navItemState: RouteSettings,
+  dispatchItemState: React.Dispatch<Action>,
+  path: PathState,
+  dispatchPath: React.Dispatch<PathAction>,
+  debouncedCheckUrl: (url: string, routeId?: number | null | undefined) => void,
+  modal: string,
+  setModal: (value: string) => void,
+  selectedNavigation: NestedNavigation | undefined,
+}
