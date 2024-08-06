@@ -91,7 +91,7 @@ const Navigation = () => {
         {modal === "NavDelete" && isNestedNavigation(actionItem) && <Delete variant="NavDelete" item={actionItem} fetchNavigations={fetchNavigations} />}
         {modal === "ItemDelete" && isNestedNavItem(actionItem) && <Delete variant="ItemDelete" item={actionItem} fetchNavigations={fetchNavigations} />}
         {modal === 'ItemCreate' && <ItemCreate variant={modal} parentId={parentId}/>}
-        {modal === 'ItemEdit' && isNestedNavItem(actionItem) && <ItemEdit variant={modal} item={actionItem} parentId={parentId}/>}
+        {modal === 'ItemEdit' && isNestedNavItem(actionItem) && <ItemEdit variant={modal} item={actionItem}/>}
         {modal === 'externalCreate' && <ExternalCreate fetchNavigations={fetchNavigations} parentId={parentId}/>}
       </SelectedNavigationContext.Provider>
     </ModalContext.Provider>
