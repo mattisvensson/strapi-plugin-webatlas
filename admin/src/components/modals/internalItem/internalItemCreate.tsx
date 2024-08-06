@@ -1,123 +1,49 @@
 import { ModalLayout, ModalBody, ModalFooter, Button, SingleSelect, SingleSelectOption, TextInput, ToggleInput, Box, Divider, Grid, GridItem } from '@strapi/design-system';
-import { useState, useContext, useEffect, useReducer, useRef, useCallback } from 'react';
-import { ModalContext, SelectedNavigationContext } from '../../contexts';
-import ModalHeader from './ModalHeader';
-import { Route, NavItemSettings, Entity, GroupedEntities, RouteSettings } from '../../../../types';
-import useAllEntities from '../../hooks/useAllEntities';
-import useApi from '../../hooks/useApi';
-import transformToUrl from '../../../../utils/transformToUrl';
-import duplicateCheck from '../../utils/duplicateCheck';
-import debounce from '../../utils/debounce';
-import URLInfo from '../../components/URLInfo';
+import ModalHeader from '../ModalHeader';
+import { withModalSharedLogic } from '../withModalSharedLogic';
+import { NavItemSettings, Entity, GroupedEntities, ModalItem_VariantCreate, ModalItem_VariantEdit } from '../../../../../types';
+import URLInfo from '../../URLInfo';
+import { useEffect } from 'react';
+import { useModalSharedLogic } from '../useModalSharedLogic';
 
-type ItemOverviewProps = {
-  fetchNavigations: () => void;
-  parentId?: number;
-}
-
-type PathState = {
-	value?: string;
-	prevValue?: string,
-	uidPath?: string,
-	initialPath?: string,
-	needsUrlCheck: boolean;
-};
-
-type Action = 
-  | { type: 'SET_TITLE'; payload: string }
-  | { type: 'SET_ACTIVE'; payload: boolean }
-  | { type: 'SET_INTERNAL'; payload: boolean }
-  | { type: 'SET_OVERRIDE'; payload: boolean };
-
-type PathAction = 
-  | { type: 'DEFAULT'; payload: string }
-  | { type: 'NO_URL_CHECK'; payload: string }
-  | { type: 'NO_TRANSFORM_AND_CHECK'; payload: string }
-  | { type: 'RESET_URL_CHECK_FLAG'; }
-  | { type: 'SET_UIDPATH'; payload: string }
-  | { type: 'SET_INITIALPATH'; payload: string }
-
-
-function reducer(navItemState: RouteSettings, action: Action): RouteSettings {
-  switch (action.type) {
-    case 'SET_TITLE':
-      return { ...navItemState, title: action.payload };
-    case 'SET_ACTIVE':
-      return { ...navItemState, active: action.payload };
-    case 'SET_INTERNAL':
-      return { ...navItemState, internal: action.payload };
-    case 'SET_OVERRIDE':
-      return { ...navItemState, isOverride: action.payload };
-    default:
-      throw new Error();
-  }
-}
-
-function pathReducer(state: PathState, action: PathAction): PathState {
-  switch (action.type) {
-    case 'DEFAULT':
-      return { 
-        ...state,
-        value: transformToUrl(action.payload), 
-        prevValue: state.value,
-        needsUrlCheck: true 
-      };
-    case 'NO_URL_CHECK':
-      return { 
-        ...state,
-        value: transformToUrl(action.payload), 
-        prevValue: state.value,
-        needsUrlCheck: false 
-      };
-    case 'NO_TRANSFORM_AND_CHECK':
-      return { 
-        ...state,
-        value: action.payload, 
-        prevValue: state.value,
-        needsUrlCheck: false 
-      };
-    case 'RESET_URL_CHECK_FLAG':
-      return { ...state, needsUrlCheck: false };
-    case 'SET_UIDPATH':
-      return { ...state, uidPath: action.payload };  
-    case 'SET_INITIALPATH':
-      return { ...state, initialPath: action.payload };  
-    default:
-      throw new Error();
-  }
-}
-
-export default function ItemCreate ({ fetchNavigations, parentId }: ItemOverviewProps){
-  const [availableEntities, setAvailableEntities] = useState<GroupedEntities[]>([])
-  const [selectedEntity, setSelectedEntity] = useState<Entity | null>()
-  const [selectedContentType, setSelectedContentType] = useState<GroupedEntities>()
-  const [entityRoute, setEntityRoute] = useState<Route>()
-  const { entities } = useAllEntities();
-  const { createNavItem, updateRoute, getRouteByRelated } = useApi();
-  const [replacement, setReplacement] = useState<string>('')
-  const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
-
-  const initialState: React.MutableRefObject<RouteSettings> = useRef({
-    title: '',
-    slug: '',
-    active: true,
-    internal: true,
-    isOverride: false,
-  })
-
-  const [navItemState, dispatch] = useReducer(reducer, initialState.current);
-  const [path, dispatchPath] = useReducer(pathReducer, {needsUrlCheck: false});
-
-  const debouncedCheckUrl = useCallback(debounce(checkUrl, 500), []);
-
-  const { setModal } = useContext(ModalContext);
-  const { selectedNavigation } = useContext(SelectedNavigationContext);
-
+function ItemCreateComponent({ 
+  availableEntities,
+  setAvailableEntities,
+  selectedEntity,
+  setSelectedEntity,
+  selectedContentType,
+  setSelectedContentType,
+  entityRoute,
+  setEntityRoute,
+  entities,
+  createNavItem,
+  updateRoute,
+  getRouteByRelated,
+  replacement,
+  validationState,
+  initialState,
+  navItemState,
+  dispatchItemState,
+  path,
+  dispatchPath,
+  debouncedCheckUrl,
+  setModal,
+  selectedNavigation,
+  parentId,
+}: ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>) {
 
   useEffect(() => {
     if (!entities) return
     setAvailableEntities(entities)
   }, [entities])
+
+  useEffect(() => {
+    if (path.needsUrlCheck && path.value) {
+      if (path.uidPath === path.value || path.initialPath === path.value) return
+			debouncedCheckUrl(path.value, entityRoute?.id);
+			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
+    }
+  }, [path.needsUrlCheck, entityRoute?.id]);
 
   useEffect(() => {
     async function fetchRoute() {
@@ -132,10 +58,10 @@ export default function ItemCreate ({ fetchNavigations, parentId }: ItemOverview
           dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath });
           dispatchPath({ type: 'SET_INITIALPATH', payload: route.fullPath });
 
-          dispatch({ type: 'SET_TITLE', payload: route.title })
-          dispatch({ type: 'SET_ACTIVE', payload: route.active })
-          dispatch({ type: 'SET_INTERNAL', payload: route.internal })
-          dispatch({ type: 'SET_OVERRIDE', payload: route.isOverride })
+          dispatchItemState({ type: 'SET_TITLE', payload: route.title })
+          dispatchItemState({ type: 'SET_ACTIVE', payload: route.active })
+          dispatchItemState({ type: 'SET_INTERNAL', payload: route.internal })
+          dispatchItemState({ type: 'SET_OVERRIDE', payload: route.isOverride })
           
           initialState.current = {
             title: route.title,
@@ -153,35 +79,8 @@ export default function ItemCreate ({ fetchNavigations, parentId }: ItemOverview
     }
     fetchRoute()
   }, [selectedEntity])
+
   
-  useEffect(() => {
-		if (path.needsUrlCheck && path.value) {
-			if (path.uidPath === path.value || path.initialPath === path.value) return
-			debouncedCheckUrl(path.value, entityRoute?.id);
-			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
-    }
-  }, [path.needsUrlCheck, entityRoute?.id]);
-
-  async function checkUrl(url: string, routeId?: number | null) {
-		if (!url) return
-    setValidationState('checking')
-		setReplacement('')
-		
-		try {
-			const data = await duplicateCheck(url, routeId)
-
-			if (!data || data === url) return 
-
-			dispatchPath({ type: 'NO_URL_CHECK', payload: data });
-			setReplacement(data)
-		} catch (err) {
-			console.log(err)
-		} finally {
-      setValidationState('done')
-    }
-	}
-
-
   const addItem = async () => {
     try {
       if (!entityRoute || !selectedNavigation) return
@@ -199,12 +98,12 @@ export default function ItemCreate ({ fetchNavigations, parentId }: ItemOverview
 
       await createNavItem(settings);
 
-      fetchNavigations()
       setModal('')
     } catch (err) {
       console.log(err)
     }
   }
+
   return (
     <ModalLayout onClose={() => setModal('')}>
       <ModalHeader title="Add new navigation item"/>
@@ -225,7 +124,7 @@ export default function ItemCreate ({ fetchNavigations, parentId }: ItemOverview
               disabled={availableEntities && availableEntities.length === 0}
             >
               {availableEntities &&
-                availableEntities.map((group: GroupedEntities, index) =>
+                availableEntities.map((group: GroupedEntities, index: number) =>
                   <SingleSelectOption key={index} value={group.label}>{group.label}</SingleSelectOption>)
               }
             </SingleSelect>
@@ -244,7 +143,7 @@ export default function ItemCreate ({ fetchNavigations, parentId }: ItemOverview
             >
               {selectedContentType &&
                 selectedContentType.entities?.map((entity: Entity) =>
-                  <SingleSelectOption key={entity.id} value={entity.id}>{entity.id} - {entity.Title}</SingleSelectOption>
+                  <SingleSelectOption key={entity.id} value={entity.id}>{entity.id} - {entity[selectedContentType.contentType.default]}</SingleSelectOption>
                 )
               }
             </SingleSelect>
@@ -263,7 +162,7 @@ export default function ItemCreate ({ fetchNavigations, parentId }: ItemOverview
                     label="Title"
                     name="title"
                     value={navItemState.title}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_TITLE', payload: e.target.value })}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchItemState({ type: 'SET_TITLE', payload: e.target.value })}
                     required
                   />
                 </GridItem>
@@ -273,7 +172,7 @@ export default function ItemCreate ({ fetchNavigations, parentId }: ItemOverview
                     placeholder="about/"
                     label="Path"
                     name="slug"
-                    value={path.value}
+                    value={path?.value}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}
                     onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
                       if (e.target.value === path.prevValue) return
@@ -291,7 +190,7 @@ export default function ItemCreate ({ fetchNavigations, parentId }: ItemOverview
                     offLabel="No"
                     hint='This menu item does not show on your site, if set to "no".'
                     checked={navItemState.active}
-                    onClick={() => dispatch({ type: 'SET_ACTIVE', payload: !navItemState.active })}
+                    onClick={() => dispatchItemState({ type: 'SET_ACTIVE', payload: !navItemState.active })}
                   />
                 </GridItem>
               </Grid>
@@ -310,5 +209,7 @@ export default function ItemCreate ({ fetchNavigations, parentId }: ItemOverview
         }
       />
     </ModalLayout>
-  )
+  );
 }
+
+export const ItemCreate = withModalSharedLogic<ModalItem_VariantCreate>(ItemCreateComponent);

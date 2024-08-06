@@ -73,7 +73,7 @@ export type ContentType = {
 
 export type ConfigContentType = {
   uid: string;
-  default?: string;
+  default: string;
   pattern?: string;
 }
 
