@@ -64,10 +64,14 @@ export default ({strapi}) => ({
 
   async updateRoute(id, data) {
     try {
-      const parent = data.parent ? await strapi.entityService.findOne('plugin::url-routes.navitem', data.parent) : null;
+      let checkedPath = data.fullPath
       
-      const fullPath = data.isOverride ? data.slug : getFullPath(parent?.fullPath, data.slug)
-      const checkedPath = await duplicateCheck(fullPath, id);
+      if (data.internal) {
+        const parent = data.parent ? await strapi.entityService.findOne('plugin::url-routes.navitem', data.parent) : null;
+        
+        const fullPath = data.isOverride ? data.slug : getFullPath(parent?.fullPath, data.slug)
+        checkedPath = await duplicateCheck(fullPath, id);
+      }
 
       const entity = await strapi.entityService.update('plugin::url-routes.route', id, {
         data: {

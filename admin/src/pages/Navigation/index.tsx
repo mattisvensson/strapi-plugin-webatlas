@@ -20,9 +20,9 @@ import useNavigations from '../../hooks/useNavigations';
 import RouteItem from './RouteItem';
 import useApi from '../../hooks/useApi';
 import { isNestedNavigation, isNestedNavItem} from '../../utils/typeChecks';
-import ExternalCreate from '../../components/modals/ExternalCreate';
 import { ItemCreate } from '../../components/modals/internalItem/internalItemCreate';
 import { ItemEdit } from '../../components/modals/internalItem/internalItemEdit';
+import { ExternalItem } from '../../components/modals/externalItem/externalItem';
 
 const Navigation = () => {
   const { navigations, fetchNavigations } = useNavigations();
@@ -90,9 +90,10 @@ const Navigation = () => {
         {modal === 'edit' && isNestedNavigation(actionItem) && <NavEdit item={actionItem} fetchNavigations={fetchNavigations} />}
         {modal === "NavDelete" && isNestedNavigation(actionItem) && <Delete variant="NavDelete" item={actionItem} fetchNavigations={fetchNavigations} />}
         {modal === "ItemDelete" && isNestedNavItem(actionItem) && <Delete variant="ItemDelete" item={actionItem} fetchNavigations={fetchNavigations} />}
-        {modal === 'ItemCreate' && <ItemCreate variant={modal} parentId={parentId}/>}
-        {modal === 'ItemEdit' && isNestedNavItem(actionItem) && <ItemEdit variant={modal} item={actionItem}/>}
-        {modal === 'externalCreate' && <ExternalCreate fetchNavigations={fetchNavigations} parentId={parentId}/>}
+        {modal === 'ItemCreate' && <ItemCreate parentId={parentId}/>}
+        {modal === 'ItemEdit' && isNestedNavItem(actionItem) && <ItemEdit item={actionItem}/>}
+        {modal === 'ExternalCreate' && <ExternalItem variant={modal} parentId={parentId}/>}
+        {modal === 'ExternalEdit' && isNestedNavItem(actionItem) && <ExternalItem variant={modal} item={actionItem}/>}
       </SelectedNavigationContext.Provider>
     </ModalContext.Provider>
   );

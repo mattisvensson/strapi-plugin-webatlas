@@ -85,7 +85,7 @@ export function useModalSharedLogic() {
   const [replacement, setReplacement] = useState<string>('');
   const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
   const { entities } = useAllEntities();
-  const { createNavItem, updateRoute, getRouteByRelated } = useApi();
+  const { createNavItem, updateRoute, getRouteByRelated, createExternalRoute } = useApi();
 
   const initialState: React.MutableRefObject<RouteSettings> = useRef({
     title: '',
@@ -133,6 +133,7 @@ export function useModalSharedLogic() {
     setEntityRoute,
     entities,
     createNavItem,
+    createExternalRoute,
     updateRoute,
     getRouteByRelated,
     replacement,

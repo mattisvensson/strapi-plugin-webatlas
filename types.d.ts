@@ -153,12 +153,10 @@ export type NavOverviewRoute = {
 
 // Modals
 type ModalItem_VariantCreate = {
-  variant: 'ItemCreate';
   parentId?: number;
 }
 
 type ModalItem_VariantEdit = {
-  variant: 'ItemEdit';
   item: NestedNavItem;
 }
 
@@ -173,6 +171,7 @@ type modalSharedLogic = {
   setEntityRoute: (value: Route) => void,
   entities: GroupedEntities[],
   createNavItem: (NavItemSettings) => Promise<any>,
+  createExternalRoute: (body: RouteSettings) => Promise<any>,
   updateRoute: (body: RouteSettings, id: number) => Promise<any>,
   getRouteByRelated: (relatedCt: string, relatedId: number, populate?: string) => Promise<any>,
   replacement: string,
