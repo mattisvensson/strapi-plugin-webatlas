@@ -70,7 +70,7 @@ function ExternalItemComponent({
 
   return (
     <ModalLayout onClose={() => setModal('')}>
-      <ModalHeader title={`Edit external route "${navItemState.title}"`}/>
+      <ModalHeader title={variant ===  'ExternalCreate' ? 'Create new external item' : `Edit external route "${navItemState.title}"`}/>
       <ModalBody>
         <Grid gap={8}>
           <GridItem col={6}>
@@ -117,7 +117,7 @@ function ExternalItemComponent({
           <>
             <Button variant="secondary" onClick={() => setModal('ItemCreate')}>Add internal link</Button>
             <Button variant="secondary" onClick="">Add wrapper component</Button>
-            <Button disabled={!navItemState.title || !path} onClick={() => addItem()}>Save</Button>
+            <Button disabled={!navItemState.title || !path} onClick={() => addItem()}>{variant === 'ExternalCreate' ? 'Add item' : 'Save'}</Button>
           </>
         }
       />
