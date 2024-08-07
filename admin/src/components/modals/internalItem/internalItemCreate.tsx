@@ -202,7 +202,7 @@ function ItemCreateComponent({
         startActions={<Button onClick={() => setModal('')} variant="tertiary">Cancel</Button>}
         endActions={
           <>
-            <Button variant="secondary" onClick={() => setModal('externalCreate')}>Add external link</Button>
+            <Button variant="secondary" onClick={() => setModal('ExternalCreate')}>Add external link</Button>
             <Button variant="secondary" onClick="">Add wrapper component</Button>
             <Button disabled={!selectedEntity} onClick={() => addItem()}>Add item</Button>
           </>

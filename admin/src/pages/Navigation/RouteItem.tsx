@@ -23,7 +23,7 @@ export default function RouteItem({item, setParentId, setActionItem, parentPath}
 
   const handleEdit = () => {
     setActionItem(item)
-    let newModal = item.route.internal ? 'ItemEdit' : 'externalEdit'
+    let newModal = item.route.internal ? 'ItemEdit' : 'ExternalEdit'
     setModal(newModal)
   }
 
