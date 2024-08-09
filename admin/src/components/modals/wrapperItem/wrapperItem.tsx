@@ -6,12 +6,12 @@ import { useModalSharedLogic } from '../useModalSharedLogic';
 import React, { useEffect } from 'react';
 
 type externalItemProps = {
-  variant: 'ExternalCreate' | 'ExternalEdit';
+  variant: 'WrapperCreate' | 'WrapperEdit';
   item?: NestedNavItem;
   parentId?: number;
 }
 
-function ExternalItemComponent({ 
+function WrapperItemComponent({ 
   variant,
   item,
   createNavItem,
@@ -19,7 +19,6 @@ function ExternalItemComponent({
   dispatchItemState,
   createExternalRoute,
   updateRoute,
-  path,
   dispatchPath,
   setModal,
   selectedNavigation,
@@ -27,7 +26,7 @@ function ExternalItemComponent({
 }: externalItemProps & ReturnType<typeof useModalSharedLogic>) {
   
   useEffect(() => {
-    if (variant !== 'ExternalEdit' || !item) return
+    if (variant !== 'WrapperEdit' || !item) return
 
     dispatchItemState({ type: 'SET_TITLE', payload: item.route.title })
     dispatchItemState({ type: 'SET_ACTIVE', payload: item.route.active })
@@ -37,16 +36,16 @@ function ExternalItemComponent({
   const addItem = async () => {
     try {
 
-      if (!path || !navItemState.title || !selectedNavigation) return
+      if (!navItemState.title || !selectedNavigation) return
 
       const data = {
         title: navItemState.title,
-        fullPath: path.value,
         active: navItemState.active,
         internal: false,
+        wrapper: true,
       }
 
-      if (variant === 'ExternalEdit' && item) {
+      if (variant === 'WrapperEdit' && item) {
         await updateRoute(data, item.route.id)
       } else {
         const route = await createExternalRoute(data)
@@ -70,7 +69,7 @@ function ExternalItemComponent({
 
   return (
     <ModalLayout onClose={() => setModal('')}>
-      <ModalHeader title={variant ===  'ExternalCreate' ? 'Create new external item' : `Edit external route "${navItemState.title}"`}/>
+      <ModalHeader title={variant === 'WrapperCreate' ? 'Create new wrapper item' : `Edit external route "${navItemState.title}"`}/>
       <ModalBody>
         <Grid gap={8}>
           <GridItem col={6}>
@@ -81,17 +80,6 @@ function ExternalItemComponent({
               value={navItemState.title}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchItemState({ type: 'SET_TITLE', payload: e.target.value })}
               required
-            />
-          </GridItem>
-          <GridItem col={6}>
-            <TextInput
-              required
-              placeholder="https://example.com"
-              label="Path"
-              name="slug"
-              value={path.value}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}
-  
             />
           </GridItem>
         </Grid>
@@ -116,8 +104,8 @@ function ExternalItemComponent({
         endActions={
           <>
             <Button variant="secondary" onClick={() => setModal('ItemCreate')}>Add internal link</Button>
-            <Button variant="secondary" onClick={() => setModal('WrapperCreate')}>Add wrapper component</Button>
-            <Button disabled={!navItemState.title || !path} onClick={() => addItem()}>{variant === 'ExternalCreate' ? 'Add item' : 'Save'}</Button>
+            <Button variant="secondary" onClick={() => setModal('ExternalCreate')}>Add external item</Button>
+            <Button disabled={!navItemState.title} onClick={() => addItem()}>{variant === 'WrapperCreate' ? 'Add item' : 'Save'}</Button>
           </>
         }
       />
@@ -125,4 +113,4 @@ function ExternalItemComponent({
   );
 }
 
-export const ExternalItem = withModalSharedLogic<externalItemProps>(ExternalItemComponent);
+export const WrapperItem = withModalSharedLogic<externalItemProps>(WrapperItemComponent);

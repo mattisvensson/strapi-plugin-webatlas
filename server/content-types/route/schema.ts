@@ -68,5 +68,10 @@ export default {
       target: "plugin::url-routes.navitem",
       configurable: false,
     },
+    wrapper: {
+      type: "boolean",
+      default: false,
+      configurable: false,
+    },
   }
 }

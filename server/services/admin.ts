@@ -53,7 +53,8 @@ export default ({strapi}) => ({
           relatedContentType: '',
           relatedId: 0,
           uidPath: '',
-          internal: false,
+          internal: data.internal,
+          wrapper: data.wrapper,
         },
       });
       return newRoute
@@ -153,8 +154,6 @@ export default ({strapi}) => ({
         populate: ['items', "items.parent", "items.route"],
       });
 
-      console.log(navigation)
-
       return getNestedNavigation(navigation)
     } catch (e) {
       console.log(e)
@@ -177,7 +176,7 @@ export default ({strapi}) => ({
 
       let fullPath = route.slug
 
-      if (route.internal && !route.isOverride) fullPath = getFullPath(parent?.route?.fullPath, route.slug)
+      if (route.internal && !route.isOverride && parent?.route.internal) fullPath = getFullPath(parent?.route?.fullPath, route.slug)
 
       await strapi.entityService.update('plugin::url-routes.route', routeId, {
         data: {

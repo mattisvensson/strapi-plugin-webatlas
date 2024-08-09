@@ -27,6 +27,7 @@ export type Route = {
   internal: boolean;
   active: boolean;
   isOverride: boolean;
+  wrapper: boolean;
   navitem: {
     id: number;
   } | null;

@@ -23,6 +23,7 @@ import { isNestedNavigation, isNestedNavItem} from '../../utils/typeChecks';
 import { ItemCreate } from '../../components/modals/internalItem/internalItemCreate';
 import { ItemEdit } from '../../components/modals/internalItem/internalItemEdit';
 import { ExternalItem } from '../../components/modals/externalItem/externalItem';
+import { WrapperItem } from '../../components/modals/wrapperItem/wrapperItem';
 
 const Navigation = () => {
   const { navigations, fetchNavigations } = useNavigations();
@@ -94,6 +95,8 @@ const Navigation = () => {
         {modal === 'ItemEdit' && isNestedNavItem(actionItem) && <ItemEdit item={actionItem}/>}
         {modal === 'ExternalCreate' && <ExternalItem variant={modal} parentId={parentId}/>}
         {modal === 'ExternalEdit' && isNestedNavItem(actionItem) && <ExternalItem variant={modal} item={actionItem}/>}
+        {modal === 'WrapperCreate' && <WrapperItem variant={modal} parentId={parentId}/>}
+        {modal === 'WrapperEdit' && isNestedNavItem(actionItem) && <WrapperItem variant={modal} item={actionItem}/>}
       </SelectedNavigationContext.Provider>
     </ModalContext.Provider>
   );
