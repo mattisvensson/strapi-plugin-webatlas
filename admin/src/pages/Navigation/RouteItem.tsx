@@ -1,19 +1,17 @@
 import { Box, Typography, Divider, Button, Flex } from '@strapi/design-system';
 import { NestedNavItem, NestedNavigation } from '../../../../types';
 import { ModalContext } from '../../contexts';
-import { useContext, useRef } from 'react';
+import { useContext } from 'react';
 import { Trash } from '@strapi/icons';
 
 type RouteItemProps = {
   item: NestedNavItem;
   setParentId: (id: number) => void;
   setActionItem: React.Dispatch<React.SetStateAction<NestedNavItem | NestedNavigation | undefined>>;
-  parentPath?: string;
+  hasParent?: boolean;
 }
 
-export default function RouteItem({item, setParentId, setActionItem, parentPath}: RouteItemProps) {
-  const fullPath = useRef<string>(item.route.fullPath);
-
+export default function RouteItem({item, setParentId, setActionItem, hasParent}: RouteItemProps) {
   const { setModal } = useContext(ModalContext);
 
   const handleAddChildren = () => {
@@ -23,7 +21,11 @@ export default function RouteItem({item, setParentId, setActionItem, parentPath}
 
   const handleEdit = () => {
     setActionItem(item)
-    let newModal = item.route.internal ? 'ItemEdit' : 'ExternalEdit'
+
+    let newModal = 'ItemEdit'
+    if (!item.route.internal) newModal = 'ExternalEdit'
+    if (item.route.wrapper) newModal = 'WrapperEdit'
+    
     setModal(newModal)
   }
 
@@ -33,7 +35,7 @@ export default function RouteItem({item, setParentId, setActionItem, parentPath}
   }
 
   return (
-    <Flex direction="column" alignItems="stretch" gap={4} marginLeft={parentPath ? 4 : 0}>
+    <Flex direction="column" alignItems="stretch" gap={4} marginLeft={hasParent ? 4 : 0}>
       <Box
         background='neutral0'
         borderColor="neutral150"
@@ -55,7 +57,7 @@ export default function RouteItem({item, setParentId, setActionItem, parentPath}
         </Flex>
       </Box>
       {item.items.map((childItem: NestedNavItem, index) => (
-        <RouteItem key={index} item={childItem} setParentId={setParentId} setActionItem={setActionItem} parentPath={fullPath.current}/>  
+        <RouteItem key={index} item={childItem} setParentId={setParentId} setActionItem={setActionItem} hasParent/>  
       ))}
     </Flex>
   );
