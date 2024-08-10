@@ -2,8 +2,9 @@ import { Box, Typography, Flex, MenuItem, IconButton, Icon, Status, Popover } fr
 import { NestedNavItem, NestedNavigation } from '../../../../types';
 import { ModalContext } from '../../contexts';
 import { useContext, useEffect, useState, ReactElement, useRef } from 'react';
-import { Link as LinkIcon, ExternalLink, OneToMany, More } from '@strapi/icons';
+import { Link as LinkIcon, ExternalLink, OneToMany, More, Drag, ChevronDown } from '@strapi/icons';
 import { useFetchClient } from '@strapi/helper-plugin';
+import { countChildren } from '../../utils';
 
 type RouteItemProps = {
   item: NestedNavItem;
@@ -32,6 +33,7 @@ export default function RouteItem({item, setParentId, setActionItem, hasParent}:
   const [isPublished, setIsPublished] = useState(false)
   const [type, setType] = useState<RouteType>('internal')
   const [isVisible, setIsVisible] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   const actionButtonRef = useRef<HTMLButtonElement>();
 
   useEffect(() => {
@@ -109,6 +111,25 @@ export default function RouteItem({item, setParentId, setActionItem, hasParent}:
               <Typography fontWeight="bold">{item.route.title}</Typography>
               <Typography textColor="neutral400">{type === 'internal' && '/'}{item.route.fullPath}</Typography>
             </Flex>
+            <Box
+              marginLeft={4}
+              marginRight={4}
+              width="1px"
+              height="32px"
+              background="neutral150"
+            />
+            {item.items.length > 0 &&
+              <Flex gap={2}>
+                <IconButton onClick={() => setCollapsed(prev => !prev)}>
+                  <ChevronDown style={{rotate: collapsed ? '-90deg' : '0deg', transition: 'all .3s ease'}}/>
+                </IconButton>
+                {collapsed && countChildren(item) > 0 && 
+                  <Typography textColor="neutral400">
+                    {countChildren(item)} children
+                  </Typography>
+                }
+              </Flex>
+            }
           </Flex>
           <Flex direction="row" gap={4}>
             {type === 'internal' && (isPublished ?
@@ -148,7 +169,7 @@ export default function RouteItem({item, setParentId, setActionItem, hasParent}:
           </Flex>
         </Flex>
       </Box>
-      {item.items.map((childItem: NestedNavItem, index) => (
+      {!collapsed && item.items.map((childItem: NestedNavItem, index) => (
         <RouteItem key={index} item={childItem} setParentId={setParentId} setActionItem={setActionItem} hasParent/>  
       ))}
     </Flex>
