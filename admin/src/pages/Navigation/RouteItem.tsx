@@ -1,8 +1,9 @@
-import { Box, Typography, Divider, Button, Flex } from '@strapi/design-system';
+import { Box, Typography, Flex, MenuItem, IconButton, Icon, Status, Popover } from '@strapi/design-system';
 import { NestedNavItem, NestedNavigation } from '../../../../types';
 import { ModalContext } from '../../contexts';
-import { useContext } from 'react';
-import { Trash } from '@strapi/icons';
+import { useContext, useEffect, useState, ReactElement, useRef } from 'react';
+import { Link as LinkIcon, ExternalLink, OneToMany, More } from '@strapi/icons';
+import { useFetchClient } from '@strapi/helper-plugin';
 
 type RouteItemProps = {
   item: NestedNavItem;
@@ -11,15 +12,62 @@ type RouteItemProps = {
   hasParent?: boolean;
 }
 
+type RouteType = "internal" | "external" | "wrapper"
+
+function RouteIcon ({ type, color = 'neutral800' }: { type: RouteType, color?: string }): ReactElement {
+  switch (type) {
+    case "external":
+      return <Icon as={ExternalLink} color={color}/>
+    case "wrapper":
+      return <Icon as={OneToMany} color={color}/>
+    default:
+      return <Icon as={LinkIcon} color={color}/>
+  }
+}
+
 export default function RouteItem({item, setParentId, setActionItem, hasParent}: RouteItemProps) {
   const { setModal } = useContext(ModalContext);
+  const { get } = useFetchClient();
+
+  const [isPublished, setIsPublished] = useState(false)
+  const [type, setType] = useState<RouteType>('internal')
+  const [isVisible, setIsVisible] = useState(false)
+  const actionButtonRef = useRef<HTMLButtonElement>();
+
+  useEffect(() => {
+    if (!item.route.internal && !item.route.wrapper) {
+      setType("external")
+    } else if (item.route.wrapper) {
+      setType("wrapper")
+    }
+  }, [])
+
+  useEffect(() => {
+    const ct = item.route.relatedContentType
+    const id = item.route.relatedId
+
+    if (!ct || !id) return
+
+    async function fetchRelated() {
+      try {
+        const { data } = await get(`/content-manager/collection-types/${ct}/${id}`)
+        if (data.publishedAt) setIsPublished(true)
+      } catch (err) {
+        console.log(err)
+      }
+    }
+    fetchRelated()
+  }, [])
+
 
   const handleAddChildren = () => {
+    setIsVisible(false)
     setParentId(item.id)
     setModal('ItemCreate')
   }
 
   const handleEdit = () => {
+    setIsVisible(false)
     setActionItem(item)
 
     let newModal = 'ItemEdit'
@@ -30,14 +78,15 @@ export default function RouteItem({item, setParentId, setActionItem, hasParent}:
   }
 
   const handleDelete = () => {
+    setIsVisible(false)
     setActionItem(item)
     setModal('ItemDelete')
   }
 
   return (
-    <Flex direction="column" alignItems="stretch" gap={4} marginLeft={hasParent ? 4 : 0}>
+    <Flex direction="column" alignItems="stretch" gap={4} marginLeft={hasParent ? 8 : 0}>
       <Box
-        background='neutral0'
+        background={item.route.active ? 'neutral0' : 'neutral100'}
         borderColor="neutral150"
         hasRadius
         paddingBottom={4}
@@ -46,14 +95,57 @@ export default function RouteItem({item, setParentId, setActionItem, hasParent}:
         paddingTop={4}
         shadow="tableShadow"
       >
-        <Typography>{item.route?.title} - {item.route?.fullPath}</Typography>
-        <Box paddingBottom={2} paddingTop={2}>
-          <Divider/>
-        </Box>
-        <Flex direction="row" gap={4}>
-          <Button onClick={() => handleEdit()}>Edit</Button>
-          <Button onClick={() => handleAddChildren()}>Add children</Button>
-          <Button variant="danger-light" onClick={() => handleDelete()} startIcon={<Trash />}>Delete</Button>
+        <Flex justifyContent="space-between" gap={4}>
+          <Flex>
+            <RouteIcon type={type}/>
+            <Box
+              marginLeft={4}
+              marginRight={4}
+              width="1px"
+              height="32px"
+              background="neutral150"
+            />
+            <Flex gap={2}>
+              <Typography fontWeight="bold">{item.route.title}</Typography>
+              <Typography textColor="neutral400">{type === 'internal' && '/'}{item.route.fullPath}</Typography>
+            </Flex>
+          </Flex>
+          <Flex direction="row" gap={4}>
+            {type === 'internal' && (isPublished ?
+              <Status variant="success" size="S" showBullet={false}>
+                <Typography fontWeight="bold" textColor="success700">
+                  Published
+                </Typography>
+              </Status> :
+              <Status variant="secondary" size="S" showBullet={false}>
+                <Typography fontWeight="bold" textColor="secondary700">
+                  Draft
+                </Typography>
+              </Status>
+            )}
+            <IconButton
+              icon={<More />}
+              label="Item actions"
+              ref={actionButtonRef}
+              onClick={() => setIsVisible(prev => !prev)}
+            />
+            {isVisible &&
+              <Popover
+                placement="bottom-end"
+                source={actionButtonRef}
+                onDismiss={() => setIsVisible(false)}
+                spacing={4}
+              >
+                <Flex alignItems="stretch" direction="column">
+                  <MenuItem onClick={() => handleEdit()}>Edit</MenuItem>
+                  <MenuItem onClick={() => handleAddChildren()}>Add children</MenuItem>
+                  <MenuItem onClick={() => handleDelete()}>
+                    <Typography textColor="danger600">Delete</Typography>
+                  </MenuItem>
+                </Flex>
+              </Popover>
+            }
+          </Flex>
         </Flex>
       </Box>
       {item.items.map((childItem: NestedNavItem, index) => (
