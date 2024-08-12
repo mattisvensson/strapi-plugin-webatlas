@@ -1,4 +1,4 @@
-import { ContentType, GroupedEntities, RouteSettings, NavItemSettings, ConfigContentType, NavOverviewState } from '../../../types';
+import { ContentType, GroupedEntities, RouteSettings, NavItemSettings, ConfigContentType, NavOverviewState, StructuredNavigationVariant } from '../../../types';
 import { useFetchClient } from '@strapi/helper-plugin';
 
 export default function useApi() {
@@ -83,10 +83,10 @@ export default function useApi() {
     return data
   };
 
-  const getNestedNavigation = async (id: number) => {
-    const { data } = await get(`/url-routes/navigation/${id}/nested`);
+  const getStructuredNavigation = async (id: number, variant: StructuredNavigationVariant) => {
+    const { data } = await get(`/url-routes/navigation/${id}/structured?variant=${variant}`);
     return data
   }
 
-  return { fetchAllContentTypes, fetchAllEntities, getRouteByRelated, createExternalRoute, updateRoute, createNavItem, updateNavItem, getNestedNavigation}
+  return { fetchAllContentTypes, fetchAllEntities, getRouteByRelated, createExternalRoute, updateRoute, createNavItem, updateNavItem, getStructuredNavigation }
 }

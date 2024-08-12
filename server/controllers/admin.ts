@@ -77,10 +77,11 @@ export default ({ strapi }: { strapi: Strapi }) => ({
       return ctx.throw(500, e)
     }
   },
-  async nestedNavigation (ctx) {
+  async structuredNavigation (ctx) {
     try {
+      const { variant } = ctx.query;
       const { id } = ctx.params;
-      return await strapi.plugin('url-routes').service('admin').nestedNavigation(id);
+      return await strapi.plugin('url-routes').service('admin').structuredNavigation(id, variant);
     } catch (e) {
       return ctx.throw(500, e)
     }

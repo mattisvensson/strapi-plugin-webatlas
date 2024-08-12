@@ -151,6 +151,8 @@ export type NavOverviewRoute = {
   isOverride: boolean;
 }
 
+export type StructuredNavigationVariant = 'nested' | 'flat';
+
 
 // Modals
 type ModalItem_VariantCreate = {

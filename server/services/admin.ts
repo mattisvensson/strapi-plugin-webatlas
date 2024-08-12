@@ -1,7 +1,6 @@
-import { ContentType, Route } from "../../types";
-import getFullPath from "../../utils/getFullPath";
-import getNestedNavigation from "../../utils/getNestedNavigation";
+import { ContentType, Route, StructuredNavigationVariant } from "../../types";
 import duplicateCheck from "../utils/duplicateCheck";
+import { getFullPath, buildStructuredNavigation } from "../../utils";
 
 export default ({strapi}) => ({
 
@@ -148,13 +147,13 @@ export default ({strapi}) => ({
     }
   },
 
-  async nestedNavigation(id) {
+  async structuredNavigation(id: number, variant: StructuredNavigationVariant) {
     try {
       const navigation = await strapi.entityService.findOne('plugin::url-routes.navigation', id, {
         populate: ['items', "items.parent", "items.route"],
       });
 
-      return getNestedNavigation(navigation)
+      return buildStructuredNavigation(navigation, variant)
     } catch (e) {
       console.log(e)
     }

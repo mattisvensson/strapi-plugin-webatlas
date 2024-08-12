@@ -93,8 +93,8 @@ export default {
     },
     {
       method: 'GET',
-      path: '/navigation/:id/nested',
-      handler: 'admin.nestedNavigation',
+      path: '/navigation/:id/structured',
+      handler: 'admin.structuredNavigation',
       config: {
         policies: [],
         auth: false,

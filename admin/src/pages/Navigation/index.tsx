@@ -50,7 +50,7 @@ const Navigation = () => {
   const [navigationItems, setNavigationItems] = useState<NestedNavItem[]>();
   const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>();
   const [parentId, setParentId] = useState<number>();
-  const { getNestedNavigation } = useApi();
+  const { getStructuredNavigation } = useApi();
 
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [overId, setOverId] = useState<UniqueIdentifier | null>(null);
@@ -70,7 +70,7 @@ const Navigation = () => {
   useEffect(() => {
     async function fetchNestedNavigation () {
       const id = selectedNavigation ? selectedNavigation.id : navigations[0].id
-      const { items } = await getNestedNavigation(id)
+      const { items } = await getStructuredNavigation(id, 'flat')
       setNavigationItems(items)
     }
     if (Array.isArray(navigations) && navigations?.length > 0)
