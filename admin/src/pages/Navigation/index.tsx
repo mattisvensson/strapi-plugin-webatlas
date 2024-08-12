@@ -8,6 +8,7 @@ import { Plus, Check } from '@strapi/icons';
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/design-system/Layout';
 import { Flex, Button } from '@strapi/design-system';
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import NavOverview from '../../components/modals/NavOverview';
 import NavCreate from '../../components/modals/NavCreate';
 import Delete from '../../components/modals/Delete';
@@ -17,13 +18,30 @@ import { ModalContext, SelectedNavigationContext } from '../../contexts';
 import Header from './Header';
 import { NestedNavigation, NestedNavItem } from '../../../../types';
 import useNavigations from '../../hooks/useNavigations';
-import RouteItem from './RouteItem';
 import useApi from '../../hooks/useApi';
 import { isNestedNavigation, isNestedNavItem} from '../../utils/typeChecks';
 import { ItemCreate } from '../../components/modals/internalItem/internalItemCreate';
 import { ItemEdit } from '../../components/modals/internalItem/internalItemEdit';
 import { ExternalItem } from '../../components/modals/externalItem/externalItem';
 import { WrapperItem } from '../../components/modals/wrapperItem/wrapperItem';
+import {
+  DndContext,
+  closestCenter,
+  DragStartEvent,
+  DragOverlay,
+  DragMoveEvent,
+  DragEndEvent,
+  DragOverEvent,
+  MeasuringStrategy,
+  UniqueIdentifier,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { getProjection } from '../../utils/dnd';
+import SortableRouteItem from './SortableRouteItem';
 
 const Navigation = () => {
   const { navigations, fetchNavigations } = useNavigations();
@@ -33,6 +51,13 @@ const Navigation = () => {
   const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>();
   const [parentId, setParentId] = useState<number>();
   const { getNestedNavigation } = useApi();
+
+  const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
+  const [overId, setOverId] = useState<UniqueIdentifier | null>(null);
+  const [offsetLeft, setOffsetLeft] = useState(0);
+  const indentationWidth = 48;
+
+  if (!navigations) return null;
 
   useEffect(() => {
     if (modal === 'overview' || modal === '') {
@@ -57,6 +82,76 @@ const Navigation = () => {
       setSelectedNavigation(navigations[0])
   }, [navigations]);
 
+  const measuring = {
+    droppable: {
+      strategy: MeasuringStrategy.Always,
+    },
+  };
+
+  function handleDragStart({ active: { id: activeId } }: DragStartEvent) {
+    if (!navigationItems) return;
+
+    setActiveId(activeId);
+    setOverId(activeId);
+
+    document.body.style.setProperty('cursor', 'grabbing');
+  }
+
+  function handleDragMove({ delta }: DragMoveEvent) {
+    setOffsetLeft(delta.x);
+  }
+
+  function handleDragOver({ over }: DragOverEvent) {
+    setOverId(over?.id ?? null);
+  }
+
+  function handleDragCancel() {
+    resetState();
+  }
+
+  
+  function handleDragEnd(event: DragEndEvent) {
+    const {active, over} = event;
+    resetState();
+
+    if (projected && over && navigationItems) {
+      const { depth } = projected;
+
+      const overIndex = navigationItems.findIndex(({ id }) => id === over.id);
+      const activeIndex = navigationItems.findIndex(({ id }) => id === active.id);
+      const activeTreeItem = navigationItems[activeIndex];
+
+      navigationItems[activeIndex] = { ...activeTreeItem, depth };
+
+      const sortedItems = arrayMove(navigationItems, activeIndex, overIndex);
+
+      setNavigationItems(sortedItems);
+    }
+  }
+
+  function resetState() {
+    setOverId(null);
+    setActiveId(null);
+    setOffsetLeft(0);
+
+    document.body.style.setProperty('cursor', '');
+  }
+
+  const activeItem = activeId
+    ? navigationItems?.find(({ id }) => id === activeId)
+    : null;
+
+  const projected =
+    activeId && overId
+      ? getProjection(
+        navigationItems,
+        activeId,
+        overId,
+        offsetLeft,
+        indentationWidth
+      )
+      : null;
+
   return (
     <ModalContext.Provider value={{modal, setModal}}>
       <SelectedNavigationContext.Provider value={{selectedNavigation, setSelectedNavigation}}>
@@ -77,9 +172,40 @@ const Navigation = () => {
             </Flex>
             {navigationItems && navigationItems.length > 0 &&
               <Flex direction="column" alignItems="stretch" gap={4}>
-                {navigationItems.map((item, index) => (
-                  <RouteItem key={index} item={item} setParentId={setParentId} setActionItem={setActionItem}/>
-                ))}
+                <DndContext
+                  collisionDetection={(e) => closestCenter(e)}
+                  onDragStart={(e) => handleDragStart(e)}
+                  onDragMove={(e) => handleDragMove(e)}
+                  onDragOver={(e) => handleDragOver(e)}
+                  onDragEnd={(e) => handleDragEnd(e)}
+                  onDragCancel={() => handleDragCancel()}
+                  measuring={measuring}
+                >
+                  <SortableContext items={navigationItems} strategy={verticalListSortingStrategy}>
+                    {navigationItems.map((item, index) => (
+                      <SortableRouteItem
+                        key={index} 
+                        item={item} 
+                        setParentId={setParentId} 
+                        setActionItem={setActionItem} 
+                        indentationWidth={indentationWidth}
+                        depth={item.id === activeId && projected ? projected.depth : item.depth}
+                      />
+                    ))}
+                    {createPortal(
+                      <DragOverlay>
+                        {activeId && activeItem ? (
+                          <SortableRouteItem
+                            item={activeItem} 
+                            setParentId={setParentId} 
+                            setActionItem={setActionItem} 
+                          />
+                        ) : null}
+                      </DragOverlay>,
+                      document.body
+                    )}
+                  </SortableContext>
+                </DndContext>
               </Flex>
             }
             {navigations?.length === 0 && <EmptyNav msg="You don't have any navigations..." buttonText='Create new navigation' modal="create"/>}

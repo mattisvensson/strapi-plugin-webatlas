@@ -1,16 +1,22 @@
 import { Box, Typography, Flex, MenuItem, IconButton, Icon, Status, Popover } from '@strapi/design-system';
 import { NestedNavItem, NestedNavigation } from '../../../../types';
 import { ModalContext } from '../../contexts';
-import { useContext, useEffect, useState, ReactElement, useRef } from 'react';
+import { useContext, useEffect, useState, ReactElement, useRef, forwardRef } from 'react';
 import { Link as LinkIcon, ExternalLink, OneToMany, More, Drag, ChevronDown } from '@strapi/icons';
 import { useFetchClient } from '@strapi/helper-plugin';
 import { countChildren } from '../../utils';
 
-type RouteItemProps = {
+export interface RouteItemProps {
   item: NestedNavItem;
   setParentId: (id: number) => void;
   setActionItem: React.Dispatch<React.SetStateAction<NestedNavItem | NestedNavigation | undefined>>;
-  hasParent?: boolean;
+  ghost?: boolean;
+  depth?: number;
+  style?: React.CSSProperties;
+  wrapperRef?(node: HTMLLIElement): void;
+  handleProps?: any;
+  disableInteraction?: boolean;
+  indentationWidth?: number;
 }
 
 type RouteType = "internal" | "external" | "wrapper"
@@ -25,8 +31,7 @@ function RouteIcon ({ type, color = 'neutral800' }: { type: RouteType, color?: s
       return <Icon as={LinkIcon} color={color}/>
   }
 }
-
-export default function RouteItem({item, setParentId, setActionItem, hasParent}: RouteItemProps) {
+export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setParentId, setActionItem, ghost, depth, style, wrapperRef, handleProps}: RouteItemProps, ref) => {
   const { setModal } = useContext(ModalContext);
   const { get } = useFetchClient();
 
@@ -35,6 +40,8 @@ export default function RouteItem({item, setParentId, setActionItem, hasParent}:
   const [isVisible, setIsVisible] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const actionButtonRef = useRef<HTMLButtonElement>();
+
+  if (!item) return null
 
   useEffect(() => {
     if (!item.route.internal && !item.route.wrapper) {
@@ -85,8 +92,17 @@ export default function RouteItem({item, setParentId, setActionItem, hasParent}:
     setModal('ItemDelete')
   }
 
+  const elStyle = {
+    marginLeft: depth !== undefined ? depth * 48 : 0,
+    opacity: ghost ? 0.5 : 1,
+    ...style,
+  };
+
   return (
-    <Flex direction="column" alignItems="stretch" gap={4} marginLeft={hasParent ? 8 : 0}>
+    <Box
+      ref={wrapperRef} 
+      style={elStyle}
+    >
       <Box
         background={item.route.active ? 'neutral0' : 'neutral100'}
         borderColor="neutral150"
@@ -96,10 +112,11 @@ export default function RouteItem({item, setParentId, setActionItem, hasParent}:
         paddingRight={4}
         paddingTop={4}
         shadow="tableShadow"
+        ref={ref}
       >
         <Flex justifyContent="space-between" gap={4}>
           <Flex>
-            <RouteIcon type={type}/>
+            <Icon as={Drag} color="neutral800" {...handleProps}/>
             <Box
               marginLeft={4}
               marginRight={4}
@@ -107,7 +124,8 @@ export default function RouteItem({item, setParentId, setActionItem, hasParent}:
               height="32px"
               background="neutral150"
             />
-            <Flex gap={2}>
+            <RouteIcon type={type}/>
+            <Flex gap={2} marginLeft={4}>
               <Typography fontWeight="bold">{item.route.title}</Typography>
               <Typography textColor="neutral400">{type === 'internal' && '/'}{item.route.fullPath}</Typography>
             </Flex>
@@ -170,8 +188,8 @@ export default function RouteItem({item, setParentId, setActionItem, hasParent}:
         </Flex>
       </Box>
       {!collapsed && item.items.map((childItem: NestedNavItem, index) => (
-        <RouteItem key={index} item={childItem} setParentId={setParentId} setActionItem={setActionItem} hasParent/>  
+        <RouteItem key={index} item={childItem} setParentId={setParentId} setActionItem={setActionItem}/>  
       ))}
-    </Flex>
+    </Box>
   );
-}
+})

@@ -124,7 +124,6 @@ export type NestedNavigation = {
   items: NestedNavItem[];
   updatedAt: string;
   createdAt: string;
-
 }
 
 export type NestedNavItem = {
@@ -136,6 +135,7 @@ export type NestedNavItem = {
   route: Route;
   updatedAt: string;
   createdAt: string;
+  depth?: number;
 }
 
 export type NavOverviewState = {
