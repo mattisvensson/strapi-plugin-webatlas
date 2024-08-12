@@ -47,7 +47,7 @@ export default function buildStructuredNavigation(data: NestedNavigation, varian
 
         if (!parentItem) return rootItems.push(newItem);
 
-        newItem.depth = parentItem.depth ? parentItem.depth + 1 : 0;
+        newItem.depth = parentItem.depth !== undefined ? parentItem.depth + 1 : 0;
         parentItem.items.push(newItem);
       } else {
         newItem.depth = 0;
