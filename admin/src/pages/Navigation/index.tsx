@@ -43,6 +43,12 @@ import {
 import { getProjection } from '../../utils/dnd';
 import SortableRouteItem from './SortableRouteItem';
 
+type Projected = {
+  depth: number;
+  maxDepth: number;
+  minDepth: number;
+}
+
 const Navigation = () => {
   const { navigations, fetchNavigations } = useNavigations();
   const [modal, setModal] = useState<string>('');
@@ -52,6 +58,8 @@ const Navigation = () => {
   const [parentId, setParentId] = useState<number>();
   const { getStructuredNavigation } = useApi();
 
+  const [projected, setProjected] = useState<Projected | null>(null);
+  const [activeItem, setActiveItem] = useState<NestedNavItem | undefined>();
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [overId, setOverId] = useState<UniqueIdentifier | null>(null);
   const [offsetLeft, setOffsetLeft] = useState(0);
@@ -108,7 +116,6 @@ const Navigation = () => {
   function handleDragCancel() {
     resetState();
   }
-
   
   function handleDragEnd(event: DragEndEvent) {
     const {active, over} = event;
@@ -136,21 +143,29 @@ const Navigation = () => {
 
     document.body.style.setProperty('cursor', '');
   }
+  
+  useEffect(() => {
+    if (!activeId || !navigationItems) return
+    
+    const item = navigationItems.find(({ id }) => id === activeId);
+    setActiveItem(item);
+  }, [navigationItems, activeId])
 
-  const activeItem = activeId
-    ? navigationItems?.find(({ id }) => id === activeId)
-    : null;
+  useEffect(() => {
+    const projection =
+      activeId && overId
+        ? getProjection(
+          navigationItems,
+          activeId,
+          overId,
+          offsetLeft,
+          indentationWidth
+        )
+        : null;
 
-  const projected =
-    activeId && overId
-      ? getProjection(
-        navigationItems,
-        activeId,
-        overId,
-        offsetLeft,
-        indentationWidth
-      )
-      : null;
+  setProjected(projection);
+  }, [activeId, overId, offsetLeft, navigationItems]);
+
 
   return (
     <ModalContext.Provider value={{modal, setModal}}>

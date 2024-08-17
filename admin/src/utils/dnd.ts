@@ -9,7 +9,7 @@ export function getProjection(
   dragOffset: number,
   indentationWidth: number
 ) {
-  if (!items) return {};
+  if (!items) return {depth: 0, maxDepth: 0, minDepth: 0};
   
   const overItemIndex = items.findIndex(({id}) => id === overId);
   const activeItemIndex = items.findIndex(({id}) => id === activeId);
