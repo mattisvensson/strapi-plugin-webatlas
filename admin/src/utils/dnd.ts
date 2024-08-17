@@ -1,4 +1,4 @@
-import {arrayMove} from '@dnd-kit/sortable';
+import { arrayMove } from '@dnd-kit/sortable';
 import { NestedNavItem } from '../../../types';
 import { UniqueIdentifier } from '@dnd-kit/core';
 
@@ -18,10 +18,8 @@ export function getProjection(
   const previousItem = newItems[overItemIndex - 1];
   const nextItem = newItems[overItemIndex + 1];
   const dragDepth = getDragDepth(dragOffset, indentationWidth);
-  const projectedDepth = activeItem.depth ? activeItem.depth + dragDepth : 0;
-  const maxDepth = getMaxDepth({
-    previousItem,
-  });
+  const projectedDepth = activeItem && typeof activeItem.depth === 'number' ? activeItem.depth + dragDepth : 0;
+  const maxDepth = getMaxDepth({previousItem});
   const minDepth = getMinDepth({nextItem});
   let depth = projectedDepth;
 
@@ -30,12 +28,12 @@ export function getProjection(
   } else if (projectedDepth < minDepth) {
     depth = minDepth;
   }
-
+  
   return {depth, maxDepth, minDepth};
 }
 
 function getMaxDepth({previousItem}: {previousItem: NestedNavItem}) {
-  if (previousItem && previousItem.depth) {
+  if (previousItem && typeof previousItem.depth === 'number') {
     return previousItem.depth + 1;
   }
 
@@ -43,7 +41,7 @@ function getMaxDepth({previousItem}: {previousItem: NestedNavItem}) {
 }
 
 function getMinDepth({nextItem}: {nextItem: NestedNavItem}) {
-  if (nextItem && nextItem.depth) {
+  if (nextItem && typeof nextItem.depth === 'number') {
     return nextItem.depth;
   }
 
