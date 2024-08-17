@@ -21,14 +21,16 @@ export interface RouteItemProps {
 
 type RouteType = "internal" | "external" | "wrapper"
 
-function RouteIcon ({ type, color = 'neutral800' }: { type: RouteType, color?: string }): ReactElement {
+function RouteIcon ({ type, color = 'neutral800' }: { type: RouteType | undefined, color?: string }): ReactElement {
   switch (type) {
     case "external":
       return <Icon as={ExternalLink} color={color}/>
     case "wrapper":
       return <Icon as={OneToMany} color={color}/>
-    default:
+    case "internal":
       return <Icon as={LinkIcon} color={color}/>
+    default:
+      return <Box width="16px" height="16px"/>
   }
 }
 export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setParentId, setActionItem, ghost, depth, style, wrapperRef, handleProps}: RouteItemProps, ref) => {
@@ -36,7 +38,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
   const { get } = useFetchClient();
 
   const [isPublished, setIsPublished] = useState(false)
-  const [type, setType] = useState<RouteType>('internal')
+  const [type, setType] = useState<RouteType>()
   const [isVisible, setIsVisible] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const actionButtonRef = useRef<HTMLButtonElement>();
@@ -48,8 +50,10 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
       setType("external")
     } else if (item.route.wrapper) {
       setType("wrapper")
+    } else {
+      setType("internal")
     }
-  }, [])
+  }, [item])
 
   useEffect(() => {
     const ct = item.route.relatedContentType
