@@ -67,8 +67,11 @@ export default function buildStructuredNavigation(data: NestedNavigation, varian
 // Helper function to flatten the nested items into a sorted array
 const flattenItems = (items: any[], result: any[] = []) => {
   items.forEach(item => {
-    result.push({ ...item, items: [] }); // Avoid adding nested items
-    if (item.items.length > 0) {
+    const itemCopy = { ...item }
+    delete itemCopy.items
+    result.push(itemCopy)
+    
+    if (item.items && item.items.length > 0) {
       flattenItems(item.items, result);
     }
   });
