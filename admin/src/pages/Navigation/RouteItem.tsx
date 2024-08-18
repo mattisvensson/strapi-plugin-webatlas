@@ -42,7 +42,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
   const [isVisible, setIsVisible] = useState(false)
   const actionButtonRef = useRef<HTMLButtonElement>();
 
-  if (!item) return null
+  if (!item || !item.route) return null
 
   useEffect(() => {
     if (!item.route.internal && !item.route.wrapper) {
@@ -107,7 +107,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
       style={elStyle}
     >
       <Box
-        background={item.route.active ? 'neutral0' : 'neutral100'}
+        background={item.route?.active ? 'neutral0' : 'neutral100'}
         borderColor="neutral150"
         hasRadius
         paddingBottom={4}
