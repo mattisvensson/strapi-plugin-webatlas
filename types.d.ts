@@ -14,6 +14,7 @@ export type NavItemSettings = {
   route: number | null;
   navigation: number | null;
   parent: number | null;
+  order: number;
 };
 
 export type Route = {
@@ -136,6 +137,7 @@ export type NestedNavItem = {
   updatedAt: string;
   createdAt: string;
   depth?: number;
+  order: number;
 }
 
 export type NavOverviewState = {

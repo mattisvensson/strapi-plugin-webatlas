@@ -22,45 +22,51 @@ export default function buildStructuredNavigation(data: NestedNavigation, varian
       }
     });
 
-    // Helper function to sort items by route.order
-    // const sortItems = (items: NestedNavItem[]) => {
-    //   items.sort((a, b) => a.route.order - b.route.order);
-    //   items.forEach(item => {
-    //     if (item.items.length > 0) {
-    //       sortItems(item.items);
-    //     }
-    //   });
-    // };
-
     // Sort root items and their nested items
     // sortItems(rootItems);
 
     // Return a new object with the nested and sorted items
     return { ...data, items: rootItems };
   } else if (variant === 'flat') {
-    // Second pass: assign items to their parent's items array or to the root items array
-    data.items.forEach(item => {
-      const newItem = itemsById.get(item.id);
-      if (!newItem) return null
-      if (item.parent) {
-        const parentItem = itemsById.get(item.parent.id);
+    // Assign items to their parent's items array or to the root items array
+    let itemsToProcess = [...data.items];
+    let itemsProcessed = new Set();
 
-        if (!parentItem) return rootItems.push(newItem);
+    while (itemsToProcess.length > 0) {
+      const remainingItems: NestedNavItem[] = [];
 
-        newItem.depth = parentItem.depth !== undefined ? parentItem.depth + 1 : 0;
-        parentItem.items.push(newItem);
-      } else {
-        newItem.depth = 0;
-        rootItems.push(newItem);
-      }
-      itemsById.set(item.id, newItem);
-    });
+      itemsToProcess.forEach(item => {
+        const newItem = itemsById.get(item.id);
+        if (!newItem) return null;
 
+        if (item.parent) {
+          const parentItem = itemsById.get(item.parent.id);
+
+          if (!parentItem || !itemsProcessed.has(item.parent.id)) {
+            // Defer processing this item until the parent is processed
+            remainingItems.push(item);
+            return;
+          }
+
+          newItem.depth = parentItem.depth !== undefined ? parentItem.depth + 1 : 0;
+          parentItem.items.push(newItem);
+        } else {
+          newItem.depth = 0;
+          rootItems.push(newItem);
+        }
+
+        itemsById.set(item.id, newItem);
+        itemsProcessed.add(item.id);
+      });
+
+      itemsToProcess = remainingItems;
+    }
     // Flatten and sort the items
-    const sortedItems = flattenItems(rootItems);
+    const sortedItems = sortItems(rootItems);
+    const flattenedItems = flattenItems(sortedItems);
   
     // Return the sorted items
-    return { ...data, items: sortedItems };
+    return { ...data, items: flattenedItems };
   }
 }
 
@@ -70,11 +76,23 @@ const flattenItems = (items: any[], result: any[] = []) => {
     const itemCopy = { ...item }
     delete itemCopy.items
     result.push(itemCopy)
-    
+
     if (item.items && item.items.length > 0) {
       flattenItems(item.items, result);
     }
   });
   return result;
+};
+
+// Helper function to sort items by route.order
+const sortItems = (items: NestedNavItem[]) => {
+  items.sort((a, b) => a.order - b.order);
+  items.forEach(item => {
+    if (item.items && item.items.length > 0) {
+      sortItems(item.items);
+    }
+  });
+
+  return items
 };
 

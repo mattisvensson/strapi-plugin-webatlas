@@ -204,6 +204,7 @@ export default ({strapi}) => ({
           navigation: data.navigation ? Number(data.navigation) : null,
           route: data.route ? Number(data.route) : null,
           parent: data.parent ? Number(data.parent) : null,
+          order: data.order ? Number(data.order) : 0,
         },
       });
 

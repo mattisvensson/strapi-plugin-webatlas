@@ -54,9 +54,10 @@ const Navigation = () => {
   const [modal, setModal] = useState<string>('');
   const [selectedNavigation, setSelectedNavigation] = useState<NestedNavigation>();
   const [navigationItems, setNavigationItems] = useState<NestedNavItem[]>();
+  const [initialNavigationItems, setInitialNavigationItems] = useState<NestedNavItem[]>();
   const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>();
   const [parentId, setParentId] = useState<number>();
-  const { getStructuredNavigation } = useApi();
+  const { getStructuredNavigation, updateNavItem } = useApi();
 
   const [projected, setProjected] = useState<Projected | null>(null);
   const [activeItem, setActiveItem] = useState<NestedNavItem | undefined>();
@@ -89,6 +90,12 @@ const Navigation = () => {
     if (!selectedNavigation && navigations.length > 0)
       setSelectedNavigation(navigations[0])
   }, [navigations]);
+
+  useEffect(() => {
+    if (navigationItems && !initialNavigationItems) {
+      setInitialNavigationItems(navigationItems)
+    }
+  }, [navigationItems]);
 
   const measuring = {
     droppable: {
@@ -143,10 +150,81 @@ const Navigation = () => {
 
     document.body.style.setProperty('cursor', '');
   }
+
+  function saveOrder() {
+    if (!navigationItems || !selectedNavigation) return
+
+    let groupIndices: number[] = [0];
+    let parentIds: number[] = [0];
+    
+    navigationItems.forEach((item, index) => {
+      const previousItem = navigationItems[index - 1];
+
+      if (typeof item.depth !== 'number') return
+
+      // if (item.depth === previousItem?.depth) {
+      //   groupIndices[item.depth] += 1
+      // } else if (item.depth === previousItem.depth + 1) {
+      //   groupIndices.push(0);
+      // } else {
+      //   const diff = previousItem.depth - item.depth;
+      //   for (let i = 0; i < diff; i++) {
+      //     groupIndices.pop();
+      //   }
+      //   groupIndices[item.depth] += 1
+      // }
+    
+      // if (item.depth === 0) {
+      //   parentIds = [0];
+      // } else if (item.depth === previousItem?.depth) {
+      //   groupIndices[item.depth] += 1
+      // } else if (item.depth === previousItem.depth + 1) {
+      //   groupIndices.push(0);
+      //   parentIds.push(previousItem.id);
+      // } else {
+      //   console.log("3")
+      //   const diff = previousItem.depth - item.depth;
+      //   for (let i = 0; i < diff; i++) {
+      //     parentIds.pop();
+      //     groupIndices.pop();
+      //   }
+      //   groupIndices[item.depth] += 1
+      // }
+
+      if (item.depth === 0) {
+        parentIds[0] = 0;
+        groupIndices[0] = (groupIndices[0] || 0) + 1;
+      } else if (typeof previousItem.depth === 'number' && item.depth === previousItem.depth + 1) {
+        parentIds[item.depth] = previousItem.id;
+        groupIndices[item.depth] = 0;
+      } else if (typeof previousItem.depth === 'number' && item.depth <= previousItem.depth) {
+        const diff = previousItem.depth - item.depth;
+        for (let i = 0; i <= diff; i++) {
+          // parentIds.pop();
+          groupIndices.pop();
+        }
+        parentIds[item.depth] = parentIds[item.depth - 1];
+        groupIndices[item.depth] = (groupIndices[item.depth] || 0) + 1;
+      }
+
+      // console.log(parentIds)
+      // console.log({depth: item.depth, order: groupIndices[item.depth], parent: parentIds[item.depth] || null, id: item.id,})
+      
+      updateNavItem({
+        order: groupIndices[item.depth],
+        parent: parentIds[item.depth] || null,
+        route: item.route.id,
+        navigation: selectedNavigation.id
+      }, item.id);
+    });
+    
+    // console.log(groupIndices)
+    setInitialNavigationItems(navigationItems)
+  }
   
   useEffect(() => {
     if (!activeId || !navigationItems) return
-    
+
     const item = navigationItems.find(({ id }) => id === activeId);
     setActiveItem(item);
   }, [navigationItems, activeId])
@@ -181,7 +259,11 @@ const Navigation = () => {
               <Button variant="secondary" startIcon={<Plus />} onClick={() => setModal('ItemCreate')}>
                 New Item
               </Button>
-              <Button startIcon={<Check />} >
+              <Button
+                startIcon={<Check />}
+                onClick={() => saveOrder()}
+                disabled={JSON.stringify(navigationItems) === JSON.stringify(initialNavigationItems)}
+              >
                 Save
               </Button>
             </Flex>

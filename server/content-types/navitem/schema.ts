@@ -38,5 +38,9 @@ export default {
       target: "plugin::url-routes.navitem",
       configurable: false,
     },
+    order: {
+      type: "integer",
+      default: 0,
+    },
   }
 }
