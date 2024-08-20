@@ -162,63 +162,30 @@ const Navigation = () => {
 
       if (typeof item.depth !== 'number') return
 
-      // if (item.depth === previousItem?.depth) {
-      //   groupIndices[item.depth] += 1
-      // } else if (item.depth === previousItem.depth + 1) {
-      //   groupIndices.push(0);
-      // } else {
-      //   const diff = previousItem.depth - item.depth;
-      //   for (let i = 0; i < diff; i++) {
-      //     groupIndices.pop();
-      //   }
-      //   groupIndices[item.depth] += 1
-      // }
-    
-      // if (item.depth === 0) {
-      //   parentIds = [0];
-      // } else if (item.depth === previousItem?.depth) {
-      //   groupIndices[item.depth] += 1
-      // } else if (item.depth === previousItem.depth + 1) {
-      //   groupIndices.push(0);
-      //   parentIds.push(previousItem.id);
-      // } else {
-      //   console.log("3")
-      //   const diff = previousItem.depth - item.depth;
-      //   for (let i = 0; i < diff; i++) {
-      //     parentIds.pop();
-      //     groupIndices.pop();
-      //   }
-      //   groupIndices[item.depth] += 1
-      // }
-
       if (item.depth === 0) {
-        parentIds[0] = 0;
+        parentIds = [0];
         groupIndices[0] = (groupIndices[0] || 0) + 1;
       } else if (typeof previousItem.depth === 'number' && item.depth === previousItem.depth + 1) {
-        parentIds[item.depth] = previousItem.id;
+        parentIds.push(previousItem.id);
         groupIndices[item.depth] = 0;
       } else if (typeof previousItem.depth === 'number' && item.depth <= previousItem.depth) {
         const diff = previousItem.depth - item.depth;
-        for (let i = 0; i <= diff; i++) {
-          // parentIds.pop();
+        for (let i = 0; i < diff; i++) {
+          parentIds.pop();
           groupIndices.pop();
         }
-        parentIds[item.depth] = parentIds[item.depth - 1];
+
         groupIndices[item.depth] = (groupIndices[item.depth] || 0) + 1;
       }
-
-      // console.log(parentIds)
-      // console.log({depth: item.depth, order: groupIndices[item.depth], parent: parentIds[item.depth] || null, id: item.id,})
       
       updateNavItem({
         order: groupIndices[item.depth],
-        parent: parentIds[item.depth] || null,
+        parent: parentIds.at(-1) || null,
         route: item.route.id,
         navigation: selectedNavigation.id
       }, item.id);
     });
     
-    // console.log(groupIndices)
     setInitialNavigationItems(navigationItems)
   }
   
