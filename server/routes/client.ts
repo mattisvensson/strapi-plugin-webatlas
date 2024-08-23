@@ -9,5 +9,13 @@ export default {
         policies: [],
       }
     },
+    {
+      method: 'GET',
+      path: '/navigation/:id',
+      handler: 'client.getNavigation',
+      config: {
+        policies: [],
+      }
+    },
   ]
 }

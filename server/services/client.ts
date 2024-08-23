@@ -1,3 +1,6 @@
+import { buildStructuredNavigation, extractRouteAndItems } from "../../utils";
+import { StructuredNavigationVariant } from "../../types";
+
 export default ({strapi}) => ({
   async getEntityByPath(slug: string) {
     try {
@@ -30,5 +33,23 @@ export default ({strapi}) => ({
       return e
     }
   },
-})
+  async getNavigation(id: string, variant: StructuredNavigationVariant = 'nested') {
+    try {
+      const navigation = await strapi.entityService.findOne('plugin::url-routes.navigation', id, {
+        populate: ['items', "items.parent", "items.route"],
+      });
 
+      if (!navigation) return null
+
+      const structured = buildStructuredNavigation(navigation, variant)
+
+      if (!structured) return null
+
+      const entityNavigation = extractRouteAndItems(structured.items)
+
+      return entityNavigation
+    } catch (e) {
+      return e
+    }
+  },
+})
