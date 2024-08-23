@@ -19,11 +19,11 @@ export default ({strapi}) => ({
 
       const entity = entities[0]
 
-      if (!entity) {
-        throw new Error('Entity not found')
-      }
+      if (!entity) return null
       
       const contentType = await strapi.entityService.findOne(entity.relatedContentType, entity.relatedId);
+      
+      if (!contentType) return null
 
       return contentType
     } catch (e) {
