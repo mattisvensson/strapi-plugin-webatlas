@@ -4,44 +4,45 @@ import { StructuredNavigationVariant } from "../../types";
 export default ({strapi}) => ({
   async getEntityByPath(slug: string, populate: string, populateDeepDepth: string, fields: any) {
     try {
-      const entities = await strapi.entityService.findMany('plugin::url-routes.route', {
+      const route = await strapi.db?.query('plugin::url-routes.route').findOne({
         filters: { 
           $or: [
-            {
-              fullPath: slug,
-            },
-            {
-              slug: slug,
-            },
-            {
-              uidPath: slug,
-            },
+            { fullPath: slug},
+            { slug: slug },
+            { uidPath: slug },
           ], 
         },
       });
 
-      const entity = entities[0]
-
-      if (!entity) return null
-
+      if (!route) return null
+      
       let populateObject: string | Record<string, boolean | Record<string, any>> = populate
-
+      
       if (populate === 'deep') {
-        const modelObject = getFullPopulateObject(entity.relatedContentType, Number(populateDeepDepth), []);
+        const modelObject = getFullPopulateObject(route.relatedContentType, Number(populateDeepDepth), []);
         if (typeof modelObject === 'object' && 'populate' in modelObject) {
           populateObject = modelObject.populate;
         }
       }
       
-      const contentType = await strapi.entityService.findOne(entity.relatedContentType, entity.relatedId, {
+      const contentTypeObject: any = Object.entries(strapi.contentTypes).find(([key, value]) => key === route.relatedContentType)
+      
+      if (!contentTypeObject) {
+        return null
+      }      
+      
+      const [contentTypeKey, contentType] = contentTypeObject;
+      
+      const entity = await strapi.entityService.findOne(route.relatedContentType, route.relatedId, {
         populate: populateObject,
         fields: fields,
       });
+      
+      if (!entity) return null
 
-      if (!contentType) return null
-
-      return contentType
+      return { contentType: contentType.info.singularName, ...entity }
     } catch (e) {
+      console.log(e)
       return e
     }
   },
@@ -61,6 +62,7 @@ export default ({strapi}) => ({
 
       return entityNavigation
     } catch (e) {
+      console.log(e)
       return e
     }
   },
