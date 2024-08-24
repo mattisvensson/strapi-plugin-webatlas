@@ -58,7 +58,7 @@ export default async ({ strapi }: { strapi: Strapi }) => {
 
   strapi.db?.lifecycles.subscribe({
     models: config.selectedContentTypes.map((type: any) => type.uid),
-
+    
     async beforeCreate() {
       const validContentTypes = config.selectedContentTypes.filter((type: any) => strapi.contentTypes[type.uid]);
       await pluginStore.set({ key: "config", value: {selectedContentTypes: validContentTypes} });
@@ -122,12 +122,11 @@ export default async ({ strapi }: { strapi: Strapi }) => {
     },
 
     async afterDelete(event: any) {
-      await strapi.db?.query('plugin::url-routes.route').delete({
-        where: {
-          relatedId: event.result.id,
-          relatedContentType: event.model.uid
-        },
-      });
+      try {
+        await findAndDeleteNavItem(event.result.id, event.model.uid)
+      } catch (err) {
+        console.log(err)
+      }
     },
 
     async afterDeleteMany(event: any) {
@@ -136,14 +135,34 @@ export default async ({ strapi }: { strapi: Strapi }) => {
       deletedArr.map((item: {id: {'$in': number[]}}) => {
         const ids = item.id['$in']
         ids.map(async (id: number) => {
-          await strapi.db?.query('plugin::url-routes.route').delete({
-            where: {
-              relatedId: id,
-              relatedContentType: event.model.uid
-            },
-          });
+          await findAndDeleteNavItem(id, event.model.uid)
         })
       })
     }
   });
 };
+
+async function findAndDeleteNavItem (relatedId: number, relatedContentType: string) {
+
+  if (!relatedId || !relatedContentType) return
+
+  const route = await strapi.db?.query('plugin::url-routes.route').findOne({
+    where: {
+      relatedId: relatedId,
+      relatedContentType: relatedContentType
+    },
+  });
+
+  if (!route.id) return
+
+  const entity = await strapi.db?.query('plugin::url-routes.navitem').findOne({
+    where: {
+      route: {
+        id: route.id
+      }
+    },
+  });
+  
+  if (entity.id) await strapi.entityService?.delete('plugin::url-routes.navitem', entity.id)
+  if (route.id) await strapi.entityService?.delete('plugin::url-routes.route', route.id)
+}
