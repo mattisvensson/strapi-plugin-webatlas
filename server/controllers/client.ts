@@ -3,11 +3,11 @@ import { Strapi } from '@strapi/strapi';
 export default ({ strapi }: { strapi: Strapi }) => ({
   async getEntityByPath(ctx) {
     try {
-      const { slug, populate, populateDeepDepth } = ctx.query;
-  
+      const { slug, populate, populateDeepDepth, fields } = ctx.query;
+
       if (!slug) return ctx.throw(400, 'Slug is required');
 
-      const entity = await strapi.plugin('url-routes').service('client').getEntityByPath(slug, populate, populateDeepDepth);
+      const entity = await strapi.plugin('url-routes').service('client').getEntityByPath(slug, populate, populateDeepDepth, fields);
 
       if (!entity) return ctx.throw(404, 'Entity not found');
 

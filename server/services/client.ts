@@ -2,7 +2,7 @@ import { buildStructuredNavigation, extractRouteAndItems, getFullPopulateObject 
 import { StructuredNavigationVariant } from "../../types";
 
 export default ({strapi}) => ({
-  async getEntityByPath(slug: string, populate: string, populateDeepDepth: string) {
+  async getEntityByPath(slug: string, populate: string, populateDeepDepth: string, fields: any) {
     try {
       const entities = await strapi.entityService.findMany('plugin::url-routes.route', {
         filters: { 
@@ -24,7 +24,7 @@ export default ({strapi}) => ({
 
       if (!entity) return null
 
-      let populateObject = {}
+      let populateObject: string | Record<string, boolean | Record<string, any>> = populate
 
       if (populate === 'deep') {
         const modelObject = getFullPopulateObject(entity.relatedContentType, Number(populateDeepDepth), []);
@@ -32,9 +32,10 @@ export default ({strapi}) => ({
           populateObject = modelObject.populate;
         }
       }
-
+      
       const contentType = await strapi.entityService.findOne(entity.relatedContentType, entity.relatedId, {
         populate: populateObject,
+        fields: fields,
       });
 
       if (!contentType) return null
