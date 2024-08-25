@@ -1,4 +1,4 @@
-import { buildStructuredNavigation, extractRouteAndItems, getFullPopulateObject } from "../../utils";
+import { buildStructuredNavigation, extractRouteAndItems, getFullPopulateObject, cleanRootKeys } from "../../utils";
 import { StructuredNavigationVariant } from "../../types";
 
 export default ({strapi}) => ({
@@ -40,7 +40,9 @@ export default ({strapi}) => ({
       
       if (!entity) return null
 
-      return { contentType: contentType.info.singularName, ...entity }
+      const cleanEntity = cleanRootKeys(entity)
+
+      return { contentType: contentType.info.singularName, ...cleanEntity }
     } catch (e) {
       console.log(e)
       return e
