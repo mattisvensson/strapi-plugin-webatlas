@@ -17,8 +17,12 @@ const getModelPopulationAttributes = (model: Schema.Component | Schema.ContentTy
   return model.attributes;
 };
 
-export default function getFullPopulateObject(modelUid: Common.UID.Schema, maxDepth = 20, ignore?: string[]) {
-  
+export default function getFullPopulateObject(
+  modelUid: Common.UID.Schema, 
+  maxDepth = 20, 
+  ignore: string[] = []
+) {
+
   if (maxDepth <= 1) {
     return true;
   }
@@ -30,9 +34,11 @@ export default function getFullPopulateObject(modelUid: Common.UID.Schema, maxDe
   const populate: Record<string, boolean | Record<string, any>> = {};
   const model = strapi.getModel(modelUid);
 
-  if (model.collectionName && ignore && !ignore.includes(model.collectionName)) {
-      ignore.push(model.collectionName);
-  } 
+  if (model.collectionName && !ignore.includes(model.collectionName)) {
+    ignore.push(model.collectionName);
+  } else if (model.collectionName && ignore.includes(model.collectionName)) {
+    return true
+  }
 
   for (const [key, value] of Object.entries(
     getModelPopulationAttributes(model)
@@ -40,10 +46,10 @@ export default function getFullPopulateObject(modelUid: Common.UID.Schema, maxDe
     if (ignore?.includes(key)) continue
     if (value) {
       if (value.type === "component") {
-        populate[key] = getFullPopulateObject(value.component, maxDepth - 1);
+        populate[key] = getFullPopulateObject(value.component, maxDepth - 1, ignore);
       } else if (value.type === "dynamiczone") {
         const dynamicPopulate = value.components.reduce((prev, cur) => {
-          const curPopulate = getFullPopulateObject(cur, maxDepth - 1);
+          const curPopulate = getFullPopulateObject(cur, maxDepth - 1, ignore);
           return curPopulate === true ? prev : merge(prev, curPopulate);
         }, {});
         
