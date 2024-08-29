@@ -11,7 +11,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/navigation/:id',
+      path: '/navigation',
       handler: 'client.getNavigation',
       config: {
         policies: [],

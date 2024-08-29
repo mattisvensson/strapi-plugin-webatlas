@@ -48,21 +48,33 @@ export default ({strapi}) => ({
       return e
     }
   },
-  async getNavigation(id: string, variant: StructuredNavigationVariant = 'nested') {
+  async getNavigation(id: string, name: string, variant: StructuredNavigationVariant = 'nested') {
     try {
-      const navigation = await strapi.entityService.findOne('plugin::url-routes.navigation', id, {
-        populate: ['items', "items.parent", "items.route"],
-      });
+      let navigation = null
+      
+      if (id) {
+        navigation = await strapi.entityService.findOne('plugin::url-routes.navigation', id, {
+          populate: ['items', "items.parent", "items.route"],
+        });
+      } else if (name) {
+        navigation = await strapi.db?.query('plugin::url-routes.navigation').findOne({
+          where: { 
+            name: name
+          },
+          populate: ['items', "items.parent", "items.route"],
+        });
+      }
 
+      
       if (!navigation) return null
-
+      
       const structured = buildStructuredNavigation(navigation, variant)
 
       if (!structured) return null
 
       const entityNavigation = extractRouteAndItems(structured.items)
 
-      return entityNavigation
+      return {...structured,  items: entityNavigation }
     } catch (e) {
       console.log(e)
       return e

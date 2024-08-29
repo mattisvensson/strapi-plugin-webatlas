@@ -18,12 +18,11 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
   async getNavigation (ctx) {
     try {
-      const { id } = ctx.params;
-      const { variant } = ctx.query;
+      const { id, name, variant } = ctx.query;
 
-      if (!id) return ctx.throw(400, 'Navigation id is required');
+      if (!id && !name) return ctx.throw(400, 'Navigation id or name is required');
 
-      const navigation = await strapi.plugin('url-routes').service('client').getNavigation(id, variant);
+      const navigation = await strapi.plugin('url-routes').service('client').getNavigation(id, name, variant);
 
       if (!navigation) return ctx.throw(404, 'Navigation not found');
 
