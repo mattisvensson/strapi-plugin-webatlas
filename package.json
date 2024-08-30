@@ -1,10 +1,10 @@
 {
-  "name": "url-routes",
+  "name": "webatlas",
   "version": "0.0.0",
   "description": "This is the description of the plugin.",
   "strapi": {
-    "name": "url-routes",
-    "description": "Description of url-routes plugin",
+    "name": "webatlas",
+    "description": "Description of webatlas plugin",
     "kind": "plugin"
   },
   "dependencies": {

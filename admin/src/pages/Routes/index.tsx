@@ -20,7 +20,7 @@ const Routes = () => {
 
   useEffect(() => {
     async function getRoutes() {
-      const { data } = await get('/url-routes/route')
+      const { data } = await get('/webatlas/route')
       setRoutes(data)
     }
     getRoutes();

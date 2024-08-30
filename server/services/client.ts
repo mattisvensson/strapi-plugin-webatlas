@@ -1,10 +1,11 @@
 import { buildStructuredNavigation, extractRouteAndItems, getFullPopulateObject, cleanRootKeys } from "../../utils";
 import { StructuredNavigationVariant } from "../../types";
+import { waRoute, waNavigation} from "../utils/pluginHelpers";
 
 export default ({strapi}) => ({
   async getEntityByPath(slug: string, populate: string, populateDeepDepth: string, fields: any) {
     try {
-      const route = await strapi.db?.query('plugin::url-routes.route').findOne({
+      const route = await strapi.db?.query(waRoute).findOne({
         filters: { 
           $or: [
             { fullPath: slug},
@@ -53,11 +54,11 @@ export default ({strapi}) => ({
       let navigation = null
       
       if (id) {
-        navigation = await strapi.entityService.findOne('plugin::url-routes.navigation', id, {
+        navigation = await strapi.entityService.findOne(waNavigation, id, {
           populate: ['items', "items.parent", "items.route"],
         });
       } else if (name) {
-        navigation = await strapi.db?.query('plugin::url-routes.navigation').findOne({
+        navigation = await strapi.db?.query(waNavigation).findOne({
           where: { 
             name: name
           },

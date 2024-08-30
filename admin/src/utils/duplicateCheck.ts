@@ -12,7 +12,7 @@ export default async function duplicateCheck(url: string, routeId?: number | nul
   if (!url) throw new Error("URL is required");
   
   try {
-    const res = await fetch('/url-routes/checkUniquePath', {
+    const res = await fetch('/webatlas/checkUniquePath', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

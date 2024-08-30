@@ -1,6 +1,7 @@
 import { ContentType, Route, StructuredNavigationVariant } from "../../types";
 import duplicateCheck from "../utils/duplicateCheck";
 import { getFullPath, buildStructuredNavigation } from "../../utils";
+import { waRoute, waNavigation, waNavItem } from "../utils/pluginHelpers";
 
 export default ({strapi}) => ({
 
@@ -8,23 +9,23 @@ export default ({strapi}) => ({
     if (!newConfig || !newConfig.selectedContentTypes) return
     
     try {
-      const routes = await strapi.entityService.findMany('plugin::url-routes.route');
+      const routes = await strapi.entityService.findMany(waRoute);
       const invalidRoutes = routes.filter((route: Route) => !newConfig.selectedContentTypes.find((type: ContentType) => type.uid === route.relatedContentType));
   
       invalidRoutes?.map(async (route: Route) => {
-        await strapi.entityService.delete('plugin::url-routes.route', route.id)
+        await strapi.entityService.delete(waRoute, route.id)
       })
     } catch (err) {
       console.log(err)
       return "Error. Couldn't delete invalid routes"
     }
 
-    const pluginStore = await strapi.store({ type: 'plugin', name: 'url-routes' });
+    const pluginStore = await strapi.store({ type: 'plugin', name: 'webatlas' });
     await pluginStore.set({ key: "config", value: newConfig });
   },
 
   async getConfig() {
-    const pluginStore = await strapi.store({ type: 'plugin', name: 'url-routes' });
+    const pluginStore = await strapi.store({ type: 'plugin', name: 'webatlas' });
     const config = await pluginStore.get({
       key: "config",
     });
@@ -33,7 +34,7 @@ export default ({strapi}) => ({
 
   async getRoutes() {
     try {
-      const entitys = await strapi.entityService.findMany('plugin::url-routes.route', {
+      const entitys = await strapi.entityService.findMany(waRoute, {
         populate: ['parent', 'navigation'],
       });
       return entitys;
@@ -44,7 +45,7 @@ export default ({strapi}) => ({
 
   async createExternalRoute(data) {
     try {
-      const newRoute = await strapi.entityService.create('plugin::url-routes.route', {
+      const newRoute = await strapi.entityService.create(waRoute, {
         data: {
           title: data.title,
           slug: data.fullPath,
@@ -67,13 +68,13 @@ export default ({strapi}) => ({
       let checkedPath = data.fullPath
       
       if (data.internal) {
-        const parent = data.parent ? await strapi.entityService.findOne('plugin::url-routes.navitem', data.parent) : null;
+        const parent = data.parent ? await strapi.entityService.findOne(waNavItem, data.parent) : null;
         
         const fullPath = data.isOverride ? data.slug : getFullPath(parent?.fullPath, data.slug)
         checkedPath = await duplicateCheck(fullPath, id);
       }
 
-      const entity = await strapi.entityService.update('plugin::url-routes.route', id, {
+      const entity = await strapi.entityService.update(waRoute, id, {
         data: {
           ...data,
           fullPath: checkedPath,
@@ -88,7 +89,7 @@ export default ({strapi}) => ({
 
   async getNavigation(id) {
     try {
-      const entity = await strapi.entityService.findOne('plugin::url-routes.navigation', id, {
+      const entity = await strapi.entityService.findOne(waNavigation, id, {
         populate: ['items', "items.parent"],
       });
       return entity
@@ -99,7 +100,7 @@ export default ({strapi}) => ({
 
   async getAllNavigations() {
     try {
-      const entity = await strapi.entityService.findMany('plugin::url-routes.navigation', {
+      const entity = await strapi.entityService.findMany(waNavigation, {
         populate: ['items', "items.parent"],
       });
       return entity
@@ -110,7 +111,7 @@ export default ({strapi}) => ({
 
   async createNavigation(data) {
     try {
-      await strapi.entityService.create('plugin::url-routes.navigation', {
+      await strapi.entityService.create(waNavigation, {
         data: {
           name: data.name,
           slug: data.name,
@@ -125,7 +126,7 @@ export default ({strapi}) => ({
 
   async updateNavigation(id, data) {
     try {
-      const entity = await strapi.entityService.update('plugin::url-routes.navigation', id, {
+      const entity = await strapi.entityService.update(waNavigation, id, {
         data: {
           name: data.name,
           slug: data.slug,
@@ -140,7 +141,7 @@ export default ({strapi}) => ({
 
   async deleteNavigation(id) {
     try {
-      await strapi.entityService.delete('plugin::url-routes.navigation', id)
+      await strapi.entityService.delete(waNavigation, id)
       return true
     } catch (e) {
       console.log(e)
@@ -149,7 +150,7 @@ export default ({strapi}) => ({
 
   async structuredNavigation(id: number, variant: StructuredNavigationVariant) {
     try {
-      const navigation = await strapi.entityService.findOne('plugin::url-routes.navigation', id, {
+      const navigation = await strapi.entityService.findOne(waNavigation, id, {
         populate: ['items', "items.parent", "items.route"],
       });
 
@@ -165,11 +166,11 @@ export default ({strapi}) => ({
 
       const routeId = Number(data.route)
 
-      const parent = data.parent ? await strapi.entityService.findOne('plugin::url-routes.navitem', data.parent, {
+      const parent = data.parent ? await strapi.entityService.findOne(waNavItem, data.parent, {
         populate: ['route'],
       }) : null;
 
-      const route = routeId ? await strapi.entityService.findOne('plugin::url-routes.route', routeId, {
+      const route = routeId ? await strapi.entityService.findOne(waRoute, routeId, {
         populate: ['route'],
       }) : null;
 
@@ -177,13 +178,13 @@ export default ({strapi}) => ({
 
       if (route.internal && !route.isOverride && parent?.route.internal) fullPath = getFullPath(parent?.route?.fullPath, route.slug)
 
-      await strapi.entityService.update('plugin::url-routes.route', routeId, {
+      await strapi.entityService.update(waRoute, routeId, {
         data: {
           fullPath,
         },
       });
 
-      const entity = await strapi.entityService.create('plugin::url-routes.navitem', {
+      const entity = await strapi.entityService.create(waNavItem, {
         data: {
           navigation: Number(data.navigation),
           route: routeId,
@@ -199,7 +200,7 @@ export default ({strapi}) => ({
 
   async updateNavItem(id, data) {
     try {
-      const entity = await strapi.entityService.update('plugin::url-routes.navitem', id, {
+      const entity = await strapi.entityService.update(waNavItem, id, {
         data: {
           navigation: data.navigation ? Number(data.navigation) : null,
           route: data.route ? Number(data.route) : null,
@@ -216,7 +217,7 @@ export default ({strapi}) => ({
 
   async deleteNavItem(id) {
     try {
-      await strapi.entityService.delete('plugin::url-routes.navitem', id)
+      await strapi.entityService.delete(waNavItem, id)
       return true
     } catch (e) {
       console.log(e)

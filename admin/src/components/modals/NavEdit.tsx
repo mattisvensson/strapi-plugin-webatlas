@@ -21,7 +21,7 @@ export default function NavEdit ({ item, fetchNavigations }: NavEditProps){
 
   const updateNavigation = async () => {
     try {
-      await put(`/url-routes/navigation/${item.id}`, { name, isActive });
+      await put(`/webatlas/navigation/${item.id}`, { name, isActive });
       fetchNavigations()
       setModal('overview')
     } catch (err) {

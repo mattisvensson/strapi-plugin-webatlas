@@ -13,7 +13,7 @@ import NavOverview from '../../components/modals/NavOverview';
 import NavCreate from '../../components/modals/NavCreate';
 import Delete from '../../components/modals/Delete';
 import NavEdit from '../../components/modals/NavEdit';
-import EmptyNav from '../Navigation/EmptyNav';
+import EmptyNav from './EmptyNav';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
 import Header from './Header';
 import { NestedNavigation, NestedNavItem } from '../../../../types';
@@ -190,9 +190,11 @@ const Navigation = () => {
   }
   
   useEffect(() => {
+    console.log(activeId, navigationItems)
     if (!activeId || !navigationItems) return
 
     const item = navigationItems.find(({ id }) => id === activeId);
+    console.log(item)
     setActiveItem(item);
   }, [navigationItems, activeId])
 
@@ -210,8 +212,7 @@ const Navigation = () => {
 
   setProjected(projection);
   }, [activeId, overId, offsetLeft, navigationItems]);
-
-
+  console.log(navigationItems)
   return (
     <ModalContext.Provider value={{modal, setModal}}>
       <SelectedNavigationContext.Provider value={{selectedNavigation, setSelectedNavigation}}>

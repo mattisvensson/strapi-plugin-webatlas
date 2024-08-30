@@ -32,7 +32,7 @@ export default function extractRouteAndItems(items: NestedNavItem[]) {
     delete route.wrapper
     
     return { 
-      __component: type === 'wrapper' ? 'url-routes.wrapper' : 'url-routes.route',
+      __component: type === 'wrapper' ? 'webatlas.wrapper' : 'webatlas.route',
       type: type,
       ...route
     };

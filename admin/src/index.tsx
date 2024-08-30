@@ -50,14 +50,14 @@ export default {
       {
         id: pluginId,
         intlLabel: {
-          id: 'url-routes-plugin-title',
-          defaultMessage: 'URL Routes Plugin',
+          id: 'webatlas-plugin-title',
+          defaultMessage: 'Webatlas',
         },
       },
       [
         {
           intlLabel: {
-            id: 'url-routes-plugin-item',
+            id: 'webatlas-plugin-item',
             defaultMessage: 'Configuration',
           },
           id: name,

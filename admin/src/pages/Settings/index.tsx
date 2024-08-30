@@ -85,7 +85,7 @@ const Settings = () => {
   return (
     <Layout>
       <HeaderLayout
-        title='URL Routes'
+        title='Routes'
         subtitle='Settings'
         primaryAction={
           <CheckPermissions permissions={false}>

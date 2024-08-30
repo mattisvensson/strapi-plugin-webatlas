@@ -1,9 +1,9 @@
-import { Strapi } from '@strapi/strapi';
+import { getAdminService } from '../utils/pluginHelpers';
 
-export default ({ strapi }: { strapi: Strapi }) => ({
+export default () => ({
   async updateConfig(ctx) {
     try {
-      await strapi.plugin('url-routes').service('admin').updateConfig(ctx.request.body);
+      await getAdminService().updateConfig(ctx.request.body);
     } catch (e) {
       ctx.throw(500, e)
     }
@@ -11,14 +11,14 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   },
   async getConfig(ctx) {
     try {
-      return await strapi.plugin('url-routes').service('admin').getConfig();
+      return await getAdminService().getConfig();
     } catch (e) {
       return ctx.throw(500, e)
     }
   },
   async getRoutes(ctx) {
     try {
-      return await strapi.plugin('url-routes').service('admin').getRoutes();
+      return await getAdminService().getRoutes();
     } catch (e) {
       return ctx.throw(500, e)
     }
@@ -26,7 +26,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   async createExternalRoute (ctx) {
     try {
       const { data } = ctx.request.body;
-      return await strapi.plugin('url-routes').service('admin').createExternalRoute(
+      return await getAdminService().createExternalRoute(
         data,
       );
     } catch (e) {
@@ -37,7 +37,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     try {
       const { id } = ctx.params;
       const { data } = ctx.request.body;
-      return await strapi.plugin('url-routes').service('admin').updateRoute(
+      return await getAdminService().updateRoute(
         id,
         data,
       );
@@ -48,14 +48,14 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   async getNavigation (ctx) {
     try {
       const { id } = ctx.params;
-      return await strapi.plugin('url-routes').service('admin').getNavigation(id);
+      return await getAdminService().getNavigation(id);
     } catch (e) {
       return ctx.throw(500, e)
     }
   },
   async getAllNavigations (ctx) {
     try {
-      return await strapi.plugin('url-routes').service('admin').getAllNavigations();
+      return await getAdminService().getAllNavigations();
     } catch (e) {
       return ctx.throw(500, e)
     }
@@ -63,7 +63,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   async createNavigation (ctx) {
     try {
       const data = ctx.request.body;
-      return await strapi.plugin('url-routes').service('admin').createNavigation(data);
+      return await getAdminService().createNavigation(data);
     } catch (e) {
       return ctx.throw(500, e)
     }
@@ -72,7 +72,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     try {
       const { id } = ctx.params;
       const data = ctx.request.body;
-      return await strapi.plugin('url-routes').service('admin').updateNavigation(id, data);
+      return await getAdminService().updateNavigation(id, data);
     } catch (e) {
       return ctx.throw(500, e)
     }
@@ -81,7 +81,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     try {
       const { variant } = ctx.query;
       const { id } = ctx.params;
-      return await strapi.plugin('url-routes').service('admin').structuredNavigation(id, variant);
+      return await getAdminService().structuredNavigation(id, variant);
     } catch (e) {
       return ctx.throw(500, e)
     }
@@ -89,7 +89,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   async deleteNavigation (ctx) {
     try {
       const { id } = ctx.params;
-      return await strapi.plugin('url-routes').service('admin').deleteNavigation(id);
+      return await getAdminService().deleteNavigation(id);
     } catch (e) {
       return ctx.throw(500, e)
     }
@@ -97,7 +97,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   async createNavItem (ctx) {
     try {
       const { data } = ctx.request.body;
-      return await strapi.plugin('url-routes').service('admin').createNavItem(data);
+      return await getAdminService().createNavItem(data);
     } catch (e) {
       return ctx.throw(500, e)
     }
@@ -106,7 +106,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     try {
       const { id } = ctx.params;
       const { data } = ctx.request.body;
-      return await strapi.plugin('url-routes').service('admin').updateNavItem(id, data);
+      return await getAdminService().updateNavItem(id, data);
     } catch (e) {
       return ctx.throw(500, e)
     }
@@ -114,7 +114,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
   async deleteNavItem (ctx) {
     try {
       const { id } = ctx.params;
-      return await strapi.plugin('url-routes').service('admin').deleteNavItem(id);
+      return await getAdminService().deleteNavItem(id);
     } catch (e) {
       return ctx.throw(500, e)
     }
@@ -130,7 +130,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
         return ctx.throw(400, 'Path is required')
       }
       
-      return await strapi.plugin('url-routes').service('admin').checkUniquePath(bodyPath || queryPath, bodyTargetRouteId || queryTargetRouteId || null);
+      return await getAdminService().checkUniquePath(bodyPath || queryPath, bodyTargetRouteId || queryTargetRouteId || null);
     } catch (e) {
       return ctx.throw(500, e)
     }

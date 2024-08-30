@@ -3,9 +3,9 @@ import { useState, useEffect, useRef, useCallback, useReducer } from 'react';
 import transformToUrl from '../../../../utils/transformToUrl';
 import { useFetchClient, useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { ConfigContentType } from '../../../../types';
-import Tooltip from '../../components/Tooltip';
+import Tooltip from '../Tooltip';
 import debounce from '../../utils/debounce';
-import URLInfo from '../../components/URLInfo';
+import URLInfo from '../URLInfo';
 import duplicateCheck from '../../utils/duplicateCheck';
 
 type Action = 
@@ -119,7 +119,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 		async function getTypes() {
 			if (!initialData.id) return setIsLoading(false);
 			try {
-				const { data } = await get(`/content-manager/collection-types/plugin::url-routes.route?filters[relatedId][$eq]=${initialData.id}`);
+				const { data } = await get(`/content-manager/collection-types/plugin::webatlas.route?filters[relatedId][$eq]=${initialData.id}`);
 				const route = data.results[0]
 
 				if (!route) return setIsLoading(false);

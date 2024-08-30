@@ -1,13 +1,13 @@
-import { Strapi } from '@strapi/strapi';
+import { getClientService } from '../utils/pluginHelpers';
 
-export default ({ strapi }: { strapi: Strapi }) => ({
+export default () => ({
   async getEntityByPath(ctx) {
     try {
       const { slug, populate, populateDeepDepth, fields } = ctx.query;
 
       if (!slug) return ctx.throw(400, 'Slug is required');
 
-      const entity = await strapi.plugin('url-routes').service('client').getEntityByPath(slug, populate, populateDeepDepth, fields);
+      const entity = await getClientService().getEntityByPath(slug, populate, populateDeepDepth, fields);
 
       if (!entity) return ctx.throw(404, 'Entity not found');
 
@@ -22,7 +22,7 @@ export default ({ strapi }: { strapi: Strapi }) => ({
 
       if (!id && !name) return ctx.throw(400, 'Navigation id or name is required');
 
-      const navigation = await strapi.plugin('url-routes').service('client').getNavigation(id, name, variant);
+      const navigation = await getClientService().getNavigation(id, name, variant);
 
       if (!navigation) return ctx.throw(404, 'Navigation not found');
 

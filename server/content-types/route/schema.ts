@@ -65,7 +65,7 @@ export default {
     navitem: {
       type: "relation",
       relation: "oneToOne",
-      target: "plugin::url-routes.navitem",
+      target: "plugin::webatlas.navitem",
       configurable: false,
     },
     wrapper: {

@@ -21,7 +21,7 @@ export default function usePluginConfig(): UsePluginConfigResponse {
       setLoading(true);
       try {
         const { data: { data: contentTypesArray} } = await get('/content-manager/content-types');
-        let { data: config } = await get('/url-routes/config');
+        let { data: config } = await get('/webatlas/config');
         if (!config || !config.selectedContentTypes) {
           throw new Error(`HTTP error! Couldn't fetch plugin config`);
         }
@@ -46,7 +46,7 @@ export default function usePluginConfig(): UsePluginConfigResponse {
 
   async function setConfig(body: PluginConfig) {
     try {
-      await put('/url-routes/config', {
+      await put('/webatlas/config', {
         ...body,
       });      
     } catch (error) {

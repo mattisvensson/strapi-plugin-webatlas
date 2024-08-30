@@ -29,7 +29,7 @@ export default function Delete ({ variant, item, fetchNavigations }: DeleteProps
 
   const handleDelete = async () => {
     try {
-        await del(`/url-routes/${variant === "NavDelete" ? 'navigation' : 'navitem'}/${item.id}`)
+        await del(`/webatlas/${variant === "NavDelete" ? 'navigation' : 'navitem'}/${item.id}`)
     } catch (err) {
       console.log(err)
     }

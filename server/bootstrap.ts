@@ -8,7 +8,7 @@ export default async ({ strapi }: { strapi: Strapi }) => {
     throw new Error('strapi.store is undefined');
   }
 
-  const pluginStore = strapi.store({ type: 'plugin', name: 'url-routes' });
+  const pluginStore = strapi.store({ type: 'plugin', name: 'webatlas' });
 
   const config = await pluginStore.get({
     key: "config",
@@ -17,7 +17,7 @@ export default async ({ strapi }: { strapi: Strapi }) => {
   if (!config?.selectedContentTypes) return
 
   strapi.db?.lifecycles.subscribe({
-    models: ['plugin::url-routes.navitem'],
+    models: ['plugin::webatlas.navitem'],
 
     async beforeDelete(event: any) {
       const id = event.params.where['id']
@@ -25,7 +25,7 @@ export default async ({ strapi }: { strapi: Strapi }) => {
       if (!id) return
 
       try {
-        const navitem = await strapi.db?.query('plugin::url-routes.navitem').findOne({
+        const navitem = await strapi.db?.query('plugin::webatlas.navitem').findOne({
           where: {
             id: id
           },
@@ -44,7 +44,7 @@ export default async ({ strapi }: { strapi: Strapi }) => {
       if (!id) return
 
       try {
-        await strapi.db?.query('plugin::url-routes.route').delete({
+        await strapi.db?.query('plugin::webatlas.route').delete({
           where: {
             id: id
           },
@@ -81,7 +81,7 @@ export default async ({ strapi }: { strapi: Strapi }) => {
 
       const path = await duplicateCheck(transformToUrl(url_alias_path));
 
-      await strapi.db?.query('plugin::url-routes.route').create({
+      await strapi.db?.query('plugin::webatlas.route').create({
         data: {
           relatedContentType: event.model.uid,
           relatedId: event.result.id,
@@ -114,7 +114,7 @@ export default async ({ strapi }: { strapi: Strapi }) => {
           data.fullPath = path;
         }
 
-        await strapi.db?.query('plugin::url-routes.route').update({
+        await strapi.db?.query('plugin::webatlas.route').update({
           where: { id: url_alias_routeId },
           data,
         });
@@ -146,7 +146,7 @@ async function findAndDeleteNavItem (relatedId: number, relatedContentType: stri
 
   if (!relatedId || !relatedContentType) return
 
-  const route = await strapi.db?.query('plugin::url-routes.route').findOne({
+  const route = await strapi.db?.query('plugin::webatlas.route').findOne({
     where: {
       relatedId: relatedId,
       relatedContentType: relatedContentType
@@ -155,7 +155,7 @@ async function findAndDeleteNavItem (relatedId: number, relatedContentType: stri
 
   if (!route.id) return
 
-  const entity = await strapi.db?.query('plugin::url-routes.navitem').findOne({
+  const entity = await strapi.db?.query('plugin::webatlas.navitem').findOne({
     where: {
       route: {
         id: route.id
@@ -163,6 +163,6 @@ async function findAndDeleteNavItem (relatedId: number, relatedContentType: stri
     },
   });
   
-  if (entity.id) await strapi.entityService?.delete('plugin::url-routes.navitem', entity.id)
-  if (route.id) await strapi.entityService?.delete('plugin::url-routes.route', route.id)
+  if (entity.id) await strapi.entityService?.delete('plugin::webatlas.navitem', entity.id)
+  if (route.id) await strapi.entityService?.delete('plugin::webatlas.route', route.id)
 }

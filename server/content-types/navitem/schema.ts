@@ -22,20 +22,20 @@ export default {
     navigation: {
       type: "relation",
       relation: "manyToOne",
-      target: "plugin::url-routes.navigation",
+      target: "plugin::webatlas.navigation",
       configurable: false,
       inversedBy: "items",
     },
     route: {
       type: "relation",
       relation: "oneToOne",
-      target: "plugin::url-routes.route",
+      target: "plugin::webatlas.route",
       configurable: false,
     },
     parent: {
       type: "relation",
       relation: "oneToOne",
-      target: "plugin::url-routes.navitem",
+      target: "plugin::webatlas.navitem",
       configurable: false,
     },
     order: {

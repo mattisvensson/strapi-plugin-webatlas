@@ -12,7 +12,7 @@ export default function useApi() {
   const fetchAllEntities = async (contentTypes?: ConfigContentType[]) => {
     try {
       if (!contentTypes) {
-        const { data } = await get('/url-routes/config')
+        const { data } = await get('/webatlas/config')
         contentTypes = data?.selectedContentTypes || []
       }
 
@@ -43,12 +43,12 @@ export default function useApi() {
   }
 
   const getRouteByRelated = async (relatedCt: string, relatedId: number, populate?: string) => {
-    const { data } = await get(`/content-manager/collection-types/plugin::url-routes.route?filters[relatedId][$eq]=${relatedId}&filters[relatedContentType][$eq]=${relatedCt}${populate ? '&populate' + populate : ''}`);
+    const { data } = await get(`/content-manager/collection-types/plugin::webatlas.route?filters[relatedId][$eq]=${relatedId}&filters[relatedContentType][$eq]=${relatedCt}${populate ? '&populate' + populate : ''}`);
     return data;
   };
 
   const createExternalRoute = async (body: RouteSettings) => {
-    const { data } = await post('/url-routes/route/external', {
+    const { data } = await post('/webatlas/route/external', {
       data: {
         ...body,
       },
@@ -57,7 +57,7 @@ export default function useApi() {
   };
 
   const updateRoute = async (body: RouteSettings, id: number) => {
-    const { data } = await put(`/url-routes/route/${id}`, {
+    const { data } = await put(`/webatlas/route/${id}`, {
       data: {
         ...body,
       },
@@ -66,7 +66,7 @@ export default function useApi() {
   };
 
   const createNavItem = async (body: NavItemSettings) => {
-    const { data } = await post('/url-routes/navitem', {
+    const { data } = await post('/webatlas/navitem', {
       data: {
         ...body,
       },
@@ -75,7 +75,7 @@ export default function useApi() {
   };
 
   const updateNavItem = async (body: NavItemSettings, id: number) => {
-    const { data } = await put(`/url-routes/navitem/${id}`, {
+    const { data } = await put(`/webatlas/navitem/${id}`, {
       data: {
         ...body,
       },
@@ -84,7 +84,7 @@ export default function useApi() {
   };
 
   const getStructuredNavigation = async (id: number, variant: StructuredNavigationVariant) => {
-    const { data } = await get(`/url-routes/navigation/${id}/structured?variant=${variant}`);
+    const { data } = await get(`/webatlas/navigation/${id}/structured?variant=${variant}`);
     return data
   }
 

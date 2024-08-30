@@ -38,7 +38,7 @@ export default {
     items: {
       type: "relation",
       relation: "oneToMany",
-      target: "plugin::url-routes.navitem",
+      target: "plugin::webatlas.navitem",
       configurable: false,
       mappedBy: 'navigation',
     },

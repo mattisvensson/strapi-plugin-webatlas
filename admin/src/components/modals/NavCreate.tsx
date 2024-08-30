@@ -15,7 +15,7 @@ export default function NavCreate ({ fetchNavigations }: { fetchNavigations: () 
 
   const createNavigation = async () => {
     try {
-      await post('/url-routes/navigation', { name, isActive });
+      await post('/webatlas/navigation', { name, isActive });
       fetchNavigations()
       setModal('overview')
     } catch (err) {
