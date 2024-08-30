@@ -1,5 +1,5 @@
 {
-  "name": "strapi-plugin-webatlas",
+  "name": "@mattisvensson/strapi-plugin-webatlas",
   "version": "1.0.0",
   "description": "A strapi plugin to manage URL routes and navigations.",
   "strapi": {
