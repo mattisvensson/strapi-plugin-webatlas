@@ -146,23 +146,27 @@ async function findAndDeleteNavItem (relatedId: number, relatedContentType: stri
 
   if (!relatedId || !relatedContentType) return
 
-  const route = await strapi.db?.query('plugin::webatlas.route').findOne({
-    where: {
-      relatedId: relatedId,
-      relatedContentType: relatedContentType
-    },
-  });
-
-  if (!route.id) return
-
-  const entity = await strapi.db?.query('plugin::webatlas.navitem').findOne({
-    where: {
-      route: {
-        id: route.id
-      }
-    },
-  });
+  try {
+    const route = await strapi.db?.query('plugin::webatlas.route').findOne({
+      where: {
+        relatedId: relatedId,
+        relatedContentType: relatedContentType
+      },
+    });
   
-  if (entity.id) await strapi.entityService?.delete('plugin::webatlas.navitem', entity.id)
-  if (route.id) await strapi.entityService?.delete('plugin::webatlas.route', route.id)
+    if (!route?.id) return
+  
+    const entity = await strapi.db?.query('plugin::webatlas.navitem').findOne({
+      where: {
+        route: {
+          id: route.id
+        }
+      },
+    });
+    
+    if (entity?.id) await strapi.entityService?.delete('plugin::webatlas.navitem', entity.id)
+    if (route?.id) await strapi.entityService?.delete('plugin::webatlas.route', route.id)
+  } catch (err) {
+    console.log(err)
+  }
 }
