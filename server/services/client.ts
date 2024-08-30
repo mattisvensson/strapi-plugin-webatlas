@@ -64,7 +64,6 @@ export default ({strapi}) => ({
           populate: ['items', "items.parent", "items.route"],
         });
       }
-
       
       if (!navigation) return null
       

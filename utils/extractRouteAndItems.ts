@@ -31,6 +31,10 @@ export default function extractRouteAndItems(items: NestedNavItem[]) {
     delete route.internal
     delete route.wrapper
     
-    return { type: type, ...route };
+    return { 
+      __component: type === 'wrapper' ? 'url-routes.wrapper' : 'url-routes.route',
+      type: type,
+      ...route
+    };
   });
 }
