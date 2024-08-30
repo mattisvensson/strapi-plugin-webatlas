@@ -1,10 +1,10 @@
 {
   "name": "webatlas",
   "version": "0.0.0",
-  "description": "This is the description of the plugin.",
+  "description": "A strapi plugin to manage URL routes and navigations.",
   "strapi": {
     "name": "webatlas",
-    "description": "Description of webatlas plugin",
+    "description": "A strapi plugin to manage URL routes and navigations.",
     "kind": "plugin"
   },
   "dependencies": {
@@ -35,16 +35,20 @@
     "styled-components": "^5.2.1"
   },
   "author": {
-    "name": "A Strapi developer"
+    "name": "Matti Svensson",
+    "email": "mattisvensson@web.de",
+    "url": "https://mattisvensson.com"
   },
   "maintainers": [
     {
-      "name": "A Strapi developer"
+      "name": "Matti Svensson",
+      "email": "mattisvensson@web.de",
+      "url": "https://mattisvensson.com"
     }
   ],
   "engines": {
-    "node": ">=18.0.0 <=20.x.x",
-    "npm": ">=6.0.0"
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
   },
   "scripts": {
     "develop": "tsc -p tsconfig.server.json -w",
