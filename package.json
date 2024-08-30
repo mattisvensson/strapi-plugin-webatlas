@@ -1,9 +1,10 @@
 {
-  "name": "webatlas",
-  "version": "0.0.0",
+  "name": "strapi-plugin-webatlas",
+  "version": "1.0.0",
   "description": "A strapi plugin to manage URL routes and navigations.",
   "strapi": {
     "name": "webatlas",
+    "displayName": "Webatlas",
     "description": "A strapi plugin to manage URL routes and navigations.",
     "kind": "plugin"
   },
