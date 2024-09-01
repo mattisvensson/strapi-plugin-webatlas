@@ -3,9 +3,10 @@
 - RBAC
 - User action feedback
 - Allow multiple routes per entity
+- Internationalization
 - Aside
  - Show all routes for entity
- - add to navigation from Entity
+ - add to navigation from entity
 - Settings
   - Max nested items
 - Navigation page
@@ -14,3 +15,4 @@
   - Move Nav item with children
   - Item search
   - collapse items
+  - Multi action for items
