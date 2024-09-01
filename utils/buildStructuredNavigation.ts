@@ -23,7 +23,7 @@ export default function buildStructuredNavigation(data: NestedNavigation, varian
     });
 
     // Sort root items and their nested items
-    // sortItems(rootItems);
+    sortItems(rootItems);
 
     // Return a new object with the nested and sorted items
     return { ...data, items: rootItems };
