@@ -44,7 +44,10 @@ export default function useApi() {
 
   const getRouteByRelated = async (relatedCt: string, relatedId: number, populate?: string) => {
     const { data } = await get(`/content-manager/collection-types/plugin::webatlas.route?filters[relatedId][$eq]=${relatedId}&filters[relatedContentType][$eq]=${relatedCt}${populate ? '&populate' + populate : ''}`);
-    return data;
+    
+    if (data?.results) return data.results[0];
+    
+    return null;
   };
 
   const createExternalRoute = async (body: RouteSettings) => {

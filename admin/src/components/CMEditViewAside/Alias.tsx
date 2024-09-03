@@ -1,12 +1,13 @@
 import { BaseCheckbox, Box, TextInput, Flex, Divider, Typography } from '@strapi/design-system';
 import { useState, useEffect, useRef, useCallback, useReducer } from 'react';
 import transformToUrl from '../../../../utils/transformToUrl';
-import { useFetchClient, useCMEditViewDataManager } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { ConfigContentType } from '../../../../types';
 import Tooltip from '../Tooltip';
 import debounce from '../../utils/debounce';
 import URLInfo from '../URLInfo';
 import duplicateCheck from '../../utils/duplicateCheck';
+import { useApi } from '../../hooks'
 
 type Action = 
   | { type: 'DEFAULT'; payload: string }
@@ -56,7 +57,7 @@ function reducer(state: PathState, action: Action): PathState {
 
 const Alias = ({ config }: { config: ConfigContentType }) => {
 	const { layout, initialData, modifiedData, onChange } = useCMEditViewDataManager()
-	const { get } = useFetchClient();
+	const { getRouteByRelated } = useApi()
 
 	const [routeId, setRouteId] = useState<number | null>()
 	const [isOverride, setIsOverride] = useState(false);
@@ -119,8 +120,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 		async function getTypes() {
 			if (!initialData.id) return setIsLoading(false);
 			try {
-				const { data } = await get(`/content-manager/collection-types/plugin::webatlas.route?filters[relatedId][$eq]=${initialData.id}`);
-				const route = data.results[0]
+				const route = await getRouteByRelated(layout.uid, initialData.id)
 
 				if (!route) return setIsLoading(false);
 

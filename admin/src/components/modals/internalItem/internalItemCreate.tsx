@@ -49,8 +49,7 @@ function ItemCreateComponent({
     async function fetchRoute() {
       if (selectedContentType?.contentType && selectedEntity?.id) {
         try {
-          const { results } = await getRouteByRelated(selectedContentType.contentType.uid, selectedEntity.id)
-          const route = results[0]
+          const route = await getRouteByRelated(selectedContentType.contentType.uid, selectedEntity.id)
 
           if (!route) return
 
