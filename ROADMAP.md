@@ -1,9 +1,12 @@
 ## Roadmap
 
+- v5 compatibility
 - RBAC
 - User action feedback
 - Allow multiple routes per entity
 - Internationalization
+- plugin translations
+- Draft and published
 - Aside
  - Show all routes for entity
  - add to navigation from entity
