@@ -102,17 +102,57 @@ export default async ({ strapi }: { strapi: Strapi }) => {
         url_alias_routeId,
         url_alias_isOverride
       } = event.params.data;
-      
-      if (url_alias_routeId) {
+
+      if (!url_alias_path) return
+
+      if (event.model.kind === 'singleType') {
+        const route = await strapi.db?.query('plugin::webatlas.route').findOne({
+          where: {
+            relatedContentType: event.model.uid
+          },
+        });
+
         const data: any = {};
         if (ctSettings?.default) data.title = event.params.data[ctSettings.default];
         if (url_alias_isOverride !== undefined) data.isOverride = url_alias_isOverride;
-        if (url_alias_path) {
-          const path = await duplicateCheck(transformToUrl(url_alias_path), url_alias_routeId) ;
-    
+        
+        if (route) {
+          const path = await duplicateCheck(transformToUrl(url_alias_path), route.id) ;
           data.slug = path;
           data.fullPath = path;
+          
+          await strapi.db?.query('plugin::webatlas.route').update({
+            where: { id: route.id },
+            data,
+          });
+        } else {
+          const path = await duplicateCheck(transformToUrl(url_alias_path)) ;
+          data.slug = path;
+          data.fullPath = path;
+
+          await strapi.db?.query('plugin::webatlas.route').create({
+            data: {
+              relatedContentType: event.model.uid,
+              relatedId: event.result.id,
+              slug: data.slug,
+              fullPath: data.fullPath,
+              uidPath: `${event.model.apiName}/${event.result.id}`,
+              isOverride: data.isOverride,
+              title: data.title
+            },
+          });
         }
+      }
+      
+      if (url_alias_routeId) {
+        const data: any = {};
+        
+        if (ctSettings?.default) data.title = event.params.data[ctSettings.default];
+        if (url_alias_isOverride !== undefined) data.isOverride = url_alias_isOverride;
+        
+        const path = await duplicateCheck(transformToUrl(url_alias_path), url_alias_routeId) ;
+        data.slug = path;
+        data.fullPath = path;
 
         await strapi.db?.query('plugin::webatlas.route').update({
           where: { id: url_alias_routeId },
