@@ -18,7 +18,8 @@ import useAllContentTypes from '../../hooks/useAllContentTypes';
 type Action = 
   | { type: 'SET_SELECTED_CONTENT_TYPES'; payload: ConfigContentType[] }
   | { type: 'SET_DEFAULT_FIELD'; payload: { ctUid: string; field: string } }
-  | { type: 'SET_PATTERN'; payload: { ctUid: string; pattern: string } };
+  | { type: 'SET_PATTERN'; payload: { ctUid: string; pattern: string } }
+  | { type: 'SET_API_FIELD'; payload: { ctUid: string; apiField: string } };
 
 const noopFallback = () => {}
 
@@ -48,6 +49,11 @@ const Settings = () => {
       case 'SET_PATTERN':
         updatedContentTypes = settingsState.selectedContentTypes.map(ct => 
           ct.uid === action.payload.ctUid ? { ...ct, pattern: transformToUrl(action.payload.pattern) } : ct
+        );
+        return { ...settingsState, selectedContentTypes: updatedContentTypes };
+      case 'SET_API_FIELD':
+        updatedContentTypes = settingsState.selectedContentTypes.map(ct => 
+          ct.uid === action.payload.ctUid ? { ...ct, apiField: transformToUrl(action.payload.apiField) } : ct
         );
         return { ...settingsState, selectedContentTypes: updatedContentTypes };
       default:
@@ -159,6 +165,17 @@ const Settings = () => {
                             hint="Define the pattern for the URL alias. The default field will be appended to this pattern."
                             value={contentType.pattern}
                             onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_PATTERN', payload: { ctUid: ct.uid, pattern: e.target.value } })}                
+                            disabled={!contentType.default}
+                          />
+                        </Box>
+                        <Box paddingTop={4}>
+                          <TextInput
+                            label="URL Alias API field"
+                            placeholder="e.g. teaser.teaser_url"
+                            labelAction={<Tooltip description="The field which will be visible in the content manger to store the url alias. Necessary for the API."/>}
+                            hint="This field is necessary for the API. Do not change this field unless you know what you are doing."
+                            value={contentType.apiField}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_API_FIELD', payload: { ctUid: ct.uid, apiField: e.target.value } })}                
                             disabled={!contentType.default}
                           />
                         </Box>

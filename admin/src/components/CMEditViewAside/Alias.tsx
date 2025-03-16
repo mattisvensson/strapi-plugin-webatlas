@@ -33,7 +33,7 @@ function reducer(state: PathState, action: Action): PathState {
 				needsUrlCheck: true 
 			};
 		case 'NO_URL_CHECK':
-			return { 
+			return {
 				...state,
 				value: transformToUrl(action.payload), 
 				prevValue: state.value,
@@ -81,6 +81,9 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	}, [])
 
 	useEffect(() => {
+		if (config.apiField)
+			onChange({ target: { name: config.apiField, value: path.value } })
+
 		if (!finished || isLoading) return
 		onChange({ target: { name: "url_alias_path", value: path.value } })
 		onChange({ target: { name: "url_alias_relatedContentType", value: layout.uid } })
