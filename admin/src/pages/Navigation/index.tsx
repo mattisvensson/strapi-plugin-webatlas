@@ -190,11 +190,9 @@ const Navigation = () => {
   }
   
   useEffect(() => {
-    console.log(activeId, navigationItems)
     if (!activeId || !navigationItems) return
 
     const item = navigationItems.find(({ id }) => id === activeId);
-    console.log(item)
     setActiveItem(item);
   }, [navigationItems, activeId])
 
@@ -210,9 +208,9 @@ const Navigation = () => {
         )
         : null;
 
-  setProjected(projection);
+    setProjected(projection);
   }, [activeId, overId, offsetLeft, navigationItems]);
-  console.log(navigationItems)
+
   return (
     <ModalContext.Provider value={{modal, setModal}}>
       <SelectedNavigationContext.Provider value={{selectedNavigation, setSelectedNavigation}}>
