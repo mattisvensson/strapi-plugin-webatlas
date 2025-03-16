@@ -96,10 +96,11 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 		const currentModifiedDataValue = modifiedData[key];
 
 		if (prevModifiedDataValueRef.current !== currentModifiedDataValue && !isOverride) {
+			const path = config.pattern ? `${config.pattern}/${modifiedData[key]}` : `${modifiedData[key]}`
 			if (modifiedData[key] === initialData[key]) {
-				dispatchPath({ type: 'NO_URL_CHECK', payload: modifiedData[key] });
+				dispatchPath({ type: 'NO_URL_CHECK', payload: path });
 			} else {
-				dispatchPath({ type: 'DEFAULT', payload: modifiedData[key] });
+				dispatchPath({ type: 'DEFAULT', payload: path });
 			}
 			prevModifiedDataValueRef.current = currentModifiedDataValue;
 		}
