@@ -3,6 +3,8 @@
   <p>Navigation and slugs, finally in sync</p>
 </div>
 
+>The **strapi-v4** branch is no longer maintained and will not receive further updates or bug fixes. Consider upgrading to the latest version for continued support and improvements.
+
 ---
 
 This plugin bridges the gap between slugs and navigations in Strapi, making URL management and menu building seamless. With automatic slug generation, a clear route overview, and support for multiple navigations, it keeps your content organized and your routes consistent—effortlessly.
