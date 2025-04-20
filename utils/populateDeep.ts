@@ -1,3 +1,21 @@
+function isEmpty(value: any): boolean {
+  if (value == null) return true;
+  if (Array.isArray(value) || typeof value === 'string') return value.length === 0;
+  if (typeof value === 'object') return Object.keys(value).length === 0;
+  return false;
+}
+
+function merge(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
+  for (const key in source) {
+    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+      target[key] = merge(target[key] || {}, source[key]);
+    } else {
+      target[key] = source[key];
+    }
+  }
+  return target;
+}
+
 /*
 * Base code from strapi-plugin-populate-deep
 *
@@ -7,7 +25,6 @@
 * */
 
 import type { Common, Schema } from '@strapi/strapi';
-import { isEmpty, merge } from 'lodash/fp';
 
 const getModelPopulationAttributes = (model: Schema.Component | Schema.ContentType) => {
   if (model.uid === "plugin::upload.file") {
@@ -50,11 +67,13 @@ export default function getFullPopulateObject(
       } else if (value.type === "dynamiczone") {
         const dynamicPopulate = value.components.reduce((prev, cur) => {
           const curPopulate = getFullPopulateObject(cur, maxDepth - 1, ignore);
-          return curPopulate === true ? prev : merge(prev, curPopulate);
-        }, {});
+          if (curPopulate === true) {
+            return prev; // Skip if curPopulate is true
+          }
+          return merge(prev, curPopulate as Record<string, any>);
+        }, {} as Record<string, any>);
         
-        populate[key] = isEmpty(dynamicPopulate) ? true : dynamicPopulate;
-        
+        populate[key] = isEmpty(dynamicPopulate) ? true : dynamicPopulate;    
       } else if (value.type === "relation") {
         const relationPopulate = getFullPopulateObject(
           //@ts-ignore
