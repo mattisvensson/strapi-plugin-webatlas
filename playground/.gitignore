@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 ############################
 # OS X
 ############################
@@ -82,25 +80,10 @@ $RECYCLE.BIN/
 ssl
 .idea
 nbproject
-.tsbuildinfo
-.eslintcache
-
-
-############################
-# Strapi
-############################
-
 public/uploads/*
 !public/uploads/.gitkeep
-
-
-############################
-# Build
-############################
-
-dist
-build
-
+.tsbuildinfo
+.eslintcache
 
 ############################
 # Node.js
@@ -113,7 +96,6 @@ logs
 results
 node_modules
 .node_history
-
 
 ############################
 # Package managers
@@ -129,7 +111,6 @@ node_modules
 .pnp.*
 yarn-error.log
 
-
 ############################
 # Tests
 ############################
@@ -137,9 +118,20 @@ yarn-error.log
 coverage
 
 ############################
-# Cypress
+# Strapi
 ############################
 
-cypress/screenshots/
-cypress/videos/
-cypress/downloads/
+license.txt
+exports
+.strapi
+dist
+build
+.strapi-updater.json
+.strapi-cloud.json
+
+############################
+# Yalc
+############################
+
+.yalc
+yalc.lock

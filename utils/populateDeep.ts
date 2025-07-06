@@ -24,7 +24,7 @@ function merge(target: Record<string, any>, source: Record<string, any>): Record
 * 
 * */
 
-import type { Common, Schema } from '@strapi/strapi';
+import type { UID, Schema } from '@strapi/strapi';
 
 const getModelPopulationAttributes = (model: Schema.Component | Schema.ContentType) => {
   if (model.uid === "plugin::upload.file") {
@@ -35,7 +35,7 @@ const getModelPopulationAttributes = (model: Schema.Component | Schema.ContentTy
 };
 
 export default function getFullPopulateObject(
-  modelUid: Common.UID.Schema, 
+  modelUid: UID.Schema, 
   maxDepth = 20, 
   ignore: string[] = []
 ) {

@@ -1,5 +1,5 @@
 import { ContentType, GroupedEntities, RouteSettings, NavItemSettings, ConfigContentType, NavOverviewState, StructuredNavigationVariant } from '../../../types';
-import { useFetchClient } from '@strapi/helper-plugin';
+import { useFetchClient } from '@strapi/strapi/admin';
 
 export default function useApi() {
   const { get, post, put } = useFetchClient();
