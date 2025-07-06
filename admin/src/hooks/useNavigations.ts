@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useFetchClient } from '@strapi/helper-plugin';
+import { useFetchClient } from '@strapi/strapi/admin';
 import { NestedNavigation } from '../../../types';
 
 export default function useNavigations () {

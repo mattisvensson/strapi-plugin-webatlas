@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { PluginConfig } from '../../../types';
-import { useFetchClient } from '@strapi/helper-plugin';
+import { useFetchClient } from '@strapi/strapi/admin';
 
 type UsePluginConfigResponse = {
   data: PluginConfig | null;
