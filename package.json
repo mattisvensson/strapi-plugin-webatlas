@@ -6,7 +6,7 @@
     "./package.json": "./package.json",
     "./strapi-admin": {
       "types": "./dist/admin/src/index.d.ts",
-      "source": "./admin/src/index.ts",
+      "source": "./admin/src/index.tsx",
       "import": "./dist/admin/index.mjs",
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"

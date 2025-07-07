@@ -1,8 +1,9 @@
+import { StrapiApp } from '@strapi/admin/strapi-admin';
 import pluginPkg from '../../package.json';
 import { PLUGIN_ID, PLUGIN_NAME } from './pluginId';
 import { Initializer } from './components/Initializer';
-import { RouteIcon, NavigationIcon} from './components/PluginIcon';
-// import CMEditViewAside from './components/CMEditViewAside';
+import { RouteIcon, NavigationIcon } from './components/PluginIcon';
+import CMEditViewAside from './components/CMEditViewAside';
 // import Navigation from './pages/Navigation';
 // import Routes from './pages/Routes';
 import Settings from './pages/Settings';
@@ -11,7 +12,7 @@ import { App } from './pages/App';
 export default {
   register(app: any) {
     app.addMenuLink({
-      to: `plugins/${PLUGIN_ID}/routes`,
+      to: `./plugins/${PLUGIN_ID}/routes`,
       icon: RouteIcon,
       intlLabel: {
         id: `${PLUGIN_ID}.link.routes`,
@@ -30,7 +31,7 @@ export default {
       ],
     });
     app.addMenuLink({
-      to: `/plugins/${PLUGIN_ID}/navigation`,
+      to: `./plugins/${PLUGIN_ID}/navigation`,
       icon: NavigationIcon,
       intlLabel: {
         id: `${PLUGIN_ID}.link.navigation`,
@@ -79,12 +80,13 @@ export default {
     });
   },
 
-  // bootstrap(app: any) {
-  //   app.injectContentManagerComponent('editView', 'right-links', {
-  //     name: 'CMEditViewAside',
-  //     Component: CMEditViewAside,
-  //   });
-  // },
+  bootstrap(app: StrapiApp) {
+    // @ts-expect-error
+    app.getPlugin('content-manager').apis.addEditViewSidePanel([() => ({
+      title: 'URL Alias',
+      content: <CMEditViewAside />,
+    })]);
+  },
 
   async registerTrads({ locales }: { locales: string[] }) {
     return Promise.all(
