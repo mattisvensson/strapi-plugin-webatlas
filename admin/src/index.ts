@@ -5,7 +5,7 @@ import { RouteIcon, NavigationIcon} from './components/PluginIcon';
 // import CMEditViewAside from './components/CMEditViewAside';
 // import Navigation from './pages/Navigation';
 // import Routes from './pages/Routes';
-// import Settings from './pages/Settings';
+import Settings from './pages/Settings';
 import { App } from './pages/App';
 
 export default {
@@ -63,9 +63,9 @@ export default {
             defaultMessage: 'Configuration',
           },
           id: PLUGIN_NAME,
-          to: `/settings/${PLUGIN_ID}`,
+          to: `${PLUGIN_ID}/configuration`,
           Component() {
-            return App;
+            return Settings;
           },
         },
       ]
