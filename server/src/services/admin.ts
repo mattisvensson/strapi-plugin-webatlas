@@ -26,9 +26,19 @@ export default ({strapi}) => ({
 
   async getConfig() {
     const pluginStore = await strapi.store({ type: 'plugin', name: 'webatlas' });
-    const config = await pluginStore.get({
+    let config = await pluginStore.get({
       key: "config",
     });
+
+    if (!config) {
+      config = await pluginStore.set({
+        key: "config",
+        value: {
+          selectedContentTypes: [],
+        },
+      });
+    }
+
     return config
   },
 
