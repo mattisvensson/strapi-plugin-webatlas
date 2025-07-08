@@ -1,26 +1,21 @@
 import { StrapiApp } from '@strapi/admin/strapi-admin';
-import pluginPkg from '../../package.json';
 import { PLUGIN_ID, PLUGIN_NAME } from './pluginId';
 import { Initializer } from './components/Initializer';
 import { RouteIcon, NavigationIcon } from './components/PluginIcon';
 import CMEditViewAside from './components/CMEditViewAside';
-// import Navigation from './pages/Navigation';
-// import Routes from './pages/Routes';
-import Settings from './pages/Settings';
-import { App } from './pages/App';
 
 export default {
-  register(app: any) {
+  register(app: StrapiApp) {
     app.addMenuLink({
-      to: `./plugins/${PLUGIN_ID}/routes`,
+      to: `/plugins/${PLUGIN_ID}/routes`,
       icon: RouteIcon,
       intlLabel: {
         id: `${PLUGIN_ID}.link.routes`,
         defaultMessage: 'Routes',
       },
-      Component() {
-        // return Routes;
-        return App;
+      Component: async () => {
+        const component = await import('./pages/Routes');
+        return { default: component.default };
       },
       permissions: [
         // Uncomment to set the permissions of the plugin here
@@ -31,15 +26,15 @@ export default {
       ],
     });
     app.addMenuLink({
-      to: `./plugins/${PLUGIN_ID}/navigation`,
+      to: `/plugins/${PLUGIN_ID}/navigation`,
       icon: NavigationIcon,
       intlLabel: {
         id: `${PLUGIN_ID}.link.navigation`,
         defaultMessage: 'Navigation',
       },
-      Component() {
-        // return Navigation;
-        return App;
+      Component: async () => {
+        const component = await import('./pages/Routes');
+        return { default: component.default };
       },
       permissions: [
         // Uncomment to set the permissions of the plugin here
@@ -49,7 +44,7 @@ export default {
         // },
       ],
     });
-    app.createSettingSection(
+    app.addSettingsLink(
       {
         id: PLUGIN_ID,
         intlLabel: {
@@ -57,20 +52,27 @@ export default {
           defaultMessage: 'Webatlas',
         },
       },
-      [
-        {
-          intlLabel: {
-            id: `${PLUGIN_ID}.settings.configuration`,
-            defaultMessage: 'Configuration',
-          },
-          id: PLUGIN_NAME,
-          to: `${PLUGIN_ID}/configuration`,
-          Component() {
-            return Settings;
-          },
+      {
+        intlLabel: {
+          id: `${PLUGIN_ID}.settings.section`,
+          defaultMessage: 'Webatlas',
         },
-      ]
-    );
+        id: PLUGIN_ID,
+        to: `/settings/${PLUGIN_ID}/configuration`,
+        Component: async () => {
+          return await import(
+            /* webpackChunkName: "webatlas-settings-page" */ './pages/Settings'
+          );
+        },
+        permissions: [
+          // Uncomment to set the permissions of the plugin here
+          // {
+          //   action: '', // the action name should be plugin::plugin-name.actionType
+          //   subject: null,
+          // },
+        ],
+      }
+    )
 
     app.registerPlugin({
       id: PLUGIN_ID,
