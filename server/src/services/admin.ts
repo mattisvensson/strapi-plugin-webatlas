@@ -43,14 +43,25 @@ export default ({strapi}) => ({
   },
 
   async getRoutes() {
+
     try {
-      const entitys = await strapi.entityService.findMany(waRoute, {
-        populate: ['parent', 'navigation'],
+      const entities = await strapi.documents(waRoute).findMany({
+         populate: ["author", "comments"],
       });
-      return entitys;
+      console.log("entities", entities)
+      return entities;
     } catch (e) {
       console.log(e)
     }
+
+    // try {
+    //   const entitys = await strapi.entityService.findMany(waRoute, {
+    //     populate: ['parent', 'navigation'],
+    //   });
+    //   return entitys;
+    // } catch (e) {
+    //   console.log(e)
+    // }
   },
 
   async createExternalRoute(data) {
