@@ -33,7 +33,7 @@ export default {
         defaultMessage: 'Navigation',
       },
       Component: async () => {
-        const component = await import('./pages/Routes');
+        const component = await import('./pages/Navigation');
         return { default: component.default };
       },
       permissions: [
