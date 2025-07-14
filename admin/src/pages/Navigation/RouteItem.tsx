@@ -33,7 +33,7 @@ function RouteIcon ({ type, color = 'neutral800' }: { type: RouteType | undefine
   }
 }
 export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setParentId, setActionItem, ghost, depth, style, wrapperRef, handleProps}: RouteItemProps, ref) => {
-  const { setModal } = useContext(ModalContext);
+  const { setModalType } = useContext(ModalContext);
   const { get } = useFetchClient();
 
   const [isPublished, setIsPublished] = useState(false)
@@ -74,7 +74,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
   const handleAddChildren = () => {
     setIsVisible(false)
     setParentId(item.id)
-    setModal('ItemCreate')
+    setModalType('ItemCreate')
   }
 
   const handleEdit = () => {
@@ -85,13 +85,13 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
     if (!item.route.internal) newModal = 'ExternalEdit'
     if (item.route.wrapper) newModal = 'WrapperEdit'
     
-    setModal(newModal)
+    setModalType(newModal)
   }
 
   const handleDelete = () => {
     setIsVisible(false)
     setActionItem(item)
-    setModal('ItemDelete')
+    setModalType('ItemDelete')
   }
 
   const elStyle = {

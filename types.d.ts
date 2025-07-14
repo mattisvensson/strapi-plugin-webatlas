@@ -193,7 +193,7 @@ type modalSharedLogic = {
   path: any,
   dispatchPath: React.Dispatch<any>,
   debouncedCheckUrl: (url: string, routeId?: number | null | undefined) => void,
-  modal: string,
-  setModal: (value: string) => void,
+  modalType: string,
+  setModalType: (value: string) => void,
   selectedNavigation: NestedNavigation | undefined,
 }

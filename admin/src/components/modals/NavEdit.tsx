@@ -16,20 +16,20 @@ export default function NavEdit ({ item, fetchNavigations }: NavEditProps){
   const [name, setName] = useState(item.name)
   const [isActive, setIsActive] = useState(item.visible)
 
-  const { setModal } = useContext(ModalContext);
+  const { setModalType } = useContext(ModalContext);
 
   const updateNavigation = async () => {
     try {
       await put(`/webatlas/navigation/${item.id}`, { name, isActive });
       fetchNavigations()
-      setModal('overview')
+      setModalType('NavOverview')
     } catch (err) {
       console.log(err)
     }
   }
 
   return (
-    <Modal.Root onClose={() => setModal('')}>
+    <Modal.Root onClose={() => setModalType('')}>
       <Modal.Header title={`Edit navigation: ${item.name}`}/>
       <Modal.Body>
         <Grid gap={4}>
@@ -42,7 +42,7 @@ export default function NavEdit ({ item, fetchNavigations }: NavEditProps){
         </Grid>
       </Modal.Body>
       <Modal.Footer
-        startActions={<Button onClick={() => setModal('overview')} variant="tertiary">Cancel</Button>}
+        startActions={<Button onClick={() => setModalType('NavOverview')} variant="tertiary">Cancel</Button>}
         endActions={<Button onClick={() => updateNavigation()}>Update</Button>}
       />
     </Modal.Root>

@@ -26,7 +26,7 @@ function ItemCreateComponent({
   path,
   dispatchPath,
   debouncedCheckUrl,
-  setModal,
+  setModalType,
   selectedNavigation,
   parentId,
 }: ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>) {
@@ -96,14 +96,14 @@ function ItemCreateComponent({
 
       await createNavItem(settings);
 
-      setModal('')
+      setModalType('')
     } catch (err) {
       console.log(err)
     }
   }
 
   return (
-    <Modal.Root onClose={() => setModal('')}>
+    <Modal.Root onClose={() => setModalType('')}>
       <Modal.Header title="Add new navigation item"/>
       <Modal.Body>
         <Grid gap={8}>
@@ -197,11 +197,11 @@ function ItemCreateComponent({
         }
       </Modal.Body>
       <Modal.Footer
-        startActions={<Button onClick={() => setModal('')} variant="tertiary">Cancel</Button>}
+        startActions={<Button onClick={() => setModalType('')} variant="tertiary">Cancel</Button>}
         endActions={
           <>
-            <Button variant="secondary" onClick={() => setModal('ExternalCreate')}>Add external link</Button>
-            <Button variant="secondary" onClick={() => setModal('WrapperCreate')}>Add wrapper component</Button>
+            <Button variant="secondary" onClick={() => setModalType('ExternalCreate')}>Add external link</Button>
+            <Button variant="secondary" onClick={() => setModalType('WrapperCreate')}>Add wrapper component</Button>
             <Button disabled={!selectedEntity} onClick={() => addItem()}>Add item</Button>
           </>
         }

@@ -1,33 +1,40 @@
-import { useState } from 'react';
-import { Grid, Toggle, Box, Field } from '@strapi/design-system';
+import { useState, useContext } from 'react';
+import { Grid, Box, Field } from '@strapi/design-system';
 import { useFetchClient } from '@strapi/strapi/admin';
 import NavModal from './NavModal';
+import { ModalContext } from '../../contexts';
 
 export default function NavCreate() {
   const { post } = useFetchClient();
+  const { setModalType } = useContext(ModalContext);
   const [name, setName] = useState('');
-  const [isActive, setIsActive] = useState(true);
+  const [isActive, setIsActive] = useState(true) // Temporary not used
+  const [loading, setLoading] = useState(false)
 
   const createNavigation = async () => {
+    setLoading(true);
     try {
-      // await post('/webatlas/navigation', { name, isActive });
-      console.log('Creating navigation with name:', name, 'and isActive:', isActive);
-      // Optionally: close modal, refresh list, etc.
+      await post('/webatlas/navigation', { name, isActive });
+      setModalType('');
     } catch (err) {
       console.log(err);
+    } finally {
+
     }
+    setLoading(false);
   };
 
   return (
     <NavModal
-      triggerText="Create Navigation"
       confirmText="Create"
       closeText="Cancel"
       titleText="Create new navigation"
-      onConfirm={createNavigation} // <-- pass handler here
+      loadingText='Creating'
+      onConfirm={createNavigation}
+      loading={loading}
     >
       <Grid.Root gap={4}>
-        <Grid.Item col={6} s={12}>
+        <Grid.Item col={12} s={12}>
           <Box width="100%">
             <Field.Root>
               <Field.Label>Name</Field.Label>

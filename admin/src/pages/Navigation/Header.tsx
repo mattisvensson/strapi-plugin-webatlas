@@ -9,12 +9,12 @@ type HeaderProps = {
 
 export default function Header ({ navigations }: HeaderProps) {
 
-  const { setModal } = useContext(ModalContext);
+  const { setModalType } = useContext(ModalContext);
   const { selectedNavigation, setSelectedNavigation } = useContext(SelectedNavigationContext);
 
   return (
     <Flex gap={4}>
-      <Button variant="secondary" onClick={() => setModal('overview')}>
+      <Button variant="secondary" onClick={() => setModalType('NavOverview')}>
         Manage
       </Button>
       <SingleSelect
@@ -26,7 +26,8 @@ export default function Header ({ navigations }: HeaderProps) {
             setSelectedNavigation(navItem);
           }
         }}
-        disabled={navigations.length === 0}>
+        disabled={navigations.length === 0}
+      >
         {navigations.map((nav) => (
           <SingleSelectOption key={nav.id} value={nav.slug}>{nav.name}</SingleSelectOption>
         ))}
