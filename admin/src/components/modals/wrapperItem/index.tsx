@@ -19,7 +19,7 @@ function WrapperItemComponent({
   createExternalRoute,
   updateRoute,
   dispatchPath,
-  setModal,
+  setModalType,
   selectedNavigation,
   parentId,
 }: externalItemProps & ReturnType<typeof useModalSharedLogic>) {
@@ -60,14 +60,14 @@ function WrapperItemComponent({
         await createNavItem(settings);
       }
 
-      setModal('')
+      setModalType('')
     } catch (err) {
       console.log(err)
     }
   }
 
   return (
-    <Modal.Root onClose={() => setModal('')}>
+    <Modal.Root onClose={() => setModalType('')}>
       <Modal.Header title={variant === 'WrapperCreate' ? 'Create new wrapper item' : `Edit external route "${navItemState.title}"`}/>
       <Modal.Body>
         <Grid gap={8}>
@@ -99,11 +99,11 @@ function WrapperItemComponent({
         </Grid>
       </Modal.Body>
       <Modal.Footer
-        startActions={<Button onClick={() => setModal('')} variant="tertiary">Cancel</Button>}
+        startActions={<Button onClick={() => setModalType('')} variant="tertiary">Cancel</Button>}
         endActions={
           <>
-            <Button variant="secondary" onClick={() => setModal('ItemCreate')}>Add internal link</Button>
-            <Button variant="secondary" onClick={() => setModal('ExternalCreate')}>Add external item</Button>
+            <Button variant="secondary" onClick={() => setModalType('ItemCreate')}>Add internal link</Button>
+            <Button variant="secondary" onClick={() => setModalType('ExternalCreate')}>Add external item</Button>
             <Button disabled={!navItemState.title} onClick={() => addItem()}>{variant === 'WrapperCreate' ? 'Add item' : 'Save'}</Button>
           </>
         }

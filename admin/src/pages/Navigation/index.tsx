@@ -19,7 +19,7 @@ import Header from './Header';
 import { NestedNavigation, NestedNavItem } from '../../../../types';
 import useNavigations from '../../hooks/useNavigations';
 import useApi from '../../hooks/useApi';
-import { isNestedNavigation, isNestedNavItem} from '../../utils/typeChecks';
+// import { isNestedNavigation, isNestedNavItem} from '../../utils/typeChecks';
 import Center from '../../components/UI/Center';
 import {
   DndContext,
@@ -29,7 +29,6 @@ import {
   DragMoveEvent,
   DragEndEvent,
   DragOverEvent,
-  MeasuringStrategy,
   UniqueIdentifier,
 } from '@dnd-kit/core';
 import {
@@ -37,7 +36,7 @@ import {
   arrayMove,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { getProjection } from '../../utils/dnd';
+import { getProjection, measuring, indentationWidth } from '../../utils/dnd';
 import SortableRouteItem from './SortableRouteItem';
 
 type Projected = {
@@ -48,7 +47,7 @@ type Projected = {
 
 const Navigation = () => {
   const { navigations, fetchNavigations } = useNavigations();
-  const [modal, setModal] = useState<string>('');
+  const [modalType, setModalType] = useState<string>('');
   const [selectedNavigation, setSelectedNavigation] = useState<NestedNavigation>();
   const [navigationItems, setNavigationItems] = useState<NestedNavItem[]>();
   const [initialNavigationItems, setInitialNavigationItems] = useState<NestedNavItem[]>();
@@ -61,17 +60,16 @@ const Navigation = () => {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [overId, setOverId] = useState<UniqueIdentifier | null>(null);
   const [offsetLeft, setOffsetLeft] = useState(0);
-  const indentationWidth = 48;
 
   if (!navigations) return null;
 
   useEffect(() => {
-    if (modal === 'overview' || modal === '') {
+    if (modalType === 'NavOverview' || modalType === '') {
       setActionItem(undefined)
       setParentId(undefined)
       fetchNavigations()
     }
-  }, [modal]);
+  }, [modalType]);
 
   useEffect(() => {
     async function fetchNestedNavigation () {
@@ -94,11 +92,6 @@ const Navigation = () => {
     }
   }, [navigationItems]);
 
-  const measuring = {
-    droppable: {
-      strategy: MeasuringStrategy.Always,
-    },
-  };
 
   function handleDragStart({ active: { id: activeId } }: DragStartEvent) {
     if (!navigationItems) return;
@@ -201,7 +194,6 @@ const Navigation = () => {
           activeId,
           overId,
           offsetLeft,
-          indentationWidth
         )
         : null;
 
@@ -209,7 +201,7 @@ const Navigation = () => {
   }, [activeId, overId, offsetLeft, navigationItems]);
 
   return (
-    <ModalContext.Provider value={{modal, setModal}}>
+    <ModalContext.Provider value={{modalType, setModalType}}>
       <SelectedNavigationContext.Provider value={{selectedNavigation, setSelectedNavigation}}>
         <>
           <Layouts.Header
@@ -219,7 +211,7 @@ const Navigation = () => {
           />
           <Layouts.Content>
             <Flex gap={4} paddingBottom={6} justifyContent="flex-end">
-              <Button variant="secondary" startIcon={<Plus />} onClick={() => setModal('ItemCreate')}>
+              <Button variant="secondary" startIcon={<Plus />} onClick={() => setModalType('ItemCreate')}>
                 New Item
               </Button>
               <Button
@@ -268,26 +260,32 @@ const Navigation = () => {
                 </DndContext>
               </Flex>
             }
-            {navigations?.length === 0 && <>
-              <Center height={400}>
-                <EmptyNav msg="You have no navigations yet..." modal="create" />
-                <NavCreate />
-              </Center>
-            </>}
-            {navigationItems?.length === 0 && <EmptyNav msg="Your navigation is empty..." modal="ItemCreate"/>}
+            {navigations?.length === 0 && <Center height={400}>
+              <EmptyNav msg="You have no navigations yet..." />
+              <Button variant="primary" onClick={() => setModalType('NavCreate')}>
+                Create new Navigation
+              </Button>
+            </Center>}
+            {navigationItems?.length === 0 && <Center height={400}>
+              <EmptyNav msg="Your navigation is empty..." />
+              <Button variant="primary" onClick={() => setModalType('ItemCreate')}>
+                Create new item
+              </Button>
+            </Center>}
+            {modalType}
           </Layouts.Content>
         </>
-        {/* {modal === 'overview' && <NavOverview navigations={navigations} setActionItem={setActionItem} />}
-        {modal === 'create' && <NavCreate />}
-        {modal === 'edit' && isNestedNavigation(actionItem) && <NavEdit item={actionItem} fetchNavigations={fetchNavigations} />}
-        {modal === "NavDelete" && isNestedNavigation(actionItem) && <Delete variant="NavDelete" item={actionItem} fetchNavigations={fetchNavigations} />}
-        {modal === "ItemDelete" && isNestedNavItem(actionItem) && <Delete variant="ItemDelete" item={actionItem} fetchNavigations={fetchNavigations} />}
-        {modal === 'ItemCreate' && <ItemCreate parentId={parentId}/>}
-        {modal === 'ItemEdit' && isNestedNavItem(actionItem) && <ItemEdit item={actionItem}/>}
-        {modal === 'ExternalCreate' && <ExternalItem variant={modal} parentId={parentId}/>}
-        {modal === 'ExternalEdit' && isNestedNavItem(actionItem) && <ExternalItem variant={modal} item={actionItem}/>}
-        {modal === 'WrapperCreate' && <WrapperItem variant={modal} parentId={parentId}/>}
-        {modal === 'WrapperEdit' && isNestedNavItem(actionItem) && <WrapperItem variant={modal} item={actionItem}/>} */}
+        {modalType === 'NavOverview' && <NavOverview navigations={navigations} setActionItem={setActionItem} />}
+        {modalType === 'NavCreate' && <NavCreate />}
+        {/* {modalType === 'edit' && isNestedNavigation(actionItem) && <NavEdit item={actionItem} fetchNavigations={fetchNavigations} />}
+        {modalType === "NavDelete" && isNestedNavigation(actionItem) && <Delete variant="NavDelete" item={actionItem} fetchNavigations={fetchNavigations} />}
+        {modalType === "ItemDelete" && isNestedNavItem(actionItem) && <Delete variant="ItemDelete" item={actionItem} fetchNavigations={fetchNavigations} />}
+        {modalType === 'ItemCreate' && <ItemCreate parentId={parentId}/>}
+        {modalType === 'ItemEdit' && isNestedNavItem(actionItem) && <ItemEdit item={actionItem}/>}
+        {modalType === 'ExternalCreate' && <ExternalItem variant={modalType} parentId={parentId}/>}
+        {modalType === 'ExternalEdit' && isNestedNavItem(actionItem) && <ExternalItem variant={modalType} item={actionItem}/>}
+        {modalType === 'WrapperCreate' && <WrapperItem variant={modalType} parentId={parentId}/>}
+        {modalType === 'WrapperEdit' && isNestedNavItem(actionItem) && <WrapperItem variant={modalType} item={actionItem}/>} */}
       </SelectedNavigationContext.Provider>
     </ModalContext.Provider>
   );

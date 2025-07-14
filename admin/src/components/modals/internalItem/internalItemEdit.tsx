@@ -19,7 +19,7 @@ function ItemEditComponent({
   path,
   dispatchPath,
   debouncedCheckUrl,
-  setModal,
+  setModalType,
 }: ModalItem_VariantEdit & ReturnType<typeof useModalSharedLogic>) {
 
   useEffect(() => {
@@ -54,7 +54,7 @@ function ItemEditComponent({
         slug: path.value
       }, item.route.id)
 
-      setModal('')
+      setModalType('')
     } catch (err) {
       console.log(err)
     }
@@ -63,7 +63,7 @@ function ItemEditComponent({
   if (!selectedContentType) return null
 
   return (
-    <Modal.Root onClose={() => setModal('')}>
+    <Modal.Root onClose={() => setModalType('')}>
     <Modal.Header title={`Edit ${selectedContentType.label} "${item.route.title}"`}/>
     <Modal.Body>
       <Grid gap={8}>
@@ -128,7 +128,7 @@ function ItemEditComponent({
       </Box>
     </Modal.Body>
     <Modal.Footer
-      startActions={<Button onClick={() => setModal('')} variant="tertiary">Cancel</Button>}
+      startActions={<Button onClick={() => setModalType('')} variant="tertiary">Cancel</Button>}
       endActions={<Button onClick={() => updateItem()} disabled={JSON.stringify(navItemState) === JSON.stringify(initialState.current) && path.value === path.initialPath}>Save</Button>}
     />
   </Modal.Root>  )

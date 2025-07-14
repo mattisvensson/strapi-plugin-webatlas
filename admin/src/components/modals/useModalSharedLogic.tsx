@@ -100,7 +100,7 @@ export function useModalSharedLogic() {
 
   const debouncedCheckUrl = useCallback(debounce(checkUrl, 500), []);
 
-  const { modal, setModal } = useContext(ModalContext);
+  const { modalType, setModalType } = useContext(ModalContext);
   const { selectedNavigation } = useContext(SelectedNavigationContext);
 
   async function checkUrl(url: string, routeId?: number | null) {
@@ -146,8 +146,8 @@ export function useModalSharedLogic() {
     path,
     dispatchPath,
     debouncedCheckUrl,
-    modal,
-    setModal,
+    modalType,
+    setModalType,
     selectedNavigation,
   };
 

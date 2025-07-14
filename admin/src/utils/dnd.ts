@@ -1,13 +1,20 @@
 import { arrayMove } from '@dnd-kit/sortable';
 import { NestedNavItem } from '../../../types';
-import { UniqueIdentifier } from '@dnd-kit/core';
+import { UniqueIdentifier, MeasuringStrategy } from '@dnd-kit/core';
+
+export const measuring = {
+  droppable: {
+    strategy: MeasuringStrategy.Always,
+  },
+};
+
+export const indentationWidth = 48;
 
 export function getProjection(
   items: NestedNavItem[] | undefined,
   activeId: UniqueIdentifier,
   overId: UniqueIdentifier,
   dragOffset: number,
-  indentationWidth: number
 ) {
   if (!items) return {depth: 0, maxDepth: 0, minDepth: 0};
   

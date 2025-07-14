@@ -1,14 +1,11 @@
-import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
-import { Flex, Box, Typography, Button } from '@strapi/design-system';
-import { NavCreate } from '../../components/modals';
+import { Box, Typography } from '@strapi/design-system';
 
 type EmptyNavProps = {
   msg: string;
-  modal: string,
 }
 
-export default function EmptyNav ({ msg, modal }: EmptyNavProps) {
+export default function EmptyNav ({ msg }: EmptyNavProps) {
 
   return (
     <>
