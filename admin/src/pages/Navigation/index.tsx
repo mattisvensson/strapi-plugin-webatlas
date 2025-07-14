@@ -8,7 +8,7 @@
 */
 
 import { Plus, Check } from '@strapi/icons';
-import { Flex, Button, Modal, Field } from '@strapi/design-system';
+import { Flex, Button } from '@strapi/design-system';
 import { Layouts } from '@strapi/strapi/admin';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -82,8 +82,9 @@ const Navigation = () => {
   }, [navigations, selectedNavigation]);
 
   useEffect(() => {
-    if (!selectedNavigation && navigations.length > 0)
+    if (navigations.length > 0 && (!selectedNavigation || !navigations.find(nav => nav.id === selectedNavigation.id))) {
       setSelectedNavigation(navigations[0])
+    }
   }, [navigations]);
 
   useEffect(() => {

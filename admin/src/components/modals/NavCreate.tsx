@@ -2,11 +2,12 @@ import { useState, useContext } from 'react';
 import { Grid, Box, Field } from '@strapi/design-system';
 import { useFetchClient } from '@strapi/strapi/admin';
 import NavModal from './NavModal';
-import { ModalContext } from '../../contexts';
+import { ModalContext, SelectedNavigationContext } from '../../contexts';
 
 export default function NavCreate() {
   const { post } = useFetchClient();
   const { setModalType } = useContext(ModalContext);
+  const { setSelectedNavigation } = useContext(SelectedNavigationContext);
   const [name, setName] = useState('');
   const [isActive, setIsActive] = useState(true) // Temporary not used
   const [loading, setLoading] = useState(false)
@@ -14,7 +15,8 @@ export default function NavCreate() {
   const createNavigation = async () => {
     setLoading(true);
     try {
-      await post('/webatlas/navigation', { name, isActive });
+      const { data } = await post('/webatlas/navigation', { name, isActive });
+      setSelectedNavigation(data);
       setModalType('');
     } catch (err) {
       console.log(err);
