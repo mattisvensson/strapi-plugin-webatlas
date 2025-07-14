@@ -1,6 +1,6 @@
 import { ContentType, Route, StructuredNavigationVariant } from "../../../types";
 import duplicateCheck from "../utils/duplicateCheck";
-import { getFullPath, buildStructuredNavigation } from "../../../utils";
+import { getFullPath, buildStructuredNavigation, transformToUrl } from "../../../utils";
 import { waRoute, waNavigation, waNavItem } from "../utils/pluginHelpers";
 
 export default ({strapi}) => ({
@@ -132,14 +132,14 @@ export default ({strapi}) => ({
 
   async createNavigation(data) {
     try {
-      await strapi.entityService.create(waNavigation, {
+      const navigation = await strapi.entityService.create(waNavigation, {
         data: {
           name: data.name,
-          slug: data.name,
+          slug: transformToUrl(data.name),
           visible: data.isActive,
         },
       });
-      return true
+      return navigation
     } catch (e) {
       console.log(e)
     }
