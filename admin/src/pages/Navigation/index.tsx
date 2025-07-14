@@ -277,8 +277,8 @@ const Navigation = () => {
         </>
         {modalType === 'NavOverview' && <NavOverview navigations={navigations} setActionItem={setActionItem} />}
         {modalType === 'NavCreate' && <NavCreate />}
+        {modalType === "NavDelete"  && <Delete variant="NavDelete" item={actionItem as NestedNavigation} fetchNavigations={fetchNavigations} />}
         {/* {modalType === 'edit' && isNestedNavigation(actionItem) && <NavEdit item={actionItem} fetchNavigations={fetchNavigations} />}
-        {modalType === "NavDelete" && isNestedNavigation(actionItem) && <Delete variant="NavDelete" item={actionItem} fetchNavigations={fetchNavigations} />}
         {modalType === "ItemDelete" && isNestedNavItem(actionItem) && <Delete variant="ItemDelete" item={actionItem} fetchNavigations={fetchNavigations} />}
         {modalType === 'ItemCreate' && <ItemCreate parentId={parentId}/>}
         {modalType === 'ItemEdit' && isNestedNavItem(actionItem) && <ItemEdit item={actionItem}/>}
