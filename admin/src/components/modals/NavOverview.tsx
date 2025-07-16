@@ -23,7 +23,7 @@ export default function NavOverview ({ navigations, setActionItem }: NavOverview
 
   const handleEdit = (nav: NestedNavigation) => {
     setActionItem(nav)
-    setModalType('edit')
+    setModalType('NavEdit')
   }
 
   const handleDelete = (nav: NestedNavigation) => {

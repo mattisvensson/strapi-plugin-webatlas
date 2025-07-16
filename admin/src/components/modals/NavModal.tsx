@@ -13,6 +13,7 @@ export default function NavModal({
   onConfirm,
   loading,
   modalToOpen,
+  footer,
 }: { 
   triggerText?: string, 
   triggerVariant?: "primary" | "secondary",
@@ -24,6 +25,7 @@ export default function NavModal({
   onConfirm?: () => void,
   loading?: boolean,
   modalToOpen?: string,
+  footer?: React.ReactNode,
 }) {
 
   const { setModalType } = useContext(ModalContext);
@@ -49,10 +51,14 @@ export default function NavModal({
             {children}
           </Modal.Body>
           <Modal.Footer>
-            <Modal.Close>
-              <Button variant="tertiary" type="button">{closeText}</Button>
-            </Modal.Close>
-            <Button type="submit" onClick={modalToOpen ? () => setModalType(modalToOpen) : null}>{loading ? loadingText : confirmText }</Button>
+            {footer ? footer : (
+              <>
+                <Modal.Close>
+                  <Button variant="tertiary" type="button">{closeText}</Button>
+                </Modal.Close>
+                <Button type="submit" onClick={modalToOpen ? () => setModalType(modalToOpen) : null}>{loading ? loadingText : confirmText }</Button>
+              </>
+            )}
           </Modal.Footer>
         </form>
       </Modal.Content>
