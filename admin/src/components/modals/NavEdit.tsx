@@ -47,17 +47,19 @@ export default function NavEdit({ item, fetchNavigations }: NavEditProps) {
       }
     >
       <Grid.Root gap={4}>
-        <Grid.Item col={6}>
-          <Field.Root>
-            <Field.Label>Name</Field.Label>
-            <Field.Input
-              type="text"
-              value={name}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-            />
-          </Field.Root>
+        <Grid.Item s={12} m={6}>
+          <Box width="100%">
+            <Field.Root>
+              <Field.Label>Name</Field.Label>
+              <Field.Input
+                type="text"
+                value={name}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+              />
+            </Field.Root>
+          </Box>
         </Grid.Item>
-        <Grid.Item col={6}>
+        <Grid.Item s={12} m={6}>
           <Box width="100%">
             <Field.Root>
               <Field.Label>Active</Field.Label>
