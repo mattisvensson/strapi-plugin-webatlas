@@ -1,4 +1,4 @@
-import { buildStructuredNavigation, extractRouteAndItems, getFullPopulateObject, cleanRootKeys } from "../../../utils";
+import { buildStructuredNavigation, extractRouteAndItems, getFullPopulateObject, cleanRootKeys, removeWaFields } from "../../../utils";
 import { StructuredNavigationVariant } from "../../../types";
 import { waRoute, waNavigation} from "../utils/pluginHelpers";
 
@@ -34,14 +34,16 @@ export default ({strapi}) => ({
       
       const [contentTypeKey, contentType] = contentTypeObject;
       
-      const entity = await strapi.entityService.findOne(route.relatedContentType, route.relatedId, {
+      const entity = await strapi.documents(route.relatedContentType).findOne({
+        documentId: route.documentIdPath,
         populate: populateObject,
-        fields: fields,
+        fields: fields
       });
       
       if (!entity) return null
 
-      const cleanEntity = cleanRootKeys(entity)
+      let cleanEntity = cleanRootKeys(entity)
+      cleanEntity = removeWaFields(cleanEntity)
 
       return { contentType: contentType.info.singularName, ...cleanEntity }
     } catch (e) {
