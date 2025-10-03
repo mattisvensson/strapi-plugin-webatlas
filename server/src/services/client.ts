@@ -33,13 +33,13 @@ export default ({strapi}) => ({
       }      
       
       const [contentTypeKey, contentType] = contentTypeObject;
-      
+
       const entity = await strapi.documents(route.relatedContentType).findOne({
         documentId: route.documentIdPath,
         populate: populateObject,
         fields: fields
       });
-      
+
       if (!entity) return null
 
       let cleanEntity = cleanRootKeys(entity)
@@ -51,18 +51,26 @@ export default ({strapi}) => ({
       return e
     }
   },
-  async getNavigation(id: string, name: string, variant: StructuredNavigationVariant = 'nested') {
+  async getNavigation(id: string, name: string, documentId: string, variant: StructuredNavigationVariant = 'nested') {
     try {
       let navigation = null
       
-      if (id) {
-        navigation = await strapi.entityService.findOne(waNavigation, id, {
-          populate: ['items', "items.parent", "items.route"],
+      if (documentId) {
+        navigation = await strapi.documents(waNavigation).findOne({
+          documentId: documentId,
+          populate: ['items', "items.parent", "items.route"]
         });
       } else if (name) {
         navigation = await strapi.db?.query(waNavigation).findOne({
           where: { 
             name: name
+          },
+          populate: ['items', "items.parent", "items.route"],
+        });
+      } else if (id) {
+        navigation = await strapi.db?.query(waNavigation).findOne({
+          where: { 
+            id: id
           },
           populate: ['items', "items.parent", "items.route"],
         });
