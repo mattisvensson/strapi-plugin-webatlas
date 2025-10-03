@@ -87,11 +87,8 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
 		if (!finished || isLoading) return;
 
-		onChange("url_alias_path", path.value);
-		onChange("url_alias_relatedContentType", model);
-		onChange("url_alias_routeId", routeId || null);
-		onChange("url_alias_relatedId", initialValues.id || null);
-		onChange("url_alias_isOverride", isOverride);
+		onChange('webatlas_path', path.value);
+		onChange('webatlas_override', isOverride);
 	}, [path.value, routeId, isOverride])
 
 	useEffect(() => {
