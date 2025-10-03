@@ -19,6 +19,7 @@ export type NavItemSettings = {
 
 export type Route = {
   id: number;
+  documentId: string,
   title: string;
   slug: string;
   fullPath: string;
