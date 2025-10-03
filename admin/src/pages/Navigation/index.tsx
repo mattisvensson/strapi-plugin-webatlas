@@ -73,8 +73,8 @@ const Navigation = () => {
 
   useEffect(() => {
     async function fetchNestedNavigation () {
-      const id = selectedNavigation ? selectedNavigation.id : navigations[0].id
-      const { items } = await getStructuredNavigation(id, 'flat')
+      const documentId = selectedNavigation ? selectedNavigation.documentId : navigations[0].documentId
+      const { items } = await getStructuredNavigation(documentId, 'flat')
       setNavigationItems(items)
     }
     if (Array.isArray(navigations) && navigations?.length > 0)

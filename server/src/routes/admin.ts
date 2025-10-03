@@ -48,7 +48,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/navigation/:id',
+      path: '/navigation/:documentId',
       handler: 'admin.getNavigation',
       config: {
         policies: [],
@@ -75,7 +75,7 @@ export default {
     },
     {
       method: 'PUT',
-      path: '/navigation/:id',
+      path: '/navigation/:documentId',
       handler: 'admin.updateNavigation',
       config: {
         policies: [],
@@ -84,7 +84,7 @@ export default {
     },
     {
       method: 'DELETE',
-      path: '/navigation/:id',
+      path: '/navigation/:documentId',
       handler: 'admin.deleteNavigation',
       config: {
         policies: [],
@@ -93,8 +93,8 @@ export default {
     },
     {
       method: 'GET',
-      path: '/navigation/:id/structured',
-      handler: 'admin.structuredNavigation',
+      path: '/navigation/:documentId/structured',
+      handler: 'admin.getStructuredNavigation',
       config: {
         policies: [],
         auth: false,

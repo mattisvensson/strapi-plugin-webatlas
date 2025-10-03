@@ -108,10 +108,11 @@ export default ({strapi}) => ({
     }
   },
 
-  async getNavigation(id) {
+  async getNavigation(documentId: string) {
     try {
-      const entity = await strapi.entityService.findOne(waNavigation, id, {
-        populate: ['items', "items.parent"],
+      const entity = await strapi.documents(waNavigation).findOne({
+        documentId: documentId,
+        populate: ['items', "items.parent"]
       });
       return entity
     } catch (e) {
@@ -121,7 +122,7 @@ export default ({strapi}) => ({
 
   async getAllNavigations() {
     try {
-      const entity = await strapi.entityService.findMany(waNavigation, {
+      const entity = await strapi.documents(waNavigation).findMany({
         populate: ['items', "items.parent"],
       });
       return entity
@@ -132,7 +133,7 @@ export default ({strapi}) => ({
 
   async createNavigation(data) {
     try {
-      const navigation = await strapi.entityService.create(waNavigation, {
+      const navigation = await strapi.documents(waNavigation).create({
         data: {
           name: data.name,
           slug: transformToUrl(data.name),
@@ -145,14 +146,15 @@ export default ({strapi}) => ({
     }
   },
 
-  async updateNavigation(id, data) {
+  async updateNavigation(documentId: string, data) {
     try {
-      const entity = await strapi.entityService.update(waNavigation, id, {
+      const entity = await strapi.documents(waNavigation).update({
+        documentId: documentId,
         data: {
           name: data.name,
           slug: data.slug,
           visible: data.isActive,
-        },
+        }
       });
       return entity
     } catch (e) {
@@ -160,20 +162,25 @@ export default ({strapi}) => ({
     }
   },
 
-  async deleteNavigation(id) {
+  async deleteNavigation(documentId: string) {
     try {
-      await strapi.entityService.delete(waNavigation, id)
+      await strapi.documents(waNavigation).delete({
+        documentId: documentId
+      })
       return true
     } catch (e) {
       console.log(e)
     }
   },
 
-  async structuredNavigation(id: number, variant: StructuredNavigationVariant) {
+  async getStructuredNavigation(documentId: number, variant: StructuredNavigationVariant = 'nested') {
     try {
-      const navigation = await strapi.entityService.findOne(waNavigation, id, {
-        populate: ['items', "items.parent", "items.route"],
+      const navigation = await strapi.documents(waNavigation).findOne({
+        documentId: documentId,
+        populate: ['items', "items.parent", "items.route"]
       });
+
+      if (!navigation) throw new Error("Navigation not found");
 
       return buildStructuredNavigation(navigation, variant)
     } catch (e) {

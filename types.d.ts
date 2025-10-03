@@ -121,6 +121,7 @@ export type User = {
 
 export type NestedNavigation = {
   id: number;
+  documentId: string,
   name: string;
   slug: string;
   visible: boolean;
