@@ -1,7 +1,6 @@
 import { getAdminService } from '../utils/pluginHelpers';
-import type { Core } from '@strapi/strapi';
 
-const admin = ({ strapi }: { strapi: Core.Strapi }) => ({
+const admin = () => ({
   async updateConfig(ctx) {
     try {
       await getAdminService().updateConfig(ctx.request.body);
@@ -48,8 +47,11 @@ const admin = ({ strapi }: { strapi: Core.Strapi }) => ({
   },
   async getNavigation (ctx) {
     try {
-      const { id } = ctx.params;
-      return await getAdminService().getNavigation(id);
+      const { documentId } = ctx.params;
+
+      if (!documentId) return ctx.throw(400, 'Navigation documentId is required');
+
+      return await getAdminService().getNavigation(documentId);
     } catch (e) {
       return ctx.throw(500, e)
     }
@@ -71,26 +73,35 @@ const admin = ({ strapi }: { strapi: Core.Strapi }) => ({
   },
   async updateNavigation (ctx) {
     try {
-      const { id } = ctx.params;
+      const { documentId } = ctx.params;
+
+      if (!documentId) return ctx.throw(400, 'Navigation documentId is required');
+
       const data = ctx.request.body;
-      return await getAdminService().updateNavigation(id, data);
+      return await getAdminService().updateNavigation(documentId, data);
     } catch (e) {
       return ctx.throw(500, e)
     }
   },
-  async structuredNavigation (ctx) {
+  async getStructuredNavigation (ctx) {
     try {
+      const { documentId } = ctx.params;
+
+      if (!documentId) return ctx.throw(400, 'Navigation documentId is required');
+
       const { variant } = ctx.query;
-      const { id } = ctx.params;
-      return await getAdminService().structuredNavigation(id, variant);
+      return await getAdminService().getStructuredNavigation(documentId, variant);
     } catch (e) {
       return ctx.throw(500, e)
     }
   },
   async deleteNavigation (ctx) {
     try {
-      const { id } = ctx.params;
-      return await getAdminService().deleteNavigation(id);
+      const { documentId } = ctx.params;
+
+      if (!documentId) return ctx.throw(400, 'Navigation documentId is required');
+
+      return await getAdminService().deleteNavigation(documentId);
     } catch (e) {
       return ctx.throw(500, e)
     }

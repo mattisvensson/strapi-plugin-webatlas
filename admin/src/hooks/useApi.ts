@@ -86,8 +86,8 @@ export default function useApi() {
     return data
   };
 
-  const getStructuredNavigation = async (id: number, variant: StructuredNavigationVariant) => {
-    const { data } = await get(`/webatlas/navigation/${id}/structured?variant=${variant}`);
+  const getStructuredNavigation = async (documentId: string, variant: StructuredNavigationVariant = 'nested') => {
+    const { data } = await get(`/webatlas/navigation/${documentId}/structured?variant=${variant}`);
     return data
   }
 

@@ -4,6 +4,8 @@ export default function buildStructuredNavigation(data: NestedNavigation, varian
   const itemsById = new Map<number, NestedNavItem>();
   const rootItems: NestedNavItem[] = [];
 
+  if (!data.items || data.items?.length === 0) return
+
   // First pass: create a map of all items by id and initialize their items array
   data.items.forEach(item => {
     itemsById.set(item.id, { ...item, items: [] });
