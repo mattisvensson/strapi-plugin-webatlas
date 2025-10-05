@@ -2,8 +2,8 @@ import { ModalContext } from '../../contexts';
 import { useContext, useRef } from 'react';
 import { Dialog, Typography, Button } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
-import { useFetchClient } from '@strapi/strapi/admin';
 import { NestedNavigation, NestedNavItem } from '../../../../types';
+import { useApi } from '../../hooks';
 
 type NavDelete = {
   variant: "NavDelete";
@@ -20,7 +20,8 @@ type ItemDelete = {
 type DeleteProps = NavDelete | ItemDelete;
 
 export default function Delete({ variant, item, fetchNavigations }: DeleteProps) {
-  const { del } = useFetchClient();
+  const { deleteNavigation, deleteNavItem } = useApi();
+
 
   const itemName = useRef(variant === "NavDelete" ? item.name : item.route.title)
   const closeModalState = useRef(variant === "NavDelete" ? 'NavOverview' : '')
@@ -29,7 +30,8 @@ export default function Delete({ variant, item, fetchNavigations }: DeleteProps)
 
   const handleDelete = async () => {
     try {
-      await del(`/webatlas/${variant === "NavDelete" ? 'navigation' : 'navitem'}/${item.id}`)
+      if (variant === "NavDelete") await deleteNavigation(item.documentId)
+      else await deleteNavItem(item.documentId)
     } catch (err) {
       console.log(err)
     }

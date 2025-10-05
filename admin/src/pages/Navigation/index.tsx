@@ -169,12 +169,12 @@ const Navigation = () => {
         groupIndices[item.depth] = (groupIndices[item.depth] || 0) + 1;
       }
       
-      updateNavItem({
+      updateNavItem(item.documentId, {
         order: groupIndices[item.depth],
         parent: parentIds.at(-1) || null,
         route: item.route.id,
         navigation: selectedNavigation.id
-      }, item.id);
+      });
     });
     
     setInitialNavigationItems(navigationItems)

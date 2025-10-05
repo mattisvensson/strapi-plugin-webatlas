@@ -95,6 +95,8 @@ export type Navigation = {
   createdAt: string;
 };
 
+export type NavigationInput = Omit<Navigation, 'id' | 'items' | 'updatedAt' | 'createdAt' | 'slug'>;
+
 export type Entity = {
   id: number;
   createdAt: string;
@@ -132,6 +134,7 @@ export type NestedNavigation = {
 
 export type NestedNavItem = {
   id: number;
+  documentId: string;
   items: NestedNavItem[];
   parent: {
     id: number;

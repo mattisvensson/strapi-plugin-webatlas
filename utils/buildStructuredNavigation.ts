@@ -1,19 +1,19 @@
 import { NestedNavigation, NestedNavItem, StructuredNavigationVariant } from "../types";
 
-export default function buildStructuredNavigation(data: NestedNavigation, variant: StructuredNavigationVariant = 'nested') {
+export default function buildStructuredNavigation(navigation: NestedNavigation, variant: StructuredNavigationVariant = 'nested') {
   const itemsById = new Map<number, NestedNavItem>();
   const rootItems: NestedNavItem[] = [];
 
-  if (!data.items || data.items?.length === 0) return
+  if (!navigation.items || navigation.items?.length === 0) return navigation
 
   // First pass: create a map of all items by id and initialize their items array
-  data.items.forEach(item => {
+  navigation.items.forEach(item => {
     itemsById.set(item.id, { ...item, items: [] });
   });
 
   if (variant === 'nested') {
     // Second pass: assign items to their parent's items array or to the root items array
-    data.items.forEach(item => {
+    navigation.items.forEach(item => {
       const newItem = itemsById.get(item.id);
       if (!newItem) return null
       if (item.parent) {
@@ -28,10 +28,10 @@ export default function buildStructuredNavigation(data: NestedNavigation, varian
     sortItems(rootItems);
 
     // Return a new object with the nested and sorted items
-    return { ...data, items: rootItems };
+    return { ...navigation, items: rootItems };
   } else if (variant === 'flat') {
     // Assign items to their parent's items array or to the root items array
-    let itemsToProcess = [...data.items];
+    let itemsToProcess = [...navigation.items];
     let itemsProcessed = new Set();
 
     while (itemsToProcess.length > 0) {
@@ -68,7 +68,7 @@ export default function buildStructuredNavigation(data: NestedNavigation, varian
     const flattenedItems = flattenItems(sortedItems);
   
     // Return the sorted items
-    return { ...data, items: flattenedItems };
+    return { ...navigation, items: flattenedItems };
   }
 }
 

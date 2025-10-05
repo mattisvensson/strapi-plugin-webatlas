@@ -1,9 +1,9 @@
 import { Grid, Toggle, Field, Box, Button } from '@strapi/design-system';
 import { useState, useContext } from 'react';
 import { ModalContext } from '../../contexts';
-import { useFetchClient } from '@strapi/strapi/admin';
 import { NestedNavigation } from '../../../../types';
 import NavModal from './NavModal'
+import { useApi } from '../../hooks';
 
 type NavEditProps = {
   item: NestedNavigation;
@@ -11,16 +11,16 @@ type NavEditProps = {
 }
 
 export default function NavEdit({ item, fetchNavigations }: NavEditProps) {
-  const { put } = useFetchClient();
   const { setModalType } = useContext(ModalContext);
   const [name, setName] = useState(item.name)
-  const [isActive, setIsActive] = useState(item.visible)
+  const [visible, setVisible] = useState(item.visible)
   const [loading, setLoading] = useState(false)
+  const { updateNavigation } = useApi();
 
-  const updateNavigation = async () => {
+  const updateNav = async () => {
     setLoading(true);
     try {
-      await put(`/webatlas/navigation/${item.id}`, { name, isActive });
+      await updateNavigation(item.documentId, { name, visible });
       fetchNavigations()
       setModalType('NavOverview')
     } catch (err) {
@@ -36,7 +36,7 @@ export default function NavEdit({ item, fetchNavigations }: NavEditProps) {
       closeText="Cancel"
       titleText={`Edit navigation: ${item.name}`}
       loadingText='Creating'
-      onConfirm={updateNavigation}
+      onConfirm={updateNav}
       loading={loading}
       modalToOpen='NavOverview'
       footer={
@@ -63,7 +63,7 @@ export default function NavEdit({ item, fetchNavigations }: NavEditProps) {
           <Box width="100%">
             <Field.Root>
               <Field.Label>Active</Field.Label>
-              <Toggle onLabel="Yes" offLabel="No" checked={isActive} onChange={() => setIsActive(prev => !prev)} />
+              <Toggle onLabel="Yes" offLabel="No" checked={visible} onChange={() => setVisible(prev => !prev)} />
             </Field.Root>
           </Box>
         </Grid.Item>
