@@ -25,14 +25,14 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       if (!id) return
 
       try {
-        const navitem = await strapi.db?.query('plugin::webatlas.navitem').findOne({
+        const navItem = await strapi.db?.query('plugin::webatlas.navitem').findOne({
           where: {
             id: id
           },
           populate: ['route']
         });
   
-        event.state = navitem.route.id && !navitem.route.internal ? { id: navitem.route.id } : null
+        event.state = navItem.route.id && !navItem.route.internal ? { id: navItem.route.id } : null
       } catch (err) {
         console.log(err)
       }
@@ -68,27 +68,28 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       const ctSettings: ConfigContentType | undefined = config.selectedContentTypes.find((type: any) => type.uid === event.model.uid);
 
       const {
-        url_alias_path,
-        url_alias_isOverride,
+        webatlas_path, 
+        webatlas_override
       } = event.params.data;
 
-      if (!url_alias_path) return;
+      if (!webatlas_path) return;
 
       let title = '';
       if (ctSettings?.default) {
         title = event.params.data[ctSettings.default];
       }
 
-      const path = await duplicateCheck(transformToUrl(url_alias_path));
-
-      await strapi.db?.query('plugin::webatlas.route').create({
+      const path = await duplicateCheck(transformToUrl(webatlas_path));
+      await strapi.documents('plugin::webatlas.route').create({
         data: {
           relatedContentType: event.model.uid,
           relatedId: event.result.id,
+          relatedDocumentId: event.result.documentId,
           slug: path,
           fullPath: path,
-          uidPath: `${event.model.apiName}/${event.result.id}`,
-          isOverride: url_alias_isOverride || false,
+          uidPath: `${event.model.singularName}/${event.result.id}`,
+          documentIdPath: event.result.documentId,
+          isOverride: webatlas_override || false,
           title: title
         },
       });
