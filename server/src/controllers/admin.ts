@@ -47,18 +47,9 @@ const admin = () => ({
   },
   async getNavigation (ctx) {
     try {
-      const { documentId } = ctx.params;
+      const { documentId, variant } = ctx.query;
 
-      if (!documentId) return ctx.throw(400, 'Navigation documentId is required');
-
-      return await getAdminService().getNavigation(documentId);
-    } catch (e) {
-      return ctx.throw(500, e)
-    }
-  },
-  async getAllNavigations (ctx) {
-    try {
-      return await getAdminService().getAllNavigations();
+      return await getAdminService().getNavigation(documentId, variant);
     } catch (e) {
       return ctx.throw(500, e)
     }
@@ -73,31 +64,19 @@ const admin = () => ({
   },
   async updateNavigation (ctx) {
     try {
-      const { documentId } = ctx.params;
+      const { documentId } = ctx.query;
 
       if (!documentId) return ctx.throw(400, 'Navigation documentId is required');
 
-      const data = ctx.request.body;
+      const { data } = ctx.request.body;
       return await getAdminService().updateNavigation(documentId, data);
-    } catch (e) {
-      return ctx.throw(500, e)
-    }
-  },
-  async getStructuredNavigation (ctx) {
-    try {
-      const { documentId } = ctx.params;
-
-      if (!documentId) return ctx.throw(400, 'Navigation documentId is required');
-
-      const { variant } = ctx.query;
-      return await getAdminService().getStructuredNavigation(documentId, variant);
     } catch (e) {
       return ctx.throw(500, e)
     }
   },
   async deleteNavigation (ctx) {
     try {
-      const { documentId } = ctx.params;
+      const { documentId } = ctx.query;
 
       if (!documentId) return ctx.throw(400, 'Navigation documentId is required');
 

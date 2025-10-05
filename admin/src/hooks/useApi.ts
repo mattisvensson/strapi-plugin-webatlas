@@ -1,8 +1,8 @@
-import { ContentType, GroupedEntities, RouteSettings, NavItemSettings, ConfigContentType, NavOverviewState, StructuredNavigationVariant } from '../../../types';
+import { ContentType, GroupedEntities, RouteSettings, NavItemSettings, ConfigContentType, NavOverviewState, StructuredNavigationVariant, NavigationInput } from '../../../types';
 import { useFetchClient } from '@strapi/strapi/admin';
 
 export default function useApi() {
-  const { get, post, put } = useFetchClient();
+  const { get, post, put, del } = useFetchClient();
 
   const fetchAllContentTypes = async () => {
     const { data } = await get('/content-manager/content-types');
@@ -77,8 +77,8 @@ export default function useApi() {
     return data
   };
 
-  const updateNavItem = async (body: NavItemSettings, id: number) => {
-    const { data } = await put(`/webatlas/navitem/${id}`, {
+  const updateNavItem = async (documentId: string, body: NavItemSettings) => {
+    const { data } = await put(`/webatlas/navitem?documentId=${documentId}`, {
       data: {
         ...body,
       },
@@ -86,10 +86,27 @@ export default function useApi() {
     return data
   };
 
+  const deleteNavItem = async (documentId: string) => {
+    const { data } = await del(`/webatlas/navitem?documentId=${documentId}`);
+    return data
+  };
+
   const getStructuredNavigation = async (documentId: string, variant: StructuredNavigationVariant = 'nested') => {
-    const { data } = await get(`/webatlas/navigation/${documentId}/structured?variant=${variant}`);
+    const { data } = await get(`/webatlas/navigation?documentId=${documentId}&variant=${variant}`);
     return data
   }
 
-  return { fetchAllContentTypes, fetchAllEntities, getRouteByRelated, createExternalRoute, updateRoute, createNavItem, updateNavItem, getStructuredNavigation }
+  const deleteNavigation = async (documentId: string) => {
+    const { data } = await del(`/webatlas/navigation?documentId=${documentId}`);
+    return data
+  }
+
+  const updateNavigation = async (documentId: string, body: NavigationInput) => {
+    const { data } = await put(`/webatlas/navigation?documentId=${documentId}`, {
+      data: body,
+    });
+    return data
+  };
+
+  return { fetchAllContentTypes, fetchAllEntities, getRouteByRelated, createExternalRoute, updateRoute, createNavItem, updateNavItem, deleteNavItem, getStructuredNavigation, deleteNavigation, updateNavigation }
 }
