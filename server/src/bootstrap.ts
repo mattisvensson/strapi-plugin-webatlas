@@ -175,18 +175,19 @@ async function findAndDeleteNavItem (relatedId: number, relatedContentType: stri
       },
     });
   
-    if (!route?.id) return
+    if (!route?.documentId) return
   
-    const entity = await strapi.db?.query('plugin::webatlas.navitem').findOne({
+    const navItem = await strapi.db?.query('plugin::webatlas.navitem').findOne({
       where: {
         route: {
-          id: route.id
+          documentId: route.documentId
         }
       },
     });
     
-    if (entity?.id) await strapi.entityService?.delete('plugin::webatlas.navitem', entity.id)
-    if (route?.id) await strapi.entityService?.delete('plugin::webatlas.route', route.id)
+    await strapi.documents('plugin::webatlas.route').delete({ documentId: route.documentId })
+    if (navItem?.documentId) await strapi.documents('plugin::webatlas.navitem').delete({ documentId: navItem.documentId })
+    
   } catch (err) {
     console.log(err)
   }
