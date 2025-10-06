@@ -242,9 +242,9 @@ export default ({strapi}) => ({
     }
   },
 
-  async checkUniquePath(initialPath: string, targetRouteId: number | null = null) {
+  async checkUniquePath(initialPath: string, targetRouteDocumentId: string | null = null) {
     try {
-      return await duplicateCheck(initialPath, targetRouteId);
+      return await duplicateCheck(initialPath, targetRouteDocumentId);
     } catch (e) {
       console.log(e)
     }

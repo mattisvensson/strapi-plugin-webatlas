@@ -110,7 +110,7 @@ export default {
       }
     },
     {
-      method: 'POST',
+      method: 'GET',
       path: '/checkUniquePath',
       handler: 'admin.checkUniquePath',
       config: {

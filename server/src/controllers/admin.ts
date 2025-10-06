@@ -112,16 +112,11 @@ const admin = () => ({
   },
   async checkUniquePath (ctx) {
     try {
-      const queryPath = ctx.query.path
-      const bodyPath = ctx.request.body.path
-      const queryTargetRouteId = ctx.query.targetRouteId
-      const bodyTargetRouteId = ctx.request.body.targetRouteId
+      const { path, targetRouteDocumentId } = ctx.query
 
-      if (!queryPath && !bodyPath) {
-        return ctx.throw(400, 'Path is required')
-      }
+      if (!path) return ctx.throw(400, 'Path is required')
       
-      return await getAdminService().checkUniquePath(bodyPath || queryPath, bodyTargetRouteId || queryTargetRouteId || null);
+      return await getAdminService().checkUniquePath(path, targetRouteDocumentId || null);
     } catch (e) {
       return ctx.throw(500, e)
     }

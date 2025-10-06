@@ -1,7 +1,7 @@
 import { waRoute } from "./pluginHelpers";
 
 async function checkPathExists(path: string, targetRoutePath?: string | null): Promise<boolean> {
-  const entities = await strapi.entityService.findMany(waRoute, {
+  const entities = await strapi.documents(waRoute).findMany({
     filters: { 
       $or: [
         {
@@ -23,14 +23,16 @@ async function checkPathExists(path: string, targetRoutePath?: string | null): P
   return entities?.length > 0;
 }
 
-export default async function duplicateCheck(initialPath: string, targetRouteId?: number | null) {
+export default async function duplicateCheck(initialPath: string, targetRouteDocumentId?: string | null) {
   try {
     let uniquePath = initialPath;
     let targetRoutePath = null;
     let counter = 1;
 
-    if (targetRouteId) {
-      const route = await strapi.entityService.findOne(waRoute, targetRouteId);
+    if (targetRouteDocumentId) {
+      const route = await strapi.documents(waRoute).findOne({
+        documentId: targetRouteDocumentId
+      });
       if (route) targetRoutePath = route.fullPath;
     }
   
