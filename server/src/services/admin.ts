@@ -9,11 +9,13 @@ export default ({strapi}) => ({
     if (!newConfig || !newConfig.selectedContentTypes) return
     
     try {
-      const routes = await strapi.entityService.findMany(waRoute);
+      const routes = await strapi.documents(waRoute).findMany();
       const invalidRoutes = routes.filter((route: Route) => !newConfig.selectedContentTypes.find((type: ContentType) => type.uid === route.relatedContentType));
   
       invalidRoutes?.map(async (route: Route) => {
-        await strapi.entityService.delete(waRoute, route.id)
+        await strapi.documents(waRoute).delete({
+          documentId: route.documentId
+        })
       })
     } catch (err) {
       console.log(err)
