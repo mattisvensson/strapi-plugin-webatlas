@@ -24,8 +24,10 @@ export type Route = {
   slug: string;
   fullPath: string;
   uidPath: string;
+  documentIdPath: string,
   relatedContentType: string;
   relatedId: number;
+  relatedDocuentId: string,
   internal: boolean;
   active: boolean;
   isOverride: boolean;

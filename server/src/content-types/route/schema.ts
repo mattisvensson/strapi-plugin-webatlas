@@ -30,6 +30,11 @@ export default {
       required: true,
       configurable: false,
     },
+    relatedDocumentId: {
+      type: "string",
+      required: true,
+      configurable: false,
+    },
     title: {
       type: "string",
       required: true,
@@ -44,6 +49,10 @@ export default {
       configurable: false,
     },
     uidPath: {
+      type: "string",
+      configurable: false,
+    },
+    documentIdPath: {
       type: "string",
       configurable: false,
     },
