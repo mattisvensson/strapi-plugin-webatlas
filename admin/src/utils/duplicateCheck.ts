@@ -8,20 +8,11 @@ import transformToUrl from "../../../utils/transformToUrl";
  * @throws {Error} Throws an error if the request fails or the network response is not ok.
  */
 
-export default async function duplicateCheck(url: string, routeId?: number | null): Promise<string> {
+export default async function duplicateCheck(url: string, routeDocumentId?: string | null): Promise<string> {
   if (!url) throw new Error("URL is required");
   
   try {
-    const res = await fetch('/webatlas/checkUniquePath', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        path: transformToUrl(url),
-        targetRouteId: routeId,
-      }),
-    });
+    const res = await fetch(`/webatlas/checkUniquePath?path=${transformToUrl(url)}${routeDocumentId ? `&targetRouteDocumentId=${routeDocumentId}` : ''}`);
 
     if (!res.ok) throw new Error(`Network response was not ok: ${res.status} ${res.statusText}`);
     
