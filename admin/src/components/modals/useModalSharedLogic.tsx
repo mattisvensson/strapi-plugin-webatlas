@@ -103,13 +103,13 @@ export function useModalSharedLogic() {
   const { modalType, setModalType } = useContext(ModalContext);
   const { selectedNavigation } = useContext(SelectedNavigationContext);
 
-  async function checkUrl(url: string, routeId?: number | null) {
+  async function checkUrl(url: string, routeDocumentId?: string | null) {
 		if (!url) return
     setValidationState('checking')
 		setReplacement('')
 		
 		try {
-			const data = await duplicateCheck(url, routeId)
+			const data = await duplicateCheck(url, routeDocumentId)
 
 			if (!data || data === url) return 
 

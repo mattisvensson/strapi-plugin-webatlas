@@ -39,10 +39,10 @@ function ItemCreateComponent({
   useEffect(() => {
     if (path.needsUrlCheck && path.value) {
       if (path.uidPath === path.value || path.initialPath === path.value) return
-			debouncedCheckUrl(path.value, entityRoute?.id);
+			debouncedCheckUrl(path.value, entityRoute?.documentId);
 			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
     }
-  }, [path.needsUrlCheck, entityRoute?.id]);
+  }, [path.needsUrlCheck, entityRoute?.documentId]);
 
   useEffect(() => {
     async function fetchRoute() {
