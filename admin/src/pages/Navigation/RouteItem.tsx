@@ -1,13 +1,13 @@
-import { Box, Typography, Flex, MenuItem, IconButton, Status, Popover } from '@strapi/design-system';
+import { Box, Typography, Flex, SimpleMenu, MenuItem, IconButton, Status } from '@strapi/design-system';
 import { NestedNavItem, NestedNavigation } from '../../../../types';
 import { ModalContext } from '../../contexts';
-import { useContext, useEffect, useState, ReactElement, useRef, forwardRef } from 'react';
-import { Link as LinkIcon, ExternalLink, OneToMany, More, Drag, ChevronDown } from '@strapi/icons';
+import { useContext, useEffect, useState, ReactElement, forwardRef } from 'react';
+import { Link as LinkIcon, ExternalLink, OneToMany, More, Drag } from '@strapi/icons';
 import { useFetchClient } from '@strapi/strapi/admin';
 
 export interface RouteItemProps {
   item: NestedNavItem;
-  setParentId: (id: number) => void;
+  setParentId: (id: string) => void;
   setActionItem: React.Dispatch<React.SetStateAction<NestedNavItem | NestedNavigation | undefined>>;
   ghost?: boolean;
   depth?: number;
@@ -36,10 +36,12 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
   const { setModalType } = useContext(ModalContext);
   const { get } = useFetchClient();
 
-  const [isPublished, setIsPublished] = useState(false)
+  const [itemStatus, setItemStatus] = useState({
+    status: 'published',
+    variant: 'primary',
+    textColor: 'primary700'
+  })
   const [type, setType] = useState<RouteType>()
-  const [isVisible, setIsVisible] = useState(false)
-  const actionButtonRef = useRef<HTMLButtonElement>(null);
 
   if (!item || !item.route) return null
 
@@ -55,14 +57,36 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
 
   useEffect(() => {
     const ct = item.route.relatedContentType
-    const id = item.route.relatedId
+    const id = item.route.relatedDocumentId
 
     if (!ct || !id) return
 
     async function fetchRelated() {
       try {
         const { data } = await get(`/content-manager/collection-types/${ct}/${id}`)
-        if (data.publishedAt) setIsPublished(true)
+
+        switch (data.data.status) {
+          case "modified":
+            setItemStatus({
+              status: 'Modified',
+              variant: 'alternative',
+              textColor: 'alternative700'
+            })
+            break;
+          case "draft":
+            setItemStatus({
+              status: 'Draft',
+              variant: 'secondary',
+              textColor: 'secondary700'
+            })
+            break;
+          default:
+            setItemStatus({
+              status: 'Published',
+              variant: 'primary',
+              textColor: 'primary700'
+            })
+        }
       } catch (err) {
         console.log(err)
       }
@@ -72,13 +96,11 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
 
 
   const handleAddChildren = () => {
-    setIsVisible(false)
-    setParentId(item.id)
+    setParentId(item.documentId)
     setModalType('ItemCreate')
   }
 
   const handleEdit = () => {
-    setIsVisible(false)
     setActionItem(item)
 
     let newModal = 'ItemEdit'
@@ -89,7 +111,6 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
   }
 
   const handleDelete = () => {
-    setIsVisible(false)
     setActionItem(item)
     setModalType('ItemDelete')
   }
@@ -133,40 +154,20 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
             </Flex>
           </Flex>
           <Flex direction="row" gap={4}>
-            {type === 'internal' && (isPublished ?
-              <Status variant="success" size="S" showBullet={false}>
-                <Typography fontWeight="bold" textColor="success700">
-                  Published
-                </Typography>
-              </Status> :
-              <Status variant="secondary" size="S" showBullet={false}>
-                <Typography fontWeight="bold" textColor="secondary700">
-                  Draft
+            {type === 'internal' && 
+              <Status variant={itemStatus.variant} size="S">
+                <Typography fontWeight="bold" textColor={itemStatus.textColor}>
+                  {itemStatus.status}
                 </Typography>
               </Status>
-            )}
-            <IconButton
-              icon={<More />}
-              label="Item actions"
-              ref={actionButtonRef}
-              onClick={() => setIsVisible(prev => !prev)}
-            />
-            {isVisible &&
-              <Popover
-                placement="bottom-end"
-                source={actionButtonRef}
-                onDismiss={() => setIsVisible(false)}
-                spacing={4}
-              >
-                <Flex alignItems="stretch" direction="column">
-                  <MenuItem onClick={() => handleEdit()}>Edit</MenuItem>
-                  <MenuItem onClick={() => handleAddChildren()}>Add children</MenuItem>
-                  <MenuItem onClick={() => handleDelete()}>
-                    <Typography textColor="danger600">Delete</Typography>
-                  </MenuItem>
-                </Flex>
-              </Popover>
             }
+            <SimpleMenu label="Notifications" tag={IconButton} icon={<More />}>
+              <MenuItem onClick={() => handleEdit()}>Edit</MenuItem>
+              <MenuItem onClick={() => handleAddChildren()}>Add children</MenuItem>
+              <MenuItem onClick={() => handleDelete()}>
+                <Typography textColor="danger600">Delete</Typography>
+              </MenuItem>
+            </SimpleMenu>
           </Flex>
         </Flex>
       </Box>

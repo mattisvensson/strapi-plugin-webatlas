@@ -178,35 +178,43 @@ export default ({strapi}) => ({
     }
   },
 
-  async createNavItem(data) {
+  async createNavItem(data: NavItemSettings) {
     try {
       if (!data.route || !data.navigation) return false
 
-      const routeId = Number(data.route)
-
-      const parent = data.parent ? await strapi.entityService.findOne(waNavItem, data.parent, {
-        populate: ['route'],
+      const parent = data.parent ? await strapi.documents(waNavItem).findOne({
+        documentId: data.parent,
+        populate: ['route']
       }) : null;
 
-      const route = routeId ? await strapi.entityService.findOne(waRoute, routeId, {
-        populate: ['route'],
+      const route = data.route ? await strapi.documents(waRoute).findOne({
+        documentId: data.route
       }) : null;
 
       let fullPath = route.slug
 
       if (route.internal && !route.isOverride && parent?.route.internal) fullPath = getFullPath(parent?.route?.fullPath, route.slug)
 
-      await strapi.entityService.update(waRoute, routeId, {
+      await strapi.documents(waRoute).update({
+        documentId: data.route,
         data: {
           fullPath,
-        },
+        }
       });
 
-      const entity = await strapi.entityService.create(waNavItem, {
+      // TODO: Update webatlas fields in related entity
+      // await strapi.documents(route.relatedContentType).update({
+      //   documentId: route.relatedDocumentId,
+      //   data: {
+      //     webatlas_path: fullPath
+      //   }
+      // });
+
+      const entity = await strapi.documents(waNavItem).create({
         data: {
-          navigation: Number(data.navigation),
-          route: routeId,
-          parent: data.parent ? Number(data.parent) : null,
+          navigation: data.navigation,
+          route: data.route || null,
+          parent: data.parent || null,
         },
       });
 

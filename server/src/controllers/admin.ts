@@ -95,9 +95,12 @@ const admin = () => ({
   },
   async updateNavItem (ctx) {
     try {
-      const { id } = ctx.params;
+      const { documentId } = ctx.query;
+
+      if (!documentId) return ctx.throw(400, 'NavItem documentId is required');
+
       const { data } = ctx.request.body;
-      return await getAdminService().updateNavItem(id, data);
+      return await getAdminService().updateNavItem(documentId, data);
     } catch (e) {
       return ctx.throw(500, e)
     }
