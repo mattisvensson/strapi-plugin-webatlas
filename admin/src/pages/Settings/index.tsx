@@ -109,7 +109,10 @@ const Settings = () => {
           paddingTop={6}
           shadow="tableShadow"
         >
-          <Field.Root name="selectedContentTypes">
+          <Field.Root
+            name="selectedContentTypes"
+            hint='Select the content types you want to enable the Webatlas plugin for.'
+          >
             <Field.Label>Enabled Content Types</Field.Label>
             <MultiSelect
               placeholder='Select Content Types'
@@ -130,9 +133,7 @@ const Settings = () => {
             >
               {allContentTypes && allContentTypes.map(item => <MultiSelectOption key={item.uid} value={item.uid}>{item.info.displayName}</MultiSelectOption>)}
             </MultiSelect>
-            <Field.Hint>
-              Select the content types you want to enable for URL aliases and navigations
-            </Field.Hint>
+            <Field.Hint/>
           </Field.Root>
           {settingsState.selectedContentTypes && settingsState.selectedContentTypes.length > 0 && <Box paddingTop={4}>
             <Field.Root name="selectedContentTypesAccordion">
@@ -151,7 +152,12 @@ const Settings = () => {
                         </Accordion.Header>
                         <Accordion.Content>
                           <Box padding={3}>
-                            <Field.Root name="electedContentTypes" error={!contentType.default && 'Please select a default field'} required>
+                            <Field.Root
+                              name="selectedContentTypes"
+                              hint='The selected field from the content type will be used to generate the URL alias. Use a field that is unique and descriptive, such as a "title" or "name".'
+                              error={!contentType.default && 'Please select a default field'} 
+                              required
+                            >
                               <Field.Label>Default URL Alias field</Field.Label>
                               <SingleSelect
                                 name={`defaultField-${ct.uid}`}
@@ -164,12 +170,13 @@ const Settings = () => {
                                   return <SingleSelectOption key={index} value={key}>{key}</SingleSelectOption>
                                 })}
                               </SingleSelect>
-                              <Field.Hint>
-                                The selected field will be used to generate the URL alias. Use a field that is unique and descriptive, such as a "title" or "name".
-                              </Field.Hint>
+                              <Field.Hint/>
                             </Field.Root>
                             <Box paddingTop={4}>
-                              <Field.Root name="urlAliasPattern" hint='The selected field will be used to generate the URL alias. Use a field that is unique and descriptive, such as a "title" or "name".'>
+                              <Field.Root
+                                name="urlAliasPattern"
+                                hint='The pattern to prepend to the generated URL alias. For example, if you enter "blog" and the value of default field is "My First Post", the generated URL alias will be "blog/my-first-post". Leave empty for no prefix.'
+                              >
                                 <Field.Label>
                                   URL Alias pattern
                                   <Tooltip description="Leading and trailing slashes will be removed. Spaces will be replaced with hyphens. Special characters will be encoded." />
@@ -185,7 +192,10 @@ const Settings = () => {
                               </Field.Root>
                             </Box>
                             <Box paddingTop={4}>
-                              <Field.Root name="urlAliasPattern" hint='This field is necessary for the API. Do not change this field unless you know what you are doing.'>
+                              <Field.Root
+                                name="urlAliasPattern"
+                                hint='This field is necessary for the API. Do not change this field unless you know what you are doing.'
+                              >
                                 <Field.Label>
                                   URL Alias API field
                                   <Tooltip description="The field which will be visible in the content manger to store the url alias. Necessary for the API." />
