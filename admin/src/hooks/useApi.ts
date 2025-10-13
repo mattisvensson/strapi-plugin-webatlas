@@ -42,9 +42,8 @@ export default function useApi() {
     }
   }
 
-  const getRouteByRelated = async (relatedCt: string, relatedId: number, populate?: string) => {
-    const { data } = await get(`/content-manager/collection-types/plugin::webatlas.route?filters[relatedId][$eq]=${relatedId}&filters[relatedContentType][$eq]=${relatedCt}${populate ? '&populate' + populate : ''}`);
-    
+  const getRouteByRelated = async (relatedDocumentId: string, populate?: string) => {
+    const { data } = await get(`/content-manager/collection-types/plugin::webatlas.route?filters[relatedDocumentId][$eq]=${relatedDocumentId}${populate ? '&populate' + populate : ''}`);
     if (data?.results) return data.results[0];
     
     return null;
@@ -59,8 +58,8 @@ export default function useApi() {
     return data
   };
 
-  const updateRoute = async (body: RouteSettings, id: number) => {
-    const { data } = await put(`/webatlas/route/${id}`, {
+  const updateRoute = async (body: RouteSettings, documentId: string) => {
+    const { data } = await put(`/webatlas/route?documentId=${documentId}`, {
       data: {
         ...body,
       },

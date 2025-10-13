@@ -52,7 +52,7 @@ const Navigation = () => {
   const [navigationItems, setNavigationItems] = useState<NestedNavItem[]>();
   const [initialNavigationItems, setInitialNavigationItems] = useState<NestedNavItem[]>();
   const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>();
-  const [parentId, setParentId] = useState<number>();
+  const [parentId, setParentId] = useState<string | undefined>();
   const { getStructuredNavigation, updateNavItem } = useApi();
 
   const [projected, setProjected] = useState<Projected | null>(null);
@@ -146,7 +146,7 @@ const Navigation = () => {
     if (!navigationItems || !selectedNavigation) return
 
     let groupIndices: number[] = [0];
-    let parentIds: number[] = [0];
+    let parentIds: string[] = [];
     
     navigationItems.forEach((item, index) => {
       const previousItem = navigationItems[index - 1];
@@ -154,10 +154,9 @@ const Navigation = () => {
       if (typeof item.depth !== 'number') return
 
       if (item.depth === 0) {
-        parentIds = [0];
         groupIndices[0] = (groupIndices[0] || 0) + 1;
       } else if (typeof previousItem.depth === 'number' && item.depth === previousItem.depth + 1) {
-        parentIds.push(previousItem.id);
+        parentIds.push(previousItem.documentId);
         groupIndices[item.depth] = 0;
       } else if (typeof previousItem.depth === 'number' && item.depth <= previousItem.depth) {
         const diff = previousItem.depth - item.depth;
@@ -172,7 +171,7 @@ const Navigation = () => {
       updateNavItem(item.documentId, {
         order: groupIndices[item.depth],
         parent: parentIds.at(-1) || null,
-        route: item.route.id,
+        route: item.route.documentId,
         navigation: selectedNavigation.id
       });
     });
@@ -280,8 +279,8 @@ const Navigation = () => {
         {modalType === 'NavCreate' && <NavCreate />}
         {modalType === "NavDelete"  && <Delete variant="NavDelete" item={actionItem as NestedNavigation} fetchNavigations={fetchNavigations} />}
         {modalType === 'NavEdit' && <NavEdit item={actionItem as NestedNavigation} fetchNavigations={fetchNavigations} />}
-        {/* {modalType === "ItemDelete" && isNestedNavItem(actionItem) && <Delete variant="ItemDelete" item={actionItem} fetchNavigations={fetchNavigations} />}
         {modalType === 'ItemCreate' && <ItemCreate parentId={parentId}/>}
+        {/* {modalType === "ItemDelete" && isNestedNavItem(actionItem) && <Delete variant="ItemDelete" item={actionItem} fetchNavigations={fetchNavigations} />}
         {modalType === 'ItemEdit' && isNestedNavItem(actionItem) && <ItemEdit item={actionItem}/>}
         {modalType === 'ExternalCreate' && <ExternalItem variant={modalType} parentId={parentId}/>}
         {modalType === 'ExternalEdit' && isNestedNavItem(actionItem) && <ExternalItem variant={modalType} item={actionItem}/>}
