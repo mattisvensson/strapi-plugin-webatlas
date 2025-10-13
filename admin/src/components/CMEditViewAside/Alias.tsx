@@ -1,4 +1,4 @@
-import { Checkbox, Box, Flex, Typography, Field } from '@strapi/design-system';
+import { Checkbox, Box, Flex, Typography, Field, Divider } from '@strapi/design-system';
 import { useState, useEffect, useRef, useCallback, useReducer, useMemo } from 'react';
 import transformToUrl from '../../../../utils/transformToUrl';
 import { unstable_useContentManagerContext as useContentManagerContext } from '@strapi/strapi/admin';
@@ -15,11 +15,13 @@ type Action =
   | { type: 'NO_TRANSFORM_AND_CHECK'; payload: string }
   | { type: 'RESET_URL_CHECK_FLAG'; }
   | { type: 'SET_UIDPATH'; payload: string }
+  | { type: 'SET_DOCUMENTIDPATH'; payload: string }
 
 type PathState = {
 	value?: string;
 	prevValue?: string,
-	uidPath?: string,
+	uIdPath?: string,
+	documentIdPath?: string,
 	needsUrlCheck: boolean;
 };
 
@@ -49,7 +51,9 @@ function reducer(state: PathState, action: Action): PathState {
 		case 'RESET_URL_CHECK_FLAG':
 			return { ...state, needsUrlCheck: false };
 		case 'SET_UIDPATH':
-			return { ...state, uidPath: action.payload };
+			return { ...state, uIdPath: action.payload };
+		case 'SET_DOCUMENTIDPATH':
+			return { ...state, documentIdPath: action.payload };
 		default:
 			throw new Error();
 	}
@@ -69,7 +73,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 		needsUrlCheck: false,
 		value: '',
 		prevValue: '',
-		uidPath: ''
+		uIdPath: ''
 	});
   const hasUserChangedField = useRef(false);
 	const initialPath = useRef('')
@@ -142,7 +146,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
   useEffect(() => {
 		if (path.needsUrlCheck && path.value) {
-			if (path.uidPath === path.value || initialPath.current === path.value) return
+			if (path.uIdPath === path.value || initialPath.current === path.value) return
 			debouncedCheckUrl(path.value);
 			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
     }
@@ -161,12 +165,13 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
 				if (!route) return
 
-				initialPath.current = initialValues.webatlas_path || route.uidPath
+				initialPath.current = initialValues.webatlas_path || route.uIdPath
 				setRouteId(route.id)
 				setIsOverride(route.isOverride || false)
 				
-				dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: route.fullPath });
-				dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath });
+				dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: route.fullPath || '' });
+				dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath || '' });
+				dispatchPath({ type: 'SET_DOCUMENTIDPATH', payload: route.documentIdPath || '' });
 			
 				// Set the prevValueRef to prevent immediate override
 				const key = config?.default;
@@ -205,6 +210,8 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 			setValidationState('done')
 		}
 	}
+
+	useEffect(() => {console.log(path)},[path])
 
 	return (
 		<Box
@@ -252,6 +259,39 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 						</Checkbox>
 					</Flex>
 				</Box>
+				{path.uIdPath && path.documentIdPath && (
+					<>	
+						<Box>
+							<Divider/>
+						</Box>
+						<Box>
+							<Field.Root
+								hint="Permanent UID path, cannot be changed."
+								label="UID path"
+								>
+								<Field.Label/>
+								<Field.Input
+									value={path.uIdPath}
+									disabled
+								/>
+								<Field.Hint/>
+							</Field.Root>
+						</Box>
+						<Box>
+							<Field.Root
+								hint="Permanent DocumentID path, cannot be changed."
+								label="DocumentID path"
+								>
+								<Field.Label/>
+								<Field.Input
+									value={path.documentIdPath}
+									disabled
+									/>
+								<Field.Hint/>
+							</Field.Root>
+						</Box>
+					</>
+				)}
 			</Flex>
 		</Box>
 	)
