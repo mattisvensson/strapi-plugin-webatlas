@@ -280,8 +280,8 @@ const Navigation = () => {
         {modalType === "NavDelete"  && <Delete variant="NavDelete" item={actionItem as NestedNavigation} fetchNavigations={fetchNavigations} />}
         {modalType === 'NavEdit' && <NavEdit item={actionItem as NestedNavigation} fetchNavigations={fetchNavigations} />}
         {modalType === 'ItemCreate' && <ItemCreate parentId={parentId}/>}
-        {/* {modalType === "ItemDelete" && isNestedNavItem(actionItem) && <Delete variant="ItemDelete" item={actionItem} fetchNavigations={fetchNavigations} />}
-        {modalType === 'ItemEdit' && isNestedNavItem(actionItem) && <ItemEdit item={actionItem}/>}
+        {modalType === "ItemDelete" && <Delete variant="ItemDelete" item={actionItem as NestedNavItem} fetchNavigations={fetchNavigations} />}
+        {/* {modalType === 'ItemEdit' && isNestedNavItem(actionItem) && <ItemEdit item={actionItem}/>}
         {modalType === 'ExternalCreate' && <ExternalItem variant={modalType} parentId={parentId}/>}
         {modalType === 'ExternalEdit' && isNestedNavItem(actionItem) && <ExternalItem variant={modalType} item={actionItem}/>}
         {modalType === 'WrapperCreate' && <WrapperItem variant={modalType} parentId={parentId}/>}
