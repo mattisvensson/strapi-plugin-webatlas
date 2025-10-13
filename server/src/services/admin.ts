@@ -229,9 +229,11 @@ export default ({strapi}) => ({
     }
   },
 
-  async deleteNavItem(id) {
+  async deleteNavItem(documentId: string) {
     try {
-      await strapi.entityService.delete(waNavItem, id)
+      await strapi.documents(waNavItem).delete({
+        documentId: documentId
+      })
       return true
     } catch (e) {
       console.log(e)

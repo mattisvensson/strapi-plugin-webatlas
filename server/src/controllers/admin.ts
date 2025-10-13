@@ -107,8 +107,11 @@ const admin = () => ({
   },
   async deleteNavItem (ctx) {
     try {
-      const { id } = ctx.params;
-      return await getAdminService().deleteNavItem(id);
+      const { documentId } = ctx.query;
+
+      if (!documentId) return ctx.throw(400, 'NavItem documentId is required');
+
+      return await getAdminService().deleteNavItem(documentId);
     } catch (e) {
       return ctx.throw(500, e)
     }

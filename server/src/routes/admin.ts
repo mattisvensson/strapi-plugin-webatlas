@@ -102,7 +102,7 @@ export default {
     },
     {
       method: 'DELETE',
-      path: '/navitem/:id',
+      path: '/navitem',
       handler: 'admin.deleteNavItem',
       config: {
         policies: [],
