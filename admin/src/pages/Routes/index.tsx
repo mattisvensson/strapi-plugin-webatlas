@@ -11,18 +11,19 @@ import { useFetchClient, Layouts } from '@strapi/strapi/admin';
 import { Flex, Typography, Table, Thead, Tbody, Tr, Td, Th, VisuallyHidden, LinkButton } from '@strapi/design-system';
 import { Pencil } from '@strapi/icons';
 import { Route } from '../../../../types';
+import { useApi } from '../../hooks';
 
 const Routes = () => {
-  const { get } = useFetchClient();
+  const { getRoutes } = useApi();
 
   const [routes, setRoutes] = useState([]);
 
   useEffect(() => {
-    async function getRoutes() {
-      const { data } = await get('/webatlas/route')
-      setRoutes(data)
+    async function fetchRoutes() {
+      const data = await getRoutes();
+      setRoutes(data);
     }
-    getRoutes();
+    fetchRoutes();
   }, [])
 
   return (
