@@ -1,5 +1,5 @@
-import { Checkbox, Box, Flex, Typography, Field, TextInput } from '@strapi/design-system';
-import { useState, useEffect, useRef, useCallback, useReducer } from 'react';
+import { Checkbox, Box, Flex, Typography, Field } from '@strapi/design-system';
+import { useState, useEffect, useRef, useCallback, useReducer, useMemo } from 'react';
 import transformToUrl from '../../../../utils/transformToUrl';
 import { unstable_useContentManagerContext as useContentManagerContext } from '@strapi/strapi/admin';
 import { ConfigContentType } from '../../../../types';
@@ -56,59 +56,89 @@ function reducer(state: PathState, action: Action): PathState {
 }
 
 const Alias = ({ config }: { config: ConfigContentType }) => {
-	const { model, layout, form } = useContentManagerContext()
+	const { layout, form } = useContentManagerContext()
 	const { initialValues, values, onChange } = form;
 	const { getRouteByRelated } = useApi()
 
 	const [routeId, setRouteId] = useState<number | null>()
 	const [isOverride, setIsOverride] = useState(false);
-	const [isLoading, setIsLoading] = useState(true);
-	const [finished, setFinished] = useState(false);
 	const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
 	const [replacement, setReplacement] = useState<string>('');
+	const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+	const [path, dispatchPath] = useReducer(reducer, {
+		needsUrlCheck: false,
+		value: '',
+		prevValue: '',
+		uidPath: ''
+	});
+  const hasUserChangedField = useRef(false);
 	const initialPath = useRef('')
-	const prevValueRef = useRef(null);
-	const [path, dispatchPath] = useReducer(reducer, {needsUrlCheck: false});
+	const prevValueRef = useRef<string | null>(null);
 
 	if (!config) return null
 
 	const debouncedCheckUrl = useCallback(debounce(checkUrl, 500), []);
 
 	useEffect(() => {
-		setTimeout(() => {
-			// TODO: Find a better way to handle onChange function
-			setFinished(true)
-		}, 500)
-	}, [])
-
-	useEffect(() => {
-		if (config.apiField)
-			onChange(config.apiField, path.value);
-
-		if (!finished || isLoading) return;
+		// TODO: How to handle in Strapi v5?
+		// if (config.apiField)
+		// 	onChange(config.apiField, path.value);
 
 		onChange('webatlas_path', path.value);
 		onChange('webatlas_override', isOverride);
 	}, [path.value, routeId, isOverride])
 
-	useEffect(() => {
-		const key = config?.default
-		if (!key) return
+    const debouncedValueEffect = useMemo(
+    () => debounce((currentValues: any) => {
+      const key = config?.default;
+      if (!key) return;
 
-		const currentValue = values[key];
+      const currentValue = currentValues[key];
+      
+      if (!currentValue) {
+        dispatchPath({ type: 'NO_URL_CHECK', payload: '' });
+        return;
+      }
 
-		if (!currentValue) return dispatchPath({ type: 'NO_URL_CHECK', payload: '' });
+      // Only run automatic path generation if:
+      // 1. Initial load is complete
+      // 2. User has manually changed the field OR no route exists
+      // 3. Not in override mode
+      if (initialLoadComplete && 
+          (hasUserChangedField.current || !routeId) && 
+          prevValueRef.current !== currentValue && 
+          !isOverride) {
+        
+        const path = config.pattern ? `${config.pattern}/${currentValue}` : `${currentValue}`;
+        if (currentValue === initialValues[key]) {
+          dispatchPath({ type: 'NO_URL_CHECK', payload: path });
+        } else {
+          dispatchPath({ type: 'DEFAULT', payload: path });
+        }
+        prevValueRef.current = currentValue;
+      }
+    }, 500),
+    [config?.default, config?.pattern, initialValues, isOverride, initialLoadComplete, routeId]
+  );
 
-		if (prevValueRef.current !== currentValue && !isOverride) {
-			const path = config.pattern ? `${config.pattern}/${values[key]}` : `${values[key]}`
-			if (values[key] === initialValues[key]) {
-				dispatchPath({ type: 'NO_URL_CHECK', payload: path });
-			} else {
-				dispatchPath({ type: 'DEFAULT', payload: path });
-			}
-			prevValueRef.current = currentValue;
-		}
-	}, [values, config?.default, isOverride]);
+  // Track when user changes the source field
+  useEffect(() => {
+    if (!initialLoadComplete) return;
+    
+    const key = config?.default;
+    if (!key) return;
+    
+    const currentValue = values[key];
+    const initialValue = initialValues[key];
+    
+    // Mark as user-changed if current value differs from initial value
+    if (currentValue !== initialValue) {
+      hasUserChangedField.current = true;
+    }
+    
+    debouncedValueEffect(values);
+  }, [values, debouncedValueEffect, initialLoadComplete]);
+
 
   useEffect(() => {
 		if (path.needsUrlCheck && path.value) {
@@ -119,28 +149,43 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
   }, [path.needsUrlCheck]);
 
 	useEffect(() => {
-		setIsLoading(true)
 
 		async function getTypes() {
-			if (!initialValues.id) return setIsLoading(false);
+			if (!initialValues.documentId) {
+        setInitialLoadComplete(true); // Mark as complete even if no route
+        return;
+      }			
+			
 			try {
-				const route = await getRouteByRelated(model, initialValues.id)
+				const route = await getRouteByRelated(initialValues.documentId)
 
-				if (!route) return setIsLoading(false);
+				if (!route) return
 
-				initialPath.current = route.fullPath || route.uidPath
+				initialPath.current = initialValues.webatlas_path || route.uidPath
 				setRouteId(route.id)
 				setIsOverride(route.isOverride || false)
-				dispatchPath({ type: 'NO_URL_CHECK', payload: initialPath.current });
+				
+				dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: route.fullPath });
 				dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath });
+			
+				// Set the prevValueRef to prevent immediate override
+				const key = config?.default;
+        if (key) {
+          prevValueRef.current = values[key];
+        }
 			} catch (err) {
 				setRouteId(null)
 				console.log(err)
 			}
-			setIsLoading(false);
+			setInitialLoadComplete(true); // Mark initial load as complete
 		}
 		getTypes()
 	}, [config])
+
+	useEffect(() => {
+		if (initialValues.webatlas_path) dispatchPath({ type: 'NO_URL_CHECK', payload: initialValues.webatlas_path });
+		if (initialValues.webatlas_override) setIsOverride(initialValues.webatlas_override);
+	}, [])
 
 	async function checkUrl(url: string) {
 		if (!url) return
@@ -151,7 +196,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 			const data = await duplicateCheck(url)
 
 			if (!data || data === url) return 
-
+			
 			dispatchPath({ type: 'NO_URL_CHECK', payload: data });
 			setReplacement(data)
 		} catch (err) {
@@ -160,8 +205,6 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 			setValidationState('done')
 		}
 	}
-
-	if (isLoading) return null;
 
 	return (
 		<Box
@@ -180,7 +223,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 							URL
 							<Tooltip description="The following characters are valid: A-Z, a-z, 0-9, /, -, _, $, ., +, !, *, ', (, )" />
 						</Field.Label>
-						<TextInput
+						<Field.Input
 							id="url-input"
 							value={path.value}
 							placeholder={config.default ? `Edit the "${config.default}" field to generate a URL` : `${layout.list.settings.displayName?.toLowerCase()}/[id]`}
