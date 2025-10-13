@@ -106,11 +106,11 @@ export default ({strapi}) => ({
       if (documentId) {
         navigation = await strapi.documents(waNavigation).findOne({
         documentId: documentId,
-        populate: ['items', "items.parent"]
+          populate: ['items', "items.route", "items.parent"]
       });
       } else {
         navigation =  await strapi.documents(waNavigation).findMany({
-        populate: ['items', "items.parent"],
+          populate: ['items', "items.route", "items.parent"],
       });
       }
 
