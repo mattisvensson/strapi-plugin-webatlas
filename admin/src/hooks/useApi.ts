@@ -58,6 +58,11 @@ export default function useApi() {
     return data
   };
 
+  const getRoutes = async () => {
+    const { data } = await get('/webatlas/route');
+    return data
+  };
+  
   const updateRoute = async (body: RouteSettings, documentId: string) => {
     const { data } = await put(`/webatlas/route?documentId=${documentId}`, {
       data: {
@@ -107,5 +112,5 @@ export default function useApi() {
     return data
   };
 
-  return { fetchAllContentTypes, fetchAllEntities, getRouteByRelated, createExternalRoute, updateRoute, createNavItem, updateNavItem, deleteNavItem, getStructuredNavigation, deleteNavigation, updateNavigation }
+  return { fetchAllContentTypes, fetchAllEntities, getRouteByRelated, createExternalRoute, getRoutes, updateRoute, createNavItem, updateNavItem, deleteNavItem, getStructuredNavigation, deleteNavigation, updateNavigation }
 }
