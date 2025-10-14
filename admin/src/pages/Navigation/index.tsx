@@ -73,7 +73,12 @@ const Navigation = () => {
 
   useEffect(() => {
     async function fetchNestedNavigation () {
-      const documentId = selectedNavigation ? selectedNavigation.documentId : navigations[0].documentId
+      if (!selectedNavigation && (!navigations || navigations.length === 0)) return
+      
+      const documentId = selectedNavigation?.documentId ?? navigations?.[0]?.documentId;
+      
+      if (!documentId) return
+      
       const { items } = await getStructuredNavigation(documentId, 'flat')
       setNavigationItems(items)
     }
@@ -167,12 +172,12 @@ const Navigation = () => {
 
         groupIndices[item.depth] = (groupIndices[item.depth] || 0) + 1;
       }
-      
+ 
       updateNavItem(item.documentId, {
         order: groupIndices[item.depth],
-        parent: parentIds.at(-1) || null,
-        route: item.route.documentId,
-        navigation: selectedNavigation.documentId
+        parent: parentIds.at(-1) || '',
+        route: item?.route?.documentId || '',
+        navigation: selectedNavigation?.documentId || ''
       });
     });
     

@@ -33,6 +33,9 @@ function RouteIcon ({ type, color = 'neutral800' }: { type: RouteType | undefine
   }
 }
 export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setParentId, setActionItem, ghost, depth, style, wrapperRef, handleProps}: RouteItemProps, ref) => {
+
+  if (!item || !item.route) return null
+  
   const { setModalType } = useContext(ModalContext);
   const { get } = useFetchClient();
 
@@ -42,9 +45,6 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
     textColor: 'primary700'
   })
   const [type, setType] = useState<RouteType>()
-
-  if (!item || !item.route) return null
-
   useEffect(() => {
     if (!item.route.internal && !item.route.wrapper) {
       setType("external")
