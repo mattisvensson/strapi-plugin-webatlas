@@ -1,4 +1,4 @@
-import { ContentType, NavigationInput, Route, StructuredNavigationVariant } from "../../../types";
+import { ContentType, NavigationInput, NavItemSettings, Route, StructuredNavigationVariant } from "../../../types";
 import duplicateCheck from "../utils/duplicateCheck";
 import { getFullPath, buildStructuredNavigation, transformToUrl } from "../../../utils";
 import { waRoute, waNavigation, waNavItem } from "../utils/pluginHelpers";
@@ -74,22 +74,25 @@ export default ({strapi}) => ({
     }
   },
 
-  async updateRoute(id, data) {
+  async updateRoute(documentId: string, data: any) {
     try {
       let checkedPath = data.fullPath
       
       if (data.internal) {
-        const parent = data.parent ? await strapi.entityService.findOne(waNavItem, data.parent) : null;
+        const parent = data.parent ? await strapi.documents(waNavItem).findOne({
+          documentId: data.parent
+        }) : null;
         
         const fullPath = data.isOverride ? data.slug : getFullPath(parent?.fullPath, data.slug)
-        checkedPath = await duplicateCheck(fullPath, id);
+        checkedPath = await duplicateCheck(fullPath, documentId);
       }
 
-      const entity = await strapi.entityService.update(waRoute, id, {
+      const entity = await strapi.documents(waRoute).update({
+        documentId: documentId,
         data: {
           ...data,
           fullPath: checkedPath,
-        },
+        }
       });
 
       return entity;

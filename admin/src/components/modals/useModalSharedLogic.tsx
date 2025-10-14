@@ -15,6 +15,7 @@ type PathState = {
 
 type Action = 
   | { type: 'SET_TITLE'; payload: string }
+  | { type: 'SET_SLUG'; payload: string }
   | { type: 'SET_ACTIVE'; payload: boolean }
   | { type: 'SET_INTERNAL'; payload: boolean }
   | { type: 'SET_OVERRIDE'; payload: boolean };
@@ -32,6 +33,8 @@ function itemStateReducer(navItemState: RouteSettings, action: Action): RouteSet
   switch (action.type) {
     case 'SET_TITLE':
       return { ...navItemState, title: action.payload };
+    case 'SET_SLUG':
+      return { ...navItemState, slug: action.payload };
     case 'SET_ACTIVE':
       return { ...navItemState, active: action.payload };
     case 'SET_INTERNAL':
@@ -84,10 +87,11 @@ export function useModalSharedLogic() {
   const [entityRoute, setEntityRoute] = useState<Route>();
   const [replacement, setReplacement] = useState<string>('');
   const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
+  // TODO: Fetch entities only once and share between modals
   const { entities } = useAllEntities();
   const { createNavItem, updateRoute, getRouteByRelated, createExternalRoute } = useApi();
 
-  const initialState: React.MutableRefObject<RouteSettings> = useRef({
+  const initialState: React.RefObject<RouteSettings> = useRef({
     title: '',
     slug: '',
     active: true,

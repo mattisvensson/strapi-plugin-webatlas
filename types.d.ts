@@ -11,9 +11,9 @@ export type NavItem = {
 };
 
 export type NavItemSettings = {
-  route: number | null;
+  route: string | null;
   navigation: number | null;
-  parent: number | null;
+  parent: string | null;
   order?: number;
 };
 
@@ -27,7 +27,7 @@ export type Route = {
   documentIdPath: string,
   relatedContentType: string;
   relatedId: number;
-  relatedDocuentId: string,
+  relatedDocumentId: string,
   internal: boolean;
   active: boolean;
   isOverride: boolean;
@@ -166,7 +166,7 @@ export type StructuredNavigationVariant = 'nested' | 'flat';
 
 // Modals
 type ModalItem_VariantCreate = {
-  parentId?: number;
+  parentId?: string;
 }
 
 type ModalItem_VariantEdit = {
@@ -185,8 +185,8 @@ type modalSharedLogic = {
   entities: GroupedEntities[],
   createNavItem: (NavItemSettings) => Promise<any>,
   createExternalRoute: (body: RouteSettings) => Promise<any>,
-  updateRoute: (body: RouteSettings, id: number) => Promise<any>,
-  getRouteByRelated: (relatedCt: string, relatedId: number, populate?: string) => Promise<any>,
+  updateRoute: (body: RouteSettings, documentId: string) => Promise<any>,
+  getRouteByRelated: (relatedDocumentId: string, populate?: string) => Promise<any>,
   replacement: string,
   setReplacement: (value: string) => void,
   validationState: 'initial' | 'checking' | 'done',
