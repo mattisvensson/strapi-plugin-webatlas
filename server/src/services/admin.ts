@@ -215,18 +215,17 @@ export default ({strapi}) => ({
     }
   },
 
-  async updateNavItem(id, data) {
+  async updateNavItem(documentId: string, data: NavItemSettings) {
     try {
-      const entity = await strapi.entityService.update(waNavItem, id, {
+      return await strapi.documents(waNavItem).update({
+        documentId: documentId,
         data: {
-          navigation: data.navigation ? Number(data.navigation) : null,
-          route: data.route ? Number(data.route) : null,
-          parent: data.parent ? Number(data.parent) : null,
-          order: data.order ? Number(data.order) : 0,
-        },
+          navigation: data.navigation || null,
+          route: data.route || null,
+          parent: data.parent || null,
+          order: data.order || 0,
+        }
       });
-
-      return entity;
     } catch (e) {
       console.log(e)
     }

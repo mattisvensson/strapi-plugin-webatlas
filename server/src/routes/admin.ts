@@ -93,7 +93,7 @@ export default {
     },
     {
       method: 'PUT',
-      path: '/navitem/:id',
+      path: '/navitem',
       handler: 'admin.updateNavItem',
       config: {
         policies: [],
