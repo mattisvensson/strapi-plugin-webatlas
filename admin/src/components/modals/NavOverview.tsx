@@ -38,7 +38,6 @@ export default function NavOverview ({ navigations, setActionItem }: NavOverview
       titleText="Navigation overview"
       loadingText='Creating'
       modalToOpen='NavCreate'
-      variant='navigation'
     >
       {navigations.length > 0 ? navigations.map((nav, index) => (
         <Box key={nav.id}>
