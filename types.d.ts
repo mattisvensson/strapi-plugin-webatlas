@@ -12,7 +12,7 @@ export type NavItem = {
 
 export type NavItemSettings = {
   route: string | null;
-  navigation: number | null;
+  navigation: string | null;
   parent: string | null;
   order?: number;
 };

@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { Button, Modal } from '@strapi/design-system';
+import { Button, Modal, Flex } from '@strapi/design-system';
 import { ModalContext } from '../../contexts';
 
 export default function NavModal({ 
@@ -14,6 +14,7 @@ export default function NavModal({
   loading,
   modalToOpen,
   footer,
+  variant = 'navItem',
 }: { 
   triggerText?: string, 
   triggerVariant?: "primary" | "secondary",
@@ -26,6 +27,7 @@ export default function NavModal({
   loading?: boolean,
   modalToOpen?: string,
   footer?: React.ReactNode,
+  variant?: 'navItem' | 'navigation',
 }) {
 
   const { setModalType } = useContext(ModalContext);
@@ -56,7 +58,14 @@ export default function NavModal({
                 <Modal.Close>
                   <Button variant="tertiary" type="button">{closeText}</Button>
                 </Modal.Close>
-                <Button type="submit" onClick={modalToOpen ? () => setModalType(modalToOpen) : null}>{loading ? loadingText : confirmText }</Button>
+                <Flex gap={2}>
+                  { variant === 'navItem' && (
+                    <>
+                      <Button type="submit" variant="secondary" onClick={() => setModalType('ExternalCreate')}>Create External</Button>
+                    </>
+                  )}
+                  <Button type="submit" onClick={modalToOpen ? () => setModalType(modalToOpen) : null}>{loading ? loadingText : confirmText }</Button>
+                </Flex>
               </>
             )}
           </Modal.Footer>

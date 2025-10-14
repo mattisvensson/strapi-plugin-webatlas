@@ -7,11 +7,11 @@ export default ({strapi}) => ({
 
   async updateConfig(newConfig) {
     if (!newConfig || !newConfig.selectedContentTypes) return
-    
+
     try {
       const routes = await strapi.documents(waRoute).findMany();
       const invalidRoutes = routes.filter((route: Route) => !newConfig.selectedContentTypes.find((type: ContentType) => type.uid === route.relatedContentType));
-  
+
       invalidRoutes?.map(async (route: Route) => {
         await strapi.documents(waRoute).delete({
           documentId: route.documentId
@@ -56,19 +56,19 @@ export default ({strapi}) => ({
 
   async createExternalRoute(data) {
     try {
-      const newRoute = await strapi.entityService.create(waRoute, {
+      return await strapi.documents(waRoute).create({
         data: {
           title: data.title,
           slug: data.fullPath,
           fullPath: data.fullPath,
           relatedContentType: '',
           relatedId: 0,
+          relatedDocumentId: '',
           uidPath: '',
-          internal: data.internal,
+          internal: false,
           wrapper: data.wrapper,
         },
       });
-      return newRoute
     } catch (e) {
       console.log(e)
     }
@@ -77,7 +77,7 @@ export default ({strapi}) => ({
   async updateRoute(documentId: string, data: any) {
     try {
       let checkedPath = data.fullPath
-      
+
       if (data.internal) {
         const parent = data.parent ? await strapi.documents(waNavItem).findOne({
           documentId: data.parent
@@ -108,13 +108,13 @@ export default ({strapi}) => ({
 
       if (documentId) {
         navigation = await strapi.documents(waNavigation).findOne({
-        documentId: documentId,
+          documentId: documentId,
           populate: ['items', "items.route", "items.parent"]
-      });
+        });
       } else {
         navigation =  await strapi.documents(waNavigation).findMany({
           populate: ['items', "items.route", "items.parent"],
-      });
+        });
       }
 
       if (!navigation) throw new Error("Navigation not found");
