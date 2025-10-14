@@ -94,7 +94,7 @@ function ItemCreateComponent({
       const settings: NavItemSettings = {
         route: entityRoute.documentId ?? null,
         parent: parentId ?? null,
-        navigation: selectedNavigation.id,
+        navigation: selectedNavigation.documentId ?? null,
       }
 
       if (path.value !== path.initialPath) {

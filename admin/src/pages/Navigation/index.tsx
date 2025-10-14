@@ -172,7 +172,7 @@ const Navigation = () => {
         order: groupIndices[item.depth],
         parent: parentIds.at(-1) || null,
         route: item.route.documentId,
-        navigation: selectedNavigation.id
+        navigation: selectedNavigation.documentId
       });
     });
     
@@ -282,9 +282,9 @@ const Navigation = () => {
         {modalType === 'ItemCreate' && <ItemCreate parentId={parentId}/>}
         {modalType === "ItemDelete" && <Delete variant="ItemDelete" item={actionItem as NestedNavItem} fetchNavigations={fetchNavigations} />}
         {modalType === 'ItemEdit' && <ItemEdit item={actionItem as NestedNavItem}/>}
-        {/* {modalType === 'ExternalCreate' && <ExternalItem variant={modalType} parentId={parentId}/>}
-        {modalType === 'ExternalEdit' && isNestedNavItem(actionItem) && <ExternalItem variant={modalType} item={actionItem}/>}
-        {modalType === 'WrapperCreate' && <WrapperItem variant={modalType} parentId={parentId}/>}
+        {modalType === 'ExternalCreate' && <ExternalItem variant={modalType} parentDocumentId={parentId}/>}
+        {modalType === 'ExternalEdit' && <ExternalItem variant={modalType} item={actionItem as NestedNavItem}/>}
+        {/*{modalType === 'WrapperCreate' && <WrapperItem variant={modalType} parentId={parentId}/>}
         {modalType === 'WrapperEdit' && isNestedNavItem(actionItem) && <WrapperItem variant={modalType} item={actionItem}/>} */}
       </SelectedNavigationContext.Provider>
     </ModalContext.Provider>
