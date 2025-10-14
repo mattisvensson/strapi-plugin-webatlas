@@ -211,8 +211,6 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 		}
 	}
 
-	useEffect(() => {console.log(path)},[path])
-
 	return (
 		<Box
 			as="aside"
@@ -250,7 +248,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 					>
 						<Checkbox
 							id="override-url"
-							value={isOverride}
+							checked={isOverride}
 							onCheckedChange={() => setIsOverride(prev => !prev)}
 						>
 							<Typography textColor="neutral600">
