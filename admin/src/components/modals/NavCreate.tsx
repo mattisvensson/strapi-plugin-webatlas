@@ -34,7 +34,6 @@ export default function NavCreate() {
       loadingText='Creating'
       onConfirm={createNavigation}
       loading={loading}
-      variant="navigation"
     >
       <Grid.Root gap={4}>
         <Grid.Item col={12} s={12}>

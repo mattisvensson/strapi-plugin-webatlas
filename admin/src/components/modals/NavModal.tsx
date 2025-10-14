@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { Button, Modal, Flex } from '@strapi/design-system';
+import { Button, Modal, Flex, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { ModalContext } from '../../contexts';
 
 export default function NavModal({ 
@@ -14,7 +14,7 @@ export default function NavModal({
   loading,
   modalToOpen,
   footer,
-  variant = 'navItem',
+  currentModalType = null,
 }: { 
   triggerText?: string, 
   triggerVariant?: "primary" | "secondary",
@@ -27,7 +27,7 @@ export default function NavModal({
   loading?: boolean,
   modalToOpen?: string,
   footer?: React.ReactNode,
-  variant?: 'navItem' | 'navigation',
+  currentModalType?: 'ItemCreate' | 'WrapperCreate' | 'ExternalCreate' | null,
 }) {
 
   const { setModalType } = useContext(ModalContext);
@@ -59,11 +59,16 @@ export default function NavModal({
                   <Button variant="tertiary" type="button">{closeText}</Button>
                 </Modal.Close>
                 <Flex gap={2}>
-                  { variant === 'navItem' && (
-                    <>
-                      <Button type="submit" variant="secondary" onClick={() => setModalType('WrapperCreate')}>Create Wrapper</Button>
-                      <Button type="submit" variant="secondary" onClick={() => setModalType('ExternalCreate')}>Create External</Button>
-                    </>
+                  { currentModalType && (
+                    <SingleSelect
+                      onChange={(value: string) => setModalType(value)}
+                      placeholder="Choose item type"
+                      value={currentModalType || ''}
+                    >
+                      <SingleSelectOption value="ItemCreate">Internal item</SingleSelectOption>
+                      <SingleSelectOption value="WrapperCreate">Wrapper item</SingleSelectOption>
+                      <SingleSelectOption value="ExternalCreate">External item</SingleSelectOption>
+                    </SingleSelect>
                   )}
                   <Button type="submit" onClick={modalToOpen ? () => setModalType(modalToOpen) : null}>{loading ? loadingText : confirmText }</Button>
                 </Flex>

@@ -121,6 +121,7 @@ function ItemCreateComponent({
       onConfirm={addItem}
       loading={loading}
       modalToOpen=''
+      currentModalType="ItemCreate"
     >
       <Grid.Root gap={4}>
         <Grid.Item col={6} s={12}>

@@ -39,7 +39,6 @@ export default function NavEdit({ item, fetchNavigations }: NavEditProps) {
       onConfirm={updateNav}
       loading={loading}
       modalToOpen='NavOverview'
-      variant="navigation"
       footer={
         <>
           <Button onClick={() => setModalType('NavOverview')} variant="tertiary">Cancel</Button>

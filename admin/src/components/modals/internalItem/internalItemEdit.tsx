@@ -105,6 +105,7 @@ function ItemEditComponent({
       loadingText='Saving'
       onConfirm={updateItem}
       modalToOpen=''
+      currentModalType="ItemCreate"
     >
       <Grid.Root gap={8}>
         <Grid.Item col={6} s={12}>

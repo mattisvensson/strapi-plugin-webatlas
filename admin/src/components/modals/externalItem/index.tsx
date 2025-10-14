@@ -76,6 +76,7 @@ function ExternalItemComponent({
       loadingText={variant === 'ExternalCreate' ? 'Adding' : 'Saving'}
       onConfirm={addItem}
       modalToOpen=''
+      currentModalType="ExternalCreate"
     >
       <Grid.Root gap={8}>
         <Grid.Item col={6} s={12}>
