@@ -39,7 +39,7 @@ export default {
     },
     {
       method: 'PUT',
-      path: '/route/:id',
+      path: '/route',
       handler: 'admin.updateRoute',
       config: {
         policies: [],

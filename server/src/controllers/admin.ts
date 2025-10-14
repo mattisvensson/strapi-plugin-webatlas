@@ -35,12 +35,12 @@ const admin = () => ({
   },
   async updateRoute (ctx) {
     try {
-      const { id } = ctx.params;
+      const { documentId } = ctx.query;
+
+      if (!documentId) return ctx.throw(400, 'Route documentId is required');
+
       const { data } = ctx.request.body;
-      return await getAdminService().updateRoute(
-        id,
-        data,
-      );
+      return await getAdminService().updateRoute(documentId, data);
     } catch (e) {
       return ctx.throw(500, e)
     }
