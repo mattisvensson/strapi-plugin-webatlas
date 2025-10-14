@@ -61,6 +61,7 @@ export default function NavModal({
                 <Flex gap={2}>
                   { variant === 'navItem' && (
                     <>
+                      <Button type="submit" variant="secondary" onClick={() => setModalType('WrapperCreate')}>Create Wrapper</Button>
                       <Button type="submit" variant="secondary" onClick={() => setModalType('ExternalCreate')}>Create External</Button>
                     </>
                   )}

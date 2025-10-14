@@ -272,7 +272,6 @@ const Navigation = () => {
                 Create new item
               </Button>
             </Center>}
-            {modalType}
           </Layouts.Content>
         </>
         {modalType === 'NavOverview' && <NavOverview navigations={navigations} setActionItem={setActionItem} />}
@@ -284,8 +283,8 @@ const Navigation = () => {
         {modalType === 'ItemEdit' && <ItemEdit item={actionItem as NestedNavItem}/>}
         {modalType === 'ExternalCreate' && <ExternalItem variant={modalType} parentDocumentId={parentId}/>}
         {modalType === 'ExternalEdit' && <ExternalItem variant={modalType} item={actionItem as NestedNavItem}/>}
-        {/*{modalType === 'WrapperCreate' && <WrapperItem variant={modalType} parentId={parentId}/>}
-        {modalType === 'WrapperEdit' && isNestedNavItem(actionItem) && <WrapperItem variant={modalType} item={actionItem}/>} */}
+        {modalType === 'WrapperCreate' && <WrapperItem variant={modalType} parentDocumentId={parentId}/>}
+        {modalType === 'WrapperEdit' && <WrapperItem variant={modalType} item={actionItem as NestedNavItem}/>}
       </SelectedNavigationContext.Provider>
     </ModalContext.Provider>
   );
