@@ -78,7 +78,7 @@ function ExternalItemComponent({
       modalToOpen=''
     >
       <Grid.Root gap={8}>
-        <Grid.Item col={6} s={12} alignItems="baseline">
+        <Grid.Item col={6} s={12}>
           <Box width="100%">
             <Field.Root>
               <Field.Label>Title</Field.Label>

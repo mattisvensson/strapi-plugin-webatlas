@@ -1,13 +1,14 @@
-import { Modal, Button, TextInput, Grid, Box, Divider, Toggle } from '@strapi/design-system';
+import { Grid, Box, Field } from '@strapi/design-system';
 import { withModalSharedLogic } from '../withModalSharedLogic';
 import { NavItemSettings, NestedNavItem } from '../../../../../types';
 import { useModalSharedLogic } from '../useModalSharedLogic';
 import React, { useEffect } from 'react';
+import { NavModal } from '../';
 
 type externalItemProps = {
   variant: 'WrapperCreate' | 'WrapperEdit';
   item?: NestedNavItem;
-  parentId?: number;
+  parentDocumentId?: string;
 }
 
 function WrapperItemComponent({ 
@@ -21,7 +22,7 @@ function WrapperItemComponent({
   dispatchPath,
   setModalType,
   selectedNavigation,
-  parentId,
+  parentDocumentId,
 }: externalItemProps & ReturnType<typeof useModalSharedLogic>) {
   
   useEffect(() => {
@@ -45,16 +46,16 @@ function WrapperItemComponent({
       }
 
       if (variant === 'WrapperEdit' && item) {
-        await updateRoute(data, item.route.id)
+        await updateRoute(data, item.route.documentId)
       } else {
         const route = await createExternalRoute(data)
   
         if (!route) return
   
         const settings: NavItemSettings = {
-          route: route.id,
-          parent: parentId ?? null,
-          navigation: selectedNavigation.id,
+          route: route.documentId,
+          parent: parentDocumentId ?? null,
+          navigation: selectedNavigation.documentId,
         }
   
         await createNavItem(settings);
@@ -67,48 +68,47 @@ function WrapperItemComponent({
   }
 
   return (
-    <Modal.Root onClose={() => setModalType('')}>
-      <Modal.Header title={variant === 'WrapperCreate' ? 'Create new wrapper item' : `Edit external route "${navItemState.title}"`}/>
-      <Modal.Body>
-        <Grid gap={8}>
-          <Grid.Item col={6}>
-            <TextInput
-              placeholder="My Title"
-              label="Title"
-              name="title"
-              value={navItemState.title}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchItemState({ type: 'SET_TITLE', payload: e.target.value })}
-              required
-            />
-          </Grid.Item>
-        </Grid>
-        <Box paddingBottom={6} paddingTop={6}>
-          <Divider/>
-        </Box>
-        <Grid gap={8} paddingBottom={6} >
-          <Grid.Item col={6}>
-            <Toggle
-              label="Is visible?"
-              onLabel="Yes"
-              offLabel="No"
-              hint='This menu item does not show on your site, if set to "no".'
-              checked={navItemState.active}
-              onClick={() => dispatchItemState({ type: 'SET_ACTIVE', payload: !navItemState.active })}
-            />
-          </Grid.Item>
-        </Grid>
-      </Modal.Body>
-      <Modal.Footer
-        startActions={<Button onClick={() => setModalType('')} variant="tertiary">Cancel</Button>}
-        endActions={
-          <>
-            <Button variant="secondary" onClick={() => setModalType('ItemCreate')}>Add internal link</Button>
-            <Button variant="secondary" onClick={() => setModalType('ExternalCreate')}>Add external item</Button>
-            <Button disabled={!navItemState.title} onClick={() => addItem()}>{variant === 'WrapperCreate' ? 'Add item' : 'Save'}</Button>
-          </>
-        }
-      />
-    </Modal.Root>
+    <NavModal
+      confirmText={variant === 'WrapperCreate' ? 'Add' : 'Save'}
+      closeText="Cancel"
+      titleText={variant === 'WrapperCreate' ? 'Create new wrapper item' : `Edit wrapper item "${navItemState.title}"`}
+      loadingText={variant === 'WrapperCreate' ? 'Adding' : 'Saving'}
+      onConfirm={addItem}
+      modalToOpen=''
+    >
+      <Grid.Root gap={8}>
+        <Grid.Item col={6} s={12}>
+          <Box width="100%">
+            <Field.Root>
+              <Field.Label>Title</Field.Label>
+              <Field.Input
+                placeholder="e.g. About us"
+                name="title"
+                value={navItemState.title || ''}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchItemState({ type: 'SET_TITLE', payload: e.target.value })}
+                required
+              />
+            </Field.Root>
+          </Box>        
+        </Grid.Item>
+      </Grid.Root>
+      {/* TODO: Add visibility toggle to navitem schema */}
+      {/* <Box paddingBottom={6} paddingTop={6}>
+        <Divider/>
+      </Box>
+      <Grid.Root gap={8} paddingBottom={6} >
+        <Grid.Item col={6}>
+          <Toggle
+            label="Is visible?"
+            onLabel="Yes"
+            offLabel="No"
+            hint='This menu item does not show on your site, if set to "no".'
+            checked={navItemState.active}
+            onClick={() => dispatchItemState({ type: 'SET_ACTIVE', payload: !navItemState.active })}
+          />
+        </Grid.Item>
+      </Grid.Root> */}
+    </NavModal>
   );
 }
 
