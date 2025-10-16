@@ -22,14 +22,21 @@ export default function usePluginConfig(): UsePluginConfigResponse {
       try {
         const { data: { data: contentTypesArray} } = await get('/content-manager/content-types');
         let { data: config } = await get('/webatlas/config');
+
         if (!config || !config.selectedContentTypes) {
           throw new Error(`HTTP error! Couldn't fetch plugin config`);
         }
-        const contentTypeUids = new Set(contentTypesArray.map((type: any) => type.uid));
-        const validContentTypes = config.selectedContentTypes.filter((type: any) => contentTypeUids.has(type.uid));        
 
-        if (JSON.stringify(validContentTypes) !== JSON.stringify(config.selectedContentTypes)) {
-          config = { ...config, selectedContentTypes: validContentTypes}
+        // Only use content types that have webatlas enabled in plugin options
+        const allowedContentTypes = contentTypesArray.filter((type: any) => 
+          type.pluginOptions?.webatlas?.active === true
+        );
+
+        const contentTypeUids = new Set(allowedContentTypes.map((type: any) => type.uid));
+        const activeContentTypes = config.selectedContentTypes.filter((type: any) => contentTypeUids.has(type.uid));
+
+        if (JSON.stringify(activeContentTypes) !== JSON.stringify(config.selectedContentTypes)) {
+          config = { ...config, selectedContentTypes: activeContentTypes}
           setConfig(config);
         }
 

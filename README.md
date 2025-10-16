@@ -67,6 +67,24 @@ All done. Enjoy 🎉
 
 ## 🔧 Configuration
 
+To use a content type with Webatlas, you need to set the plugin options in the content type schema. You can do this by editing the content type's schema file located in `src/api/[content-type]/content-types/[content-type]/schema.json`.
+
+Your schema should contain the following:
+
+```json
+{
+  // ... other schema properties ...
+  "pluginOptions": {
+    "webatlas": {
+      "active": true
+    },
+    // ... other plugin options ...
+  }
+}
+```
+
+You can then still enable or disable the plugin for each content type in the settings page of the plugin without the need to edit the schema file again or redeploy your Strapi instance.
+
 ### Settings page
 
 Use the settings page to configure the plugin.

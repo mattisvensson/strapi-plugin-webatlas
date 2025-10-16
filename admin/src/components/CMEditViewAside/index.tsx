@@ -1,24 +1,30 @@
 import { useState, useEffect } from 'react';
 import { unstable_useContentManagerContext as useContentManagerContext, } from '@strapi/strapi/admin';
+import { Typography, Link } from '@strapi/design-system';
 import { ConfigContentType } from '../../../../types';
-import usePluginConfig from '../../hooks/usePluginConfig';
+import { usePluginConfig, useAllContentTypes } from '../../hooks';
 import Alias from './Alias';
 // import Navigation from './Navigation';
 
 const CMEditViewAside = () => {
   const { model } = useContentManagerContext()
+  const { contentTypes } = useAllContentTypes()
   const { data: config } = usePluginConfig()
 
   const [contentTypeConfig, setContentTypeConfig] = useState<ConfigContentType | null>(null);
-  const [isHidden, setIsHidden] = useState(true);
+  const [isAllowedContentType, setIsAllowedContentType] = useState(false);
+  const [isActiveContentType, setIsActiveContentType] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!config) return
-
+    
+    const modelConfig = contentTypes?.find((ct) => ct.uid === model)
+    if (modelConfig?.pluginOptions?.webatlas?.active) setIsAllowedContentType(true)
+    
     config?.selectedContentTypes?.map((type) => {
       if (type.uid === model) {
-        setIsHidden(false);
+        setIsActiveContentType(true);
         setContentTypeConfig(type);
       }
     })
@@ -47,7 +53,28 @@ const CMEditViewAside = () => {
     }
   }, []);
 
-  if (isHidden || isLoading || !contentTypeConfig) return null;
+  if (!isLoading) return (
+    <Typography textColor="neutral600">
+      Loading...
+    </Typography>
+  )
+
+  if (!isAllowedContentType) return (
+    <Typography textColor="neutral600">
+      This content type is not allowed for <strong>WebAtlas</strong>. 
+      If you wish to use it, please contact your administrator. 
+    </Typography>
+  )
+
+  if (isActiveContentType || !contentTypeConfig) return (
+    <Typography textColor="neutral600">
+      This content type is not configured for <strong>WebAtlas</strong>. 
+      If you wish to use it, please configure it in the 
+      <Link href="/admin/settings/webatlas/configuration" marginLeft={1}>
+        settings
+      </Link>.
+    </Typography>
+  )
 
   return (
     <>

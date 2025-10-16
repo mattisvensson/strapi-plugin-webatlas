@@ -74,6 +74,11 @@ export type ContentType = {
   attributes: {
     [key: string]: any;
   }
+  pluginOptions: {
+    webatlas?: {
+      active: boolean;
+    };
+  };
 };
 
 export type ConfigContentType = {
@@ -203,4 +208,16 @@ type modalSharedLogic = {
   modalType: string,
   setModalType: (value: string) => void,
   selectedNavigation: NestedNavigation | undefined,
+}
+
+
+declare module '@strapi/strapi' {
+  namespace Schema {
+    interface ContentTypePluginOptions {
+      webatlas?: {
+        active?: boolean;
+        // Add other webatlas options here if needed
+      };
+    }
+  }
 }

@@ -28,7 +28,7 @@ const Settings = () => {
   const { data: config, setConfig } = usePluginConfig();
   const [settingsState, dispatch] = useReducer(reducer, config || { selectedContentTypes: [] });
   const { contentTypes: allContentTypesData } = useAllContentTypes();
-  const allContentTypes = allContentTypesData?.filter((ct: ContentType) => ct.isDisplayed);
+  const allContentTypes = allContentTypesData?.filter((ct: ContentType) => ct.pluginOptions?.webatlas?.active === true);
   const [initialState, setInitialState] = useState(config || { selectedContentTypes: [] })
 
   function reducer(settingsState: PluginConfig, action: Action): PluginConfig {
@@ -143,7 +143,10 @@ const Settings = () => {
                   const ct: ContentType | undefined = allContentTypes?.find((item) => item.uid === contentType.uid)
                   if (!ct) return null
                   return (
-                    <Box borderColor={!contentType.default && 'danger500'}>
+                    <Box
+                      borderColor={!contentType.default && 'danger500'}
+                      key={ct.uid}
+                    >
                       <Accordion.Item key={ct.uid} value={ct.uid} size="S">
                         <Accordion.Header>
                           <Accordion.Trigger>

@@ -1,12 +1,13 @@
 import set from 'lodash/set';
-import { Core, Schema } from '@strapi/strapi';
+import { Core } from '@strapi/strapi';
+import type { ContentType } from '../../types'
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  Object.values(strapi.contentTypes).forEach((contentType: Schema.ContentType) => {
-    
-    // TODO: Only add fields to content types that are allowed to have routes
-    if (!contentType.uid.startsWith('api::')) return;
-      
+  Object.values(strapi.contentTypes).forEach((contentType: ContentType) => {
+
+    // Only add fields to content types that have webatlas enabled in plugin options
+    if (!contentType.pluginOptions?.webatlas?.active) return;
+
     const { attributes } = contentType;
 
     const fieldSettings = {
