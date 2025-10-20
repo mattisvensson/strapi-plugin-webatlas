@@ -1,7 +1,8 @@
 import { waRoute } from "./pluginHelpers";
+import type { UID } from '@strapi/strapi';
 
 async function checkPathExists(path: string, targetRoutePath?: string | null): Promise<boolean> {
-  const entities = await strapi.documents(waRoute).findMany({
+  const entities = await strapi.documents(waRoute as UID.ContentType).findMany({
     filters: { 
       $or: [
         {
@@ -30,7 +31,7 @@ export default async function duplicateCheck(initialPath: string, targetRouteDoc
     let counter = 1;
 
     if (targetRouteDocumentId) {
-      const route = await strapi.documents(waRoute).findOne({
+      const route = await strapi.documents(waRoute as UID.ContentType).findOne({
         documentId: targetRouteDocumentId
       });
       if (route) targetRoutePath = route.fullPath;
