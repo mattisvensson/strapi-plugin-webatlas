@@ -1,4 +1,5 @@
 import { NestedNavItem } from "../types";
+import { PLUGIN_NAME } from "../pluginId";
 
 export default function extractRouteAndItems(items: NestedNavItem[]) {
   return items.map((item: any) => {
@@ -32,7 +33,7 @@ export default function extractRouteAndItems(items: NestedNavItem[]) {
     delete route.wrapper
     
     return { 
-      __component: type === 'wrapper' ? 'webatlas.wrapper' : 'webatlas.route',
+      __component: type === 'wrapper' ? `${PLUGIN_NAME}.wrapper` : `${PLUGIN_NAME}.route`,
       type: type,
       ...route
     };
