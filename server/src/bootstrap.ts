@@ -1,7 +1,9 @@
-import type { Core } from '@strapi/strapi';
 import { PluginConfig, ConfigContentType } from "../../types";
 import transformToUrl from "../../utils/transformToUrl";
 import duplicateCheck from "./utils/duplicateCheck";
+import { waRoute, waNavItem } from "./utils/pluginHelpers";
+import type { Core, UID } from '@strapi/strapi';
+
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   if (!strapi.store) {
@@ -17,7 +19,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   if (!config?.selectedContentTypes) return
 
   strapi.db?.lifecycles.subscribe({
-    models: ['plugin::webatlas.navitem'],
+    models: [waNavItem],
 
     async beforeDelete(event: any) {
       const id = event.params.where['id']
@@ -25,7 +27,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       if (!id) return
 
       try {
-        const navItem = await strapi.db?.query('plugin::webatlas.navitem').findOne({
+        const navItem = await strapi.db?.query(waNavItem).findOne({
           where: {
             id: id
           },
@@ -44,7 +46,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       if (!id) return
 
       try {
-        await strapi.db?.query('plugin::webatlas.route').delete({
+        await strapi.db?.query(waRoute).delete({
           where: {
             id: id
           },
@@ -77,7 +79,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       const title = ctSettings?.default ? event.params.data[ctSettings.default] : '';
 
       const path = await duplicateCheck(transformToUrl(webatlas_path));
-      await strapi.documents('plugin::webatlas.route').create({
+      await strapi.documents(waRoute as UID.ContentType).create({
         data: {
           relatedContentType: event.model.uid,
           relatedId: event.result.id,
@@ -103,7 +105,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (!webatlas_path) return
 
-      const relatedRoute = await strapi.db?.query('plugin::webatlas.route').findOne({
+      const relatedRoute = await strapi.db?.query(waRoute).findOne({
           where: {
           relatedDocumentId: documentId
           },
@@ -120,7 +122,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       }
       
       if (!relatedRoute) {
-        await strapi.documents('plugin::webatlas.route').create({
+        await strapi.documents(waRoute as UID.ContentType).create({
             data: {
               relatedContentType: event.model.uid,
               relatedId: event.result.id,
@@ -131,7 +133,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           }
         })
       } else {
-        await strapi.documents('plugin::webatlas.route').update({ 
+        await strapi.documents(waRoute as UID.ContentType).update({ 
           documentId: relatedRoute.documentId,
           data: {
             ...routeData
@@ -168,7 +170,7 @@ async function findAndDeleteNavItem (relatedId: number, relatedContentType: stri
   if (!relatedId || !relatedContentType) return
 
   try {
-    const route = await strapi.db?.query('plugin::webatlas.route').findOne({
+    const route = await strapi.db?.query(waRoute).findOne({
       where: {
         relatedId: relatedId,
         relatedContentType: relatedContentType
@@ -177,7 +179,7 @@ async function findAndDeleteNavItem (relatedId: number, relatedContentType: stri
   
     if (!route?.documentId) return
   
-    const navItem = await strapi.db?.query('plugin::webatlas.navitem').findOne({
+    const navItem = await strapi.db?.query(waNavItem).findOne({
       where: {
         route: {
           documentId: route.documentId
@@ -185,8 +187,8 @@ async function findAndDeleteNavItem (relatedId: number, relatedContentType: stri
       },
     });
     
-    await strapi.documents('plugin::webatlas.route').delete({ documentId: route.documentId })
-    if (navItem?.documentId) await strapi.documents('plugin::webatlas.navitem').delete({ documentId: navItem.documentId })
+    await strapi.documents(waRoute as UID.ContentType).delete({ documentId: route.documentId })
+    if (navItem?.documentId) await strapi.documents(waNavItem as UID.ContentType).delete({ documentId: navItem.documentId })
     
   } catch (err) {
     console.log(err)
