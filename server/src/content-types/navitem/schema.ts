@@ -12,10 +12,10 @@ export default {
   },
   pluginOptions: {
     "content-manager": {
-      visible: true
+      visible: false
     },
     "content-type-builder": {
-      visible: true
+      visible: false
     }
   },
   attributes: {
@@ -30,6 +30,7 @@ export default {
       type: "relation",
       relation: "oneToOne",
       target: "plugin::webatlas.route",
+      inversedBy: "navitem",
       configurable: false,
     },
     parent: {
