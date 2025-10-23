@@ -1,5 +1,5 @@
 import { StrapiApp } from '@strapi/admin/strapi-admin';
-import { PLUGIN_ID, PLUGIN_NAME } from '../../pluginId';
+import { PLUGIN_ID } from '../../pluginId';
 import { Initializer } from './components/Initializer';
 import { RouteIcon, NavigationIcon } from './components/PluginIcon';
 import CMEditViewAside from './components/CMEditViewAside';
@@ -78,7 +78,7 @@ export default {
       id: PLUGIN_ID,
       initializer: Initializer,
       isReady: false,
-      name: PLUGIN_NAME,
+      name: PLUGIN_ID,
     });
   },
 

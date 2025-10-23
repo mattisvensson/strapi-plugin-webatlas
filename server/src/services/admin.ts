@@ -2,7 +2,7 @@ import { ContentType, NavigationInput, NavItemSettings, Route, StructuredNavigat
 import duplicateCheck from "../utils/duplicateCheck";
 import { getFullPath, buildStructuredNavigation, transformToUrl } from "../../../utils";
 import { waRoute, waNavigation, waNavItem } from "../utils/pluginHelpers";
-import { PLUGIN_NAME } from "../../../pluginId";
+import { PLUGIN_ID } from "../../../pluginId";
 
 export default ({strapi}) => ({
 
@@ -23,12 +23,12 @@ export default ({strapi}) => ({
       return "Error. Couldn't delete invalid routes"
     }
 
-    const pluginStore = await strapi.store({ type: 'plugin', name: PLUGIN_NAME });
+    const pluginStore = await strapi.store({ type: 'plugin', name: PLUGIN_ID });
     await pluginStore.set({ key: "config", value: newConfig });
   },
 
   async getConfig() {
-    const pluginStore = await strapi.store({ type: 'plugin', name: PLUGIN_NAME });
+    const pluginStore = await strapi.store({ type: 'plugin', name: PLUGIN_ID });
     let config = await pluginStore.get({
       key: "config",
     });
