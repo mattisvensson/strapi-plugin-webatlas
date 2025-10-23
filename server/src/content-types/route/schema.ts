@@ -75,6 +75,7 @@ export default {
       type: "relation",
       relation: "oneToOne",
       target: "plugin::webatlas.navitem",
+      mappedBy: "route",
       configurable: false,
     },
     wrapper: {

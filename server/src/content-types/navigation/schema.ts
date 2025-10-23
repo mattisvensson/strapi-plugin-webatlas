@@ -40,7 +40,7 @@ export default {
       relation: "oneToMany",
       target: "plugin::webatlas.navitem",
       configurable: false,
-      mappedBy: 'navigation',
+      mappedBy: 'plugin::webatlas.navigation',
     },
   }
 }
