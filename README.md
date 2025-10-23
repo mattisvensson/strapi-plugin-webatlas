@@ -24,9 +24,8 @@ This plugin is still in the early stages of development. Many features are plann
 
 ## 💎 Versions
 
-- **Strapi v5** - [v1.x (work in progress)](https://github.com/mattisvensson/strapi-plugin-webatlas/tree/main)
-- **Strapi v4** - [v1.x (Archived – no further updates)](https://github.com/mattisvensson/strapi-plugin-webatlas/tree/main)
-
+- **Strapi v5** - [v0.x.x (work in progress - beta)](https://github.com/mattisvensson/strapi-plugin-webatlas/tree/main)
+- **Strapi v4** - not supported
 ## ✨ Features
 
 - **🚀 Automatic Slug Generation:** Automatically generate clean, SEO-friendly slugs based on your content fields. No more manual slug writing — just choose the field, and the plugin takes care of the rest. Slugs are unique and easily customizable.
@@ -38,21 +37,16 @@ This plugin is still in the early stages of development. Many features are plann
 ## ⏳ Installation
 
 ### Via command line
-
-(Use **yarn** to install this plugin within your Strapi project (recommended). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/).)
-
+Install Webatlas via command line with a package manager of your choice.
+Using NPM:
 ```bash
-yarn add strapi-plugin-webatlas@latest
+npm install strapi-plugin-webatlas@beta
 ```
 
-After successful installation you've to re-build your Strapi instance. To archive that simply use:
-
+Using Yarn:
 ```bash
-yarn build
-yarn develop
+yarn add strapi-plugin-webatlas@beta
 ```
-
-**Webatlas** should appear in the **Plugins** section of Strapi sidebar after you run app again.
 
 As a next step you must configure your the plugin by the way you want to. See [**Configuration**](#🔧-configuration) section.
 
@@ -99,7 +93,6 @@ For each selected content type, you have the following settings:
 
 ## 🧩 Roadmap
 
-- v5 compatibility
 - RBAC
 - User action feedback
 - Internationalization
@@ -109,7 +102,6 @@ For each selected content type, you have the following settings:
   - Filters
   - Nested url structure
 - Entity page
- - Show all routes for entity
  - Add to navigation from entity
 - Settings
   - Navigation settings
@@ -122,6 +114,7 @@ For each selected content type, you have the following settings:
   - Item search
   - Collapse items
   - Multi action for items
+- Redirects management
 
 ---
 
@@ -131,7 +124,7 @@ This plugin is still in the early stages of development. Many features are plann
 
 ## 📝 License
 
-[MIT License](LICENSE.md) Copyright (c) [Matti Svensson](https://mattisvensson.com/)
+[MIT License](LICENSE.md) Copyright (c) [Matti Svensson](https://mattisvensson.dev/)
 
 Webatlas v5 is based on the [plugin boilerplate](https://github.com/pluginpal/strapi-plugin-boilerplate#readme) by [PluginPal](https://www.pluginpal.io/).
 
