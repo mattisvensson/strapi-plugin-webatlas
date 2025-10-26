@@ -13,14 +13,14 @@ const CMEditViewAside = () => {
 
   const [contentTypeConfig, setContentTypeConfig] = useState<ConfigContentType | null>(null);
   const [isAllowedContentType, setIsAllowedContentType] = useState(false);
-  const [isActiveContentType, setIsActiveContentType] = useState(true);
+  const [isActiveContentType, setIsActiveContentType] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!config) return
     
-    const modelConfig = contentTypes?.find((ct) => ct.uid === model)
-    if (modelConfig?.pluginOptions?.webatlas?.active) setIsAllowedContentType(true)
+    const contentType = contentTypes?.find((ct) => ct.uid === model)
+    if (contentType?.pluginOptions?.webatlas?.active) setIsAllowedContentType(true)
     
     config?.selectedContentTypes?.map((type) => {
       if (type.uid === model) {
@@ -53,7 +53,7 @@ const CMEditViewAside = () => {
     }
   }, []);
 
-  if (!isLoading) return (
+  if (isLoading) return (
     <Typography textColor="neutral600">
       Loading...
     </Typography>
@@ -66,7 +66,7 @@ const CMEditViewAside = () => {
     </Typography>
   )
 
-  if (isActiveContentType || !contentTypeConfig) return (
+  if (!isActiveContentType || !contentTypeConfig) return (
     <Typography textColor="neutral600">
       This content type is not configured for <strong>WebAtlas</strong>. 
       If you wish to use it, please configure it in the 
