@@ -13,14 +13,13 @@ import { Layouts } from '@strapi/strapi/admin';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { NavOverview, NavCreate, Delete, NavEdit, ItemCreate, ItemEdit, ExternalItem, WrapperItem, NavModal } from '../../components/modals';
-import EmptyNav from './EmptyNav';
+import { EmptyBox, Center } from '../../components/UI';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
 import Header from './Header';
 import { NestedNavigation, NestedNavItem } from '../../../../types';
 import useNavigations from '../../hooks/useNavigations';
 import useApi from '../../hooks/useApi';
 // import { isNestedNavigation, isNestedNavItem} from '../../utils/typeChecks';
-import Center from '../../components/UI/Center';
 import {
   DndContext,
   closestCenter,
@@ -266,13 +265,13 @@ const Navigation = () => {
               </Flex>
             }
             {navigations?.length === 0 && <Center height={400}>
-              <EmptyNav msg="You have no navigations yet..." />
+              <EmptyBox msg="You have no navigations yet..." />
               <Button variant="primary" onClick={() => setModalType('NavCreate')}>
                 Create new Navigation
               </Button>
             </Center>}
             {navigationItems?.length === 0 && <Center height={400}>
-              <EmptyNav msg="Your navigation is empty..." />
+              <EmptyBox msg="Your navigation is empty..." />
               <Button variant="primary" onClick={() => setModalType('ItemCreate')}>
                 Create new item
               </Button>

@@ -5,7 +5,7 @@ type EmptyNavProps = {
   msg: string;
 }
 
-export default function EmptyNav ({ msg }: EmptyNavProps) {
+export default function EmptyBox ({ msg }: EmptyNavProps) {
 
   return (
     <>
