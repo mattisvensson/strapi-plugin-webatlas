@@ -32,25 +32,34 @@ const CMEditViewAside = () => {
   }, [config])
 
   useEffect(() => {
-    const label = Array.from(document.querySelectorAll('label')).find((l) => l.textContent?.startsWith('webatlas_path'));
-    if (label) {
-      let parentDiv = label.closest('div');
-      for (let i = 0; i < 2; i++) {
-        if (parentDiv) {
-          // @ts-expect-error
-          parentDiv = parentDiv.parentElement;
-        }
+    const isWebatlasLabel = (label: Element) => label.textContent?.startsWith('webatlas_');
+    
+    document.querySelectorAll('label').forEach(label => {
+      if (!isWebatlasLabel(label)) return;
+      
+      const container = label.parentElement?.parentElement;
+      const parent = container?.parentElement;
+      const greatGrandParent = parent?.parentElement?.parentElement;
+      
+      if (!container || !parent) return;
+      
+      const parentWebatlasCount = Array.from(parent.querySelectorAll('label')).filter(isWebatlasLabel).length;
+      const childrenCount = parent.children.length;
+      
+      // Remove great grandparent if it only has webatlas fields
+      if (greatGrandParent && greatGrandParent?.querySelectorAll('label').length === 
+          Array.from(greatGrandParent.querySelectorAll('label')).filter(isWebatlasLabel).length) {
+        greatGrandParent.remove();
       }
-      if (parentDiv) {
-        const grandParentDiv = parentDiv.parentElement;
-        if (grandParentDiv && grandParentDiv.children.length === 1) {
-          grandParentDiv.parentElement?.remove();
-          return;
-        } else {
-          parentDiv.remove();
-        }
+      // Remove parent if: single child OR two children with two webatlas fields  
+      else if (childrenCount === 1 || (childrenCount === 2 && parentWebatlasCount === 2)) {
+        parent.remove();
       }
-    }
+      // Remove container if: two children with one webatlas field OR fallback
+      else {
+        container.remove();
+      }
+    });
   }, []);
 
   if (isLoading) return (
