@@ -55,26 +55,42 @@ export default ({strapi}) => ({
   async getNavigation(id: string, name: string, documentId: string, variant: StructuredNavigationVariant = 'nested') {
     try {
       let navigation = null
-      // TODO: dont use if else to find navigations. Instead try to find documentId first, if not found use name and id
-      if (documentId) {
-        navigation = await strapi.documents(waNavigation).findOne({
-          documentId: documentId,
-          populate: ['items', "items.parent", "items.route"]
-        });
-      } else if (name) {
-        navigation = await strapi.db?.query(waNavigation).findOne({
-          where: { 
-            name: name
-          },
-          populate: ['items', "items.parent", "items.route"],
-        });
-      } else if (id) {
-        navigation = await strapi.db?.query(waNavigation).findOne({
-          where: { 
-            id: id
-          },
-          populate: ['items', "items.parent", "items.route"],
-        });
+
+      const lookupMethods = [
+        {
+          condition: documentId,
+          lookup: () => strapi.documents(waNavigation).findOne({
+            documentId: documentId,
+            populate: ['items', "items.parent", "items.route"]
+          }),
+          name: 'documentId'
+        },
+        {
+          condition: name,
+          lookup: () => strapi.db?.query(waNavigation).findOne({
+            where: { name: name },
+            populate: ['items', "items.parent", "items.route"],
+          }),
+          name: 'name'
+        },
+        {
+          condition: id,
+          lookup: () => strapi.db?.query(waNavigation).findOne({
+            where: { id: id },
+            populate: ['items', "items.parent", "items.route"],
+          }),
+          name: 'id'
+        }
+      ];
+
+      for (const method of lookupMethods) {
+        if (method.condition && !navigation) {
+          try {
+            navigation = await method.lookup();
+          } catch (error) {
+            console.log(`Navigation lookup by ${method.name} failed:`, error);
+          }
+        }
       }
       
       if (!navigation) return null
