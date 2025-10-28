@@ -9,7 +9,6 @@ export default ({strapi}) => ({
         filters: {
           $or: [
             { fullPath: slug },
-            { slug: slug },
             { uidPath: slug },
             { documentIdPath: slug },
           ],
@@ -56,7 +55,7 @@ export default ({strapi}) => ({
   async getNavigation(id: string, name: string, documentId: string, variant: StructuredNavigationVariant = 'nested') {
     try {
       let navigation = null
-      
+      // TODO: dont use if else to find navigations. Instead try to find documentId first, if not found use name and id
       if (documentId) {
         navigation = await strapi.documents(waNavigation).findOne({
           documentId: documentId,
