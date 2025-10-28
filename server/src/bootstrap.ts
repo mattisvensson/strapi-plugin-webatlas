@@ -106,13 +106,13 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       if (!webatlas_path) return
 
       const relatedRoute = await strapi.db?.query(waRoute).findOne({
-          where: {
+        where: {
           relatedDocumentId: documentId
-          },
-        });
+        },
+      });
 
       const title = ctSettings?.default ? event.params.data[ctSettings.default] : ''
-      const path = await duplicateCheck(transformToUrl(webatlas_path))
+      const path = await duplicateCheck(transformToUrl(webatlas_path), relatedRoute ? relatedRoute.documentId : null);
 
       const routeData: any = {
         title,
@@ -123,9 +123,9 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       
       if (!relatedRoute) {
         await strapi.documents(waRoute as UID.ContentType).create({
-            data: {
-              relatedContentType: event.model.uid,
-              relatedId: event.result.id,
+          data: {
+            relatedContentType: event.model.uid,
+            relatedId: event.result.id,
             relatedDocumentId: event.result.documentId,
             uidPath: `${event.model.singularName}/${event.result.id}`,
             documentIdPath: event.result.documentId,
@@ -133,6 +133,8 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           }
         })
       } else {
+        console.log('updating route', relatedRoute.documentId)
+        console.log('with data', routeData)
         await strapi.documents(waRoute as UID.ContentType).update({ 
           documentId: relatedRoute.documentId,
           data: {
