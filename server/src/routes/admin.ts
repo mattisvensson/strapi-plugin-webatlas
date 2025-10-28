@@ -29,6 +29,15 @@ export default {
       }
     },
     {
+      method: 'PUT',
+      path: '/route',
+      handler: 'admin.updateRoute',
+      config: {
+        policies: [],
+        auth: false,
+      }
+    },
+    {
       method: 'POST',
       path: '/route/external',
       handler: 'admin.createExternalRoute',
@@ -38,9 +47,9 @@ export default {
       }
     },
     {
-      method: 'PUT',
-      path: '/route',
-      handler: 'admin.updateRoute',
+      method: 'GET',
+      path: '/route/related',
+      handler: 'admin.getRelatedRoute',
       config: {
         policies: [],
         auth: false,

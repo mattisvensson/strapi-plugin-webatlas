@@ -191,7 +191,7 @@ type modalSharedLogic = {
   createNavItem: (NavItemSettings) => Promise<any>,
   createExternalRoute: (body: RouteSettings) => Promise<any>,
   updateRoute: (body: RouteSettings, documentId: string) => Promise<any>,
-  getRouteByRelated: (relatedDocumentId: string, populate?: string) => Promise<any>,
+  getRelatedRoute: (relatedDocumentId: string) => Promise<any>,
   replacement: string,
   setReplacement: (value: string) => void,
   validationState: 'initial' | 'checking' | 'done',

@@ -55,26 +55,6 @@ export default ({strapi}) => ({
     }
   },
 
-  async createExternalRoute(data) {
-    try {
-      return await strapi.documents(waRoute).create({
-        data: {
-          title: data.title,
-          slug: data.fullPath,
-          fullPath: data.fullPath,
-          relatedContentType: '',
-          relatedId: 0,
-          relatedDocumentId: '',
-          uidPath: '',
-          internal: false,
-          wrapper: data.wrapper,
-        },
-      });
-    } catch (e) {
-      console.log(e)
-    }
-  },
-
   async updateRoute(documentId: string, data: any) {
     try {
       let checkedPath = data.fullPath
@@ -97,6 +77,38 @@ export default ({strapi}) => ({
       });
 
       return entity;
+    } catch (e) {
+      console.log(e)
+    }
+  },
+
+  async createExternalRoute(data) {
+    try {
+      return await strapi.documents(waRoute).create({
+        data: {
+          title: data.title,
+          slug: data.fullPath,
+          fullPath: data.fullPath,
+          relatedContentType: '',
+          relatedId: 0,
+          relatedDocumentId: '',
+          uidPath: '',
+          internal: false,
+          wrapper: data.wrapper,
+        },
+      });
+    } catch (e) {
+      console.log(e)
+    }
+  },
+
+  async getRelatedRoute(documentId: string) {
+    try {
+      return await strapi.db?.query(waRoute).findOne({
+        where: {
+          relatedDocumentId: documentId
+        },
+      });
     } catch (e) {
       console.log(e)
     }
