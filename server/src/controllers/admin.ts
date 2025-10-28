@@ -23,6 +23,18 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
+  async updateRoute (ctx) {
+    try {
+      const { documentId } = ctx.query;
+
+      if (!documentId) return ctx.throw(400, 'Route documentId is required');
+
+      const { data } = ctx.request.body;
+      return await getAdminService().updateRoute(documentId, data);
+    } catch (e) {
+      return ctx.throw(500, e)
+    }
+  },
   async createExternalRoute (ctx) {
     try {
       const { data } = ctx.request.body;
@@ -33,14 +45,13 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async updateRoute (ctx) {
+  async getRelatedRoute (ctx) {
     try {
       const { documentId } = ctx.query;
 
       if (!documentId) return ctx.throw(400, 'Route documentId is required');
 
-      const { data } = ctx.request.body;
-      return await getAdminService().updateRoute(documentId, data);
+      return await getAdminService().getRelatedRoute(documentId);
     } catch (e) {
       return ctx.throw(500, e)
     }

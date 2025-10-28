@@ -42,11 +42,10 @@ export default function useApi() {
     }
   }
 
-  const getRouteByRelated = async (relatedDocumentId: string, populate?: string) => {
-    const { data } = await get(`/content-manager/collection-types/plugin::webatlas.route?filters[relatedDocumentId][$eq]=${relatedDocumentId}${populate ? '&populate' + populate : ''}`);
-    if (data?.results) return data.results[0];
+  const getRelatedRoute = async (relatedDocumentId: string) => {
+    const { data } = await get(`/webatlas/route/related?documentId=${relatedDocumentId}`);
+    return data
     
-    return null;
   };
 
   const createExternalRoute = async (body: RouteSettings) => {
@@ -112,5 +111,18 @@ export default function useApi() {
     return data
   };
 
-  return { fetchAllContentTypes, fetchAllEntities, getRouteByRelated, createExternalRoute, getRoutes, updateRoute, createNavItem, updateNavItem, deleteNavItem, getStructuredNavigation, deleteNavigation, updateNavigation }
+  return { 
+    fetchAllContentTypes,
+    fetchAllEntities,
+    getRelatedRoute,
+    createExternalRoute,
+    getRoutes,
+    updateRoute,
+    createNavItem,
+    updateNavItem,
+    deleteNavItem,
+    getStructuredNavigation,
+    deleteNavigation,
+    updateNavigation,
+  }
 }

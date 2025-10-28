@@ -21,7 +21,7 @@ function ItemCreateComponent({
   entities,
   createNavItem,
   updateRoute,
-  getRouteByRelated,
+  getRelatedRoute,
   replacement,
   validationState,
   initialState,
@@ -53,7 +53,7 @@ function ItemCreateComponent({
     async function fetchRoute() {
       if (selectedContentType?.contentType && selectedEntity?.id) {
         try {
-          const route = await getRouteByRelated(selectedEntity.documentId)
+          const route = await getRelatedRoute(selectedEntity.documentId)
 
           // TODO: Create a route if not existing or show error
           if (!route) return

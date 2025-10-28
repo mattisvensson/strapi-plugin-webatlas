@@ -62,7 +62,7 @@ function reducer(state: PathState, action: Action): PathState {
 const Alias = ({ config }: { config: ConfigContentType }) => {
 	const { layout, form } = useContentManagerContext()
 	const { initialValues, values, onChange } = form;
-	const { getRouteByRelated } = useApi()
+	const { getRelatedRoute } = useApi()
 
 	const [routeId, setRouteId] = useState<number | null>()
 	const [isOverride, setIsOverride] = useState(false);
@@ -161,7 +161,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
       }			
 			
 			try {
-				const route = await getRouteByRelated(initialValues.documentId)
+				const route = await getRelatedRoute(initialValues.documentId)
 
 				if (!route) return
 
