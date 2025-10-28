@@ -20,7 +20,8 @@ This plugin is still in the early stages of development. Many features are plann
 3. [⏳ Installation](#installation)
 4. [🖐 Requirements](#requirements)
 5. [🔧 Configuration](#configuration)
-6. [🧩 Roadmap](#roadmap)
+6. [📖 Usage](#usage)
+7. [🧩 Roadmap](#roadmap)
 
 ## 💎 Versions
 
@@ -40,12 +41,12 @@ This plugin is still in the early stages of development. Many features are plann
 Install Webatlas via command line with a package manager of your choice.
 Using NPM:
 ```bash
-npm install strapi-plugin-webatlas@beta
+npm install @mattisvensson/strapi-plugin-webatlas@beta
 ```
 
 Using Yarn:
 ```bash
-yarn add strapi-plugin-webatlas@beta
+yarn add @mattisvensson/strapi-plugin-webatlas@beta
 ```
 
 As a next step you must configure your the plugin by the way you want to. See [**Configuration**](#🔧-configuration) section.
@@ -56,8 +57,8 @@ All done. Enjoy 🎉
 
 **Minimum environment requirements**
 
+- Strapi `>=5.0.0`
 - Node.js `>=20.0.0`
-- NPM `>=10.x.x`
 
 ## 🔧 Configuration
 
@@ -91,13 +92,39 @@ For each selected content type, you have the following settings:
 - **URL Alias pattern:** Create a default pattern for the slug. For example, when creating a 'news' content type and you want your url structure to be like '/news/some-title' for all entities, enter 'news' in this setting field. The slug will automatically be appended to this string.
 - **URL Alias API field:** Allows you to append the current URL (slug) of an entity to a specific field. This is especially useful when working with components like a "teaser"—for example, you can store the slug in a hidden field within the teaser component. This way, you can fetch just the teaser via the API while still having access to its full URL.
 
+## 📖 Usage
+
+Webatlas provides two API endpoints. One to fetch routes and one to fetch navigations.
+
+### Fetch route
+
+`GET /api/webatlas/path`
+
+Query parameters:
+- `slug` (string, required): The slug/path to fetch the route for. This can either be the generated path from webatlas, the uId path or the documentId path.
+- `populate` (string, optional): Comma-separated list of relations to populate. Use `deep` to populate all relations in any depth.
+- `populateDeepDepth` (string, optional): Depth for deep population.
+- `fields` (string, optional): Comma-separated list of fields to include in the response.
+- `status` (string, optional): `draft` or `published`. Default is `published`. Returns the draft or published version of the entity.
+
+### Fetch navigation
+
+`GET /api/webatlas/navigation`
+
+One of these query parameters are mandatory to fetch a navigation. If you provide multiple, `documentId` has the highest priority, followed by `name` and `id`.
+- `documentId` (string, optional): The document ID of the navigation to fetch.
+- `name` (string, optional): The name of the navigation to fetch.
+- `id` (string, optional): The ID of the navigation to fetch.
+
+Optional parameters:
+- `variant` (string, optional): `nested` or `flat`.The variant of the navigation to fetch. Default is `nested`.
+
 ## 🧩 Roadmap
 
 - RBAC
 - User action feedback
 - Internationalization
 - Plugin translations
-- Draft and published
 - Route page
   - Filters
   - Nested url structure
