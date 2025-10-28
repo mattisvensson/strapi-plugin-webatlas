@@ -3,15 +3,16 @@ import { StructuredNavigationVariant } from "../../../types";
 import { waRoute, waNavigation} from "../utils/pluginHelpers";
 
 export default ({strapi}) => ({
-  async getEntityByPath(slug: string, populate: string, populateDeepDepth: string, fields: any) {
+  async getEntityByPath(slug: string, populate: string, populateDeepDepth: string, fields: any, status: 'draft' | 'published' = 'published') {
     try {
-      const route = await strapi.db?.query(waRoute).findOne({
-        filters: { 
+      const route = await strapi.documents(waRoute).findFirst({
+        filters: {
           $or: [
-            { fullPath: slug},
+            { fullPath: slug },
             { slug: slug },
             { uidPath: slug },
-          ], 
+            { documentIdPath: slug },
+          ],
         },
       });
 
@@ -37,7 +38,8 @@ export default ({strapi}) => ({
       const entity = await strapi.documents(route.relatedContentType).findOne({
         documentId: route.documentIdPath,
         populate: populateObject,
-        fields: fields
+        fields: fields,
+        status: status,
       });
 
       if (!entity) return null
