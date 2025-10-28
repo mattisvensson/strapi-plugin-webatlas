@@ -1,92 +1,75 @@
-function isEmpty(value: any): boolean {
-  if (value == null) return true;
-  if (Array.isArray(value) || typeof value === 'string') return value.length === 0;
-  if (typeof value === 'object') return Object.keys(value).length === 0;
-  return false;
-}
-
-function merge(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
-  for (const key in source) {
-    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
-      target[key] = merge(target[key] || {}, source[key]);
-    } else {
-      target[key] = source[key];
-    }
-  }
-  return target;
-}
+import type { UID, Schema } from '@strapi/strapi';
+import { isEmpty, merge } from 'lodash/fp';
 
 /*
-* Base code from strapi-plugin-populate-deep
-*
-* https://www.npmjs.com/package/strapi-plugin-populate-deep
+* Base code from original strapi-plugin-populate-deep Strapi v4 plugin:*
 * https://github.com/Barelydead/strapi-plugin-populate-deep
 * 
-* */
-
-import type { UID, Schema } from '@strapi/strapi';
+* Some modifications were made to work with Strapi v5:
+* https://github.com/NEDDL/strapi-v5-plugin-populate-deep
+* 
+* The Strapi v5 version has been used as a base and further modified to
+* fit the specific needs of this project, mainly typescript types.
+*/
 
 const getModelPopulationAttributes = (model: Schema.Component | Schema.ContentType) => {
   if (model.uid === "plugin::upload.file") {
     const { related, ...attributes } = model.attributes;
     return attributes;
   }
+
   return model.attributes;
 };
 
-export default function getFullPopulateObject(
-  modelUid: UID.Schema, 
-  maxDepth = 20, 
-  ignore: string[] = []
-) {
-
+export default function getFullPopulateObject(modelUid: UID.Schema, maxDepth = 5, ignore: string[] = []) {
   if (maxDepth <= 1) {
     return true;
   }
-
   if (modelUid === "admin::user") {
     return false;
   }
 
-  const populate: Record<string, boolean | Record<string, any>> = {};
-  const model = strapi.getModel(modelUid);
-
-  if (model.collectionName && !ignore.includes(model.collectionName)) {
-    ignore.push(model.collectionName);
-  } else if (model.collectionName && ignore.includes(model.collectionName)) {
-    return true
+  if (ignore.includes(modelUid)) {
+    return true;
   }
 
-  for (const [key, value] of Object.entries(
-    getModelPopulationAttributes(model)
-  )) {
-    if (ignore?.includes(key)) continue
+  const populate: Record<string, boolean | Record<string, any>> = {};
+  const model = strapi.getModel(modelUid);
+  
+  const newIgnore = [...ignore, modelUid];
+
+  for (const [key, value] of Object.entries(getModelPopulationAttributes(model))) {
+    if (ignore?.includes(key)) continue;
     if (value) {
       if (value.type === "component") {
-        populate[key] = getFullPopulateObject(value.component, maxDepth - 1, ignore);
+        const componentPopulate = getFullPopulateObject(value.component, maxDepth - 1, newIgnore);
+        if (componentPopulate) {
+          populate[key] = componentPopulate;
+        }
       } else if (value.type === "dynamiczone") {
         const dynamicPopulate = value.components.reduce((prev, cur) => {
-          const curPopulate = getFullPopulateObject(cur, maxDepth - 1, ignore);
-          if (curPopulate === true) {
-            return prev; // Skip if curPopulate is true
+          const curPopulate = getFullPopulateObject(cur, maxDepth - 1, newIgnore);
+          if (curPopulate !== false) {
+            return merge(prev, {[cur]: curPopulate});
           }
-          return merge(prev, curPopulate as Record<string, any>);
-        }, {} as Record<string, any>);
-        
-        populate[key] = isEmpty(dynamicPopulate) ? true : dynamicPopulate;    
+          return prev;
+        }, {});
+        populate[key] = isEmpty(dynamicPopulate) ? true : { on: dynamicPopulate };
       } else if (value.type === "relation") {
-        const relationPopulate = getFullPopulateObject(
-          //@ts-ignore
-          value.target,
-          (key === 'localizations') && maxDepth > 2 ? 1 : maxDepth - 1,
-          ignore
-        );
-
-        if (relationPopulate) populate[key] = relationPopulate;
+        if ('target' in value && value.target) {
+          const relationPopulate = getFullPopulateObject(
+            value.target as UID.Schema,
+            key === "localizations" && maxDepth > 2 ? 1 : maxDepth - 1,
+            newIgnore
+          );
+          if (relationPopulate) {
+            populate[key] = relationPopulate;
+          }
+        }
       } else if (value.type === "media") {
         populate[key] = true;
       }
     }
   }
   return isEmpty(populate) ? true : { populate };
-};
+}
