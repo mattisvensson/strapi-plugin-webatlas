@@ -159,6 +159,7 @@ const Navigation = () => {
 
       if (item.depth === 0) {
         groupIndices[0] = (groupIndices[0] || 0) + 1;
+        parentIds = [];
       } else if (typeof previousItem.depth === 'number' && item.depth === previousItem.depth + 1) {
         parentIds.push(previousItem.documentId);
         groupIndices[item.depth] = 0;
