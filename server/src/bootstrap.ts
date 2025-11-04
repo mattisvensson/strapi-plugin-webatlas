@@ -133,8 +133,6 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           }
         })
       } else {
-        console.log('updating route', relatedRoute.documentId)
-        console.log('with data', routeData)
         await strapi.documents(waRoute as UID.ContentType).update({ 
           documentId: relatedRoute.documentId,
           data: {
