@@ -11,7 +11,6 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   const pluginStore = strapi.store({ type: 'plugin', name: 'webatlas' });
-
   const config = await pluginStore.get({
     key: "config",
   }) as PluginConfig;
@@ -21,6 +20,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   strapi.db?.lifecycles.subscribe({
     models: [waNavItem],
 
+    // TODO: is beforeDelete needed?
     async beforeDelete(event: any) {
       const id = event.params.where['id']
 
@@ -33,6 +33,8 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           },
           populate: ['route']
         });
+
+        if (!navItem || !navItem.route) return
   
         event.state = navItem.route.id && !navItem.route.internal ? { id: navItem.route.id } : null
       } catch (err) {
@@ -75,6 +77,14 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       } = event.params.data;
 
       if (!webatlas_path) return;
+
+      const relatedRoute = await strapi.db?.query(waRoute).findOne({
+        where: {
+          relatedDocumentId: event.result.documentId
+        },
+      });
+
+      if (relatedRoute) return;
 
       const title = ctSettings?.default ? event.params.data[ctSettings.default] : '';
 
