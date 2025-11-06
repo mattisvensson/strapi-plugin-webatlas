@@ -3,7 +3,7 @@
  * Settings
  * This file contains the settings page for the Webatlas plugin in Strapi.
  * It allows users to configure which content types are enabled for URL aliases and navigations,
- * as well as setting default fields, URL alias patterns, and API fields for each content type. 
+ * as well as setting default fields and the URL alias patterns for each content type. 
  *
 */
 
@@ -22,7 +22,6 @@ type Action =
   | { type: 'SET_SELECTED_CONTENT_TYPES'; payload: ConfigContentType[] }
   | { type: 'SET_DEFAULT_FIELD'; payload: { ctUid: string; field: string } }
   | { type: 'SET_PATTERN'; payload: { ctUid: string; pattern: string } }
-  | { type: 'SET_API_FIELD'; payload: { ctUid: string; apiField: string } };
 
 const Settings = () => {
   const { data: config, setConfig } = usePluginConfig();
@@ -47,11 +46,6 @@ const Settings = () => {
       case 'SET_PATTERN':
         updatedContentTypes = settingsState.selectedContentTypes.map(ct =>
           ct.uid === action.payload.ctUid ? { ...ct, pattern: transformToUrl(action.payload.pattern) } : ct
-        );
-        return { ...settingsState, selectedContentTypes: updatedContentTypes };
-      case 'SET_API_FIELD':
-        updatedContentTypes = settingsState.selectedContentTypes.map(ct =>
-          ct.uid === action.payload.ctUid ? { ...ct, apiField: transformToUrl(action.payload.apiField) } : ct
         );
         return { ...settingsState, selectedContentTypes: updatedContentTypes };
       default:
@@ -125,7 +119,6 @@ const Settings = () => {
                     uid: v,
                     default: '',
                     pattern: '',
-                    apiField: '',
                   })),
                 })
               }
@@ -190,25 +183,6 @@ const Settings = () => {
                                   disabled={!contentType.default}
                                   type="text"
                                   placeholder="e.g. blog"
-                                />
-                                <Field.Hint />
-                              </Field.Root>
-                            </Box>
-                            <Box paddingTop={4}>
-                              <Field.Root
-                                name="urlAliasPattern"
-                                hint='This field is necessary for the API. Do not change this field unless you know what you are doing.'
-                              >
-                                <Field.Label>
-                                  URL Alias API field
-                                  <Tooltip description="The field which will be visible in the content manger to store the url alias. Necessary for the API." />
-                                </Field.Label>
-                                <Field.Input
-                                  value={contentType.apiField}
-                                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_API_FIELD', payload: { ctUid: ct.uid, apiField: e.target.value } })}
-                                  disabled={!contentType.default}
-                                  type="text"
-                                  placeholder="e.g. teaser.teaser_url"
                                 />
                                 <Field.Hint />
                               </Field.Root>

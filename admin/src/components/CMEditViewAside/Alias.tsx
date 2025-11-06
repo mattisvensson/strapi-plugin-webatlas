@@ -84,10 +84,6 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	const debouncedCheckUrl = useCallback(debounce(checkUrl, 500), []);
 
 	useEffect(() => {
-		// TODO: How to handle in Strapi v5?
-		// if (config.apiField)
-		// 	onChange(config.apiField, path.value);
-
 		onChange('webatlas_path', path.value);
 		onChange('webatlas_override', isOverride);
 	}, [path.value, routeId, isOverride])

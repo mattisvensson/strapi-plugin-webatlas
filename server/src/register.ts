@@ -12,7 +12,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     const fieldSettings = {
       writable: true,
-      private: true,
       configurable: false,
       editable: false,
       visible: true,
@@ -22,10 +21,12 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     set(attributes, 'webatlas_path', {
       ...fieldSettings,
       type: 'string',
+      private: false,
     });    
     set(attributes, 'webatlas_override', {
       ...fieldSettings,
       type: 'boolean',
+      private: true,
     });    
   });
 };
