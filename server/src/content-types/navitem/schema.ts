@@ -21,23 +21,23 @@ export default {
   attributes: {
     navigation: {
       type: "relation",
+      configurable: false,
       relation: "manyToOne",
       target: "plugin::webatlas.navigation",
-      configurable: false,
       inversedBy: "items",
     },
     route: {
       type: "relation",
-      relation: "oneToOne",
+      configurable: false,
+      relation: "manyToOne",
       target: "plugin::webatlas.route",
       inversedBy: "navitem",
-      configurable: false,
     },
     parent: {
       type: "relation",
+      configurable: false,
       relation: "oneToOne",
       target: "plugin::webatlas.navitem",
-      configurable: false,
     },
     order: {
       type: "integer",
