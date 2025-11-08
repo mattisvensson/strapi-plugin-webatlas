@@ -79,8 +79,6 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	const initialPath = useRef('')
 	const prevValueRef = useRef<string | null>(null);
 
-	if (!config) return null
-
 	const debouncedCheckUrl = useCallback(debounce(checkUrl, 500), []);
 
 	useEffect(() => {
@@ -123,20 +121,25 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
   // Track when user changes the source field
   useEffect(() => {
-    if (!initialLoadComplete) return;
-    
-    const key = config?.default;
+		const key = config?.default;
     if (!key) return;
-    
-    const currentValue = values[key];
+
+		const currentValue = values[key];
     const initialValue = initialValues[key];
-    
+
+		if (currentValue && !isOverride) {
+			const path = config.pattern ? `${config.pattern}/${currentValue}` : `${currentValue}`;
+			onChange('webatlas_path', path);
+		}
+
+    if (!initialLoadComplete) return;
+        
     // Mark as user-changed if current value differs from initial value
     if (currentValue !== initialValue) {
       hasUserChangedField.current = true;
     }
-    
-    debouncedValueEffect(values);
+
+		debouncedValueEffect(values);
   }, [values, debouncedValueEffect, initialLoadComplete]);
 
 
@@ -149,7 +152,6 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
   }, [path.needsUrlCheck]);
 
 	useEffect(() => {
-
 		async function getTypes() {
 			if (!initialValues.documentId) {
         setInitialLoadComplete(true); // Mark as complete even if no route
@@ -206,6 +208,12 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 			setValidationState('done')
 		}
 	}
+
+	if (!initialLoadComplete) return (
+    <Typography textColor="neutral600">
+      Loading...
+    </Typography>
+  )
 
 	return (
 		<Box
