@@ -62,7 +62,7 @@ const CMEditViewAside = () => {
     });
   }, []);
 
-  if (isLoading) return (
+  if (isLoading || !config) return (
     <Typography textColor="neutral600">
       Loading...
     </Typography>
