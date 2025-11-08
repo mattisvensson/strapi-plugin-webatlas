@@ -37,10 +37,10 @@ export default {
     },
     items: {
       type: "relation",
+      configurable: false,
       relation: "oneToMany",
       target: "plugin::webatlas.navitem",
-      configurable: false,
-      mappedBy: 'plugin::webatlas.navigation',
+      mappedBy: 'navigation',
     },
   }
 }

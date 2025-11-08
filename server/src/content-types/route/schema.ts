@@ -73,10 +73,10 @@ export default {
     },
     navitem: {
       type: "relation",
-      relation: "oneToOne",
+      configurable: true,
+      relation: "oneToMany",
       target: "plugin::webatlas.navitem",
       mappedBy: "route",
-      configurable: false,
     },
     wrapper: {
       type: "boolean",
