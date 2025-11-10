@@ -124,7 +124,6 @@ Optional parameters:
 - RBAC
 - User action feedback
 - Internationalization
-- Plugin translations
 - Route page
   - Filters
   - Nested url structure
