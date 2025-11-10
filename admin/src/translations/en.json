@@ -1,1 +1,16 @@
-{}
+{
+  "webatlas.navigation.page.title": "Navigation",
+  "webatlas.navigation.page.subtitle": "Manage your navigation settings here",
+  "webatlas.navigation.page.emptyNavigation": "You have no navigations yet...",
+  "webatlas.navigation.page.createNewNavigation": "Create new navigation",
+  "webatlas.navigation.page.createNewItem": "Create new item",
+  "webatlas.navigation.page.newItemButton": "New Item",
+
+  "webatlas.delete": "Delete",
+  "webatlas.edit": "Edit",
+  "webatlas.add": "Add",
+  "webatlas.cancel": "Cancel",
+  "webatlas.save": "Save",
+  "webatlas.select": "Select",
+  "webatlas.manage": "Manage"
+}

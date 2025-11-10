@@ -1,0 +1,16 @@
+{
+  "webatlas.navigation.page.title": "Navigation",
+  "webatlas.navigation.page.subtitle": "Verwalten Sie hier Ihre Navigationen",
+  "webatlas.navigation.page.emptyNavigation": "Es existiert noch keine Navigation...",
+  "webatlas.navigation.page.createNewNavigation": "Neue Navigation erstellen",
+  "webatlas.navigation.page.createNewItem": "Neues Element erstellen",
+  "webatlas.navigation.page.newItemButton": "Neues Element",
+
+  "webatlas.delete": "Löschen",
+  "webatlas.edit": "Bearbeiten",
+  "webatlas.add": "Hinzufügen",
+  "webatlas.cancel": "Abbrechen",
+  "webatlas.save": "Speichern",
+  "webatlas.select": "Auswählen",
+  "webatlas.manage": "Verwalten"
+}

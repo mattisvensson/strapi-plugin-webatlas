@@ -19,6 +19,8 @@ import Header from './Header';
 import { NestedNavigation, NestedNavItem } from '../../../../types';
 import useNavigations from '../../hooks/useNavigations';
 import useApi from '../../hooks/useApi';
+import { getTranslation } from '../../utils';
+import { useIntl } from 'react-intl';
 // import { isNestedNavigation, isNestedNavItem} from '../../utils/typeChecks';
 import {
   DndContext,
@@ -59,6 +61,8 @@ const Navigation = () => {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [overId, setOverId] = useState<UniqueIdentifier | null>(null);
   const [offsetLeft, setOffsetLeft] = useState(0);
+
+  const { formatMessage } = useIntl();
 
   if (!navigations) return null;
 
@@ -210,21 +214,33 @@ const Navigation = () => {
       <SelectedNavigationContext.Provider value={{selectedNavigation, setSelectedNavigation}}>
         <>
           <Layouts.Header
-            title='Navigation'
-            subtitle='Manage your navigation settings here'
+            title={formatMessage({
+              id: getTranslation('navigation.page.title'),
+              defaultMessage: 'Navigation',
+            })}
+            subtitle={formatMessage({
+              id: getTranslation('navigation.page.subtitle'),
+              defaultMessage: 'Manage your navigation settings here is default',
+            })}
             primaryAction={<Header navigations={navigations}/>}
           />
           <Layouts.Content>
             <Flex gap={4} paddingBottom={6} justifyContent="flex-end">
               <Button variant="secondary" startIcon={<Plus />} onClick={() => setModalType('ItemCreate')}>
-                New Item
+                {formatMessage({
+                  id: getTranslation('navigation.page.newItemButton'),
+                  defaultMessage: 'New Item',
+                })}
               </Button>
               <Button
                 startIcon={<Check />}
                 onClick={() => saveOrder()}
                 disabled={JSON.stringify(navigationItems) === JSON.stringify(initialNavigationItems)}
               >
-                Save
+                {formatMessage({
+                  id: getTranslation('save'),
+                  defaultMessage: 'Save',
+                })}
               </Button>
             </Flex>
             {navigationItems && navigationItems.length > 0 &&
@@ -266,15 +282,24 @@ const Navigation = () => {
               </Flex>
             }
             {navigations?.length === 0 && <Center height={400}>
-              <EmptyBox msg="You have no navigations yet..." />
+              <EmptyBox msg={formatMessage({
+                id: getTranslation('navigation.page.emptyNavigation'),
+                defaultMessage: 'You have no navigations yet...',
+              })} />
               <Button variant="primary" onClick={() => setModalType('NavCreate')}>
-                Create new Navigation
+                {formatMessage({
+                  id: getTranslation('navigation.page.createNewNavigation'),
+                  defaultMessage: 'Create new navigation',
+                })}
               </Button>
             </Center>}
             {navigationItems?.length === 0 && <Center height={400}>
               <EmptyBox msg="Your navigation is empty..." />
               <Button variant="primary" onClick={() => setModalType('ItemCreate')}>
-                Create new item
+                {formatMessage({
+                  id: getTranslation('navigation.page.createNewItem'),
+                  defaultMessage: 'Create new item',
+                })}
               </Button>
             </Center>}
           </Layouts.Content>
