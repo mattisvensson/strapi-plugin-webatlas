@@ -2,6 +2,8 @@ import { Flex, Button, SingleSelect, SingleSelectOption} from '@strapi/design-sy
 import { NestedNavigation } from '../../../../types';
 import { useContext } from 'react';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
+import { getTranslation } from '../../utils';
+import { useIntl } from 'react-intl';
 
 type HeaderProps = {
   navigations: NestedNavigation[]
@@ -12,14 +14,22 @@ export default function Header ({ navigations }: HeaderProps) {
   const { setModalType } = useContext(ModalContext);
   const { selectedNavigation, setSelectedNavigation } = useContext(SelectedNavigationContext);
 
+  const { formatMessage } = useIntl();
+
   return (
     <Flex gap={4}>
       <Button variant="secondary" onClick={() => setModalType('NavOverview')}>
-        Manage
+        {formatMessage({
+          id: getTranslation('manage'),
+          defaultMessage: 'Manage',
+        })}
       </Button>
       <SingleSelect
         value={selectedNavigation ? selectedNavigation.slug : ''} 
-        placeholder="Select Navigation" 
+        placeholder={formatMessage({
+          id: getTranslation('navigation.page.selectNavigation'),
+          defaultMessage: 'Select Navigation',
+        })}
         onChange={(value: string) => {
           const navItem = navigations.find(nav => nav.slug === value);
           if (navItem) {
