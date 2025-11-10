@@ -5,6 +5,7 @@
   "webatlas.navigation.page.createNewNavigation": "Neue Navigation erstellen",
   "webatlas.navigation.page.createNewItem": "Neues Element erstellen",
   "webatlas.navigation.page.newItemButton": "Neues Element",
+  "webatlas.navigation.page.selectNavigation": "Navigation auswählen",
 
   "webatlas.delete": "Löschen",
   "webatlas.edit": "Bearbeiten",
