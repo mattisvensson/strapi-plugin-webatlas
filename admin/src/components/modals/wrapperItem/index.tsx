@@ -4,6 +4,8 @@ import { NavItemSettings, NestedNavItem } from '../../../../../types';
 import { useModalSharedLogic } from '../useModalSharedLogic';
 import React, { useEffect } from 'react';
 import { NavModal } from '../';
+import { useIntl } from 'react-intl';
+import { getTranslation } from '../../../utils';
 
 type externalItemProps = {
   variant: 'WrapperCreate' | 'WrapperEdit';
@@ -24,6 +26,8 @@ function WrapperItemComponent({
   selectedNavigation,
   parentDocumentId,
 }: externalItemProps & ReturnType<typeof useModalSharedLogic>) {
+
+  const { formatMessage } = useIntl();
   
   useEffect(() => {
     if (variant !== 'WrapperEdit' || !item) return
@@ -69,10 +73,19 @@ function WrapperItemComponent({
 
   return (
     <NavModal
-      confirmText={variant === 'WrapperCreate' ? 'Add' : 'Save'}
-      closeText="Cancel"
-      titleText={variant === 'WrapperCreate' ? 'Create new wrapper item' : `Edit wrapper item "${navItemState.title}"`}
-      loadingText={variant === 'WrapperCreate' ? 'Adding' : 'Saving'}
+      confirmText={variant === 'WrapperCreate' ? 
+        formatMessage({ id: getTranslation('add'), defaultMessage: 'Add' }) : 
+        formatMessage({ id: getTranslation('save'), defaultMessage: 'Save' })
+      } 
+      closeText={formatMessage({ id: getTranslation('cancel'), defaultMessage: 'Cancel' })}
+      titleText={variant === 'WrapperCreate' ? 
+        formatMessage({ id: getTranslation('modal.wrapperItem.titleText.create'), defaultMessage: 'Create new wrapper item' }) :
+        formatMessage({ id: getTranslation('modal.wrapperItem.titleText.edit'), defaultMessage: 'Edit wrapper item:' }) + ` "${navItemState.title}"`
+      }
+      loadingText={variant === 'WrapperCreate' ? 
+        formatMessage({ id: getTranslation('modal.wrapperItem.loadingText.create'), defaultMessage: 'Adding' }) : 
+        formatMessage({ id: getTranslation('modal.wrapperItem.loadingText.edit'), defaultMessage: 'Saving' })  
+      }
       onConfirm={addItem}
       modalToOpen=''
       currentModalType="WrapperCreate"
@@ -81,9 +94,17 @@ function WrapperItemComponent({
         <Grid.Item col={6} s={12}>
           <Box width="100%">
             <Field.Root>
-              <Field.Label>Title</Field.Label>
+              <Field.Label>
+                {formatMessage({
+                  id: getTranslation('modal.wrapperItem.titleField.label'),
+                  defaultMessage: 'Title' 
+                })}
+              </Field.Label>
               <Field.Input
-                placeholder="e.g. About us"
+                placeholder={formatMessage({
+                  id: getTranslation('modal.wrapperItem.titleField.placeholder'),
+                  defaultMessage: 'e.g. About us'
+                })}
                 name="title"
                 value={navItemState.title || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchItemState({ type: 'SET_TITLE', payload: e.target.value })}
@@ -99,14 +120,28 @@ function WrapperItemComponent({
       </Box>
       <Grid.Root gap={8} paddingBottom={6} >
         <Grid.Item col={6}>
-          <Toggle
-            label="Is visible?"
-            onLabel="Yes"
-            offLabel="No"
-            hint='This menu item does not show on your site, if set to "no".'
-            checked={navItemState.active}
-            onClick={() => dispatchItemState({ type: 'SET_ACTIVE', payload: !navItemState.active })}
-          />
+        <Box width="100%">
+            <Field.Root>
+              <Field.Label>
+                {formatMessage({
+                  id: getTranslation('modal.activeField.label'),
+                  defaultMessage: 'Active'
+                })}
+              </Field.Label>
+              <Toggle
+                onLabel={formatMessage({
+                  id: getTranslation('modal.activeField.onLabel'),
+                  defaultMessage: 'Yes'
+                })}
+                offLabel={formatMessage({
+                  id: getTranslation('modal.activeField.offLabel'),
+                  defaultMessage: 'No'
+                })}
+                checked={navItemState.active}
+                onChange={() => dispatchItemState({ type: 'SET_ACTIVE', payload: !navItemState.active })}
+              />
+            </Field.Root>
+          </Box>
         </Grid.Item>
       </Grid.Root> */}
     </NavModal>

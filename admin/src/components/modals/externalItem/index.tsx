@@ -4,6 +4,8 @@ import { NavItemSettings, NestedNavItem } from '../../../../../types';
 import { useModalSharedLogic } from '../useModalSharedLogic';
 import React, { useEffect } from 'react';
 import { NavModal } from '../'
+import { useIntl } from 'react-intl';
+import { getTranslation } from '../../../utils';
 
 type externalItemProps = {
   variant: 'ExternalCreate' | 'ExternalEdit';
@@ -25,6 +27,8 @@ function ExternalItemComponent({
   selectedNavigation,
   parentDocumentId,
 }: externalItemProps & ReturnType<typeof useModalSharedLogic>) {
+
+  const { formatMessage } = useIntl();
   
   useEffect(() => {
     if (variant !== 'ExternalEdit' || !item) return
@@ -70,10 +74,19 @@ function ExternalItemComponent({
 
   return (
     <NavModal
-      confirmText={variant === 'ExternalCreate' ? 'Add' : 'Save'}
-      closeText="Cancel"
-      titleText={variant ===  'ExternalCreate' ? 'Create new external item' : `Edit external route "${navItemState.title}"`}
-      loadingText={variant === 'ExternalCreate' ? 'Adding' : 'Saving'}
+      confirmText={variant === 'ExternalCreate' ? 
+        formatMessage({ id: getTranslation('add'), defaultMessage: 'Add' }) : 
+        formatMessage({ id: getTranslation('save'), defaultMessage: 'Save' })
+      }
+      closeText={formatMessage({ id: getTranslation('cancel'), defaultMessage: 'Cancel' })}
+      titleText={variant ===  'ExternalCreate' ?
+        formatMessage({ id: getTranslation('modal.externalItem.titleText.create'), defaultMessage: 'Create new external item' }) : 
+        formatMessage({ id: getTranslation('modal.externalItem.titleText.edit'), defaultMessage: `Edit external route "${navItemState.title}"` })
+      }
+      loadingText={variant === 'ExternalCreate' ? 
+        formatMessage({ id: getTranslation('modal.externalItem.loadingText.create'), defaultMessage: 'Adding' }) : 
+        formatMessage({ id: getTranslation('modal.externalItem.loadingText.edit'), defaultMessage: 'Saving' })
+      }
       onConfirm={addItem}
       modalToOpen=''
       currentModalType="ExternalCreate"
@@ -82,9 +95,17 @@ function ExternalItemComponent({
         <Grid.Item col={6} s={12}>
           <Box width="100%">
             <Field.Root>
-              <Field.Label>Title</Field.Label>
+              <Field.Label>
+                {formatMessage({
+                  id: getTranslation('modal.item.titleField.label'),
+                  defaultMessage: 'Title'
+                })}
+              </Field.Label>
               <Field.Input
-                placeholder="e.g. About us"
+                placeholder={formatMessage({
+                  id: getTranslation('modal.item.titleField.placeholder'),
+                  defaultMessage: 'e.g. About us'
+                })}
                 name="title"
                 value={navItemState.title || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchItemState({ type: 'SET_TITLE', payload: e.target.value })}
@@ -96,11 +117,18 @@ function ExternalItemComponent({
         <Grid.Item col={6} s={12}>
           <Box width="100%">
             <Field.Root>
-              <Field.Label>Path</Field.Label>
+              <Field.Label>
+                {formatMessage({
+                  id: getTranslation('modal.item.routeField.label'),
+                  defaultMessage: 'Path'
+                })}
+              </Field.Label>
               <Field.Input
                 required
-                placeholder="https://example.com"
-                label="Path"
+                placeholder={formatMessage({
+                  id: getTranslation('modal.externalItem.routeField.placeholder'),
+                  defaultMessage: 'e.g. https://example.com'
+                })}
                 name="slug"
                 value={path?.value || ''}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}

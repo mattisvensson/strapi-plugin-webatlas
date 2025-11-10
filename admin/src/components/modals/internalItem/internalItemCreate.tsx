@@ -5,6 +5,8 @@ import URLInfo from '../../URLInfo';
 import { useEffect, useState } from 'react';
 import { useModalSharedLogic } from '../useModalSharedLogic';
 import { NavModal } from '../'
+import { useIntl } from 'react-intl';
+import { getTranslation } from '../../../utils';
 
 // TODO: Let the user select if the parent slug should be inherited or not
 // TODO: Add hint if a route is added that already exists in a navigation (because there is only one path per route)
@@ -35,6 +37,7 @@ function ItemCreateComponent({
   parentId,
 }: ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>) {
   const [loading, setLoading] = useState(false)
+  const { formatMessage } = useIntl();
 
   useEffect(() => {
     if (!entities) return
@@ -114,10 +117,10 @@ function ItemCreateComponent({
 
   return (
     <NavModal
-      confirmText="Add"
-      closeText="Cancel"
-      titleText="Add new navigation item"
-      loadingText='Creating'
+      confirmText={formatMessage({ id: getTranslation('add'), defaultMessage: 'Add' })}
+      closeText={formatMessage({ id: getTranslation('cancel'), defaultMessage: 'Cancel' })}
+      titleText={formatMessage({ id: getTranslation('modal.internalItem.titleText.create'), defaultMessage: 'Add new navigation item' })}
+      loadingText={formatMessage({ id: getTranslation('modal.internalItem.loadingText.create'), defaultMessage: 'Creating' })}
       onConfirm={addItem}
       loading={loading}
       modalToOpen=''
@@ -127,10 +130,18 @@ function ItemCreateComponent({
         <Grid.Item col={6} s={12}>
           <Box width="100%">
             <Field.Root>
-              <Field.Label>Content Type</Field.Label>
+              <Field.Label>
+                {formatMessage({
+                  id: getTranslation('modal.internalItem.contentType.label'),
+                  defaultMessage: 'Content Type'
+                })}
+              </Field.Label>
               <SingleSelect
                 value={selectedContentType ? selectedContentType.label : ''}
-                placeholder="Select a content type"
+                placeholder={formatMessage({
+                  id: getTranslation('modal.internalItem.contentType.placeholder'),
+                  defaultMessage: 'Select a content type'
+                })}
                 onChange={(value: string) => {
                   const [contentType] = availableEntities.filter((group: GroupedEntities) => group.label === value)
                   if (contentType) {
@@ -151,10 +162,18 @@ function ItemCreateComponent({
         <Grid.Item col={6} s={12}>
           <Box width="100%">
             <Field.Root>
-              <Field.Label>Entity</Field.Label>
+              <Field.Label>
+                {formatMessage({
+                  id: getTranslation('modal.internalItem.entity.label'),
+                  defaultMessage: 'Entity'
+                })}
+              </Field.Label>
               <SingleSelect
                 value={selectedEntity ? selectedEntity.id : ''}
-                placeholder="Select a entity"
+                placeholder={formatMessage({
+                  id: getTranslation('modal.internalItem.entity.placeholder'),
+                  defaultMessage: 'Select an entity'
+                })}
                 onChange={(value: number) => {
                   const flatEntities = availableEntities.flatMap((group: GroupedEntities) => group.entities);
                   const route = flatEntities.find((route: Entity) => route.id === Number(value));
@@ -181,9 +200,17 @@ function ItemCreateComponent({
             <Grid.Item col={6} s={12} alignItems="baseline">
               <Box width="100%">
                 <Field.Root>
-                  <Field.Label>Title</Field.Label>
+                  <Field.Label>
+                    {formatMessage({
+                      id: getTranslation('modal.item.titleField.label'),
+                      defaultMessage: 'Title'
+                    })}
+                  </Field.Label>
                   <Field.Input
-                    placeholder="e.g. About us"
+                    placeholder={formatMessage({
+                      id: getTranslation('modal.item.titleField.placeholder'),
+                      defaultMessage: 'e.g. About us'
+                    })}
                     name="title"
                     value={navItemState.title || ''}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchItemState({ type: 'SET_TITLE', payload: e.target.value })}
@@ -195,11 +222,18 @@ function ItemCreateComponent({
             <Grid.Item col={6} s={12}>
               <Box width="100%">
                 <Field.Root>
-                  <Field.Label>Path</Field.Label>
+                  <Field.Label>
+                    {formatMessage({
+                      id: getTranslation('modal.item.routeField.label'),
+                      defaultMessage: 'Route'
+                    })}
+                  </Field.Label>
                   <Field.Input
                     required
-                    placeholder="about/"
-                    label="Path"
+                    placeholder={formatMessage({
+                      id: getTranslation('modal.item.routeField.placeholder'),
+                      defaultMessage: 'e.g. about/'
+                    })}
                     name="slug"
                     value={path?.value || ''}
                     onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}

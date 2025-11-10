@@ -3,6 +3,8 @@ import { Grid, Box, Field } from '@strapi/design-system';
 import { useFetchClient } from '@strapi/strapi/admin';
 import NavModal from './NavModal';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
+import { useIntl } from 'react-intl';
+import { getTranslation } from '../../utils';
 
 export default function NavCreate() {
   const { post } = useFetchClient();
@@ -11,6 +13,7 @@ export default function NavCreate() {
   const [name, setName] = useState('');
   const [isActive, setIsActive] = useState(true) // Temporary not used
   const [loading, setLoading] = useState(false)
+  const { formatMessage } = useIntl();
 
   const createNavigation = async () => {
     setLoading(true);
@@ -28,10 +31,10 @@ export default function NavCreate() {
 
   return (
     <NavModal
-      confirmText="Create"
-      closeText="Cancel"
-      titleText="Create new navigation"
-      loadingText='Creating'
+      confirmText={formatMessage({ id: getTranslation('modal.navCreate.confirmText'), defaultMessage: 'Create' })}
+      closeText={formatMessage({ id: getTranslation('modal.navCreate.closeText'), defaultMessage: 'Cancel' })}
+      titleText={formatMessage({ id: getTranslation('modal.navCreate.titleText'), defaultMessage: 'Create new navigation' })}
+      loadingText={formatMessage({ id: getTranslation('modal.navCreate.loadingText'), defaultMessage: 'Creating' })}
       onConfirm={createNavigation}
       loading={loading}
     >
@@ -39,7 +42,12 @@ export default function NavCreate() {
         <Grid.Item col={12} s={12}>
           <Box width="100%">
             <Field.Root>
-              <Field.Label>Name</Field.Label>
+              <Field.Label>
+                {formatMessage({
+                  id: getTranslation('modal.nameField.label'),
+                  defaultMessage: 'Name'
+                })}
+              </Field.Label>
               <Field.Input
                 type="text"
                 value={name}
@@ -51,8 +59,24 @@ export default function NavCreate() {
         {/* <Grid.Item col={6} s={12}>
           <Box width="100%">
             <Field.Root>
-              <Field.Label>Active</Field.Label>
-              <Toggle onLabel="Yes" offLabel="No" checked={isActive} onChange={() => setIsActive(prev => !prev)} />
+              <Field.Label>
+                {formatMessage({
+                  id: getTranslation('modal.activeField.label'),
+                  defaultMessage: 'Active'
+                })}
+              </Field.Label>
+              <Toggle
+                onLabel={formatMessage({
+                  id: getTranslation('modal.activeField.onLabel'),
+                  defaultMessage: 'Yes'
+                })}
+                offLabel={formatMessage({
+                  id: getTranslation('modal.activeField.offLabel'),
+                  defaultMessage: 'No'
+                })}
+                checked={isActive}
+                onChange={() => setIsActive(prev => !prev)}
+              />
             </Field.Root>
           </Box>
         </Grid.Item> */}

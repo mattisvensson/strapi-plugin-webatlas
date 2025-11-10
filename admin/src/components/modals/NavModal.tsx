@@ -1,6 +1,8 @@
 import { useContext } from 'react';
 import { Button, Modal, Flex, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { ModalContext } from '../../contexts';
+import { useIntl } from 'react-intl';
+import { getTranslation } from '../../utils';
 
 export default function NavModal({ 
   triggerText, 
@@ -31,6 +33,7 @@ export default function NavModal({
 }) {
 
   const { setModalType } = useContext(ModalContext);
+  const { formatMessage } = useIntl();
   
   return (
     <Modal.Root open={true} onOpenChange={() => setModalType('')}>
@@ -65,9 +68,24 @@ export default function NavModal({
                       placeholder="Choose item type"
                       value={currentModalType || ''}
                     >
-                      <SingleSelectOption value="ItemCreate">Internal item</SingleSelectOption>
-                      <SingleSelectOption value="WrapperCreate">Wrapper item</SingleSelectOption>
-                      <SingleSelectOption value="ExternalCreate">External item</SingleSelectOption>
+                      <SingleSelectOption value="ItemCreate">
+                        {formatMessage({
+                          id: getTranslation('modal.navModal.internalItem'),
+                          defaultMessage: 'Internal item'
+                        })}
+                      </SingleSelectOption>
+                      <SingleSelectOption value="WrapperCreate">
+                        {formatMessage({
+                          id: getTranslation('modal.navModal.wrapperItem'),
+                          defaultMessage: 'Wrapper item'
+                        })}
+                      </SingleSelectOption>
+                      <SingleSelectOption value="ExternalCreate">
+                        {formatMessage({
+                          id: getTranslation('modal.navModal.externalItem'),
+                          defaultMessage: 'External item'
+                        })}
+                      </SingleSelectOption>
                     </SingleSelect>
                   )}
                   <Button type="submit" onClick={modalToOpen ? () => setModalType(modalToOpen) : null}>{loading ? loadingText : confirmText }</Button>

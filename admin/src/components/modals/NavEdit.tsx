@@ -4,6 +4,8 @@ import { ModalContext } from '../../contexts';
 import { NestedNavigation } from '../../../../types';
 import NavModal from './NavModal'
 import { useApi } from '../../hooks';
+import { useIntl } from 'react-intl';
+import { getTranslation } from '../../utils';
 
 type NavEditProps = {
   item: NestedNavigation;
@@ -16,6 +18,7 @@ export default function NavEdit({ item, fetchNavigations }: NavEditProps) {
   const [visible, setVisible] = useState(item.visible)
   const [loading, setLoading] = useState(false)
   const { updateNavigation } = useApi();
+  const { formatMessage } = useIntl();
 
   const updateNav = async () => {
     setLoading(true);
@@ -32,17 +35,27 @@ export default function NavEdit({ item, fetchNavigations }: NavEditProps) {
 
   return (
     <NavModal
-      confirmText="Create"
-      closeText="Cancel"
-      titleText={`Edit navigation: ${item.name}`}
-      loadingText='Creating'
+      confirmText={formatMessage({ id: getTranslation('modal.navEdit.confirmText'), defaultMessage: 'Create' })}
+      closeText={formatMessage({ id: getTranslation('modal.navEdit.closeText'), defaultMessage: 'Cancel' })}
+      titleText={formatMessage({ id: getTranslation('modal.navEdit.titleText'), defaultMessage: 'Edit navigation:' }) + " " + item.name}
+      loadingText={formatMessage({ id: getTranslation('modal.navEdit.loadingText'), defaultMessage: 'Updating' })}
       onConfirm={updateNav}
       loading={loading}
       modalToOpen='NavOverview'
       footer={
         <>
-          <Button onClick={() => setModalType('NavOverview')} variant="tertiary">Cancel</Button>
-          <Button>Update</Button>
+          <Button onClick={() => setModalType('NavOverview')} variant="tertiary">
+            {formatMessage({
+              id: getTranslation('modal.navEdit.closeText'),
+              defaultMessage: 'Cancel'
+            })}
+          </Button>
+          <Button>
+            {formatMessage({
+              id: getTranslation('modal.navEdit.confirmText'),
+              defaultMessage: 'Update'
+            })}
+          </Button>
         </>
       }
     >
@@ -50,7 +63,12 @@ export default function NavEdit({ item, fetchNavigations }: NavEditProps) {
         <Grid.Item s={12} m={6}>
           <Box width="100%">
             <Field.Root>
-              <Field.Label>Name</Field.Label>
+              <Field.Label>
+                {formatMessage({
+                  id: getTranslation('modal.nameField.label'),
+                  defaultMessage: 'Name'
+                })}
+              </Field.Label>
               <Field.Input
                 type="text"
                 value={name}
@@ -62,8 +80,24 @@ export default function NavEdit({ item, fetchNavigations }: NavEditProps) {
         <Grid.Item s={12} m={6}>
           <Box width="100%">
             <Field.Root>
-              <Field.Label>Active</Field.Label>
-              <Toggle onLabel="Yes" offLabel="No" checked={visible} onChange={() => setVisible(prev => !prev)} />
+              <Field.Label>
+                {formatMessage({
+                  id: getTranslation('modal.activeField.label'),
+                  defaultMessage: 'Active'
+                })}
+              </Field.Label>
+              <Toggle
+                onLabel={formatMessage({
+                  id: getTranslation('modal.activeField.onLabel'),
+                  defaultMessage: 'Yes'
+                })}
+                offLabel={formatMessage({
+                  id: getTranslation('modal.activeField.offLabel'),
+                  defaultMessage: 'No'
+                })}
+                checked={visible}
+                onChange={() => setVisible(prev => !prev)}
+              />
             </Field.Root>
           </Box>
         </Grid.Item>
