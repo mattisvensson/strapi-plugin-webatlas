@@ -25,6 +25,10 @@
   "webatlas.settings.page.urlAliasPattern.tooltip": "Führende und abschließende Schrägstriche werden entfernt. Leerzeichen werden durch Bindestriche ersetzt. Sonderzeichen werden kodiert.",
   "webatlas.settings.page.urlAliasPattern.placeholder": "z.B. blog",
 
+  "webatlas.components.URLInfo.checking": "Überprüfe, ob die URL verfügbar ist...",
+  "webatlas.components.URLInfo.available": "URL ist verfügbar",
+  "webatlas.components.URLInfo.notAvailable": "URL ist nicht verfügbar. Ersetzt durch",
+
   "webatlas.title": "Titel",
   "webatlas.route": "Route",
   "webatlas.actions": "Aktionen",

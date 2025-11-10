@@ -25,6 +25,10 @@
   "webatlas.settings.page.urlAliasPattern.tooltip": "Leading and trailing slashes will be removed. Spaces will be replaced with hyphens. Special characters will be encoded.",
   "webatlas.settings.page.urlAliasPattern.placeholder": "e.g. blog",
 
+  "webatlas.components.URLInfo.checking": "Checking if URL is available...",
+  "webatlas.components.URLInfo.available": "URL is available",
+  "webatlas.components.URLInfo.notAvailable": "URL is not available. Replaced with",
+
   "webatlas.title": "Title",
   "webatlas.route": "Route",
   "webatlas.actions": "Actions",
