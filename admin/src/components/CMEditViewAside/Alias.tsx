@@ -8,6 +8,8 @@ import debounce from '../../utils/debounce';
 import URLInfo from '../URLInfo';
 import duplicateCheck from '../../utils/duplicateCheck';
 import { useApi } from '../../hooks'
+import { useIntl } from 'react-intl';
+import { getTranslation } from '../../utils';
 
 type Action = 
   | { type: 'DEFAULT'; payload: string }
@@ -63,6 +65,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	const { layout, form } = useContentManagerContext()
 	const { initialValues, values, onChange } = form;
 	const { getRelatedRoute } = useApi()
+	const { formatMessage } = useIntl();
 
 	const [routeId, setRouteId] = useState<number | null>()
 	const [isOverride, setIsOverride] = useState(false);
@@ -211,7 +214,10 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
 	if (!initialLoadComplete) return (
     <Typography textColor="neutral600">
-      Loading...
+			{formatMessage({
+        id: getTranslation('components.CMEditViewAside.loading'),
+        defaultMessage: 'Loading...',
+      })}
     </Typography>
   )
 
@@ -227,15 +233,30 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 				gap={4}
 			>
 				<Box>
-					<Field.Root hint={!initialValues.id && !config.default ? '[id] will be replaced with the entry ID' : ''}>
+					<Field.Root>
 						<Field.Label>
-							URL
-							<Tooltip description="The following characters are valid: A-Z, a-z, 0-9, /, -, _, $, ., +, !, *, ', (, )" />
+							{formatMessage({
+								id: getTranslation('components.CMEditViewAside.alias.urlInput.label'),
+								defaultMessage: 'URL',
+							})}
+							<Tooltip description={formatMessage({
+								id: getTranslation('components.CMEditViewAside.alias.urlInput.tooltip'),
+								defaultMessage: 'The following characters are valid: A-Z, a-z, 0-9, /, -, _, $, ., +, !, *, \', (, )',
+							})} />
 						</Field.Label>
 						<Field.Input
 							id="url-input"
 							value={path.value}
-							placeholder={config.default ? `Edit the "${config.default}" field to generate a URL` : `${layout.list.settings.displayName?.toLowerCase()}/[id]`}
+							placeholder={
+								formatMessage({
+									id: getTranslation('components.CMEditViewAside.alias.urlInput.start'),
+									defaultMessage: 'Edit the',
+								})
+								+ " \"" + config.default + "\" " +
+								formatMessage({
+									id: getTranslation('components.CMEditViewAside.alias.urlInput.end'),
+									defaultMessage: 'field to generate a URL',
+								})}
 							onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}
 							disabled={!isOverride}
 							onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -256,7 +277,10 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 							onCheckedChange={() => setIsOverride(prev => !prev)}
 						>
 							<Typography textColor="neutral600">
-								Override generated URL
+								{formatMessage({
+									id: getTranslation('components.CMEditViewAside.alias.overrideCheckbox'),
+									defaultMessage: 'Override automatic URL generation',
+								})}
 							</Typography>
 						</Checkbox>
 					</Flex>
@@ -268,8 +292,14 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 						</Box>
 						<Box>
 							<Field.Root
-								hint="Permanent UID path, cannot be changed."
-								label="UID path"
+								hint={formatMessage({
+									id: getTranslation('components.CMEditViewAside.alias.uidRoute.hint'),
+									defaultMessage: 'Permanent UID route, cannot be changed',
+								})}
+								label={formatMessage({
+									id: getTranslation('components.CMEditViewAside.alias.uidRoute.label'),
+									defaultMessage: 'UID route',
+								})}
 								>
 								<Field.Label/>
 								<Field.Input
@@ -281,8 +311,14 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 						</Box>
 						<Box>
 							<Field.Root
-								hint="Permanent DocumentID path, cannot be changed."
-								label="DocumentID path"
+								hint={formatMessage({
+									id: getTranslation('components.CMEditViewAside.alias.documentIdRoute.hint'),
+									defaultMessage: 'Permanent Document ID route, cannot be changed',
+								})}
+								label={formatMessage({
+									id: getTranslation('components.CMEditViewAside.alias.documentIdRoute.label'),
+									defaultMessage: 'Document ID route',
+								})}
 								>
 								<Field.Label/>
 								<Field.Input
