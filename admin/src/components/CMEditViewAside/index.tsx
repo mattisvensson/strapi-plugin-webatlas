@@ -4,6 +4,10 @@ import { Typography, Link } from '@strapi/design-system';
 import { ConfigContentType } from '../../../../types';
 import { usePluginConfig, useAllContentTypes } from '../../hooks';
 import Alias from './Alias';
+import { getTranslation } from '../../utils';
+import { useIntl } from 'react-intl';
+import { PLUGIN_NAME } from '../../../../pluginId';
+
 // import Navigation from './Navigation';
 
 const CMEditViewAside = () => {
@@ -15,6 +19,8 @@ const CMEditViewAside = () => {
   const [isAllowedContentType, setIsAllowedContentType] = useState(false);
   const [isActiveContentType, setIsActiveContentType] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const { formatMessage } = useIntl();
 
   useEffect(() => {
     if (!config) return
@@ -64,23 +70,43 @@ const CMEditViewAside = () => {
 
   if (isLoading || !config) return (
     <Typography textColor="neutral600">
-      Loading...
+      {formatMessage({
+        id: getTranslation('components.CMEditViewAside.loading'),
+        defaultMessage: 'Loading...',
+      })}
     </Typography>
   )
 
   if (!isAllowedContentType) return (
     <Typography textColor="neutral600">
-      This content type is not allowed for <strong>WebAtlas</strong>. 
-      If you wish to use it, please contact your administrator. 
+      {formatMessage({
+        id: getTranslation('components.CMEditViewAside.notAllowed.start'),
+        defaultMessage: 'This content type is not allowed for',
+      })}
+      {" "}<strong>{PLUGIN_NAME}</strong>.{" "}
+      {formatMessage({
+        id: getTranslation('components.CMEditViewAside.notAllowed.end'),
+        defaultMessage: 'If you wish to use it, please contact your administrator',
+      })}.
     </Typography>
   )
 
   if (!isActiveContentType || !contentTypeConfig) return (
     <Typography textColor="neutral600">
-      This content type is not configured for <strong>WebAtlas</strong>. 
-      If you wish to use it, please configure it in the 
-      <Link href="/admin/settings/webatlas/configuration" marginLeft={1}>
-        settings
+      {formatMessage({
+        id: getTranslation('components.CMEditViewAside.notConfigured.start'),
+        defaultMessage: 'This content type is not configured for',
+      })}
+      {" "}<strong>{PLUGIN_NAME}</strong>.{" "}
+      {formatMessage({
+        id: getTranslation('components.CMEditViewAside.notConfigured.middle'),
+        defaultMessage: 'If you wish to use it, please configure it in the',
+      })}
+      {" "}<Link href="/admin/settings/webatlas/configuration">
+        {formatMessage({
+          id: getTranslation('components.CMEditViewAside.notConfigured.end'),
+          defaultMessage: 'settings',
+        })}
       </Link>.
     </Typography>
   )
