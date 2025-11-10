@@ -17,6 +17,9 @@ import { ContentType, ConfigContentType, PluginConfig } from '../../../../types'
 import transformToUrl from '../../../../utils/transformToUrl';
 import Tooltip from '../../components/Tooltip'
 import useAllContentTypes from '../../hooks/useAllContentTypes';
+import { PLUGIN_NAME } from '../../../../pluginId';
+import { getTranslation } from '../../utils';
+import { useIntl } from 'react-intl';
 
 type Action =
   | { type: 'SET_SELECTED_CONTENT_TYPES'; payload: ConfigContentType[] }
@@ -29,6 +32,8 @@ const Settings = () => {
   const { contentTypes: allContentTypesData } = useAllContentTypes();
   const allContentTypes = allContentTypesData?.filter((ct: ContentType) => ct.pluginOptions?.webatlas?.active === true);
   const [initialState, setInitialState] = useState(config || { selectedContentTypes: [] })
+
+  const { formatMessage } = useIntl();
 
   function reducer(settingsState: PluginConfig, action: Action): PluginConfig {
     let updatedContentTypes
@@ -76,8 +81,11 @@ const Settings = () => {
   return (
     <>
       <Layouts.Header
-        title='Routes'
-        subtitle='Settings'
+        title={PLUGIN_NAME}
+        subtitle={formatMessage({
+          id: getTranslation('settings.page.subtitle'),
+          defaultMessage: 'Settings',
+        })}
         primaryAction={
           <Button
             type="submit"
@@ -88,7 +96,10 @@ const Settings = () => {
               || settingsState.selectedContentTypes.find((cta: ConfigContentType) => !cta.default) !== undefined
             }
           >
-            Save
+            {formatMessage({
+              id: getTranslation('save'),
+              defaultMessage: 'Save',
+            })}
           </Button>
         }
       />
@@ -105,11 +116,22 @@ const Settings = () => {
         >
           <Field.Root
             name="selectedContentTypes"
-            hint='Select the content types you want to enable the Webatlas plugin for.'
+            hint={formatMessage({
+              id: getTranslation('settings.page.enabledContentTypes.hint'),
+              defaultMessage: 'Select the content types for which you want to enable URL aliases',
+            })}
           >
-            <Field.Label>Enabled Content Types</Field.Label>
+            <Field.Label>
+              {formatMessage({
+                id: getTranslation('settings.page.enabledContentTypes'),
+                defaultMessage: 'Enabled Content Types',
+              })}
+            </Field.Label>
             <MultiSelect
-              placeholder='Select Content Types'
+              placeholder={formatMessage({
+                id: getTranslation('settings.page.enabledContentTypes.placeholder'),
+                defaultMessage: 'Select content types...',
+              })}
               onClear={() => dispatch({ type: 'SET_SELECTED_CONTENT_TYPES', payload: [] })}
               value={[...settingsState.selectedContentTypes.map((ct: ConfigContentType) => ct.uid)]}
               onChange={(value: string[]) =>
@@ -130,8 +152,13 @@ const Settings = () => {
           </Field.Root>
           {settingsState.selectedContentTypes && settingsState.selectedContentTypes.length > 0 && <Box paddingTop={4}>
             <Field.Root name="selectedContentTypesAccordion">
-              <Field.Label>Enabled Content Types Settings</Field.Label>
-              <Accordion.Root label="Content Type settings">
+              <Field.Label>
+                {formatMessage({
+                  id: getTranslation('settings.page.contentTypeSettings'),
+                  defaultMessage: 'Content Type settings',
+                })}
+              </Field.Label>
+              <Accordion.Root>
                 {settingsState.selectedContentTypes?.map((contentType: ConfigContentType) => {
                   const ct: ContentType | undefined = allContentTypes?.find((item) => item.uid === contentType.uid)
                   if (!ct) return null
@@ -150,11 +177,23 @@ const Settings = () => {
                           <Box padding={3}>
                             <Field.Root
                               name="selectedContentTypes"
-                              hint='The selected field from the content type will be used to generate the URL alias. Use a field that is unique and descriptive, such as a "title" or "name".'
-                              error={!contentType.default && 'Please select a default field'} 
+                              hint={formatMessage({
+                                id: getTranslation('settings.page.defaultField.hint'),
+                                defaultMessage: 'The selected field from the content type will be used to generate the URL alias. Use a field that is unique and descriptive, such as a "title" or "name".',
+                              })}
+                              // hint='The selected field from the content type will be used to generate the URL alias. Use a field that is unique and descriptive, such as a "title" or "name".'
+                              error={!contentType.default && formatMessage({
+                                id: getTranslation('settings.page.defaultField.error'),
+                                defaultMessage: 'Please select a default field',
+                              })}
                               required
                             >
-                              <Field.Label>Default URL Alias field</Field.Label>
+                              <Field.Label>
+                                {formatMessage({
+                                  id: getTranslation('settings.page.defaultField'),
+                                  defaultMessage: 'Default URL Alias field',
+                                })}
+                              </Field.Label>
                               <SingleSelect
                                 name={`defaultField-${ct.uid}`}
                                 onClear={() => dispatch({ type: 'SET_DEFAULT_FIELD', payload: { ctUid: ct.uid, field: '' } })}
@@ -171,18 +210,30 @@ const Settings = () => {
                             <Box paddingTop={4}>
                               <Field.Root
                                 name="urlAliasPattern"
-                                hint='The pattern to prepend to the generated URL alias. For example, if you enter "blog" and the value of default field is "My First Post", the generated URL alias will be "blog/my-first-post". Leave empty for no prefix.'
+                                hint={formatMessage({
+                                  id: getTranslation('settings.page.urlAliasPattern.hint'),
+                                  defaultMessage: 'The pattern to prepend to the generated URL alias. For example, if you enter "blog" and the value of default field is "My First Post", the generated URL alias will be "blog/my-first-post". Leave empty for no prefix.',
+                                })}
                               >
                                 <Field.Label>
-                                  URL Alias pattern
-                                  <Tooltip description="Leading and trailing slashes will be removed. Spaces will be replaced with hyphens. Special characters will be encoded." />
+                                  {formatMessage({
+                                    id: getTranslation('settings.page.urlAliasPattern'),
+                                    defaultMessage: 'URL Alias Pattern',
+                                  })}
+                                  <Tooltip description={formatMessage({
+                                    id: getTranslation('settings.page.urlAliasPattern.tooltip'),
+                                    defaultMessage: 'Leading and trailing slashes will be removed. Spaces will be replaced with hyphens. Special characters will be encoded.',
+                                  })} />
                                 </Field.Label>
                                 <Field.Input
                                   value={contentType.pattern}
                                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_PATTERN', payload: { ctUid: ct.uid, pattern: e.target.value } })}
                                   disabled={!contentType.default}
                                   type="text"
-                                  placeholder="e.g. blog"
+                                  placeholder={formatMessage({
+                                    id: getTranslation('settings.page.urlAliasPattern.placeholder'),
+                                    defaultMessage: 'e.g. blog',
+                                  })}
                                 />
                                 <Field.Hint />
                               </Field.Root>

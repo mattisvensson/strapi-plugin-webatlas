@@ -11,7 +11,20 @@
   "webatlas.routes.page.title": "Routen",
   "webatlas.routes.page.subtitle": "Übersicht aller vorhandenen Routen",
   "webatlas.routes.page.emptyRoutes": "Es wurden keine Routen gefunden",
-  
+
+  "webatlas.settings.page.subtitle": "Konfigurieren Sie Ihre Webatlas-Plugin-Einstellungen",
+  "webatlas.settings.page.enabledContentTypes": "Aktivierte Inhaltstypen",
+  "webatlas.settings.page.enabledContentTypes.hint": "Wählen Sie die Inhaltstypen aus, für die Sie URL-Aliase aktivieren möchten",
+  "webatlas.settings.page.enabledContentTypes.placeholder": "Inhaltstypen auswählen...",
+  "webatlas.settings.page.contentTypeSettings": "Inhaltstyp-Einstellungen",
+  "webatlas.settings.page.defaultField": "Standard URL-Alias Feld",
+  "webatlas.settings.page.defaultField.hint": "Das ausgewählte Feld aus dem Inhaltstyp wird verwendet, um den URL-Alias zu generieren. Verwenden Sie ein Feld, das einzigartig und beschreibend ist, wie z.B. \"Titel\" oder \"Name\".",
+  "webatlas.settings.page.defaultField.error": "Bitte wählen Sie ein Standardfeld aus",
+  "webatlas.settings.page.urlAliasPattern": "URL-Alias Muster",
+  "webatlas.settings.page.urlAliasPattern.hint": "Das Muster, das dem generierten URL-Alias vorangestellt wird. Wenn Sie z.B. \"blog\" eingeben und der Wert des Standardfelds \"Mein erster Beitrag\" ist, wird der generierte URL-Alias \"blog/mein-erster-beitrag\" sein. Lassen Sie es leer für kein Präfix.",
+  "webatlas.settings.page.urlAliasPattern.tooltip": "Führende und abschließende Schrägstriche werden entfernt. Leerzeichen werden durch Bindestriche ersetzt. Sonderzeichen werden kodiert.",
+  "webatlas.settings.page.urlAliasPattern.placeholder": "z.B. blog",
+
   "webatlas.title": "Titel",
   "webatlas.route": "Route",
   "webatlas.actions": "Aktionen",
