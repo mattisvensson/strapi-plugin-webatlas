@@ -4,6 +4,8 @@ import { Dialog, Typography, Button } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
 import { NestedNavigation, NestedNavItem } from '../../../../types';
 import { useApi } from '../../hooks';
+import { useIntl } from 'react-intl';
+import { getTranslation } from '../../utils';
 
 type NavDelete = {
   variant: "NavDelete";
@@ -21,12 +23,12 @@ type DeleteProps = NavDelete | ItemDelete;
 
 export default function Delete({ variant, item, fetchNavigations }: DeleteProps) {
   const { deleteNavigation, deleteNavItem } = useApi();
-
-
+  
   const itemName = useRef(variant === "NavDelete" ? item.name : item.route.title)
   const closeModalState = useRef(variant === "NavDelete" ? 'NavOverview' : '')
-
+  
   const { setModalType } = useContext(ModalContext);
+  const { formatMessage } = useIntl();
 
   const handleDelete = async () => {
     try {
@@ -44,22 +46,55 @@ export default function Delete({ variant, item, fetchNavigations }: DeleteProps)
     <Dialog.Root defaultOpen={true} onClose={() => setModalType(closeModalState.current)}>
       <Dialog.Content>
         <Dialog.Header>
-          Delete "{itemName.current}"?
+          {formatMessage({
+            id: getTranslation('delete'),
+            defaultMessage: 'Delete'
+          })}
+          : "{itemName.current}"?
         </Dialog.Header>
         <Dialog.Body>
           <Typography textAlign="center">
-            Are you sure you want to delete the navigation {variant === "ItemDelete" && "item"} "{<span style={{ fontWeight: "bold" }}>{itemName.current}</span>}"? This can not be undone.
+            {formatMessage({
+              id: getTranslation('modal.delete.message.start'),
+              defaultMessage: 'You are about to delete the following'
+            })}
+            {" "}
+            {variant === "ItemDelete" ?
+              formatMessage({
+                id: getTranslation('modal.delete.message.navItem'),
+                defaultMessage: 'navigation item'
+              }) : 
+              formatMessage({
+                id: getTranslation('modal.delete.message.navigation'),
+                defaultMessage: 'navigation'
+              })
+            }
+          </Typography>
+          <Typography textAlign="center" fontWeight="bold" style={{ marginTop: 8, marginBottom: 8, fontSize: 20 }}>
+            {itemName.current}
+          </Typography>
+          <Typography textAlign="center">
+            {formatMessage({
+              id: getTranslation('modal.delete.message.end'),
+              defaultMessage: 'This can not be undone. Are you sure?'
+            })}
           </Typography>
         </Dialog.Body>
         <Dialog.Footer>
           <Dialog.Cancel>
             <Button onClick={() => setModalType(closeModalState.current)} variant="tertiary">
-              No, keep
+              {formatMessage({
+                id: getTranslation('modal.delete.cancelText'),
+                defaultMessage: 'No, keep'
+              })}
             </Button>
           </Dialog.Cancel>
           <Dialog.Action>
             <Button variant="danger-light" onClick={() => handleDelete()} startIcon={<Trash />}>
-              Yes, delete
+              {formatMessage({
+                id: getTranslation('modal.delete.confirmText'),
+                defaultMessage: 'Yes, delete'
+              })}
             </Button>
           </Dialog.Action>
         </Dialog.Footer>

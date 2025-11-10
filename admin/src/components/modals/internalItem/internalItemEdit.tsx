@@ -7,6 +7,8 @@ import { useModalSharedLogic } from '../useModalSharedLogic';
 import { NavModal } from '../'
 import { isEqual } from 'lodash';
 import { debounce } from '../../../utils';
+import { useIntl } from 'react-intl';
+import { getTranslation } from '../../../utils';
 
 function ItemEditComponent({
   item,
@@ -24,6 +26,8 @@ function ItemEditComponent({
   debouncedCheckUrl,
   setModalType,
 }: ModalItem_VariantEdit & ReturnType<typeof useModalSharedLogic>) {
+
+  const { formatMessage } = useIntl();
 
   useEffect(() => {
     dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.fullPath })
@@ -99,10 +103,10 @@ function ItemEditComponent({
 
   return (
     <NavModal
-      confirmText="Save"
-      closeText="Cancel"
-      titleText={`Edit ${selectedContentType.label} "${item.route.title}"`}
-      loadingText='Saving'
+      confirmText={formatMessage({ id: getTranslation('save'), defaultMessage: 'Save' })}
+      closeText={formatMessage({ id: getTranslation('cancel'), defaultMessage: 'Cancel' })}
+      titleText={`${formatMessage({ id: getTranslation('edit'), defaultMessage: 'Edit' })} ${selectedContentType.label} "${item.route.title}"`}
+      loadingText={formatMessage({ id: getTranslation('modal.internalItem.loadingText.edit'), defaultMessage: 'Saving' })}
       onConfirm={updateItem}
       modalToOpen=''
       currentModalType="ItemCreate"
@@ -111,7 +115,12 @@ function ItemEditComponent({
         <Grid.Item col={6} s={12}>
           <Box width="100%">
             <Field.Root>
-              <Field.Label>Content Type</Field.Label>
+              <Field.Label>
+                {formatMessage({
+                  id: getTranslation('modal.internalItem.contentType.label'),
+                  defaultMessage: 'Content Type'
+                })}
+              </Field.Label>
               <Field.Input
                 value={selectedContentType.label}
                 disabled
@@ -122,7 +131,12 @@ function ItemEditComponent({
         <Grid.Item col={6} s={12}>
           <Box width="100%">
             <Field.Root>
-              <Field.Label>Entity</Field.Label>
+              <Field.Label>
+                {formatMessage({
+                  id: getTranslation('modal.internalItem.entity.label'),
+                  defaultMessage: 'Entity'
+                })}
+              </Field.Label>
               <Field.Input
                 value={`${item.route.relatedId} - ${item.route.title}`}
                 disabled
@@ -139,9 +153,18 @@ function ItemEditComponent({
           <Grid.Item col={6} s={12} alignItems="baseline">
             <Box width="100%">
               <Field.Root>
-                <Field.Label>Title</Field.Label>
+                <Field.Label>
+                  {formatMessage({
+                    id: getTranslation('modal.item.titleField.label'),
+                    defaultMessage: 'Title'
+                  })}
+                </Field.Label>
                 <Field.Input
-                  placeholder="e.g. About us"
+                  placeholder={formatMessage({
+                    id: getTranslation('modal.item.titleField.placeholder'),
+                    defaultMessage: 'e.g. About us'
+                  })}
+                  name="title"
                   value={navItemState.title || ''}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchItemState({ type: 'SET_TITLE', payload: e.target.value })}
                   required
@@ -152,9 +175,17 @@ function ItemEditComponent({
           <Grid.Item col={6} s={12}>
             <Box width="100%">
               <Field.Root>
-                <Field.Label>Path</Field.Label>
+                <Field.Label>
+                  {formatMessage({
+                    id: getTranslation('modal.item.routeField.label'),
+                    defaultMessage: 'Route'
+                  })}
+                </Field.Label>
                 <Field.Input
-                  placeholder="about/"
+                  placeholder={formatMessage({
+                    id: getTranslation('modal.item.routeField.placeholder'),
+                    defaultMessage: 'e.g. about/'
+                  })}
                   value={path.value || ''}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) => handlePathChange(e.target.value)}
                   onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
