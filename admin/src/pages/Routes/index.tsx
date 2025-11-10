@@ -13,9 +13,12 @@ import { Pencil } from '@strapi/icons';
 import { Route } from '../../../../types';
 import { useApi } from '../../hooks';
 import { EmptyBox, Center } from '../../components/UI';
+import { getTranslation } from '../../utils';
+import { useIntl } from 'react-intl';
 
 const Routes = () => {
   const { getRoutes } = useApi();
+  const { formatMessage } = useIntl();
 
   const [routes, setRoutes] = useState([]);
 
@@ -30,13 +33,22 @@ const Routes = () => {
   return (
     <>
       <Layouts.Header
-        title='Routes'
-        subtitle='Overview of all existing routes'
+        title={formatMessage({
+          id: getTranslation('routes.page.title'),
+          defaultMessage: 'Routes',
+        })}
+        subtitle={formatMessage({
+          id: getTranslation('routes.page.subtitle'),
+          defaultMessage: 'Overview of all existing routes',
+        })}
       />
       <Layouts.Content>
         {routes.length === 0 ? (
           <Center height={400}>
-            <EmptyBox msg="No routes found" />
+            <EmptyBox msg={formatMessage({
+              id: getTranslation('routes.page.emptyRoutes'),
+              defaultMessage: 'No routes found',
+            })} />
           </Center>
         ) : (
           <Table colCount={4} rowCount={routes.length}>
@@ -46,13 +58,28 @@ const Routes = () => {
                   <Typography variant="sigma">ID</Typography>
                 </Th>
                 <Th>
-                  <Typography variant="sigma">Title</Typography>
+                  <Typography variant="sigma">
+                    {formatMessage({
+                      id: getTranslation('title'),
+                      defaultMessage: 'Title',
+                    })}
+                  </Typography>
                 </Th>
                 <Th>
-                  <Typography variant="sigma">Route</Typography>
+                  <Typography variant="sigma">
+                    {formatMessage({
+                      id: getTranslation('route'),
+                      defaultMessage: 'Route',
+                    })}
+                  </Typography>
                 </Th>
                 <Th>
-                  <VisuallyHidden>Actions</VisuallyHidden>
+                  <VisuallyHidden>
+                    {formatMessage({
+                      id: getTranslation('actions'),
+                      defaultMessage: 'Actions',
+                    })}
+                  </VisuallyHidden>
                 </Th>
               </Tr>
             </Thead>
@@ -70,7 +97,12 @@ const Routes = () => {
                   </Td>
                   <Td>
                     <Flex gap={2} justifyContent="end">
-                      <LinkButton variant="secondary" startIcon={<Pencil />} href={`/admin/content-manager/collection-types/${route.relatedContentType}/${route.relatedDocumentId}`}>Edit</LinkButton>
+                      <LinkButton variant="secondary" startIcon={<Pencil />} href={`/admin/content-manager/collection-types/${route.relatedContentType}/${route.relatedDocumentId}`}>
+                        {formatMessage({
+                          id: getTranslation('edit'),
+                          defaultMessage: 'Edit',
+                        })}
+                      </LinkButton>
                     </Flex>
                   </Td>
                 </Tr>

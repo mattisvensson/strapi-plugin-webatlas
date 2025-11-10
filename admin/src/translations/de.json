@@ -8,6 +8,14 @@
   "webatlas.navigation.page.selectNavigation": "Navigation auswählen",
   "webatlas.navigation.page.navItem.addChildren": "Unterelement hinzufügen",
 
+  "webatlas.routes.page.title": "Routen",
+  "webatlas.routes.page.subtitle": "Übersicht aller vorhandenen Routen",
+  "webatlas.routes.page.emptyRoutes": "Es wurden keine Routen gefunden",
+  
+  "webatlas.title": "Titel",
+  "webatlas.route": "Route",
+  "webatlas.actions": "Aktionen",
+
   "webatlas.delete": "Löschen",
   "webatlas.edit": "Bearbeiten",
   "webatlas.add": "Hinzufügen",
