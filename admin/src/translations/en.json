@@ -6,6 +6,7 @@
   "webatlas.navigation.page.createNewItem": "Create new item",
   "webatlas.navigation.page.newItemButton": "New Item",
   "webatlas.navigation.page.selectNavigation": "Select Navigation",
+  "webatlas.navigation.page.navItem.addChildren": "Add children",
 
   "webatlas.delete": "Delete",
   "webatlas.edit": "Edit",

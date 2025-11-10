@@ -4,6 +4,8 @@ import { ModalContext } from '../../contexts';
 import { useContext, useEffect, useState, ReactElement, forwardRef } from 'react';
 import { Link as LinkIcon, ExternalLink, OneToMany, More, Drag } from '@strapi/icons';
 import { useFetchClient } from '@strapi/strapi/admin';
+import { getTranslation } from '../../utils';
+import { useIntl } from 'react-intl';
 
 export interface RouteItemProps {
   item: NestedNavItem;
@@ -38,6 +40,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
   
   const { setModalType } = useContext(ModalContext);
   const { get } = useFetchClient();
+  const { formatMessage } = useIntl();
 
   const [itemStatus, setItemStatus] = useState({
     status: 'published',
@@ -162,10 +165,25 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
               </Status>
             }
             <SimpleMenu label="Notifications" tag={IconButton} icon={<More />}>
-              <MenuItem onClick={() => handleEdit()}>Edit</MenuItem>
-              <MenuItem onClick={() => handleAddChildren()}>Add children</MenuItem>
+              <MenuItem onClick={() => handleEdit()}>
+                {formatMessage({
+                  id: getTranslation('edit'),
+                  defaultMessage: 'Edit',
+                })}
+              </MenuItem>
+              <MenuItem onClick={() => handleAddChildren()}>
+                {formatMessage({
+                  id: getTranslation('navigation.page.navItem.addChildren'),
+                  defaultMessage: 'Add children',
+                })}
+              </MenuItem>
               <MenuItem onClick={() => handleDelete()}>
-                <Typography textColor="danger600">Delete</Typography>
+                <Typography textColor="danger600">
+                  {formatMessage({
+                    id: getTranslation('delete'),
+                    defaultMessage: 'Delete',
+                  })}
+                </Typography>
               </MenuItem>
             </SimpleMenu>
           </Flex>
