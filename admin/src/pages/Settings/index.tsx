@@ -201,7 +201,16 @@ const Settings = () => {
                                 onChange={(value: string) => dispatch({ type: 'SET_DEFAULT_FIELD', payload: { ctUid: ct.uid, field: value } })}
                               >
                                 {Object.entries(ct.attributes).map(([key], index) => {
-                                  if (key === 'id' || key === 'createdAt' || key === 'updatedAt' || key === 'createdBy' || key === 'updatedBy') return null
+                                  if (
+                                    key === 'id' || 
+                                    key === 'documentId' ||
+                                    key === 'createdAt' || 
+                                    key === 'updatedAt' || 
+                                    key === 'createdBy' || 
+                                    key === 'updatedBy' ||
+                                    key === 'webatlas_path' ||
+                                    key === 'webatlas_override'
+                                  ) return null
                                   return <SingleSelectOption key={index} value={key}>{key}</SingleSelectOption>
                                 })}
                               </SingleSelect>
