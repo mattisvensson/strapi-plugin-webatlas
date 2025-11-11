@@ -17,6 +17,7 @@ export default function NavModal({
   modalToOpen,
   footer,
   currentModalType = null,
+  currentModalMode = 'create',
 }: { 
   triggerText?: string, 
   triggerVariant?: "primary" | "secondary",
@@ -30,6 +31,7 @@ export default function NavModal({
   modalToOpen?: string,
   footer?: React.ReactNode,
   currentModalType?: 'ItemCreate' | 'WrapperCreate' | 'ExternalCreate' | null,
+  currentModalMode?: 'create' | 'edit',
 }) {
 
   const { setModalType } = useContext(ModalContext);
@@ -62,7 +64,7 @@ export default function NavModal({
                   <Button variant="tertiary" type="button">{closeText}</Button>
                 </Modal.Close>
                 <Flex gap={2}>
-                  { currentModalType && (
+                  { currentModalType && currentModalMode === 'create' && (
                     <SingleSelect
                       onChange={(value: string) => setModalType(value)}
                       placeholder="Choose item type"

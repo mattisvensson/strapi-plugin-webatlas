@@ -110,6 +110,7 @@ function ItemEditComponent({
       onConfirm={updateItem}
       modalToOpen=''
       currentModalType="ItemCreate"
+      currentModalMode="edit"
     >
       <Grid.Root gap={8}>
         <Grid.Item col={6} s={12}>
