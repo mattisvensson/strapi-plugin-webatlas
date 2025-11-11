@@ -174,6 +174,19 @@ export default ({strapi}) => ({
 
   async deleteNavigation(documentId: string) {
     try {
+      const navigation =  await strapi.documents(waNavigation).findOne({
+        documentId: documentId,
+        populate: ['items'],
+      })
+
+      if (!navigation) throw new Error("Navigation not found");
+
+      for (const item of navigation.items) {
+        await strapi.documents(waNavItem).delete({
+          documentId: item.documentId
+        })
+      }
+
       return await strapi.documents(waNavigation).delete({
         documentId: documentId
       })
