@@ -8,7 +8,7 @@
 */
 
 import { Plus, Check } from '@strapi/icons';
-import { Flex, Button } from '@strapi/design-system';
+import { Flex, Button, Typography } from '@strapi/design-system';
 import { Layouts } from '@strapi/strapi/admin';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -217,11 +217,17 @@ const Navigation = () => {
             title={formatMessage({
               id: getTranslation('navigation.page.title'),
               defaultMessage: 'Navigation',
-            })}
-            subtitle={formatMessage({
-              id: getTranslation('navigation.page.subtitle'),
-              defaultMessage: 'Manage all your navigations here',
-            })}
+            }) + (selectedNavigation ? `: ${selectedNavigation.name}` : '')}
+            subtitle={
+              <Typography textColor="neutral500">
+                {selectedNavigation ? 
+                  `ID: ${selectedNavigation.id} | DocumentID : ${selectedNavigation.documentId}` : 
+                  formatMessage({
+                    id: getTranslation('navigation.page.subtitle.noNavigationSelected'),
+                    defaultMessage: 'No navigation selected',
+                  })}
+              </Typography>
+            }
             primaryAction={<Header navigations={navigations}/>}
           />
           <Layouts.Content>
