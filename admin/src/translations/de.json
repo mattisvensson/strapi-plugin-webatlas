@@ -11,6 +11,7 @@
   "webatlas.routes.page.title": "Routen",
   "webatlas.routes.page.subtitle": "Übersicht aller vorhandenen Routen",
   "webatlas.routes.page.emptyRoutes": "Es wurden keine Routen gefunden",
+  "webatlas.routes.page.column.type": "Typ",
 
   "webatlas.settings.page.subtitle": "Konfigurieren Sie Ihre Webatlas-Plugin-Einstellungen",
   "webatlas.settings.page.enabledContentTypes": "Aktivierte Inhaltstypen",
@@ -88,6 +89,10 @@
   "webatlas.components.CMEditViewAside.alias.uidRoute.hint": "Permanente UID-Route, kann nicht geändert werden",
   "webatlas.components.CMEditViewAside.alias.documentIdRoute.label": "Dokumenten-ID Route",
   "webatlas.components.CMEditViewAside.alias.documentIdRoute.hint": "Permanente Dokumenten-ID-Route, kann nicht geändert werden",
+
+  "webatlas.route.type.internal": "Intern",
+  "webatlas.route.type.external": "Extern",
+  "webatlas.route.type.wrapper": "Wrapper",
 
   "webatlas.title": "Titel",
   "webatlas.route": "Route",
