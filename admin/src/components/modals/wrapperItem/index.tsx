@@ -89,6 +89,7 @@ function WrapperItemComponent({
       onConfirm={addItem}
       modalToOpen=''
       currentModalType="WrapperCreate"
+      currentModalMode={variant === 'WrapperCreate' ? 'create' : 'edit'}
     >
       <Grid.Root gap={8}>
         <Grid.Item col={6} s={12}>

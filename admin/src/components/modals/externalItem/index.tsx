@@ -90,6 +90,7 @@ function ExternalItemComponent({
       onConfirm={addItem}
       modalToOpen=''
       currentModalType="ExternalCreate"
+      currentModalMode={variant === 'ExternalCreate' ? 'create' : 'edit'}
     >
       <Grid.Root gap={8}>
         <Grid.Item col={6} s={12}>
