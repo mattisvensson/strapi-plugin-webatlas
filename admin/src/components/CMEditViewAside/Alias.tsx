@@ -87,40 +87,37 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	useEffect(() => {
 		onChange('webatlas_path', path.value);
 		onChange('webatlas_override', isOverride);
-	}, [path.value, routeId, isOverride])
+	}, [path.value, isOverride])
 
-    const debouncedValueEffect = useMemo(
-    () => debounce((currentValues: any) => {
-      const key = config?.default;
-      if (!key) return;
+	const debouncedValueEffect = useMemo(() => debounce((currentValues: any) => {
+		const key = config?.default;
+		if (!key) return;
 
-      const currentValue = currentValues[key];
-      
-      if (!currentValue) {
-        dispatchPath({ type: 'NO_URL_CHECK', payload: '' });
-        return;
-      }
+		const currentValue = currentValues[key];
+		
+		if (!currentValue) {
+			dispatchPath({ type: 'NO_URL_CHECK', payload: '' });
+			return;
+		}
 
-      // Only run automatic path generation if:
-      // 1. Initial load is complete
-      // 2. User has manually changed the field OR no route exists
-      // 3. Not in override mode
-      if (initialLoadComplete && 
-          (hasUserChangedField.current || !routeId) && 
-          prevValueRef.current !== currentValue && 
-          !isOverride) {
-        
-        const path = config.pattern ? `${config.pattern}/${currentValue}` : `${currentValue}`;
-        if (currentValue === initialValues[key]) {
-          dispatchPath({ type: 'NO_URL_CHECK', payload: path });
-        } else {
-          dispatchPath({ type: 'DEFAULT', payload: path });
-        }
-        prevValueRef.current = currentValue;
-      }
-    }, 500),
-    [config?.default, config?.pattern, initialValues, isOverride, initialLoadComplete, routeId]
-  );
+		// Only run automatic path generation if:
+		// 1. Initial load is complete
+		// 2. User has manually changed the field OR no route exists
+		// 3. Not in override mode
+		if (initialLoadComplete && 
+				(hasUserChangedField.current || !routeId) && 
+				prevValueRef.current !== currentValue && 
+				!isOverride) {
+			
+			const path = config.pattern ? `${config.pattern}/${currentValue}` : `${currentValue}`;
+			if (currentValue === initialValues[key]) {
+				dispatchPath({ type: 'NO_URL_CHECK', payload: path });
+			} else {
+				dispatchPath({ type: 'DEFAULT', payload: path });
+			}
+			prevValueRef.current = currentValue;
+		}
+	}, 500), [config?.default, config?.pattern, initialValues, isOverride, initialLoadComplete, routeId]);
 
   // Track when user changes the source field
   useEffect(() => {
