@@ -1,6 +1,6 @@
 {
   "webatlas.navigation.page.title": "Navigation",
-  "webatlas.navigation.page.subtitle": "Verwalten Sie hier Ihre Navigationen",
+  "webatlas.navigation.page.subtitle.noNavigationSelected": "Keine Navigation ausgewählt",
   "webatlas.navigation.page.emptyNavigation": "Es existiert noch keine Navigation...",
   "webatlas.navigation.page.createNewNavigation": "Neue Navigation erstellen",
   "webatlas.navigation.page.createNewItem": "Neues Element erstellen",
