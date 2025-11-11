@@ -89,6 +89,7 @@
   "webatlas.components.CMEditViewAside.alias.uidRoute.hint": "Permanente UID-Route, kann nicht geändert werden",
   "webatlas.components.CMEditViewAside.alias.documentIdRoute.label": "Dokumenten-ID Route",
   "webatlas.components.CMEditViewAside.alias.documentIdRoute.hint": "Permanente Dokumenten-ID-Route, kann nicht geändert werden",
+  "webatlas.components.CMEditViewAside.alias.newRouteInfo": "Eine neue URL-Route wird beim Speichern dieses Eintrags erstellt.",
 
   "webatlas.route.type.internal": "Intern",
   "webatlas.route.type.external": "Extern",
