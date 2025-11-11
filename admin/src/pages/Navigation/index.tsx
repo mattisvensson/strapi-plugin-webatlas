@@ -225,7 +225,7 @@ const Navigation = () => {
             primaryAction={<Header navigations={navigations}/>}
           />
           <Layouts.Content>
-            <Flex gap={4} paddingBottom={6} justifyContent="flex-end">
+            {selectedNavigation && <Flex gap={4} paddingBottom={6} justifyContent="flex-end">
               <Button variant="secondary" startIcon={<Plus />} onClick={() => setModalType('ItemCreate')}>
                 {formatMessage({
                   id: getTranslation('navigation.page.newItemButton'),
@@ -242,7 +242,7 @@ const Navigation = () => {
                   defaultMessage: 'Save',
                 })}
               </Button>
-            </Flex>
+            </Flex>}
             {navigationItems && navigationItems.length > 0 &&
               <Flex direction="column" alignItems="stretch" gap={4}>
                 <DndContext
