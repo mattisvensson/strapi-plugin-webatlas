@@ -220,7 +220,7 @@ const Navigation = () => {
             })}
             subtitle={formatMessage({
               id: getTranslation('navigation.page.subtitle'),
-              defaultMessage: 'Manage your navigation settings here is default',
+              defaultMessage: 'Manage all your navigations here',
             })}
             primaryAction={<Header navigations={navigations}/>}
           />
