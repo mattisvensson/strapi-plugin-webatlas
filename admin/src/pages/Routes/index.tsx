@@ -13,14 +13,14 @@ import { Pencil } from '@strapi/icons';
 import { Route } from '../../../../types';
 import { useApi } from '../../hooks';
 import { EmptyBox, Center } from '../../components/UI';
-import { getTranslation } from '../../utils';
+import { getTranslation, getRouteType } from '../../utils';
 import { useIntl } from 'react-intl';
 
 const Routes = () => {
   const { getRoutes } = useApi();
   const { formatMessage } = useIntl();
 
-  const [routes, setRoutes] = useState([]);
+  const [routes, setRoutes] = useState<Route[]>([]);
 
   useEffect(() => {
     async function fetchRoutes() {
@@ -74,6 +74,14 @@ const Routes = () => {
                   </Typography>
                 </Th>
                 <Th>
+                  <Typography variant="sigma">
+                    {formatMessage({
+                      id: getTranslation('routes.page.column.type'),
+                      defaultMessage: 'Type',
+                    })}
+                  </Typography>
+                </Th>
+                <Th>
                   <VisuallyHidden>
                     {formatMessage({
                       id: getTranslation('actions'),
@@ -96,13 +104,27 @@ const Routes = () => {
                     <Typography textColor="neutral800">{route.fullPath}</Typography>
                   </Td>
                   <Td>
+                    <Typography textColor="neutral800">
+                      {formatMessage({
+                        id: getTranslation(`route.type.${getRouteType(route)}`),
+                        defaultMessage: '-',
+                      })}
+                    </Typography>
+                  </Td>
+                  <Td>
                     <Flex gap={2} justifyContent="end">
-                      <LinkButton variant="secondary" startIcon={<Pencil />} href={`/admin/content-manager/collection-types/${route.relatedContentType}/${route.relatedDocumentId}`}>
-                        {formatMessage({
-                          id: getTranslation('edit'),
-                          defaultMessage: 'Edit',
-                        })}
-                      </LinkButton>
+                      {route.internal && 
+                        <LinkButton
+                          variant="secondary"
+                          startIcon={<Pencil />} 
+                          href={`/admin/content-manager/collection-types/${route.relatedContentType}/${route.relatedDocumentId}`}
+                        >
+                          {formatMessage({
+                            id: getTranslation('edit'),
+                            defaultMessage: 'Edit',
+                          })}
+                        </LinkButton>
+                      }
                     </Flex>
                   </Td>
                 </Tr>
