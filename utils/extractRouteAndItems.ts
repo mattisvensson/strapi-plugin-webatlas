@@ -6,6 +6,8 @@ export default function extractRouteAndItems(items: NestedNavItem[]) {
 
     const route = { ...item.route }
 
+    if (!route) return null
+
     if (item.depth) {
       route.depth = item.depth;
     }
@@ -15,7 +17,7 @@ export default function extractRouteAndItems(items: NestedNavItem[]) {
       if (items.length > 0) route.items = items;
     }
 
-    let type
+    let type: 'internal' | 'external' | 'wrapper'
 
     if (!route.internal && route.wrapper) 
       type = 'wrapper'
