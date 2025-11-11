@@ -62,7 +62,7 @@ function reducer(state: PathState, action: Action): PathState {
 }
 
 const Alias = ({ config }: { config: ConfigContentType }) => {
-	const { layout, form } = useContentManagerContext()
+	const { form } = useContentManagerContext()
 	const { initialValues, values, onChange } = form;
 	const { getRelatedRoute } = useApi()
 	const { formatMessage } = useIntl();
@@ -72,6 +72,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
 	const [replacement, setReplacement] = useState<string>('');
 	const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+	const [urlIsValid, setUrlIsValid] = useState<'valid' | 'invalid' | null>(null);
 	const [path, dispatchPath] = useReducer(reducer, {
 		needsUrlCheck: false,
 		value: '',
@@ -82,7 +83,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	const initialPath = useRef('')
 	const prevValueRef = useRef<string | null>(null);
 
-	const debouncedCheckUrl = useCallback(debounce(checkUrl, 500), []);
+	const debouncedCheckUrl = useCallback(debounce(checkUrl, 250), []);
 
 	useEffect(() => {
 		onChange('webatlas_path', path.value);
@@ -205,6 +206,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 		} catch (err) {
 			console.log(err)
 		} finally {
+			setUrlIsValid(null);
 			setValidationState('done')
 		}
 	}
@@ -230,7 +232,32 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 				gap={4}
 			>
 				<Box>
-					<Field.Root>
+					{!routeId && 
+						<>
+							<Typography textColor="neutral600" marginBottom={2}>
+								{formatMessage({
+									id: getTranslation('components.CMEditViewAside.alias.newRouteInfo'),
+									defaultMessage: 'A new URL route will be created upon saving this entry.',
+								})}
+							</Typography>
+							<Box paddingBottom={2} paddingTop={2}>
+								<Divider/>
+							</Box>
+						</>
+					}
+					<Field.Root
+						hint={
+							formatMessage({
+								id: getTranslation('components.CMEditViewAside.alias.urlInput.start'),
+								defaultMessage: 'Edit the',
+							})
+							+ " \"" + config.default + "\" " +
+							formatMessage({
+								id: getTranslation('components.CMEditViewAside.alias.urlInput.end'),
+								defaultMessage: 'field to generate a URL',
+							})
+						}
+					>
 						<Field.Label>
 							{formatMessage({
 								id: getTranslation('components.CMEditViewAside.alias.urlInput.label'),
@@ -244,26 +271,17 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 						<Field.Input
 							id="url-input"
 							value={path.value}
-							placeholder={
-								formatMessage({
-									id: getTranslation('components.CMEditViewAside.alias.urlInput.start'),
-									defaultMessage: 'Edit the',
-								})
-								+ " \"" + config.default + "\" " +
-								formatMessage({
-									id: getTranslation('components.CMEditViewAside.alias.urlInput.end'),
-									defaultMessage: 'field to generate a URL',
-								})}
 							onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}
 							disabled={!isOverride}
 							onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
 								if (e.target.value === path.prevValue) return
 								dispatchPath({ type: 'DEFAULT', payload: e.target.value })}
 							}
+							style={{ outline: urlIsValid !== null ? (urlIsValid === 'valid' ? "1px solid #5cb176" : "1px solid #ee5e52") : undefined }}
 						/>
 						<Field.Hint/>
 					</Field.Root>
-					<URLInfo validationState={validationState} replacement={replacement} />
+					<URLInfo validationState={validationState} replacement={replacement} setUrlStatus={setUrlIsValid} />
 					<Flex
 						gap={2}
 						paddingTop={2}
