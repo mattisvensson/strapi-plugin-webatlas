@@ -3,6 +3,7 @@ import { PLUGIN_ID, PLUGIN_NAME } from '../../pluginId';
 import { Initializer } from './components/Initializer';
 import { RouteIcon, NavigationIcon } from './components/PluginIcon';
 import CMEditViewAside from './components/CMEditViewAside';
+import pluginPermissions from './permissions';
 
 export default {
   register(app: StrapiApp) {
@@ -18,11 +19,7 @@ export default {
         return { default: component.default };
       },
       permissions: [
-        // Uncomment to set the permissions of the plugin here
-        // {
-        //   action: '', // the action name should be plugin::plugin-name.actionType
-        //   subject: null,
-        // },
+          pluginPermissions['page.routes'][0],
       ],
     });
     app.addMenuLink({
@@ -37,11 +34,7 @@ export default {
         return { default: component.default };
       },
       permissions: [
-        // Uncomment to set the permissions of the plugin here
-        // {
-        //   action: '', // the action name should be plugin::plugin-name.actionType
-        //   subject: null,
-        // },
+        pluginPermissions['page.navigation'][0],
       ],
     });
     app.addSettingsLink(
@@ -88,11 +81,7 @@ export default {
           );
         },
         permissions: [
-          // Uncomment to set the permissions of the plugin here
-          // {
-          //   action: '', // the action name should be plugin::plugin-name.actionType
-          //   subject: null,
-          // },
+          pluginPermissions['settings.configuration'][0],
         ],
       }
     )

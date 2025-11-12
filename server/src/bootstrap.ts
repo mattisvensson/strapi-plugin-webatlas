@@ -6,6 +6,36 @@ import type { Core, UID } from '@strapi/strapi';
 
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
+
+  try {
+    // Register permission actions.
+    const actions = [
+      {
+        section: 'plugins',
+        displayName: 'Access the navigation page',
+        uid: 'page.navigation',
+        pluginName: 'webatlas',
+      },
+      {
+        section: 'plugins',
+        displayName: 'Access the routes page',
+        uid: 'page.routes',
+        pluginName: 'webatlas',
+      },
+      {
+        section: 'plugins',
+        displayName: 'Access the settings page',
+        uid: 'settings.configuration',
+        pluginName: 'webatlas',
+      },
+    ];
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    (strapi.admin.services.permission.actionProvider.registerMany as (a: any) => void)(actions);
+  } catch (error) {
+    strapi.log.error(`Bootstrap failed. ${String(error)}`);
+  }
+
   if (!strapi.store) {
     throw new Error('strapi.store is undefined');
   }
