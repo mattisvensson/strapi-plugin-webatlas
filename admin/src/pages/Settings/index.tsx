@@ -57,6 +57,7 @@ const Settings = () => {
   const [initialState, setInitialState] = useState(config || { selectedContentTypes: [] })
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     setInitialState(config || { selectedContentTypes: [] })
@@ -85,6 +86,7 @@ const Settings = () => {
       || settingsState.selectedContentTypes.find((cta: ConfigContentType) => !cta.default) !== undefined
     ) return
 
+    setIsSaving(true);
     try {
       await setConfig(settingsState)
       setInitialState(settingsState)
@@ -96,7 +98,9 @@ const Settings = () => {
           defaultMessage: 'Settings saved successfully',
         }),
       });
+      setIsSaving(false);
     } catch (err) {
+      setIsSaving(false);
       toggleNotification({
         type: 'danger',
         message: formatMessage({
@@ -115,7 +119,7 @@ const Settings = () => {
   }
 
   return (
-    <PageWrapper settingsState={settingsState} initialState={initialState} save={save}>
+    <PageWrapper settingsState={settingsState} initialState={initialState} save={save} isSaving={isSaving}>
       <Field.Root
         name="selectedContentTypes"
         hint={formatMessage({

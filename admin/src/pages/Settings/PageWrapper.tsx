@@ -3,18 +3,19 @@ import { Page, Layouts} from '@strapi/strapi/admin'
 import { PLUGIN_NAME } from '../../../../pluginId';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
-import { Check } from '@strapi/icons';
 import type { ConfigContentType } from '../../../../types';
 
 export default function PageWrapper({ 
   settingsState, 
   initialState, 
   save, 
+  isSaving,
   children
 }: { 
   settingsState?: any, 
   initialState?: any, 
   save?: () => void, 
+  isSaving?: boolean,
   children: React.ReactNode 
 }) {
 
@@ -31,11 +32,12 @@ export default function PageWrapper({
         primaryAction={ settingsState && initialState && save &&
           <Button
             type="submit"
-            startIcon={<Check />}
             onClick={() => save()}
+            loading={isSaving}
             disabled={
               JSON.stringify(settingsState) === JSON.stringify(initialState)
               || settingsState.selectedContentTypes.find((cta: ConfigContentType) => !cta.default) !== undefined
+              || isSaving
             }
           >
             {formatMessage({
