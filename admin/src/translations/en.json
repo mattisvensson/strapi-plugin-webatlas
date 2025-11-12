@@ -105,5 +105,8 @@
   "webatlas.cancel": "Cancel",
   "webatlas.save": "Save",
   "webatlas.select": "Select",
-  "webatlas.manage": "Manage"
+  "webatlas.manage": "Manage",
+
+  "webatlas.notification.error": "An error occurred",
+  "webatlas.notification.settings.saved": "Settings saved successfully"
 }
