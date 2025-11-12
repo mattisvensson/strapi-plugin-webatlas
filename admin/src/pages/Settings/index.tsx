@@ -27,7 +27,7 @@ type Action =
   | { type: 'SET_PATTERN'; payload: { ctUid: string; pattern: string } }
 
 const Settings = () => {
-  const { data: config, setConfig } = usePluginConfig();
+  const { config, setConfig } = usePluginConfig();
   const [settingsState, dispatch] = useReducer(reducer, config || { selectedContentTypes: [] });
   const { contentTypes: allContentTypesData } = useAllContentTypes();
   const allContentTypes = allContentTypesData?.filter((ct: ContentType) => ct.pluginOptions?.webatlas?.active === true);

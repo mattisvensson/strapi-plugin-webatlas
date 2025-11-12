@@ -13,7 +13,7 @@ import { PLUGIN_NAME } from '../../../../pluginId';
 const CMEditViewAside = () => {
   const { model } = useContentManagerContext()
   const { contentTypes } = useAllContentTypes()
-  const { data: config } = usePluginConfig()
+  const { config } = usePluginConfig()
 
   const [contentTypeConfig, setContentTypeConfig] = useState<ConfigContentType | null>(null);
   const [isAllowedContentType, setIsAllowedContentType] = useState(false);

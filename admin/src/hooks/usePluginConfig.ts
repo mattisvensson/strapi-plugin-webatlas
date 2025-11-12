@@ -3,31 +3,31 @@ import { PluginConfig } from '../../../types';
 import { useFetchClient } from '@strapi/strapi/admin';
 
 type UsePluginConfigResponse = {
-  data: PluginConfig | null;
+  config: PluginConfig | null;
   loading: boolean;
-  error: string | null;
-  setConfig: (body: PluginConfig) => Promise<boolean | void>;
+  fetchError: string | null;
+  setConfig: (body: PluginConfig) => Promise<void>;
 };
 
 export default function usePluginConfig(): UsePluginConfigResponse {
   const { put, get } = useFetchClient();
 
-  const [data, setData] = useState<PluginConfig | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [config, setConfigData] = useState<PluginConfig | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      setFetchError(null);
       try {
         const { data: { data: contentTypesArray} } = await get('/content-manager/content-types');
         let { data: config } = await get('/webatlas/config');
 
         if (!config || !config.selectedContentTypes) {
-          throw new Error(`HTTP error! Couldn't fetch plugin config`);
+          throw new Error(`Couldn't fetch plugin config`);
         }
 
-        // Only use content types that have webatlas enabled in plugin options
         const allowedContentTypes = contentTypesArray.filter((type: any) => 
           type.pluginOptions?.webatlas?.active === true
         );
@@ -37,13 +37,13 @@ export default function usePluginConfig(): UsePluginConfigResponse {
 
         if (JSON.stringify(activeContentTypes) !== JSON.stringify(config.selectedContentTypes)) {
           config = { ...config, selectedContentTypes: activeContentTypes}
-          setConfig(config);
+          await setConfig(config);
         }
 
-        setData(config);
-        setLoading(false);
-      } catch (error) {
-        setError((error as Error).message);
+        setConfigData(config);
+      } catch (error: any) {
+        setFetchError(error.message);
+      } finally {
         setLoading(false);
       }
     };
@@ -51,15 +51,13 @@ export default function usePluginConfig(): UsePluginConfigResponse {
     fetchData();
   }, []);
 
-  async function setConfig(body: PluginConfig) {
+  async function setConfig(body: PluginConfig): Promise<void> {
     try {
-      await put('/webatlas/config', {
-        ...body,
-      });      
+      await put('/webatlas/config', { ...body });
     } catch (error) {
-      setError((error as Error).message);
+      throw error;
     }
   }
 
-  return { data, loading, error, setConfig };
+  return { config, loading, fetchError, setConfig };
 }
