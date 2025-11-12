@@ -108,5 +108,6 @@
   "webatlas.manage": "Manage",
 
   "webatlas.notification.error": "An error occurred",
-  "webatlas.notification.settings.saved": "Settings saved successfully"
+  "webatlas.notification.settings.saved": "Settings saved successfully",
+  "webatlas.notification.routes.fetchFailed": "Failed to fetch routes"
 }
