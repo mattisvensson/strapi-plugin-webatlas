@@ -166,7 +166,7 @@ const Settings = () => {
             <Accordion.Root>
               {settingsState.selectedContentTypes?.map((contentTypeSettings: ConfigContentType) => {
                 const ct: ContentType | undefined = allContentTypes?.find((item) => item.uid === contentTypeSettings.uid)
-                return <ContentTypeAccordion contentType={ct} contentTypeSettings={contentTypeSettings} dispatch={dispatch} />
+                return <ContentTypeAccordion key={contentTypeSettings.uid} contentType={ct} contentTypeSettings={contentTypeSettings} dispatch={dispatch} />
               })}
             </Accordion.Root>
           </Field.Root>
