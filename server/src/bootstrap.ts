@@ -14,18 +14,21 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
         section: 'plugins',
         displayName: 'Access the navigation page',
         uid: 'page.navigation',
+        subCategory: 'Navigation',
         pluginName: 'webatlas',
       },
       {
         section: 'plugins',
         displayName: 'Access the routes page',
         uid: 'page.routes',
+        subCategory: 'Routes',
         pluginName: 'webatlas',
       },
       {
         section: 'plugins',
         displayName: 'Access the settings page',
         uid: 'settings.configuration',
+        subCategory: 'Settings',
         pluginName: 'webatlas',
       },
     ];
