@@ -108,5 +108,6 @@
   "webatlas.manage": "Verwalten",
   
   "webatlas.notification.error": "Ein Fehler ist aufgetreten",
-  "webatlas.notification.settings.saved": "Einstellungen erfolgreich gespeichert"
+  "webatlas.notification.settings.saved": "Einstellungen erfolgreich gespeichert",
+  "webatlas.notification.routes.fetchFailed": "Routen konnten nicht abgerufen werden"
 }
