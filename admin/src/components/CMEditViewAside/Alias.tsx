@@ -130,7 +130,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
 		if (currentValue && !isOverride) {
 			const path = config.pattern ? `${config.pattern}/${currentValue}` : `${currentValue}`;
-			onChange('webatlas_path', path);
+			onChange('webatlas_path', transformToUrl(path));
 		}
 
     if (!initialLoadComplete) return;
