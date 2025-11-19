@@ -11,6 +11,7 @@ type externalItemProps = {
   variant: 'WrapperCreate' | 'WrapperEdit';
   item?: NestedNavItem;
   parentDocumentId?: string;
+  onEdit?: (editedItem: NestedNavItem) => void;
 }
 
 function WrapperItemComponent({ 
@@ -20,11 +21,11 @@ function WrapperItemComponent({
   navItemState,
   dispatchItemState,
   createExternalRoute,
-  updateRoute,
   dispatchPath,
   setModalType,
   selectedNavigation,
   parentDocumentId,
+  onEdit,
 }: externalItemProps & ReturnType<typeof useModalSharedLogic>) {
 
   const { formatMessage } = useIntl();
@@ -50,7 +51,12 @@ function WrapperItemComponent({
       }
 
       if (variant === 'WrapperEdit' && item) {
-        await updateRoute(data, item.route.documentId)
+        onEdit && onEdit({
+          ...item,
+          update: { 
+            ...data
+          }
+        })
       } else {
         const route = await createExternalRoute(data)
   

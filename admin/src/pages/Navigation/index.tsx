@@ -467,6 +467,11 @@ const Navigation = () => {
           <WrapperItem 
             variant={modalType}
             item={actionItem as NestedNavItem}
+            onEdit={(editedItem) => {
+              setNavigationItems(items =>
+                items?.map(item => item.id === editedItem.id ? editedItem : item)
+              )
+            }}
           />
         }
       </SelectedNavigationContext.Provider>
