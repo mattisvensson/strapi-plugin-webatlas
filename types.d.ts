@@ -149,8 +149,10 @@ export type NestedNavItem = {
   route: Route;
   updatedAt: string;
   createdAt: string;
+  status: 'published' | 'draft' | 'modified' | null;
   depth?: number;
   order: number;
+  deleted?: boolean;
 }
 
 export type NavOverviewState = {

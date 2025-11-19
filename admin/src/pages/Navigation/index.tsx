@@ -7,21 +7,18 @@
  *
 */
 
-import { Plus, Check } from '@strapi/icons';
-import { Flex, Button, Typography } from '@strapi/design-system';
-import { Layouts } from '@strapi/strapi/admin';
+import { Plus } from '@strapi/icons';
+import { Flex, Button } from '@strapi/design-system';
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { NavOverview, NavCreate, Delete, NavEdit, ItemCreate, ItemEdit, ExternalItem, WrapperItem, NavModal } from '../../components/modals';
-import { EmptyBox, Center } from '../../components/UI';
+import { EmptyBox, Center, FullLoader } from '../../components/UI';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
-import Header from './Header';
 import { NestedNavigation, NestedNavItem } from '../../../../types';
-import useNavigations from '../../hooks/useNavigations';
 import useApi from '../../hooks/useApi';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
-// import { isNestedNavigation, isNestedNavItem} from '../../utils/typeChecks';
+import { useNotification, useFetchClient } from '@strapi/strapi/admin'
 import {
   DndContext,
   closestCenter,
@@ -39,6 +36,7 @@ import {
 } from '@dnd-kit/sortable';
 import { getProjection, measuring, indentationWidth } from '../../utils/dnd';
 import SortableRouteItem from './SortableRouteItem';
+import PageWrapper from './PageWrapper';
 
 type Projected = {
   depth: number;
@@ -47,14 +45,16 @@ type Projected = {
 }
 
 const Navigation = () => {
-  const { navigations, fetchNavigations } = useNavigations();
+  const [navigations, setNavigations] = useState<NestedNavigation[]>([]);
   const [modalType, setModalType] = useState<string>('');
   const [selectedNavigation, setSelectedNavigation] = useState<NestedNavigation>();
   const [navigationItems, setNavigationItems] = useState<NestedNavItem[]>();
   const [initialNavigationItems, setInitialNavigationItems] = useState<NestedNavItem[]>();
   const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>();
   const [parentId, setParentId] = useState<string | undefined>();
-  const { getStructuredNavigation, updateNavItem } = useApi();
+  const { updateNavItem, getNavigation, deleteNavItem } = useApi();
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [projected, setProjected] = useState<Projected | null>(null);
   const [activeItem, setActiveItem] = useState<NestedNavItem | undefined>();
@@ -63,44 +63,138 @@ const Navigation = () => {
   const [offsetLeft, setOffsetLeft] = useState(0);
 
   const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
+  const { get } = useFetchClient();
 
-  if (!navigations) return null;
+  useEffect(() => {
+    async function loadNavigations() {
+      setLoading(true);
+      try {
+        const data = await getNavigation({ variant: 'flat' });
+        const updatedNavigations = await Promise.all(
+          data.map(async (nav: NestedNavigation) => {
+            const updatedItems = await Promise.all(
+              nav.items.map(async (item) => {
+                const ct = item.route.relatedContentType;
+                const id = item.route.relatedDocumentId;
+                if (!ct || !id) return item;
+                try {
+                  const { data } = await get(`/content-manager/collection-types/${ct}/${id}`);
+                  return { ...item, status: data.data.status };
+                } catch (err) {
+                  console.error(err);
+                  return item;
+                }
+              })
+            );
+            return { ...nav, items: updatedItems };
+          })
+        );
+
+        setNavigations(updatedNavigations);
+        setSelectedNavigation(updatedNavigations[0]);
+      } catch (error) {
+        console.error('Error fetching navigations: ', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadNavigations();
+  }, []);
 
   useEffect(() => {
     if (modalType === 'NavOverview' || modalType === '') {
       setActionItem(undefined)
       setParentId(undefined)
-      fetchNavigations()
     }
   }, [modalType]);
 
   useEffect(() => {
-    async function fetchNestedNavigation () {
-      if (!selectedNavigation && (!navigations || navigations.length === 0)) return
-      
-      const documentId = selectedNavigation?.documentId ?? navigations?.[0]?.documentId;
-      
-      if (!documentId) return
-      
-      const { items } = await getStructuredNavigation(documentId, 'flat')
-      setNavigationItems(items)
-    }
-    if (Array.isArray(navigations) && navigations?.length > 0)
-      fetchNestedNavigation()
-  }, [navigations, selectedNavigation]);
+    setNavigationItems(selectedNavigation?.items || []);
+  }, [selectedNavigation]);
 
   useEffect(() => {
-    if (navigations.length > 0 && (!selectedNavigation || !navigations.find(nav => nav.id === selectedNavigation.id))) {
-      setSelectedNavigation(navigations[0])
-    }
-  }, [navigations]);
-
-  useEffect(() => {
-    if (navigationItems && !initialNavigationItems) {
+    if (selectedNavigation?.items && !initialNavigationItems) {
       setInitialNavigationItems(navigationItems)
     }
   }, [navigationItems]);
 
+  useEffect(() => {
+    if (!activeId || !navigationItems) return
+
+    const item = navigationItems.find(({ id }) => id === activeId);
+    setActiveItem(item);
+  }, [navigationItems, activeId])
+
+  function saveOrder() {
+    if (!navigationItems || !selectedNavigation) return
+
+    setIsSavingOrder(true);
+
+    let error = false;
+
+    let groupIndices: number[] = [0];
+    let parentIds: string[] = [];
+    
+    navigationItems.forEach(async (item, index) => {
+      if (item.deleted) {
+        try {
+          await deleteNavItem(item.documentId);
+        } catch (error) {
+          console.error('Error deleting navigation item ', error);
+        }
+        return;
+      }
+
+      const previousItem = navigationItems[index - 1];
+
+      if (typeof item.depth !== 'number') {
+        setIsSavingOrder(false);
+        return
+      }
+
+      if (item.depth === 0) {
+        groupIndices[0] = (groupIndices[0] || 0) + 1;
+        parentIds = [];
+      } else if (typeof previousItem.depth === 'number' && item.depth === previousItem.depth + 1) {
+        parentIds.push(previousItem.documentId);
+        groupIndices[item.depth] = 0;
+      } else if (typeof previousItem.depth === 'number' && item.depth <= previousItem.depth) {
+        const diff = previousItem.depth - item.depth;
+        for (let i = 0; i < diff; i++) {
+          parentIds.pop();
+          groupIndices.pop();
+        }
+
+        groupIndices[item.depth] = (groupIndices[item.depth] || 0) + 1;
+      }
+ 
+      try {
+        await updateNavItem(item.documentId, {
+          order: groupIndices[item.depth],
+          parent: parentIds.at(-1) || '',
+          route: item?.route?.documentId || '',
+          navigation: selectedNavigation?.documentId || ''
+        });
+      } catch (error) {
+        error = true;
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage({
+            id: getTranslation('notification.navigation.saveOrderFailed'),
+            defaultMessage: 'Error updating navigation item',
+          }) + ' ' + item.route.title,
+        });
+        console.error('Error updating navigation item ', error);
+      } finally {
+        setIsSavingOrder(false);
+      }
+    });
+    
+    !error && setInitialNavigationItems(navigationItems)
+  }
+
+  // React DnD Handlers --------------------------------------------------------
 
   function handleDragStart({ active: { id: activeId } }: DragStartEvent) {
     if (!navigationItems) return;
@@ -150,51 +244,6 @@ const Navigation = () => {
     document.body.style.setProperty('cursor', '');
   }
 
-  function saveOrder() {
-    if (!navigationItems || !selectedNavigation) return
-
-    let groupIndices: number[] = [0];
-    let parentIds: string[] = [];
-    
-    navigationItems.forEach((item, index) => {
-      const previousItem = navigationItems[index - 1];
-
-      if (typeof item.depth !== 'number') return
-
-      if (item.depth === 0) {
-        groupIndices[0] = (groupIndices[0] || 0) + 1;
-        parentIds = [];
-      } else if (typeof previousItem.depth === 'number' && item.depth === previousItem.depth + 1) {
-        parentIds.push(previousItem.documentId);
-        groupIndices[item.depth] = 0;
-      } else if (typeof previousItem.depth === 'number' && item.depth <= previousItem.depth) {
-        const diff = previousItem.depth - item.depth;
-        for (let i = 0; i < diff; i++) {
-          parentIds.pop();
-          groupIndices.pop();
-        }
-
-        groupIndices[item.depth] = (groupIndices[item.depth] || 0) + 1;
-      }
- 
-      updateNavItem(item.documentId, {
-        order: groupIndices[item.depth],
-        parent: parentIds.at(-1) || '',
-        route: item?.route?.documentId || '',
-        navigation: selectedNavigation?.documentId || ''
-      });
-    });
-    
-    setInitialNavigationItems(navigationItems)
-  }
-  
-  useEffect(() => {
-    if (!activeId || !navigationItems) return
-
-    const item = navigationItems.find(({ id }) => id === activeId);
-    setActiveItem(item);
-  }, [navigationItems, activeId])
-
   useEffect(() => {
     const projection =
       activeId && overId
@@ -209,118 +258,153 @@ const Navigation = () => {
     setProjected(projection);
   }, [activeId, overId, offsetLeft, navigationItems]);
 
+  if (loading) {
+    return (
+      <PageWrapper navigations={navigations} loading={loading}>
+        <FullLoader />
+      </PageWrapper>
+    );
+  }
+
   return (
     <ModalContext.Provider value={{modalType, setModalType}}>
       <SelectedNavigationContext.Provider value={{selectedNavigation, setSelectedNavigation}}>
-        <>
-          <Layouts.Header
-            title={formatMessage({
-              id: getTranslation('navigation.page.title'),
-              defaultMessage: 'Navigation',
-            }) + (selectedNavigation ? `: ${selectedNavigation.name}` : '')}
-            subtitle={
-              <Typography textColor="neutral500">
-                {selectedNavigation ? 
-                  `ID: ${selectedNavigation.id} | DocumentID : ${selectedNavigation.documentId}` : 
-                  formatMessage({
-                    id: getTranslation('navigation.page.subtitle.noNavigationSelected'),
-                    defaultMessage: 'No navigation selected',
-                  })}
-              </Typography>
-            }
-            primaryAction={<Header navigations={navigations}/>}
-          />
-          <Layouts.Content>
-            {selectedNavigation && <Flex gap={4} paddingBottom={6} justifyContent="flex-end">
-              <Button variant="secondary" startIcon={<Plus />} onClick={() => setModalType('ItemCreate')}>
-                {formatMessage({
-                  id: getTranslation('navigation.page.newItemButton'),
-                  defaultMessage: 'New Item',
-                })}
-              </Button>
-              <Button
-                startIcon={<Check />}
-                onClick={() => saveOrder()}
-                disabled={JSON.stringify(navigationItems) === JSON.stringify(initialNavigationItems)}
+        <PageWrapper navigations={navigations}>
+          {selectedNavigation && <Flex gap={4} paddingBottom={6} justifyContent="flex-end">
+            <Button variant="secondary" startIcon={<Plus />} onClick={() => setModalType('ItemCreate')}>
+              {formatMessage({
+                id: getTranslation('navigation.page.newItemButton'),
+                defaultMessage: 'New Item',
+              })}
+            </Button>
+            <Button
+              onClick={() => saveOrder()}
+              loading={isSavingOrder}
+              variant="primary"
+              disabled={JSON.stringify(navigationItems) === JSON.stringify(initialNavigationItems)}
+            >
+              {formatMessage({
+                id: getTranslation('save'),
+                defaultMessage: 'Save',
+              })}
+            </Button>
+          </Flex>}
+          {selectedNavigation && navigationItems && navigationItems.length > 0 &&
+            <Flex direction="column" alignItems="stretch" gap={4}>
+              <DndContext
+                collisionDetection={(e) => closestCenter(e)}
+                onDragStart={(e) => handleDragStart(e)}
+                onDragMove={(e) => handleDragMove(e)}
+                onDragOver={(e) => handleDragOver(e)}
+                onDragEnd={(e) => handleDragEnd(e)}
+                onDragCancel={() => handleDragCancel()}
+                measuring={measuring}
               >
-                {formatMessage({
-                  id: getTranslation('save'),
-                  defaultMessage: 'Save',
-                })}
-              </Button>
-            </Flex>}
-            {navigationItems && navigationItems.length > 0 &&
-              <Flex direction="column" alignItems="stretch" gap={4}>
-                <DndContext
-                  collisionDetection={(e) => closestCenter(e)}
-                  onDragStart={(e) => handleDragStart(e)}
-                  onDragMove={(e) => handleDragMove(e)}
-                  onDragOver={(e) => handleDragOver(e)}
-                  onDragEnd={(e) => handleDragEnd(e)}
-                  onDragCancel={() => handleDragCancel()}
-                  measuring={measuring}
-                >
-                  <SortableContext items={navigationItems} strategy={verticalListSortingStrategy}>
-                    {navigationItems.map((item, index) => (
-                      <SortableRouteItem
-                        key={index} 
-                        item={item} 
-                        setParentId={setParentId} 
-                        setActionItem={setActionItem} 
-                        indentationWidth={indentationWidth}
-                        depth={item.id === activeId && projected ? projected.depth : item.depth}
-                      />
-                    ))}
-                    {createPortal(
-                      <DragOverlay>
-                        {activeId && activeItem ? (
-                          <SortableRouteItem
-                            item={activeItem} 
-                            setParentId={setParentId} 
-                            setActionItem={setActionItem} 
-                          />
-                        ) : null}
-                      </DragOverlay>,
-                      document.body
-                    )}
-                  </SortableContext>
-                </DndContext>
-              </Flex>
-            }
-            {navigations?.length === 0 && <Center height={400}>
-              <EmptyBox msg={formatMessage({
-                id: getTranslation('navigation.page.emptyNavigation'),
-                defaultMessage: 'You have no navigations yet...',
-              })} />
-              <Button variant="primary" onClick={() => setModalType('NavCreate')}>
-                {formatMessage({
-                  id: getTranslation('navigation.page.createNewNavigation'),
-                  defaultMessage: 'Create new navigation',
-                })}
-              </Button>
-            </Center>}
-            {navigationItems?.length === 0 && <Center height={400}>
-              <EmptyBox msg="Your navigation is empty..." />
-              <Button variant="primary" onClick={() => setModalType('ItemCreate')}>
-                {formatMessage({
-                  id: getTranslation('navigation.page.createNewItem'),
-                  defaultMessage: 'Create new item',
-                })}
-              </Button>
-            </Center>}
-          </Layouts.Content>
-        </>
-        {modalType === 'NavOverview' && <NavOverview navigations={navigations} setActionItem={setActionItem} />}
+                <SortableContext items={navigationItems} strategy={verticalListSortingStrategy}>
+                  {navigationItems.map((item, index) => (
+                    <SortableRouteItem
+                      key={index} 
+                      item={item} 
+                      setParentId={setParentId} 
+                      setActionItem={setActionItem} 
+                      indentationWidth={indentationWidth}
+                      depth={item.id === activeId && projected ? projected.depth : item.depth}
+                    />
+                  ))}
+                  {createPortal(
+                    <DragOverlay>
+                      {activeId && activeItem ? (
+                        <SortableRouteItem
+                          item={activeItem} 
+                          setParentId={setParentId} 
+                          setActionItem={setActionItem} 
+                        />
+                      ) : null}
+                    </DragOverlay>,
+                    document.body
+                  )}
+                </SortableContext>
+              </DndContext>
+            </Flex>
+          }
+          {navigations?.length === 0 && <Center height={400}>
+            <EmptyBox msg={formatMessage({
+              id: getTranslation('navigation.page.emptyNavigation'),
+              defaultMessage: 'You have no navigations yet...',
+            })} />
+            <Button variant="primary" onClick={() => setModalType('NavCreate')}>
+              {formatMessage({
+                id: getTranslation('navigation.page.createNewNavigation'),
+                defaultMessage: 'Create new navigation',
+              })}
+            </Button>
+          </Center>}
+          {selectedNavigation?.items?.length === 0 && <Center height={400}>
+            <EmptyBox msg="Your navigation is empty..." />
+            <Button variant="primary" onClick={() => setModalType('ItemCreate')}>
+              {formatMessage({
+                id: getTranslation('navigation.page.createNewItem'),
+                defaultMessage: 'Create new item',
+              })}
+            </Button>
+          </Center>}
+        </PageWrapper>
+        {modalType === 'NavOverview' &&
+          <NavOverview
+            navigations={navigations}
+            setActionItem={setActionItem}
+          />
+        }
         {modalType === 'NavCreate' && <NavCreate />}
-        {modalType === "NavDelete"  && <Delete variant="NavDelete" item={actionItem as NestedNavigation} fetchNavigations={fetchNavigations} />}
-        {modalType === 'NavEdit' && <NavEdit item={actionItem as NestedNavigation} fetchNavigations={fetchNavigations} />}
+        {modalType === "NavDelete"  &&
+          <Delete variant="NavDelete"
+            item={actionItem as NestedNavigation}
+            onDelete={() => {}}
+          />
+        }
+        {modalType === 'NavEdit' &&
+          <NavEdit
+            item={actionItem as NestedNavigation}
+            onEdit={() => {}}
+          />
+        }
         {modalType === 'ItemCreate' && <ItemCreate parentId={parentId}/>}
-        {modalType === "ItemDelete" && <Delete variant="ItemDelete" item={actionItem as NestedNavItem} fetchNavigations={fetchNavigations} />}
+        {modalType === "ItemDelete" &&
+          <Delete
+            variant="ItemDelete" 
+            item={actionItem as NestedNavItem} 
+            onDelete={(editedItem) => {
+              setNavigationItems(items =>
+                items?.map(item => item.id === editedItem.id ? editedItem : item)
+              )
+            }}
+          />
+        }
         {modalType === 'ItemEdit' && <ItemEdit item={actionItem as NestedNavItem}/>}
-        {modalType === 'ExternalCreate' && <ExternalItem variant={modalType} parentDocumentId={parentId}/>}
-        {modalType === 'ExternalEdit' && <ExternalItem variant={modalType} item={actionItem as NestedNavItem}/>}
-        {modalType === 'WrapperCreate' && <WrapperItem variant={modalType} parentDocumentId={parentId}/>}
-        {modalType === 'WrapperEdit' && <WrapperItem variant={modalType} item={actionItem as NestedNavItem}/>}
+        {modalType === 'ExternalCreate' &&
+          <ExternalItem
+            variant={modalType}
+            parentDocumentId={parentId}
+          />
+        }
+        {modalType === 'ExternalEdit' &&
+          <ExternalItem
+            variant={modalType}
+            item={actionItem as NestedNavItem}
+          />
+        }
+        {modalType === 'WrapperCreate' &&
+          <WrapperItem
+            variant={modalType}
+            parentDocumentId={parentId}
+          />
+        }
+        {modalType === 'WrapperEdit' && 
+          <WrapperItem 
+            variant={modalType}
+            item={actionItem as NestedNavItem}
+          />
+        }
       </SelectedNavigationContext.Provider>
     </ModalContext.Provider>
   );

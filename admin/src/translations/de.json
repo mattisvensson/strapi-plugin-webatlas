@@ -106,8 +106,13 @@
   "webatlas.save": "Speichern",
   "webatlas.select": "Auswählen",
   "webatlas.manage": "Verwalten",
+  "webatlas.published": "Veröffentlicht",
+  "webatlas.draft": "Entwurf",
+  "webatlas.modified": "Geändert",
+  "webatlas.deleted": "Gelöscht",
   
   "webatlas.notification.error": "Ein Fehler ist aufgetreten",
   "webatlas.notification.settings.saved": "Einstellungen erfolgreich gespeichert",
-  "webatlas.notification.routes.fetchFailed": "Routen konnten nicht abgerufen werden"
+  "webatlas.notification.routes.fetchFailed": "Routen konnten nicht abgerufen werden",
+  "webatlas.notification.navigation.saveOrderFailed": "Fehler beim Aktualisieren des Navigationselements"
 }

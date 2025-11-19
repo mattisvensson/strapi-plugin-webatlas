@@ -3,7 +3,6 @@ import { NestedNavItem, NestedNavigation } from '../../../../types';
 import { ModalContext } from '../../contexts';
 import { useContext, useEffect, useState, ReactElement, forwardRef } from 'react';
 import { Link as LinkIcon, ExternalLink, OneToMany, More, Drag } from '@strapi/icons';
-import { useFetchClient } from '@strapi/strapi/admin';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
 
@@ -35,18 +34,35 @@ function RouteIcon ({ type, color = 'neutral800' }: { type: RouteType | undefine
   }
 }
 export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setParentId, setActionItem, ghost, depth, style, wrapperRef, handleProps}: RouteItemProps, ref) => {
-
   if (!item || !item.route) return null
-  
+
   const { setModalType } = useContext(ModalContext);
-  const { get } = useFetchClient();
   const { formatMessage } = useIntl();
 
-  const [itemStatus, setItemStatus] = useState({
-    status: 'published',
-    variant: 'primary',
-    textColor: 'primary700'
-  })
+  const itemStatusOptions = {
+    published: {
+      status: formatMessage({
+        id: getTranslation('published'),
+        defaultMessage: 'Published',
+      }),
+      variant: 'primary',
+    },
+    draft: {
+      status: formatMessage({
+        id: getTranslation('draft'),
+        defaultMessage: 'Draft',
+      }),
+      variant: 'secondary',
+    },
+    modified: {
+      status: formatMessage({
+        id: getTranslation('modified'),
+        defaultMessage: 'Modified',
+      }),
+      variant: 'alternative',
+    }
+  }
+
   const [type, setType] = useState<RouteType>()
   useEffect(() => {
     if (!item.route.internal && !item.route.wrapper) {
@@ -57,46 +73,6 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
       setType("internal")
     }
   }, [item])
-
-  useEffect(() => {
-    const ct = item.route.relatedContentType
-    const id = item.route.relatedDocumentId
-
-    if (!ct || !id) return
-
-    async function fetchRelated() {
-      try {
-        const { data } = await get(`/content-manager/collection-types/${ct}/${id}`)
-
-        switch (data.data.status) {
-          case "modified":
-            setItemStatus({
-              status: 'Modified',
-              variant: 'alternative',
-              textColor: 'alternative700'
-            })
-            break;
-          case "draft":
-            setItemStatus({
-              status: 'Draft',
-              variant: 'secondary',
-              textColor: 'secondary700'
-            })
-            break;
-          default:
-            setItemStatus({
-              status: 'Published',
-              variant: 'primary',
-              textColor: 'primary700'
-            })
-        }
-      } catch (err) {
-        console.log(err)
-      }
-    }
-    fetchRelated()
-  }, [])
-
 
   const handleAddChildren = () => {
     setParentId(item.documentId)
@@ -120,7 +96,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
 
   const elStyle = {
     marginLeft: depth !== undefined ? depth * 48 : 0,
-    opacity: ghost ? 0.5 : 1,
+    opacity: (ghost || item.deleted) ? 0.5 : 1,
     ...style,
   };
 
@@ -141,26 +117,34 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
         ref={ref}
       >
         <Flex justifyContent="space-between" gap={4}>
-          <Flex>
+          <Flex gap={4}>
             <Drag color="neutral800" {...handleProps}/>
             <Box
-              marginLeft={4}
-              marginRight={4}
               width="1px"
               height="32px"
               background="neutral150"
             />
             <RouteIcon type={type}/>
-            <Flex gap={2} marginLeft={4}>
+            <Flex gap={2}>
               <Typography fontWeight="bold">{item.route.title}</Typography>
               <Typography textColor="neutral400">{type === 'internal' && '/'}{item.route.fullPath}</Typography>
             </Flex>
+            {item.deleted &&
+              <Status size="S">
+                <Typography fontWeight="bold" textColor="danger500">
+                  {formatMessage({
+                    id: getTranslation('deleted'),
+                    defaultMessage: 'Deleted',
+                  })}
+                </Typography>
+              </Status>
+            }
           </Flex>
           <Flex direction="row" gap={4}>
-            {type === 'internal' && 
-              <Status variant={itemStatus.variant} size="S">
-                <Typography fontWeight="bold" textColor={itemStatus.textColor}>
-                  {itemStatus.status}
+            {type === 'internal' && item.status &&
+              <Status variant={itemStatusOptions[item.status].variant} size="S">
+                <Typography fontWeight="bold">
+                  {itemStatusOptions[item.status].status}
                 </Typography>
               </Status>
             }

@@ -99,6 +99,14 @@ export default function useApi() {
     return data
   }
 
+  const getNavigation = async ({ documentId, variant }: {documentId?: string, variant?: StructuredNavigationVariant} = {}) => {
+    const query = [];
+    if (documentId) query.push(`documentId=${documentId}`);
+    if (variant) query.push(`variant=${variant}`);
+    const { data } = await get(`/webatlas/navigation${query.length > 0 ? `?${query.join('&')}` : ''}`);
+    return data
+  }
+
   const deleteNavigation = async (documentId: string) => {
     const { data } = await del(`/webatlas/navigation?documentId=${documentId}`);
     return data
@@ -122,6 +130,7 @@ export default function useApi() {
     updateNavItem,
     deleteNavItem,
     getStructuredNavigation,
+    getNavigation,
     deleteNavigation,
     updateNavigation,
   }

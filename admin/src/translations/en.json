@@ -106,8 +106,13 @@
   "webatlas.save": "Save",
   "webatlas.select": "Select",
   "webatlas.manage": "Manage",
+  "webatlas.published": "Published",
+  "webatlas.draft": "Draft",
+  "webatlas.modified": "Modified",
+  "webatlas.deleted": "Deleted",
 
   "webatlas.notification.error": "An error occurred",
   "webatlas.notification.settings.saved": "Settings saved successfully",
-  "webatlas.notification.routes.fetchFailed": "Failed to fetch routes"
+  "webatlas.notification.routes.fetchFailed": "Failed to fetch routes",
+  "webatlas.notification.navigation.saveOrderFailed": "Error updating navigation item"
 }
