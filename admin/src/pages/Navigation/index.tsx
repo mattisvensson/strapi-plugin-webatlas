@@ -53,7 +53,7 @@ const Navigation = () => {
   const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>();
   const [parentId, setParentId] = useState<string | undefined>();
   const { updateNavItem, getNavigation, deleteNavItem, updateRoute } = useApi();
-  const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [isSavingNavigation, setIsSavingNavigation] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const [projected, setProjected] = useState<Projected | null>(null);
@@ -136,17 +136,17 @@ const Navigation = () => {
     setActiveItem(item);
   }, [navigationItems, activeId])
 
-  function saveNavigation() {
+  async function saveNavigation() {
     if (!navigationItems || !selectedNavigation) return
 
-    setIsSavingOrder(true);
+    setIsSavingNavigation(true);
 
     let error = false;
 
     let groupIndices: number[] = [0];
     let parentIds: string[] = [];
     
-    navigationItems.map(async (item, index) => {
+    for (const [index, item] of navigationItems.entries()) {
       if (item.deleted) {
         try {
           await deleteNavItem(item.documentId);
@@ -188,7 +188,7 @@ const Navigation = () => {
       const previousItem = navigationItems[index - 1];
 
       if (typeof item.depth !== 'number') {
-        setIsSavingOrder(false);
+        setIsSavingNavigation(false);
         return
       }
 
@@ -226,9 +226,9 @@ const Navigation = () => {
         });
         console.error('Error updating navigation item ', error);
       } finally {
-        setIsSavingOrder(false);
+        setIsSavingNavigation(false);
       }
-    });
+    }
     
     if (!error) {
       setInitialNavigationItems(navigationItems)
@@ -328,7 +328,7 @@ const Navigation = () => {
             </Button>
             <Button
               onClick={() => saveNavigation()}
-              loading={isSavingOrder}
+              loading={isSavingNavigation}
               variant="primary"
               disabled={JSON.stringify(navigationItems) === JSON.stringify(initialNavigationItems)}
             >
@@ -450,6 +450,11 @@ const Navigation = () => {
           <ExternalItem
             variant={modalType}
             item={actionItem as NestedNavItem}
+            onEdit={(editedItem) => {
+              setNavigationItems(items =>
+                items?.map(item => item.id === editedItem.id ? editedItem : item)
+              )
+            }}
           />
         }
         {modalType === 'WrapperCreate' &&

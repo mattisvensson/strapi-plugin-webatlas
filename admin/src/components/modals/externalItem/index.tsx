@@ -11,6 +11,7 @@ type externalItemProps = {
   variant: 'ExternalCreate' | 'ExternalEdit';
   item?: NestedNavItem;
   parentDocumentId?: string;
+  onEdit?: (editedItem: NestedNavItem) => void;
 }
 
 function ExternalItemComponent({ 
@@ -20,12 +21,12 @@ function ExternalItemComponent({
   navItemState,
   dispatchItemState,
   createExternalRoute,
-  updateRoute,
   path,
   dispatchPath,
   setModalType,
   selectedNavigation,
   parentDocumentId,
+  onEdit,
 }: externalItemProps & ReturnType<typeof useModalSharedLogic>) {
 
   const { formatMessage } = useIntl();
@@ -51,7 +52,14 @@ function ExternalItemComponent({
       }
 
       if (variant === 'ExternalEdit' && item) {
-        await updateRoute(data, item.route.documentId)
+        if (onEdit) {
+          onEdit({
+            ...item,
+            update: {
+              ...data
+            }
+          });
+        }
       } else {
         const route = await createExternalRoute(data)
   
