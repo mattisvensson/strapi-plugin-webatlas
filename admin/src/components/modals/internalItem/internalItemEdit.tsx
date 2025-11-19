@@ -15,7 +15,6 @@ function ItemEditComponent({
   selectedContentType,
   setSelectedContentType,
   entities,
-  updateRoute,
   replacement,
   validationState,
   initialState,
@@ -25,6 +24,7 @@ function ItemEditComponent({
   dispatchPath,
   debouncedCheckUrl,
   setModalType,
+  onEdit,
 }: ModalItem_VariantEdit & ReturnType<typeof useModalSharedLogic>) {
 
   const { formatMessage } = useIntl();
@@ -82,17 +82,19 @@ function ItemEditComponent({
 
   const updateItem = async () => {
     try {
-      if (isEqual(navItemState ,initialState.current) && path.value === path.initialPath) return
+      if (isEqual(navItemState, initialState.current) && path.value === path.initialPath) return
       
       const isOverride = path.value !== item.route.fullPath ? true : navItemState.isOverride
 
-      await updateRoute({
-        ...navItemState,
-        slug: path.value,
-        fullPath: path.value,
-        isOverride,
-      }, item.route.documentId)
-
+      onEdit({
+        ...item,
+        update: {
+          title: navItemState.title,
+          slug: navItemState.slug,
+          fullPath: path.value,
+          isOverride,
+        },
+    });
       setModalType('')
     } catch (err) {
       console.log(err)

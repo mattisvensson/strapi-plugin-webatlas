@@ -153,6 +153,12 @@ export type NestedNavItem = {
   depth?: number;
   order: number;
   deleted?: boolean;
+  update?: {
+    title?: string;
+    slug?: string;
+    fullPath?: string;
+    isOverride?: boolean;
+  }
 }
 
 export type NavOverviewState = {
@@ -178,6 +184,7 @@ type ModalItem_VariantCreate = {
 
 type ModalItem_VariantEdit = {
   item: NestedNavItem;
+  onEdit: (editedItem: NestedNavItem) => void;
 }
 
 type modalSharedLogic = {
