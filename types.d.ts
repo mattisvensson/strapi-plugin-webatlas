@@ -144,7 +144,7 @@ export type NestedNavItem = {
   documentId: string;
   items: NestedNavItem[];
   parent: {
-    id: number;
+    documentId: string;
   } | null;
   route: Route;
   updatedAt: string;
