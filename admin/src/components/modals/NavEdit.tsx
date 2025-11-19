@@ -9,10 +9,10 @@ import { getTranslation } from '../../utils';
 
 type NavEditProps = {
   item: NestedNavigation;
-  fetchNavigations: () => void;
+  onEdit: () => void;
 }
 
-export default function NavEdit({ item, fetchNavigations }: NavEditProps) {
+export default function NavEdit({ item, onEdit }: NavEditProps) {
   const { setModalType } = useContext(ModalContext);
   const [name, setName] = useState(item.name)
   const [visible, setVisible] = useState(item.visible)
@@ -24,8 +24,8 @@ export default function NavEdit({ item, fetchNavigations }: NavEditProps) {
     setLoading(true);
     try {
       await updateNavigation(item.documentId, { name, visible });
-      fetchNavigations()
       setModalType('NavOverview')
+      onEdit();
     } catch (err) {
       console.log(err)
     } finally {

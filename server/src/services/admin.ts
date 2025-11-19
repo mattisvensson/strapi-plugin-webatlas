@@ -1,4 +1,4 @@
-import { ContentType, NavigationInput, NavItemSettings, Route, StructuredNavigationVariant } from "../../../types";
+import type { ContentType, NavigationInput, NavItemSettings, NestedNavigation, Route, StructuredNavigationVariant } from "../../../types";
 import duplicateCheck from "../utils/duplicateCheck";
 import { getFullPath, buildStructuredNavigation, transformToUrl } from "../../../utils";
 import { waRoute, waNavigation, waNavItem } from "../utils/pluginHelpers";
@@ -124,16 +124,21 @@ export default ({strapi}) => ({
           documentId: documentId,
           populate: ['items', "items.route", "items.parent"]
         });
+
+        if (!navigation) throw new Error("Navigation not found");
+
+        if (variant)
+          navigation = buildStructuredNavigation(navigation, variant)
       } else {
         navigation =  await strapi.documents(waNavigation).findMany({
           populate: ['items', "items.route", "items.parent"],
         });
-      }
 
-      if (!navigation) throw new Error("Navigation not found");
+        if (!navigation) throw new Error("Navigation not found");
 
-      if (variant) {
-        navigation = buildStructuredNavigation(navigation, variant)
+        if (variant) {
+          navigation = navigation.map((nav: NestedNavigation) => buildStructuredNavigation(nav, variant))
+        }
       }
 
       return navigation

@@ -3,26 +3,24 @@ import { useContext, useRef } from 'react';
 import { Dialog, Typography, Button } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
 import { NestedNavigation, NestedNavItem } from '../../../../types';
-import { useApi } from '../../hooks';
 import { useIntl } from 'react-intl';
 import { getTranslation } from '../../utils';
 
 type NavDelete = {
   variant: "NavDelete";
   item: NestedNavigation;
-  fetchNavigations: () => void;
+  onDelete: (editedItem: NestedNavigation) => void;
 }
 
 type ItemDelete = {
   variant: "ItemDelete";
   item: NestedNavItem;
-  fetchNavigations: () => void;
+  onDelete: (editedItem: NestedNavItem) => void;
 }
 
 type DeleteProps = NavDelete | ItemDelete;
 
-export default function Delete({ variant, item, fetchNavigations }: DeleteProps) {
-  const { deleteNavigation, deleteNavItem } = useApi();
+export default function Delete({ variant, item, onDelete }: DeleteProps) {
   
   const itemName = useRef(variant === "NavDelete" ? item.name : item.route.title)
   const closeModalState = useRef(variant === "NavDelete" ? 'NavOverview' : '')
@@ -32,13 +30,16 @@ export default function Delete({ variant, item, fetchNavigations }: DeleteProps)
 
   const handleDelete = async () => {
     try {
-      if (variant === "NavDelete") await deleteNavigation(item.documentId)
-      else await deleteNavItem(item.documentId)
+      if (variant === "NavDelete") {
+
+      } else if (variant === "ItemDelete") {
+        const editedItem = { ...item, deleted: true };
+        onDelete(editedItem);
+      }
     } catch (err) {
       console.log(err)
     }
 
-    fetchNavigations()
     setModalType(closeModalState.current)
   }
 
