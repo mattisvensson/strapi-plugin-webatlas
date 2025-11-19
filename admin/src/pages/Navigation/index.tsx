@@ -52,7 +52,7 @@ const Navigation = () => {
   const [initialNavigationItems, setInitialNavigationItems] = useState<NestedNavItem[]>();
   const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>();
   const [parentId, setParentId] = useState<string | undefined>();
-  const { updateNavItem, getNavigation, deleteNavItem } = useApi();
+  const { updateNavItem, getNavigation, deleteNavItem, updateRoute } = useApi();
   const [isSavingOrder, setIsSavingOrder] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -102,6 +102,7 @@ const Navigation = () => {
       });
     }
   }
+
   useEffect(() => {
     async function fetchNavigations() {
       setLoading(true);
@@ -161,6 +162,27 @@ const Navigation = () => {
           error = true;
         }
         return;
+      }
+
+      if (item.update) {
+        try {
+          await updateRoute({
+            title: item.update.title || item.route.title,
+            slug: item.update.slug || item.route.slug,
+            fullPath: item.update.fullPath || item.route.fullPath,
+            isOverride: item.update.isOverride !== undefined ? item.update.isOverride : item.route.isOverride,
+          }, item.route.documentId)
+        } catch (error) {
+          console.error('Error updating route ', error);
+          toggleNotification({
+            type: 'danger',
+            message: formatMessage({
+              id: getTranslation('notification.navigation.saveNavigationFailed'),
+              defaultMessage: 'Error updating navigation item',
+            }) + ' ' + item.route.title,
+          });
+          error = true;
+        }
       }
 
       const previousItem = navigationItems[index - 1];
@@ -407,7 +429,17 @@ const Navigation = () => {
             }}
           />
         }
-        {modalType === 'ItemEdit' && <ItemEdit item={actionItem as NestedNavItem}/>}
+        {modalType === 'ItemEdit' &&
+          <ItemEdit
+            item={actionItem as NestedNavItem}
+            onEdit={(editedItem) => {
+              console.log(editedItem);
+              setNavigationItems(items =>
+                items?.map(item => item.id === editedItem.id ? editedItem : item)
+              )
+            }}
+          />
+        }
         {modalType === 'ExternalCreate' &&
           <ExternalItem
             variant={modalType}
