@@ -66,40 +66,49 @@ const Navigation = () => {
   const { toggleNotification } = useNotification();
   const { get } = useFetchClient();
 
-  useEffect(() => {
-    async function loadNavigations() {
-      setLoading(true);
-      try {
-        const data = await getNavigation({ variant: 'flat' });
-        const updatedNavigations = await Promise.all(
-          data.map(async (nav: NestedNavigation) => {
-            const updatedItems = await Promise.all(
-              nav.items.map(async (item) => {
-                const ct = item.route.relatedContentType;
-                const id = item.route.relatedDocumentId;
-                if (!ct || !id) return item;
-                try {
-                  const { data } = await get(`/content-manager/collection-types/${ct}/${id}`);
-                  return { ...item, status: data.data.status };
-                } catch (err) {
-                  console.error(err);
-                  return item;
-                }
-              })
-            );
-            return { ...nav, items: updatedItems };
-          })
-        );
+  async function loadNavigations() {
+    try {
+      const data = await getNavigation({ variant: 'flat' });
+      const updatedNavigations = await Promise.all(
+        data.map(async (nav: NestedNavigation) => {
+          const updatedItems = await Promise.all(
+            nav.items.map(async (item) => {
+              const ct = item.route.relatedContentType;
+              const id = item.route.relatedDocumentId;
+              if (!ct || !id) return item;
+              try {
+                const { data } = await get(`/content-manager/collection-types/${ct}/${id}`);
+                return { ...item, status: data.data.status };
+              } catch (err) {
+                console.error(err);
+                return item;
+              }
+            })
+          );
+          return { ...nav, items: updatedItems };
+        })
+      );
 
-        setNavigations(updatedNavigations);
-        setSelectedNavigation(updatedNavigations[0]);
-      } catch (error) {
-        console.error('Error fetching navigations: ', error);
-      } finally {
-        setLoading(false);
-      }
+      setNavigations(updatedNavigations);
+      setSelectedNavigation(updatedNavigations[0]);
+    } catch (error) {
+      console.error('Error fetching navigations: ', error);
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: getTranslation('notification.navigation.fetchFailed'),
+          defaultMessage: 'Failed to fetch navigations',
+        }),
+      });
     }
-    loadNavigations();
+  }
+  useEffect(() => {
+    async function fetchNavigations() {
+      setLoading(true);
+      await loadNavigations();
+      setLoading(false);
+    }
+    fetchNavigations();
   }, []);
 
   useEffect(() => {
@@ -126,7 +135,7 @@ const Navigation = () => {
     setActiveItem(item);
   }, [navigationItems, activeId])
 
-  function saveOrder() {
+  function saveNavigation() {
     if (!navigationItems || !selectedNavigation) return
 
     setIsSavingOrder(true);
@@ -136,12 +145,20 @@ const Navigation = () => {
     let groupIndices: number[] = [0];
     let parentIds: string[] = [];
     
-    navigationItems.forEach(async (item, index) => {
+    navigationItems.map(async (item, index) => {
       if (item.deleted) {
         try {
           await deleteNavItem(item.documentId);
         } catch (error) {
           console.error('Error deleting navigation item ', error);
+          toggleNotification({
+            type: 'danger',
+            message: formatMessage({
+              id: getTranslation('notification.navigation.deleteFailed'),
+              defaultMessage: 'Error deleting navigation item',
+            }) + ' ' + item.route.title,
+          });
+          error = true;
         }
         return;
       }
@@ -181,7 +198,7 @@ const Navigation = () => {
         toggleNotification({
           type: 'danger',
           message: formatMessage({
-            id: getTranslation('notification.navigation.saveOrderFailed'),
+            id: getTranslation('notification.navigation.saveNavigationFailed'),
             defaultMessage: 'Error updating navigation item',
           }) + ' ' + item.route.title,
         });
@@ -191,7 +208,17 @@ const Navigation = () => {
       }
     });
     
-    !error && setInitialNavigationItems(navigationItems)
+    if (!error) {
+      setInitialNavigationItems(navigationItems)
+      loadNavigations();
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: getTranslation('notification.navigation.navigationSaved'),
+          defaultMessage: 'Navigation updated successfully',
+        }),
+      });
+    }
   }
 
   // React DnD Handlers --------------------------------------------------------
@@ -278,7 +305,7 @@ const Navigation = () => {
               })}
             </Button>
             <Button
-              onClick={() => saveOrder()}
+              onClick={() => saveNavigation()}
               loading={isSavingOrder}
               variant="primary"
               disabled={JSON.stringify(navigationItems) === JSON.stringify(initialNavigationItems)}
