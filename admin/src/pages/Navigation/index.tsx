@@ -14,7 +14,7 @@ import { createPortal } from 'react-dom';
 import { NavOverview, NavCreate, Delete, NavEdit, ItemCreate, ItemEdit, ExternalItem, WrapperItem, NavModal } from '../../components/modals';
 import { EmptyBox, Center, FullLoader } from '../../components/UI';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
-import { NestedNavigation, NestedNavItem } from '../../../../types';
+import type { NestedNavigation, NestedNavItem } from '../../../../types';
 import useApi from '../../hooks/useApi';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
@@ -52,7 +52,7 @@ const Navigation = () => {
   const [initialNavigationItems, setInitialNavigationItems] = useState<NestedNavItem[]>();
   const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>();
   const [parentId, setParentId] = useState<string | undefined>();
-  const { updateNavItem, getNavigation, deleteNavItem, updateRoute } = useApi();
+  const { updateNavItem, getNavigation, deleteNavItem, updateRoute, createNavItem } = useApi();
   const [isSavingNavigation, setIsSavingNavigation] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -136,16 +136,34 @@ const Navigation = () => {
     setActiveItem(item);
   }, [navigationItems, activeId])
 
+  function handleSoftAddedItem(newItem: NestedNavItem) {
+    if (newItem.isNew?.parent) {
+      const parentIndex = navigationItems?.findIndex(item => item.documentId === newItem.isNew?.parent);
+      if (parentIndex !== undefined && parentIndex >= 0) {
+        const parentDepth = navigationItems ? navigationItems[parentIndex].depth || 0 : 0;
+        newItem.depth = parentDepth + 1;
+        const updatedItems = navigationItems ? [
+          ...navigationItems.slice(0, parentIndex + 1),
+          newItem,
+          ...navigationItems.slice(parentIndex + 1)
+        ] : [newItem];
+        setNavigationItems(updatedItems);
+        return;
+      }
+    }
+    setNavigationItems(items => items ? [...items, newItem] : [newItem])
+  }
+
   async function saveNavigation() {
     if (!navigationItems || !selectedNavigation) return
-
+    
     setIsSavingNavigation(true);
 
     let error = false;
 
     let groupIndices: number[] = [0];
     let parentIds: string[] = [];
-    
+
     for (const [index, item] of navigationItems.entries()) {
       if (item.deleted) {
         try {
@@ -161,10 +179,13 @@ const Navigation = () => {
           });
           error = true;
         }
+
+        loadNavigations();
+        setIsSavingNavigation(false);
         return;
       }
 
-      if (item.update) {
+      if (item.update && !item.isNew) {
         try {
           await updateRoute({
             title: item.update.title || item.route.title,
@@ -209,12 +230,19 @@ const Navigation = () => {
       }
  
       try {
-        await updateNavItem(item.documentId, {
-          order: groupIndices[item.depth],
-          parent: parentIds.at(-1) || '',
-          route: item?.route?.documentId || '',
-          navigation: selectedNavigation?.documentId || ''
-        });
+        if (item.isNew) {
+          await createNavItem({
+            route: item.isNew.route,
+            parent: item.isNew.parent,
+            navigation: item.isNew.navigation,
+            order: groupIndices[item.depth],
+          });
+        } else {
+          await updateNavItem(item.documentId, {
+            order: groupIndices[item.depth] || 0,
+            parent: parentIds.at(-1) || null,
+          });
+        }
       } catch (error) {
         error = true;
         toggleNotification({
@@ -225,11 +253,11 @@ const Navigation = () => {
           }) + ' ' + item.route.title,
         });
         console.error('Error updating navigation item ', error);
-      } finally {
-        setIsSavingNavigation(false);
       }
     }
-    
+
+    setIsSavingNavigation(false);
+
     if (!error) {
       setInitialNavigationItems(navigationItems)
       loadNavigations();
@@ -330,7 +358,8 @@ const Navigation = () => {
               onClick={() => saveNavigation()}
               loading={isSavingNavigation}
               variant="primary"
-              disabled={JSON.stringify(navigationItems) === JSON.stringify(initialNavigationItems)}
+              // TODO: update disabled condition
+              // disabled={JSON.stringify(navigationItems) === JSON.stringify(initialNavigationItems)}
             >
               {formatMessage({
                 id: getTranslation('save'),
@@ -388,7 +417,7 @@ const Navigation = () => {
               })}
             </Button>
           </Center>}
-          {selectedNavigation?.items?.length === 0 && <Center height={400}>
+          {navigationItems?.length === 0 && <Center height={400}>
             <EmptyBox msg="Your navigation is empty..." />
             <Button variant="primary" onClick={() => setModalType('ItemCreate')}>
               {formatMessage({
@@ -417,7 +446,14 @@ const Navigation = () => {
             onEdit={() => {}}
           />
         }
-        {modalType === 'ItemCreate' && <ItemCreate parentId={parentId}/>}
+        {modalType === 'ItemCreate' && 
+          <ItemCreate
+            parentId={parentId}
+            onCreate={(newItem) => {
+              handleSoftAddedItem(newItem)
+            }}
+          />
+        }
         {modalType === "ItemDelete" &&
           <Delete
             variant="ItemDelete" 

@@ -159,6 +159,11 @@ export type NestedNavItem = {
     fullPath?: string;
     isOverride?: boolean;
   }
+  isNew?: {
+    route: string | null;
+    parent: string | null;
+    navigation: string | null;
+  };
 }
 
 export type NavOverviewState = {
@@ -177,9 +182,19 @@ export type NavOverviewRoute = {
 export type StructuredNavigationVariant = 'nested' | 'flat';
 
 
+export type SoftAddedNavItem = {
+  route: string | null;
+  navigation: string | null;
+  parent: string | null;
+  routeUpdate?: {
+    fullPath?: string;
+  }
+}
+
 // Modals
 type ModalItem_VariantCreate = {
   parentId?: string;
+  onCreate: (newItem: NestedNavItem) => void;
 }
 
 type ModalItem_VariantEdit = {

@@ -248,14 +248,16 @@ export default ({strapi}) => ({
 
   async updateNavItem(documentId: string, data: NavItemSettings) {
     try {
+      const updateData: any = {};
+      
+      if (data.navigation !== undefined && data.parent !== null && data.parent !== '') updateData.navigation = data.navigation;
+      if (data.route !== undefined && data.parent !== null && data.parent !== '') updateData.route = data.route;
+      if (data.parent !== undefined && data.parent !== null && data.parent !== '') updateData.parent = data.parent;
+      if (data.order !== undefined && data.parent !== null && typeof data.order === 'number') updateData.order = data.order;
+
       return await strapi.documents(waNavItem).update({
         documentId: documentId,
-        data: {
-          navigation: data.navigation || null,
-          route: data.route || null,
-          parent: data.parent || null,
-          order: data.order || 0,
-        }
+        data: updateData
       });
     } catch (e) {
       console.log(e)
