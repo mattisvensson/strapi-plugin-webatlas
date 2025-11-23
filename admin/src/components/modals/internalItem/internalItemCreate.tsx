@@ -1,12 +1,12 @@
-import { SingleSelect, SingleSelectOption, Toggle, Box, Divider, Grid, Field } from '@strapi/design-system';
+import { SingleSelect, SingleSelectOption, Box, Divider, Grid, Field } from '@strapi/design-system';
 import { withModalSharedLogic } from '../withModalSharedLogic';
-import { NavItemSettings, Entity, GroupedEntities, ModalItem_VariantCreate } from '../../../../../types';
+import type { Entity, GroupedEntities, ModalItem_VariantCreate } from '../../../../../types';
 import URLInfo from '../../URLInfo';
 import { useEffect, useState } from 'react';
 import { useModalSharedLogic } from '../useModalSharedLogic';
 import { NavModal } from '../'
 import { useIntl } from 'react-intl';
-import { getTranslation } from '../../../utils';
+import { getTranslation, createTempNavItemObject } from '../../../utils';
 
 // TODO: Let the user select if the parent slug should be inherited or not
 // TODO: Add hint if a route is added that already exists in a navigation (because there is only one path per route)
@@ -21,8 +21,6 @@ function ItemCreateComponent({
   entityRoute,
   setEntityRoute,
   entities,
-  createNavItem,
-  updateRoute,
   getRelatedRoute,
   replacement,
   validationState,
@@ -35,6 +33,7 @@ function ItemCreateComponent({
   setModalType,
   selectedNavigation,
   parentId,
+  onCreate,
 }: ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>) {
   const [loading, setLoading] = useState(false)
   const { formatMessage } = useIntl();
@@ -86,7 +85,6 @@ function ItemCreateComponent({
     }
     fetchRoute()
   }, [selectedEntity])
-
   
   const addItem = async () => {
     try {
@@ -94,18 +92,23 @@ function ItemCreateComponent({
 
       if (!entityRoute || !selectedNavigation) return
 
-      const settings: NavItemSettings = {
-        route: entityRoute.documentId ?? null,
-        parent: parentId ?? null,
-        navigation: selectedNavigation.documentId ?? null,
-      }
+      // TODO: Handle route update if path changed
+      // if (path.value !== path.initialPath) {
+      //   if (navItemState.slug !== entityRoute.fullPath) navItemState.isOverride = true
+      //   await updateRoute({fullPath: path.value}, entityRoute.documentId)
+      //   settings.routeUpdate = { fullPath: path.value }
+      // }
 
-      if (path.value !== path.initialPath) {
-        if (navItemState.slug !== entityRoute.fullPath) navItemState.isOverride = true
-        await updateRoute({fullPath: path.value}, entityRoute.documentId)
-      }
-
-      await createNavItem(settings);
+      const newItem = createTempNavItemObject({
+        parentId,
+        entityRoute,
+        selectedNavigation,
+        navItemState,
+        selectedEntity,
+        selectedContentType,
+        path
+      })
+      onCreate(newItem)
 
       setModalType('')
     } catch (err) {

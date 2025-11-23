@@ -80,7 +80,7 @@ export default function useApi() {
     return data
   };
 
-  const updateNavItem = async (documentId: string, body: NavItemSettings) => {
+  const updateNavItem = async (documentId: string, body: Pick<NavItemSettings, 'order' | 'parent'>) => {
     const { data } = await put(`/webatlas/navitem?documentId=${documentId}`, {
       data: {
         ...body,
