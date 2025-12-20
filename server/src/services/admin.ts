@@ -102,6 +102,36 @@ export default ({strapi}) => ({
     }
   },
 
+  async createExternalRouteAndNavItem(
+    {routeData, navItemData}: 
+    {routeData: any, navItemData: Omit<NavItemSettings, 'route'>}
+  ) {
+    let route = null
+    try {
+      route = await this.createExternalRoute(routeData)
+      await this.createNavItem({
+        route: route.documentId,
+        navigation: navItemData.navigation,
+        parent: navItemData.parent,
+        order: navItemData.order,
+      })
+      return true
+    } catch (e) {
+      console.log(e)
+      route.documentId && this.deleteRoute(route.documentId)
+    }
+  },
+
+  async deleteRoute(routeId) {
+    try {
+      await strapi.documents(waRoute).delete({
+        documentId: routeId
+      })
+    } catch (e) {
+      console.log(e)
+    }
+  },
+
   async getRelatedRoute(documentId: string) {
     try {
       return await strapi.db?.query(waRoute).findOne({

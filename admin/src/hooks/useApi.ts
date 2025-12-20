@@ -56,6 +56,14 @@ export default function useApi() {
     });
     return data
   };
+  const createExternalRouteAndNavItem = async (body: { routeData: RouteSettings; navItemData: Omit<NavItemSettings, 'route' > }) => {
+    const { data } = await post('/webatlas/route/external/navitem', {
+      data: {
+        ...body,
+      },
+    });
+    return data
+  };
 
   const getRoutes = async () => {
     const { data } = await get('/webatlas/route');
@@ -124,6 +132,7 @@ export default function useApi() {
     fetchAllEntities,
     getRelatedRoute,
     createExternalRoute,
+    createExternalRouteAndNavItem,
     getRoutes,
     updateRoute,
     createNavItem,

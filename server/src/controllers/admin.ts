@@ -45,6 +45,21 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
+  async createExternalRouteAndNavItem (ctx) {
+    try {
+      const { data } = ctx.request.body;
+
+      if (!data || !data.routeData || !data.navItemData) {
+        return ctx.throw(400, 'Both routeData and navItemData are required');
+      }
+
+      return await getAdminService().createExternalRouteAndNavItem(
+        { routeData: data.routeData, navItemData: data.navItemData },
+      );
+    } catch (e) {
+      return ctx.throw(500, e)
+    }
+  },
   async getRelatedRoute (ctx) {
     try {
       const { documentId } = ctx.query;

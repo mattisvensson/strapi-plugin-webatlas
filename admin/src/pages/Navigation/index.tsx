@@ -52,7 +52,7 @@ const Navigation = () => {
   const [initialNavigationItems, setInitialNavigationItems] = useState<NestedNavItem[]>();
   const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>();
   const [parentId, setParentId] = useState<string | undefined>();
-  const { updateNavItem, getNavigation, deleteNavItem, updateRoute, createNavItem } = useApi();
+  const { updateNavItem, getNavigation, deleteNavItem, updateRoute, createNavItem, createExternalRouteAndNavItem } = useApi();
   const [isSavingNavigation, setIsSavingNavigation] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -231,12 +231,32 @@ const Navigation = () => {
  
       try {
         if (item.isNew) {
-          await createNavItem({
-            route: item.isNew.route,
-            parent: item.isNew.parent,
-            navigation: item.isNew.navigation,
-            order: groupIndices[item.depth],
-          });
+          if (item.isNew.route) {
+            await createNavItem({
+              route: item.isNew.route,
+              parent: item.isNew.parent,
+              navigation: item.isNew.navigation,
+              order: groupIndices[item.depth],
+            });
+          } else {
+            createExternalRouteAndNavItem({
+              routeData: {
+                title: item.route.title,
+                slug: item.route.slug,
+                fullPath: item.route.fullPath,
+                wrapper: item.route.wrapper,
+                internal: item.route.internal,
+                // isOverride: item.route.isOverride,
+                // active: item.route.active,
+              },
+              navItemData: {
+                parent: item.isNew.parent,
+                navigation: item.isNew.navigation,
+                order: groupIndices[item.depth],
+              }
+            })
+           
+          }
         } else {
           await updateNavItem(item.documentId, {
             order: groupIndices[item.depth] || 0,
@@ -479,14 +499,17 @@ const Navigation = () => {
         {modalType === 'ExternalCreate' &&
           <ExternalItem
             variant={modalType}
-            parentDocumentId={parentId}
+            parentId={parentId}
+            onCreate={(newItem) => {
+              handleSoftAddedItem(newItem)
+            }}
           />
         }
         {modalType === 'ExternalEdit' &&
           <ExternalItem
             variant={modalType}
             item={actionItem as NestedNavItem}
-            onEdit={(editedItem) => {
+            onSave={(editedItem) => {
               setNavigationItems(items =>
                 items?.map(item => item.id === editedItem.id ? editedItem : item)
               )
