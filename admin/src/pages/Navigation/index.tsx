@@ -167,7 +167,7 @@ const Navigation = () => {
     for (const [index, item] of navigationItems.entries()) {
       if (item.deleted) {
         try {
-          await deleteNavItem(item.documentId);
+          item.documentId && await deleteNavItem(item.documentId);
         } catch (error) {
           console.error('Error deleting navigation item ', error);
           toggleNotification({
@@ -180,8 +180,6 @@ const Navigation = () => {
           error = true;
         }
 
-        loadNavigations();
-        setIsSavingNavigation(false);
         continue;
       }
 
