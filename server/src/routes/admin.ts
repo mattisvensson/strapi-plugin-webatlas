@@ -47,6 +47,15 @@ export default {
       }
     },
     {
+      method: 'POST',
+      path: '/route/external/navitem',
+      handler: 'admin.createExternalRouteAndNavItem',
+      config: {
+        policies: [],
+        auth: false,
+      }
+    },
+    {
       method: 'GET',
       path: '/route/related',
       handler: 'admin.getRelatedRoute',

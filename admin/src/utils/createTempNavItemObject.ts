@@ -14,11 +14,13 @@ type CreateTempNavItemObjectParams = {
     title?: string;
   };
   selectedEntity: Entity | undefined | null;
-  selectedContentType: GroupedEntities | undefined;
+  selectedContentType: GroupedEntities | undefined | null;
   path: {
     value: string;
     uidPath: string;
   };
+  wrapper?: boolean;
+  internal?: boolean;
 };
 
 export default function createTempNavItemObject({ 
@@ -28,7 +30,9 @@ export default function createTempNavItemObject({
   navItemState, 
   selectedEntity, 
   selectedContentType,
-  path
+  path,
+  wrapper = false,
+  internal = true,
 }: CreateTempNavItemObjectParams): NestedNavItem {
     const tempNavItem: NestedNavItem = {
       id: 0,
@@ -52,7 +56,7 @@ export default function createTempNavItemObject({
         documentIdPath: selectedEntity ? selectedEntity.documentId : '',
         fullPath: path.value || '',
         id: 0,
-        internal: true,
+        internal: internal,
         isOverride: navItemState.isOverride || false,
         relatedContentType: selectedContentType ? JSON.stringify(selectedContentType.contentType) : '',
         relatedDocumentId: selectedEntity ? selectedEntity.documentId : '',
@@ -61,7 +65,7 @@ export default function createTempNavItemObject({
         title: navItemState.title || '',
         uidPath: path.uidPath || '',
         updatedAt: new Date().toISOString(),
-        wrapper: false,
+        wrapper: wrapper,
         navitem: null,
       },
     }

@@ -1,77 +1,89 @@
-import { TextInput, Grid, Box, Field } from '@strapi/design-system';
+import { Grid, Box, Field } from '@strapi/design-system';
 import { withModalSharedLogic } from '../withModalSharedLogic';
-import { NavItemSettings, NestedNavItem } from '../../../../../types';
+import { NestedNavItem } from '../../../../../types';
 import { useModalSharedLogic } from '../useModalSharedLogic';
 import React, { useEffect } from 'react';
 import { NavModal } from '../'
 import { useIntl } from 'react-intl';
-import { getTranslation } from '../../../utils';
+import { getTranslation, createTempNavItemObject } from '../../../utils';
 
-type externalItemProps = {
-  variant: 'ExternalCreate' | 'ExternalEdit';
-  item?: NestedNavItem;
-  parentDocumentId?: string;
-  onEdit?: (editedItem: NestedNavItem) => void;
+type externalCreateProps = {
+  variant: 'ExternalCreate';
+  parentId?: string;
+  onCreate: (newItem: NestedNavItem) => void;
 }
 
-function ExternalItemComponent({ 
-  variant,
-  item,
-  createNavItem,
-  navItemState,
-  dispatchItemState,
-  createExternalRoute,
-  path,
-  dispatchPath,
-  setModalType,
-  selectedNavigation,
-  parentDocumentId,
-  onEdit,
-}: externalItemProps & ReturnType<typeof useModalSharedLogic>) {
+type externalEditProps = {
+  variant: 'ExternalEdit';
+  item: NestedNavItem;
+  onSave: (editedItem: NestedNavItem) => void;
+}
+
+type externalItemProps = externalCreateProps | externalEditProps;
+
+function isExternalEditProps(
+  props: externalItemProps
+): props is externalEditProps {
+  return props.variant === 'ExternalEdit';
+}
+function isExternalCreateProps(
+  props: externalItemProps
+): props is externalCreateProps {
+  return props.variant === 'ExternalCreate';
+}
+
+function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useModalSharedLogic>) {
+  const {
+    variant,
+    navItemState,
+    dispatchItemState,
+    path,
+    dispatchPath,
+    setModalType,
+    selectedNavigation,
+  } = props;
+
+  const parentId = isExternalCreateProps(props) ? props.parentId : undefined;
+  const onCreate = isExternalCreateProps(props) ? props.onCreate : undefined;
+  const onSave = isExternalEditProps(props) ? props.onSave : undefined;
+  const item = isExternalEditProps(props) ? props.item : undefined;
 
   const { formatMessage } = useIntl();
   
   useEffect(() => {
-    if (variant !== 'ExternalEdit' || !item) return
+    if (variant !== 'ExternalEdit' || !item) return;
 
-    dispatchItemState({ type: 'SET_TITLE', payload: item.route.title })
-    dispatchItemState({ type: 'SET_ACTIVE', payload: item.route.active })
-    dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.fullPath })
-  }, [])
+    dispatchItemState({ type: 'SET_TITLE', payload: item.route.title });
+    dispatchItemState({ type: 'SET_ACTIVE', payload: item.route.active });
+    dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.fullPath });
+  }, [variant, item, dispatchItemState, dispatchPath]);
 
-  const addItem = async () => {
+  const handleConfirm = async () => {
     try {
-
       if (!path || !navItemState.title || !selectedNavigation) return
 
-      const data = {
-        title: navItemState.title,
-        fullPath: path.value,
-        active: navItemState.active,
-        internal: false,
-      }
-
-      if (variant === 'ExternalEdit' && item) {
-        if (onEdit) {
-          onEdit({
-            ...item,
-            update: {
-              ...data
-            }
-          });
-        }
-      } else {
-        const route = await createExternalRoute(data)
-  
-        if (!route) return
-  
-        const settings: NavItemSettings = {
-          route: route.documentId,
-          parent: parentDocumentId ?? null,
-          navigation: selectedNavigation.documentId,
-        }
-  
-        await createNavItem(settings);
+      if (variant === 'ExternalEdit' && item && onSave) {
+        onSave({
+          ...item,
+          update: {
+            title: navItemState.title,
+            fullPath: path.value,
+            // internal: false,
+            // active: navItemState.active,
+          }
+        });
+      } else if (onCreate) {
+        const newItem = createTempNavItemObject({
+          parentId,
+          entityRoute: null,
+          selectedNavigation,
+          navItemState,
+          selectedEntity: null,
+          selectedContentType: null,
+          path,
+          internal: false,
+        })
+        onCreate(newItem);
       }
 
       setModalType('')
@@ -95,7 +107,7 @@ function ExternalItemComponent({
         formatMessage({ id: getTranslation('modal.externalItem.loadingText.create'), defaultMessage: 'Adding' }) : 
         formatMessage({ id: getTranslation('modal.externalItem.loadingText.edit'), defaultMessage: 'Saving' })
       }
-      onConfirm={addItem}
+      onConfirm={handleConfirm}
       modalToOpen=''
       currentModalType="ExternalCreate"
       currentModalMode={variant === 'ExternalCreate' ? 'create' : 'edit'}

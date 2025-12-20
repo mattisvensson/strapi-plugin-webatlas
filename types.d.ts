@@ -42,14 +42,17 @@ export type Route = {
 export type RouteSettings = {
   relatedContentType?: string;
   relatedId?: number;
+  relatedDocumentId?: string;
   title?: string;
   fullPath?: string;
   slug?: string;
   uidPath?: string;
+  documentIdPath?: string;
   isOverride?: boolean;
   internal?: boolean;
   active?: boolean;
   navitem?: number;
+  wrapper?: boolean
 };
 
 export type MainModal = {
