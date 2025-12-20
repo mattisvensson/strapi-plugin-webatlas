@@ -35,8 +35,8 @@ export default function createTempNavItemObject({
   internal = true,
 }: CreateTempNavItemObjectParams): NestedNavItem {
     const tempNavItem: NestedNavItem = {
-      id: 0,
-      documentId: '',
+      id: Math.floor(Math.random() * -1000000), // Temporary negative ID
+      documentId: `temp-${Date.now()}`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       depth: 0,
