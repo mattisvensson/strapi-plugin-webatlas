@@ -182,7 +182,7 @@ const Navigation = () => {
 
         loadNavigations();
         setIsSavingNavigation(false);
-        return;
+        continue;
       }
 
       if (item.update && !item.isNew) {
