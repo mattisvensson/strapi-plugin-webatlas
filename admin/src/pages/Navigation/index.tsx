@@ -399,7 +399,7 @@ const Navigation = () => {
                 <SortableContext items={navigationItems} strategy={verticalListSortingStrategy}>
                   {navigationItems.map((item, index) => (
                     <SortableRouteItem
-                      key={index} 
+                      key={item.documentId || index} 
                       item={item} 
                       setParentId={setParentId} 
                       setActionItem={setActionItem} 
