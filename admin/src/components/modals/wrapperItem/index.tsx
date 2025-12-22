@@ -1,32 +1,51 @@
 import { Grid, Box, Field } from '@strapi/design-system';
 import { withModalSharedLogic } from '../withModalSharedLogic';
-import { NavItemSettings, NestedNavItem } from '../../../../../types';
+import { NestedNavItem } from '../../../../../types';
 import { useModalSharedLogic } from '../useModalSharedLogic';
 import React, { useEffect } from 'react';
 import { NavModal } from '../';
 import { useIntl } from 'react-intl';
-import { getTranslation } from '../../../utils';
+import { getTranslation, createTempNavItemObject } from '../../../utils';
 
-type externalItemProps = {
-  variant: 'WrapperCreate' | 'WrapperEdit';
-  item?: NestedNavItem;
-  parentDocumentId?: string;
-  onEdit?: (editedItem: NestedNavItem) => void;
+type wrapperCreateProps = {
+  variant: 'WrapperCreate';
+  parentId?: string;
+  onCreate: (newItem: NestedNavItem) => void;
 }
 
-function WrapperItemComponent({ 
-  variant,
-  item,
-  createNavItem,
-  navItemState,
-  dispatchItemState,
-  createExternalRoute,
-  dispatchPath,
-  setModalType,
-  selectedNavigation,
-  parentDocumentId,
-  onEdit,
-}: externalItemProps & ReturnType<typeof useModalSharedLogic>) {
+type wrapperEditProps = {
+  variant: 'WrapperEdit';
+  item: NestedNavItem;
+  onSave: (editedItem: NestedNavItem) => void;
+}
+
+type wrapperItemProps = wrapperCreateProps | wrapperEditProps;
+
+function isWrapperEditProps(
+  props: wrapperItemProps
+): props is wrapperEditProps {
+  return props.variant === 'WrapperEdit';
+}
+function isWrapperCreateProps(
+  props: wrapperItemProps
+): props is wrapperCreateProps {
+  return props.variant === 'WrapperCreate';
+}
+
+function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useModalSharedLogic>) {
+  const {
+    variant,
+    navItemState,
+    dispatchItemState,
+    dispatchPath,
+    setModalType,
+    selectedNavigation,
+  } = props;
+
+  const parentId = isWrapperCreateProps(props) ? props.parentId : undefined;
+  const onCreate = isWrapperCreateProps(props) ? props.onCreate : undefined;
+  const onSave = isWrapperEditProps(props) ? props.onSave : undefined;
+  const item = isWrapperEditProps(props) ? props.item : undefined;
 
   const { formatMessage } = useIntl();
   
@@ -38,7 +57,7 @@ function WrapperItemComponent({
     dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.fullPath })
   }, [])
 
-  const addItem = async () => {
+  const onConfirm = async () => {
     try {
 
       if (!navItemState.title || !selectedNavigation) return
@@ -50,25 +69,24 @@ function WrapperItemComponent({
         wrapper: true,
       }
 
-      if (variant === 'WrapperEdit' && item) {
-        onEdit && onEdit({
+      if (variant === 'WrapperEdit' && item && onSave) {
+        onSave({
           ...item,
           update: { 
             ...data
           }
         })
-      } else {
-        const route = await createExternalRoute(data)
-  
-        if (!route) return
-  
-        const settings: NavItemSettings = {
-          route: route.documentId,
-          parent: parentDocumentId ?? null,
-          navigation: selectedNavigation.documentId,
-        }
-  
-        await createNavItem(settings);
+      } else if (onCreate) {
+        const newItem = createTempNavItemObject({
+          parentId,
+          entityRoute: null,
+          selectedNavigation,
+          navItemState,
+          selectedEntity: null,
+          selectedContentType: null,
+          wrapper: true,
+        })
+        onCreate(newItem);
       }
 
       setModalType('')
@@ -92,7 +110,7 @@ function WrapperItemComponent({
         formatMessage({ id: getTranslation('modal.wrapperItem.loadingText.create'), defaultMessage: 'Adding' }) : 
         formatMessage({ id: getTranslation('modal.wrapperItem.loadingText.edit'), defaultMessage: 'Saving' })  
       }
-      onConfirm={addItem}
+      onConfirm={onConfirm}
       modalToOpen=''
       currentModalType="WrapperCreate"
       currentModalMode={variant === 'WrapperCreate' ? 'create' : 'edit'}
@@ -155,4 +173,4 @@ function WrapperItemComponent({
   );
 }
 
-export const WrapperItem = withModalSharedLogic<externalItemProps>(WrapperItemComponent);
+export const WrapperItem = withModalSharedLogic<wrapperItemProps>(WrapperItemComponent);
