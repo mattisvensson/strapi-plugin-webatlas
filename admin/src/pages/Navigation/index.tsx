@@ -517,14 +517,17 @@ const Navigation = () => {
         {modalType === 'WrapperCreate' &&
           <WrapperItem
             variant={modalType}
-            parentDocumentId={parentId}
+            parentId={parentId}
+            onCreate={(newItem) => {
+              handleSoftAddedItem(newItem)
+            }}
           />
         }
         {modalType === 'WrapperEdit' && 
           <WrapperItem 
             variant={modalType}
             item={actionItem as NestedNavItem}
-            onEdit={(editedItem) => {
+            onSave={(editedItem) => {
               setNavigationItems(items =>
                 items?.map(item => item.id === editedItem.id ? editedItem : item)
               )
