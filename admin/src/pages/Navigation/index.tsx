@@ -73,8 +73,8 @@ const Navigation = () => {
         data.map(async (nav: NestedNavigation) => {
           const updatedItems = await Promise.all(
             nav.items.map(async (item) => {
-              const ct = item.route.relatedContentType;
-              const id = item.route.relatedDocumentId;
+              const ct = item.route?.relatedContentType;
+              const id = item.route?.relatedDocumentId;
               if (!ct || !id) return item;
               try {
                 const { data } = await get(`/content-manager/collection-types/${ct}/${id}`);
