@@ -35,31 +35,6 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async createExternalRoute (ctx) {
-    try {
-      const { data } = ctx.request.body;
-      return await getAdminService().createExternalRoute(
-        data,
-      );
-    } catch (e) {
-      return ctx.throw(500, e)
-    }
-  },
-  async createExternalRouteAndNavItem (ctx) {
-    try {
-      const { data } = ctx.request.body;
-
-      if (!data || !data.routeData || !data.navItemData) {
-        return ctx.throw(400, 'Both routeData and navItemData are required');
-      }
-
-      return await getAdminService().createExternalRouteAndNavItem(
-        { routeData: data.routeData, navItemData: data.navItemData },
-      );
-    } catch (e) {
-      return ctx.throw(500, e)
-    }
-  },
   async getRelatedRoute (ctx) {
     try {
       const { documentId } = ctx.query;
@@ -118,37 +93,6 @@ const admin = () => ({
       if (!documentId) return ctx.throw(400, 'Navigation documentId is required');
 
       return await getAdminService().deleteNavigation(documentId);
-    } catch (e) {
-      return ctx.throw(500, e)
-    }
-  },
-  async createNavItem (ctx) {
-    try {
-      const { data } = ctx.request.body;
-      return await getAdminService().createNavItem(data);
-    } catch (e) {
-      return ctx.throw(500, e)
-    }
-  },
-  async updateNavItem (ctx) {
-    try {
-      const { documentId } = ctx.query;
-
-      if (!documentId) return ctx.throw(400, 'NavItem documentId is required');
-
-      const { data } = ctx.request.body;
-      return await getAdminService().updateNavItem(documentId, data);
-    } catch (e) {
-      return ctx.throw(500, e)
-    }
-  },
-  async deleteNavItem (ctx) {
-    try {
-      const { documentId } = ctx.query;
-
-      if (!documentId) return ctx.throw(400, 'NavItem documentId is required');
-
-      return await getAdminService().deleteNavItem(documentId);
     } catch (e) {
       return ctx.throw(500, e)
     }

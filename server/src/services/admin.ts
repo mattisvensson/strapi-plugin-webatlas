@@ -1,8 +1,10 @@
-import type { ContentType, NavigationInput, NavItemSettings, NestedNavigation, Route, StructuredNavigationVariant } from "../../../types";
+import type { ContentType, NavigationInput, NestedNavigation, NestedNavItem, Route, StructuredNavigationVariant } from "../../../types";
 import duplicateCheck from "../utils/duplicateCheck";
 import { getFullPath, buildStructuredNavigation, transformToUrl } from "../../../utils";
 import { waRoute, waNavigation, waNavItem } from "../utils/pluginHelpers";
 import { PLUGIN_ID } from "../../../pluginId";
+import { createNavItem, updateNavItem, deleteNavItem } from "../utils/navItemHandler";
+import { createExternalRoute } from "../utils/routeHandler";
 
 export default ({strapi}) => ({
 
@@ -77,56 +79,6 @@ export default ({strapi}) => ({
       });
 
       return entity;
-    } catch (e) {
-      console.log(e)
-    }
-  },
-
-  async createExternalRoute(data) {
-    try {
-      return await strapi.documents(waRoute).create({
-        data: {
-          title: data.title,
-          slug: data.fullPath,
-          fullPath: data.fullPath,
-          relatedContentType: '',
-          relatedId: 0,
-          relatedDocumentId: '',
-          uidPath: '',
-          internal: false,
-          wrapper: data.wrapper,
-        },
-      });
-    } catch (e) {
-      console.log(e)
-    }
-  },
-
-  async createExternalRouteAndNavItem(
-    {routeData, navItemData}: 
-    {routeData: any, navItemData: Omit<NavItemSettings, 'route'>}
-  ) {
-    let route = null
-    try {
-      route = await this.createExternalRoute(routeData)
-      await this.createNavItem({
-        route: route.documentId,
-        navigation: navItemData.navigation,
-        parent: navItemData.parent,
-        order: navItemData.order,
-      })
-      return true
-    } catch (e) {
-      console.log(e)
-      route.documentId && this.deleteRoute(route.documentId)
-    }
-  },
-
-  async deleteRoute(routeId) {
-    try {
-      await strapi.documents(waRoute).delete({
-        documentId: routeId
-      })
     } catch (e) {
       console.log(e)
     }
@@ -243,7 +195,7 @@ export default ({strapi}) => ({
     for (const [index, item] of navigationItems.entries()) {
       if (item.deleted) {
         try {
-          item.documentId && await this.deleteNavItem(item.documentId);
+          item.documentId && await deleteNavItem(item.documentId);
         } catch (error) {
           error = true;
           console.error('Error deleting navigation item ', error);
@@ -300,14 +252,14 @@ export default ({strapi}) => ({
       try {
         if (item.isNew) {
           if (item.isNew.route) {
-            await this.createNavItem({
+            await createNavItem({
               route: item.isNew.route,
               parent: item.isNew.parent,
               navigation: item.isNew.navigation,
               order: groupIndices[item.depth],
             });
           } else {
-            const newRoute = await this.createExternalRoute({
+            const newRoute = await createExternalRoute({
                 title: item.route.title,
                 slug: item.route.slug,
                 fullPath: item.route.fullPath,
@@ -317,17 +269,16 @@ export default ({strapi}) => ({
                 // active: item.route.active,
             })
 
-            const newNavItem = await this.createNavItem({
+            const newNavItem = await createNavItem({
               route: newRoute.documentId,
               navigation: navigationId,
               parent: item.isNew.parent,
               order: groupIndices[item.depth],
             }) 
-            
-            newNavItemsMap.set(item.documentId, newNavItem);
+            if (newNavItem) newNavItemsMap.set(item.documentId, newNavItem);
           }
         } else {
-          await this.updateNavItem(item.documentId, {
+          await updateNavItem(item.documentId, {
             navigation: undefined,
             route: undefined,
             order: groupIndices[item.depth] || 0,
@@ -343,79 +294,6 @@ export default ({strapi}) => ({
     return !error
   },
 
-  async createNavItem(data: NavItemSettings) {
-    try {
-      if (!data.route || !data.navigation) return false
-
-      const parent = data.parent ? await strapi.documents(waNavItem).findOne({
-        documentId: data.parent,
-        populate: ['route']
-      }) : null;
-
-      const route = data.route ? await strapi.documents(waRoute).findOne({
-        documentId: data.route
-      }) : null;
-
-      let fullPath = route.slug
-
-      if (route.internal && !route.isOverride && parent?.route.internal) fullPath = getFullPath(parent?.route?.fullPath, route.slug)
-
-      await strapi.documents(waRoute).update({
-        documentId: data.route,
-        data: {
-          fullPath,
-        }
-      });
-
-      // TODO: Update webatlas fields in related entity
-      // await strapi.documents(route.relatedContentType).update({
-      //   documentId: route.relatedDocumentId,
-      //   data: {
-      //     webatlas_path: fullPath
-      //   }
-      // });
-
-      const entity = await strapi.documents(waNavItem).create({
-        data: {
-          navigation: data.navigation,
-          route: data.route || null,
-          parent: data.parent || null,
-        },
-      });
-
-      return entity;
-    } catch (e) {
-      console.log(e)
-    }
-  },
-
-  async updateNavItem(documentId: string, data: NavItemSettings) {
-    try {
-      const updateData: any = {};
-      if (data.navigation !== undefined && data.navigation !== null && data.navigation !== '') updateData.navigation = data.navigation;
-      if (data.route !== undefined && data.route !== null && data.route !== '') updateData.route = data.route;
-      if (data.parent !== undefined) updateData.parent = data.parent;
-      if (data.order !== undefined && typeof data.order === 'number') updateData.order = data.order;
-
-      return await strapi.documents(waNavItem).update({
-        documentId: documentId,
-        data: updateData
-      });
-    } catch (e) {
-      console.log(e)
-    }
-  },
-
-  async deleteNavItem(documentId: string) {
-    try {
-      await strapi.documents(waNavItem).delete({
-        documentId: documentId
-      })
-      return true
-    } catch (e) {
-      console.log(e)
-    }
-  },
 
   async checkUniquePath(initialPath: string, targetRouteDocumentId: string | null = null) {
     try {

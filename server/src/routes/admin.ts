@@ -38,24 +38,6 @@ export default {
       }
     },
     {
-      method: 'POST',
-      path: '/route/external',
-      handler: 'admin.createExternalRoute',
-      config: {
-        policies: [],
-        auth: false,
-      }
-    },
-    {
-      method: 'POST',
-      path: '/route/external/navitem',
-      handler: 'admin.createExternalRouteAndNavItem',
-      config: {
-        policies: [],
-        auth: false,
-      }
-    },
-    {
       method: 'GET',
       path: '/route/related',
       handler: 'admin.getRelatedRoute',
@@ -104,33 +86,6 @@ export default {
       method: 'DELETE',
       path: '/navigation',
       handler: 'admin.deleteNavigation',
-      config: {
-        policies: [],
-        auth: false,
-      }
-    },
-    {
-      method: 'POST',
-      path: '/navitem',
-      handler: 'admin.createNavItem',
-      config: {
-        policies: [],
-        auth: false,
-      }
-    },
-    {
-      method: 'PUT',
-      path: '/navitem',
-      handler: 'admin.updateNavItem',
-      config: {
-        policies: [],
-        auth: false,
-      }
-    },
-    {
-      method: 'DELETE',
-      path: '/navitem',
-      handler: 'admin.deleteNavItem',
       config: {
         policies: [],
         auth: false,

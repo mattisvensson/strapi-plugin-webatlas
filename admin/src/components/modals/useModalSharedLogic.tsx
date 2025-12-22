@@ -89,7 +89,7 @@ export function useModalSharedLogic() {
   const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
   // TODO: Fetch entities only once and share between modals
   const { entities } = useAllEntities();
-  const { createNavItem, updateRoute, getRelatedRoute, createExternalRoute } = useApi();
+  const { updateRoute, getRelatedRoute } = useApi();
 
   const initialState: React.RefObject<RouteSettings> = useRef({
     title: '',
@@ -136,8 +136,6 @@ export function useModalSharedLogic() {
     entityRoute,
     setEntityRoute,
     entities,
-    createNavItem,
-    createExternalRoute,
     updateRoute,
     getRelatedRoute,
     replacement,
