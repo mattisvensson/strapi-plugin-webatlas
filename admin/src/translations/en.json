@@ -115,7 +115,6 @@
   "webatlas.notification.settings.saved": "Settings saved successfully",
   "webatlas.notification.routes.fetchFailed": "Failed to fetch routes",
   "webatlas.notification.navigation.saveNavigationFailed": "Error updating navigation item",
-  "webatlas.notification.navigation.deleteFailed": "Error deleting navigation item",
   "webatlas.notification.navigation.navigationSaved": "Navigation updated successfully",
   "webatlas.notification.navigation.fetchFailed": "Failed to fetch navigations"
 }
