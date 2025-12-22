@@ -215,8 +215,6 @@ type modalSharedLogic = {
   entityRoute: Route | undefined,
   setEntityRoute: (value: Route) => void,
   entities: GroupedEntities[],
-  createNavItem: (NavItemSettings) => Promise<any>,
-  createExternalRoute: (body: RouteSettings) => Promise<any>,
   updateRoute: (body: RouteSettings, documentId: string) => Promise<any>,
   getRelatedRoute: (relatedDocumentId: string) => Promise<any>,
   replacement: string,

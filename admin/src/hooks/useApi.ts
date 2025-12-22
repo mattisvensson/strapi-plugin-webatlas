@@ -48,23 +48,6 @@ export default function useApi() {
     
   };
 
-  const createExternalRoute = async (body: RouteSettings) => {
-    const { data } = await post('/webatlas/route/external', {
-      data: {
-        ...body,
-      },
-    });
-    return data
-  };
-  const createExternalRouteAndNavItem = async (body: { routeData: RouteSettings; navItemData: Omit<NavItemSettings, 'route' > }) => {
-    const { data } = await post('/webatlas/route/external/navitem', {
-      data: {
-        ...body,
-      },
-    });
-    return data
-  };
-
   const getRoutes = async () => {
     const { data } = await get('/webatlas/route');
     return data
@@ -76,29 +59,6 @@ export default function useApi() {
         ...body,
       },
     });
-    return data
-  };
-
-  const createNavItem = async (body: NavItemSettings) => {
-    const { data } = await post('/webatlas/navitem', {
-      data: {
-        ...body,
-      },
-    });
-    return data
-  };
-
-  const updateNavItem = async (documentId: string, body: Pick<NavItemSettings, 'order' | 'parent'>) => {
-    const { data } = await put(`/webatlas/navitem?documentId=${documentId}`, {
-      data: {
-        ...body,
-      },
-    });
-    return data
-  };
-
-  const deleteNavItem = async (documentId: string) => {
-    const { data } = await del(`/webatlas/navitem?documentId=${documentId}`);
     return data
   };
 
@@ -139,13 +99,8 @@ export default function useApi() {
     fetchAllContentTypes,
     fetchAllEntities,
     getRelatedRoute,
-    createExternalRoute,
-    createExternalRouteAndNavItem,
     getRoutes,
     updateRoute,
-    createNavItem,
-    updateNavItem,
-    deleteNavItem,
     getStructuredNavigation,
     getNavigation,
     deleteNavigation,
