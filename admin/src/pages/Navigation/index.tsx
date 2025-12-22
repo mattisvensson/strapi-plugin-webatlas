@@ -158,10 +158,25 @@ const Navigation = () => {
     if (!navigationItems || !selectedNavigation) return
     
     setIsSavingNavigation(true);
+    
     try {
       await updateNavigationItemStructure(selectedNavigation.documentId, navigationItems);
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({
+          id: getTranslation('notification.navigation.navigationSaved'),
+          defaultMessage: 'Navigation updated successfully',
+        }),
+      });
     } catch (e) {
       console.error(e)
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: getTranslation('notification.navigation.saveNavigationFailed'),
+          defaultMessage: 'Error updating navigation item',
+        }),
+      });
     } finally {
       loadNavigations();
       setIsSavingNavigation(false)
