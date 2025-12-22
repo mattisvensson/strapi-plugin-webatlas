@@ -230,6 +230,119 @@ export default ({strapi}) => ({
     }
   },
 
+  async updateNavigationItemStructure(navigationId: string, navigationItems: NestedNavItem[]) {
+    if (!navigationId || !navigationItems) return
+
+    let error = false;
+
+    let groupIndices: number[] = [];
+    let parentIds: string[] = [];
+
+    const newNavItemsMap = new Map<string, NestedNavItem>();
+
+    for (const [index, item] of navigationItems.entries()) {
+      if (item.deleted) {
+        try {
+          item.documentId && await this.deleteNavItem(item.documentId);
+        } catch (error) {
+          error = true;
+          console.error('Error deleting navigation item ', error);
+        }
+
+        continue;
+      }
+
+      if (item.parent?.documentId.startsWith("temp-")) {
+        const newItem = newNavItemsMap.get(item.parent.documentId);
+        item.isNew.parent = newItem?.documentId
+      }
+
+      if (item.update && !item.isNew) {
+        try {
+          await this.updateRoute(item.route.documentId, {
+            title: item.update.title || item.route.title,
+            slug: item.update.slug || item.route.slug,
+            fullPath: item.update.fullPath || item.route.fullPath,
+            isOverride: item.update.isOverride !== undefined ? item.update.isOverride : item.route.isOverride,
+          })
+        } catch (error) {
+          error = true;
+          console.error('Error updating route ', error);
+        }
+      }
+
+      const previousItem = navigationItems[index - 1];
+
+      if (typeof item.depth !== 'number') {
+        return
+      }
+
+      if (item.depth === 0) {
+        if (groupIndices[0] !== undefined) {
+          groupIndices[0] = groupIndices[0] + 1;
+        } else {
+          groupIndices[0] = 0
+        }
+        parentIds = [];
+      } else if (typeof previousItem.depth === 'number' && item.depth === previousItem.depth + 1) {
+        parentIds.push(previousItem.documentId);
+        groupIndices[item.depth] = 0;
+      } else if (typeof previousItem.depth === 'number' && item.depth <= previousItem.depth) {
+        const diff = previousItem.depth - item.depth;
+        for (let i = 0; i < diff; i++) {
+          parentIds.pop();
+          groupIndices.pop();
+        }
+
+        groupIndices[item.depth] = (groupIndices[item.depth] || 0) + 1;
+      }
+ 
+      try {
+        if (item.isNew) {
+          if (item.isNew.route) {
+            await this.createNavItem({
+              route: item.isNew.route,
+              parent: item.isNew.parent,
+              navigation: item.isNew.navigation,
+              order: groupIndices[item.depth],
+            });
+          } else {
+            const newRoute = await this.createExternalRoute({
+                title: item.route.title,
+                slug: item.route.slug,
+                fullPath: item.route.fullPath,
+                wrapper: item.route.wrapper,
+                internal: item.route.internal,
+                // isOverride: item.route.isOverride,
+                // active: item.route.active,
+            })
+
+            const newNavItem = await this.createNavItem({
+              route: newRoute.documentId,
+              navigation: navigationId,
+              parent: item.isNew.parent,
+              order: groupIndices[item.depth],
+            }) 
+            
+            newNavItemsMap.set(item.documentId, newNavItem);
+          }
+        } else {
+          await this.updateNavItem(item.documentId, {
+            navigation: undefined,
+            route: undefined,
+            order: groupIndices[item.depth] || 0,
+            parent: parentIds.at(-1) || null,
+          });
+        }
+      } catch (errorMsg) {
+        error = true;
+        console.error('Error updating navigation item ', errorMsg);
+      }
+    }
+
+    return !error
+  },
+
   async createNavItem(data: NavItemSettings) {
     try {
       if (!data.route || !data.navigation) return false
@@ -279,11 +392,10 @@ export default ({strapi}) => ({
   async updateNavItem(documentId: string, data: NavItemSettings) {
     try {
       const updateData: any = {};
-      
-      if (data.navigation !== undefined && data.parent !== null && data.parent !== '') updateData.navigation = data.navigation;
-      if (data.route !== undefined && data.parent !== null && data.parent !== '') updateData.route = data.route;
-      if (data.parent !== undefined && data.parent !== null && data.parent !== '') updateData.parent = data.parent;
-      if (data.order !== undefined && data.parent !== null && typeof data.order === 'number') updateData.order = data.order;
+      if (data.navigation !== undefined && data.navigation !== null && data.navigation !== '') updateData.navigation = data.navigation;
+      if (data.route !== undefined && data.route !== null && data.route !== '') updateData.route = data.route;
+      if (data.parent !== undefined) updateData.parent = data.parent;
+      if (data.order !== undefined && typeof data.order === 'number') updateData.order = data.order;
 
       return await strapi.documents(waNavItem).update({
         documentId: documentId,

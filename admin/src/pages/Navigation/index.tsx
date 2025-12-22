@@ -52,7 +52,7 @@ const Navigation = () => {
   const [initialNavigationItems, setInitialNavigationItems] = useState<NestedNavItem[]>();
   const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>();
   const [parentId, setParentId] = useState<string | undefined>();
-  const { updateNavItem, getNavigation, deleteNavItem, updateRoute, createNavItem, createExternalRouteAndNavItem } = useApi();
+  const { getNavigation, updateNavigationItemStructure } = useApi();
   const [isSavingNavigation, setIsSavingNavigation] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -158,134 +158,13 @@ const Navigation = () => {
     if (!navigationItems || !selectedNavigation) return
     
     setIsSavingNavigation(true);
-
-    let error = false;
-
-    let groupIndices: number[] = [0];
-    let parentIds: string[] = [];
-
-    for (const [index, item] of navigationItems.entries()) {
-      if (item.deleted) {
-        try {
-          item.documentId && await deleteNavItem(item.documentId);
-        } catch (error) {
-          console.error('Error deleting navigation item ', error);
-          toggleNotification({
-            type: 'danger',
-            message: formatMessage({
-              id: getTranslation('notification.navigation.deleteFailed'),
-              defaultMessage: 'Error deleting navigation item',
-            }) + ' ' + item.route.title,
-          });
-          error = true;
-        }
-
-        continue;
-      }
-
-      if (item.update && !item.isNew) {
-        try {
-          await updateRoute({
-            title: item.update.title || item.route.title,
-            slug: item.update.slug || item.route.slug,
-            fullPath: item.update.fullPath || item.route.fullPath,
-            isOverride: item.update.isOverride !== undefined ? item.update.isOverride : item.route.isOverride,
-          }, item.route.documentId)
-        } catch (error) {
-          console.error('Error updating route ', error);
-          toggleNotification({
-            type: 'danger',
-            message: formatMessage({
-              id: getTranslation('notification.navigation.saveNavigationFailed'),
-              defaultMessage: 'Error updating navigation item',
-            }) + ' ' + item.route.title,
-          });
-          error = true;
-        }
-      }
-
-      const previousItem = navigationItems[index - 1];
-
-      if (typeof item.depth !== 'number') {
-        setIsSavingNavigation(false);
-        return
-      }
-
-      if (item.depth === 0) {
-        groupIndices[0] = (groupIndices[0] || 0) + 1;
-        parentIds = [];
-      } else if (typeof previousItem.depth === 'number' && item.depth === previousItem.depth + 1) {
-        parentIds.push(previousItem.documentId);
-        groupIndices[item.depth] = 0;
-      } else if (typeof previousItem.depth === 'number' && item.depth <= previousItem.depth) {
-        const diff = previousItem.depth - item.depth;
-        for (let i = 0; i < diff; i++) {
-          parentIds.pop();
-          groupIndices.pop();
-        }
-
-        groupIndices[item.depth] = (groupIndices[item.depth] || 0) + 1;
-      }
- 
-      try {
-        if (item.isNew) {
-          if (item.isNew.route) {
-            await createNavItem({
-              route: item.isNew.route,
-              parent: item.isNew.parent,
-              navigation: item.isNew.navigation,
-              order: groupIndices[item.depth],
-            });
-          } else {
-            createExternalRouteAndNavItem({
-              routeData: {
-                title: item.route.title,
-                slug: item.route.slug,
-                fullPath: item.route.fullPath,
-                wrapper: item.route.wrapper,
-                internal: item.route.internal,
-                // isOverride: item.route.isOverride,
-                // active: item.route.active,
-              },
-              navItemData: {
-                parent: item.isNew.parent,
-                navigation: item.isNew.navigation,
-                order: groupIndices[item.depth],
-              }
-            })
-           
-          }
-        } else {
-          await updateNavItem(item.documentId, {
-            order: groupIndices[item.depth] || 0,
-            parent: parentIds.at(-1) || null,
-          });
-        }
-      } catch (error) {
-        error = true;
-        toggleNotification({
-          type: 'danger',
-          message: formatMessage({
-            id: getTranslation('notification.navigation.saveNavigationFailed'),
-            defaultMessage: 'Error updating navigation item',
-          }) + ' ' + item.route.title,
-        });
-        console.error('Error updating navigation item ', error);
-      }
-    }
-
-    setIsSavingNavigation(false);
-
-    if (!error) {
-      setInitialNavigationItems(navigationItems)
+    try {
+      await updateNavigationItemStructure(selectedNavigation.documentId, navigationItems);
+    } catch (e) {
+      console.error(e)
+    } finally {
       loadNavigations();
-      toggleNotification({
-        type: 'success',
-        message: formatMessage({
-          id: getTranslation('notification.navigation.navigationSaved'),
-          defaultMessage: 'Navigation updated successfully',
-        }),
-      });
+      setIsSavingNavigation(false)
     }
   }
 

@@ -92,6 +92,15 @@ export default {
       }
     },
     {
+      method: 'PUT',
+      path: '/navigation/items',
+      handler: 'admin.updateNavigationItemStructure',
+      config: {
+        policies: [],
+        auth: false,
+      }
+    },
+    {
       method: 'DELETE',
       path: '/navigation',
       handler: 'admin.deleteNavigation',

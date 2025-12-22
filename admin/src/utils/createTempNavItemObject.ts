@@ -15,7 +15,7 @@ type CreateTempNavItemObjectParams = {
   };
   selectedEntity: Entity | undefined | null;
   selectedContentType: GroupedEntities | undefined | null;
-  path: {
+  path?: {
     value: string;
     uidPath: string;
   };
@@ -54,16 +54,16 @@ export default function createTempNavItemObject({
         createdAt: new Date().toISOString(),
         documentId: '',
         documentIdPath: selectedEntity ? selectedEntity.documentId : '',
-        fullPath: path.value || '',
+        fullPath: path?.value || '',
         id: 0,
         internal: internal,
         isOverride: navItemState.isOverride || false,
         relatedContentType: selectedContentType ? JSON.stringify(selectedContentType.contentType) : '',
         relatedDocumentId: selectedEntity ? selectedEntity.documentId : '',
         relatedId: selectedEntity ? selectedEntity.id : 0,
-        slug: path.value || '',
+        slug: path?.value || '',
         title: navItemState.title || '',
-        uidPath: path.uidPath || '',
+        uidPath: path?.uidPath || '',
         updatedAt: new Date().toISOString(),
         wrapper: wrapper,
         navitem: null,

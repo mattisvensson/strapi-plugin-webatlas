@@ -1,4 +1,4 @@
-import { ContentType, GroupedEntities, RouteSettings, NavItemSettings, ConfigContentType, NavOverviewState, StructuredNavigationVariant, NavigationInput } from '../../../types';
+import { ContentType, GroupedEntities, RouteSettings, NavItemSettings, ConfigContentType, StructuredNavigationVariant, NavigationInput, NestedNavItem } from '../../../types';
 import { useFetchClient } from '@strapi/strapi/admin';
 
 export default function useApi() {
@@ -127,6 +127,14 @@ export default function useApi() {
     return data
   };
 
+  const updateNavigationItemStructure = async (documentId: string, navigationItems: NestedNavItem[]) => {
+    const { data } = await put(`/webatlas/navigation/items`, {
+      navigationId: documentId,
+      navigationItems,
+    });
+    return data
+  };
+
   return { 
     fetchAllContentTypes,
     fetchAllEntities,
@@ -142,5 +150,6 @@ export default function useApi() {
     getNavigation,
     deleteNavigation,
     updateNavigation,
+    updateNavigationItemStructure,
   }
 }
