@@ -100,6 +100,17 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
+  async updateNavigationItemStructure (ctx) {
+    try {
+      const { navigationId, navigationItems } = ctx.request.body;
+
+      if (!navigationId || !navigationItems) return ctx.throw(400, 'NavigationId and Navigation items are required');
+
+      return await getAdminService().updateNavigationItemStructure(navigationId, navigationItems);
+    } catch (e) {
+      return ctx.throw(500, e)
+    }
+  },
   async deleteNavigation (ctx) {
     try {
       const { documentId } = ctx.query;
