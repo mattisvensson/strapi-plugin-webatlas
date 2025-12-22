@@ -9,7 +9,7 @@
 
 import { Plus } from '@strapi/icons';
 import { Flex, Button } from '@strapi/design-system';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { NavOverview, NavCreate, Delete, NavEdit, ItemCreate, ItemEdit, ExternalItem, WrapperItem, NavModal } from '../../components/modals';
 import { EmptyBox, Center, FullLoader } from '../../components/UI';
@@ -37,6 +37,7 @@ import {
 import { getProjection, measuring, indentationWidth } from '../../utils/dnd';
 import SortableRouteItem from './SortableRouteItem';
 import PageWrapper from './PageWrapper';
+import cloneDeep from 'lodash/cloneDeep';
 
 type Projected = {
   depth: number;
@@ -49,7 +50,7 @@ const Navigation = () => {
   const [modalType, setModalType] = useState<string>('');
   const [selectedNavigation, setSelectedNavigation] = useState<NestedNavigation>();
   const [navigationItems, setNavigationItems] = useState<NestedNavItem[]>();
-  const [initialNavigationItems, setInitialNavigationItems] = useState<NestedNavItem[]>();
+  const initialNavigationItemsRef = useRef<NestedNavItem[] | null>(null);
   const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>();
   const [parentId, setParentId] = useState<string | undefined>();
   const { getNavigation, updateNavigationItemStructure } = useApi();
@@ -121,13 +122,8 @@ const Navigation = () => {
 
   useEffect(() => {
     setNavigationItems(selectedNavigation?.items || []);
+    initialNavigationItemsRef.current = cloneDeep(selectedNavigation?.items) || null;
   }, [selectedNavigation]);
-
-  useEffect(() => {
-    if (selectedNavigation?.items && !initialNavigationItems) {
-      setInitialNavigationItems(navigationItems)
-    }
-  }, [navigationItems]);
 
   useEffect(() => {
     if (!activeId || !navigationItems) return
@@ -270,8 +266,7 @@ const Navigation = () => {
               onClick={() => saveNavigation()}
               loading={isSavingNavigation}
               variant="primary"
-              // TODO: update disabled condition
-              // disabled={JSON.stringify(navigationItems) === JSON.stringify(initialNavigationItems)}
+              disabled={JSON.stringify(navigationItems) === JSON.stringify(initialNavigationItemsRef.current)}
             >
               {formatMessage({
                 id: getTranslation('save'),
