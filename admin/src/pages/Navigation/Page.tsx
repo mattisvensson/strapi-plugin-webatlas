@@ -230,6 +230,7 @@ const Navigation = () => {
     if (projected && over && navigationItems) {
       const { depth } = projected;
 
+      // Update the depth of the active item
       const overIndex = navigationItems.findIndex(({ id }) => id === over.id);
       const activeIndex = navigationItems.findIndex(({ id }) => id === active.id);
       const activeTreeItem = navigationItems[activeIndex];
@@ -238,7 +239,18 @@ const Navigation = () => {
 
       const sortedItems = arrayMove(navigationItems, activeIndex, overIndex);
 
-      setNavigationItems(sortedItems);
+      // Fix potential depth issues
+      const fixedItems = [...sortedItems];
+      fixedItems[0].depth = 0;
+      for (let i = 1; i < fixedItems.length; i++) {
+        const prev = fixedItems[i - 1].depth ?? 0;
+        let curr = fixedItems[i].depth ?? 0;
+        if (curr < 0) curr = 0;
+        if (curr > prev + 1) curr = prev + 1;
+        fixedItems[i].depth = curr;
+      }
+      
+      setNavigationItems(fixedItems);
     }
   }
 

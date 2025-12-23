@@ -23,11 +23,10 @@ export function getProjection(
   const activeItem = items[activeItemIndex];
   const newItems = arrayMove(items, activeItemIndex, overItemIndex);
   const previousItem = newItems[overItemIndex - 1];
-  const nextItem = newItems[overItemIndex + 1];
   const dragDepth = getDragDepth(dragOffset, indentationWidth);
   const projectedDepth = activeItem && typeof activeItem.depth === 'number' ? activeItem.depth + dragDepth : 0;
-  const maxDepth = getMaxDepth({previousItem});
-  const minDepth = getMinDepth({nextItem});
+  let maxDepth = getMaxDepth({previousItem});
+  let minDepth = 0
   let depth = projectedDepth;
 
   if (projectedDepth >= maxDepth) {
@@ -42,14 +41,6 @@ export function getProjection(
 function getMaxDepth({previousItem}: {previousItem: NestedNavItem}) {
   if (previousItem && typeof previousItem.depth === 'number') {
     return previousItem.depth + 1;
-  }
-
-  return 0;
-}
-
-function getMinDepth({nextItem}: {nextItem: NestedNavItem}) {
-  if (nextItem && typeof nextItem.depth === 'number') {
-    return nextItem.depth;
   }
 
   return 0;
