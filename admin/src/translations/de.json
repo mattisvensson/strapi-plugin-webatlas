@@ -116,5 +116,7 @@
   "webatlas.notification.routes.fetchFailed": "Routen konnten nicht abgerufen werden",
   "webatlas.notification.navigation.saveNavigationFailed": "Fehler beim Aktualisieren des Navigationselements",
   "webatlas.notification.navigation.navigationSaved": "Navigation erfolgreich aktualisiert",
-  "webatlas.notification.navigation.fetchFailed": "Fehler beim Abrufen der Navigationen"
+  "webatlas.notification.navigation.fetchFailed": "Fehler beim Abrufen der Navigationen",
+  "webatlas.notification.navigation.notFound": "Navigation nicht gefunden. Zur Navigation weitergeleitet",
+  "webatlas.notification.navigation.creationFailed": "Erstellung der Navigation fehlgeschlagen"
 }

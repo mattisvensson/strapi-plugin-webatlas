@@ -1,8 +1,8 @@
-import { ContentType, GroupedEntities, RouteSettings, NavItemSettings, ConfigContentType, StructuredNavigationVariant, NavigationInput, NestedNavItem } from '../../../types';
+import { ContentType, GroupedEntities, RouteSettings, ConfigContentType, StructuredNavigationVariant, NavigationInput, NestedNavItem } from '../../../types';
 import { useFetchClient } from '@strapi/strapi/admin';
 
 export default function useApi() {
-  const { get, post, put, del } = useFetchClient();
+  const { get, put, del } = useFetchClient();
 
   const fetchAllContentTypes = async () => {
     const { data } = await get('/content-manager/content-types');
@@ -67,7 +67,7 @@ export default function useApi() {
     return data
   }
 
-  const getNavigation = async ({ documentId, variant }: {documentId?: string, variant?: StructuredNavigationVariant} = {}) => {
+  const getNavigation = async ({ documentId, variant }: {documentId?: string, variant?: StructuredNavigationVariant | "namesOnly"} = {}) => {
     const query = [];
     if (documentId) query.push(`documentId=${documentId}`);
     if (variant) query.push(`variant=${variant}`);
