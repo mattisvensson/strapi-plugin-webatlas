@@ -1,26 +1,39 @@
 import { useState, useContext } from 'react';
 import { Grid, Box, Field } from '@strapi/design-system';
-import { useFetchClient } from '@strapi/strapi/admin';
+import { useNotification, useFetchClient } from '@strapi/strapi/admin';
 import NavModal from './NavModal';
-import { ModalContext, SelectedNavigationContext } from '../../contexts';
+import { ModalContext } from '../../contexts';
 import { useIntl } from 'react-intl';
 import { getTranslation } from '../../utils';
+import { useNavigate  } from 'react-router-dom';
 
 export default function NavCreate() {
   const { post } = useFetchClient();
   const { setModalType } = useContext(ModalContext);
-  const { setSelectedNavigation } = useContext(SelectedNavigationContext);
   const [name, setName] = useState('');
   const [isActive, setIsActive] = useState(true) // Temporary not used
   const [loading, setLoading] = useState(false)
   const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
+  const navigate = useNavigate();
 
   const createNavigation = async () => {
     setLoading(true);
     try {
       const { data } = await post('/webatlas/navigation', { name, isActive });
-      setSelectedNavigation(data);
-      setModalType('');
+      
+      if (data.documentId) {
+        navigate(`/plugins/webatlas/navigation/${data.documentId}`);
+        setModalType('');
+      } else {
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage({
+            id: getTranslation('notification.navigation.creationFailed'),
+            defaultMessage: 'Creation of navigation failed',
+          }),
+        });
+      }
     } catch (err) {
       console.log(err);
     } finally {

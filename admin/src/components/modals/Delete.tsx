@@ -5,6 +5,8 @@ import { Trash } from '@strapi/icons';
 import { NestedNavigation, NestedNavItem } from '../../../../types';
 import { useIntl } from 'react-intl';
 import { getTranslation } from '../../utils';
+import { useApi } from '../../hooks';
+import { useNavigate } from 'react-router-dom';
 
 type NavDelete = {
   variant: "NavDelete";
@@ -27,11 +29,14 @@ export default function Delete({ variant, item, onDelete }: DeleteProps) {
   
   const { setModalType } = useContext(ModalContext);
   const { formatMessage } = useIntl();
+  const { deleteNavigation } = useApi();
+  const navigate = useNavigate();
 
   const handleDelete = async () => {
     try {
       if (variant === "NavDelete") {
-
+        await deleteNavigation(item.documentId);
+        navigate('/plugins/webatlas/navigation');
       } else if (variant === "ItemDelete") {
         const editedItem = { ...item, deleted: true };
         onDelete(editedItem);

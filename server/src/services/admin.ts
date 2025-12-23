@@ -96,10 +96,22 @@ export default ({strapi}) => ({
     }
   },
 
-  async getNavigation(documentId?: string, variant?: StructuredNavigationVariant) {
+  async getNavigation(documentId?: string, variant?: StructuredNavigationVariant | "namesOnly") {
     try {
 
       let navigation = null
+
+      if (variant === "namesOnly") {
+        if (documentId) {
+          return await strapi.documents(waNavigation).findOne({
+            documentId: documentId,
+            select: ['documentId', 'name', 'slug', 'visible'],
+          });
+        }
+        return await strapi.documents(waNavigation).findMany({
+          select: ['documentId', 'name', 'slug', 'visible'],
+        });
+      }
 
       if (documentId) {
         navigation = await strapi.documents(waNavigation).findOne({
