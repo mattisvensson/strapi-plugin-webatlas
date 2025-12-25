@@ -44,6 +44,7 @@ export default function PageWrapper({ navigations, loading = false, children }: 
                 id: getTranslation('navigation.page.selectNavigation'),
                 defaultMessage: 'Select Navigation',
               })}
+              selected={true}
               onChange={(value: string) => {
                 const navItem = navigations.find(nav => nav.slug === value);
                 navItem && navigate(`/plugins/webatlas/navigation/${navItem.documentId}`);
