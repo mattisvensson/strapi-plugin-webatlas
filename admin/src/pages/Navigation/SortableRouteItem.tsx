@@ -4,7 +4,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { RouteItem } from './RouteItem';
 import { RouteItemProps } from './RouteItem';
 
-export default function SortableRouteItem({item, depth, ...props}: RouteItemProps) {
+export default function SortableRouteItem({item, depth, setNavigationItems, ...props}: RouteItemProps) {
   if (!item) return null
 
   const { 
@@ -25,6 +25,7 @@ export default function SortableRouteItem({item, depth, ...props}: RouteItemProp
     <RouteItem 
       ref={setDraggableNodeRef}
       wrapperRef={setDroppableNodeRef}
+      setNavigationItems={setNavigationItems}
       style={style}
       item={item} 
       disableInteraction={isSorting}

@@ -343,6 +343,7 @@ const Navigation = () => {
                       item={item} 
                       setParentId={setParentId} 
                       setActionItem={setActionItem} 
+                      setNavigationItems={setNavigationItems}
                       indentationWidth={indentationWidth}
                       depth={item.id === activeId && projected ? projected.depth : item.depth}
                     />
@@ -353,7 +354,8 @@ const Navigation = () => {
                         <SortableRouteItem
                           item={activeItem} 
                           setParentId={setParentId} 
-                          setActionItem={setActionItem} 
+                          setActionItem={setActionItem}
+                          setNavigationItems={setNavigationItems}
                         />
                       ) : null}
                     </DragOverlay>,

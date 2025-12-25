@@ -110,6 +110,7 @@
   "webatlas.draft": "Draft",
   "webatlas.modified": "Modified",
   "webatlas.deleted": "Deleted",
+  "webatlas.restore": "Restore",
 
   "webatlas.notification.error": "An error occurred",
   "webatlas.notification.settings.saved": "Settings saved successfully",

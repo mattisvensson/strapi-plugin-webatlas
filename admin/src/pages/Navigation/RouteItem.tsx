@@ -10,6 +10,7 @@ export interface RouteItemProps {
   item: NestedNavItem;
   setParentId: (id: string) => void;
   setActionItem: React.Dispatch<React.SetStateAction<NestedNavItem | NestedNavigation | undefined>>;
+  setNavigationItems: React.Dispatch<React.SetStateAction<NestedNavItem[] | undefined>>;
   ghost?: boolean;
   depth?: number;
   style?: React.CSSProperties;
@@ -33,7 +34,7 @@ function RouteIcon ({ type, color = 'neutral800' }: { type: RouteType | undefine
       return <Box width="16px" height="16px"/>
   }
 }
-export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setParentId, setActionItem, ghost, depth, style, wrapperRef, handleProps}: RouteItemProps, ref) => {
+export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setParentId, setActionItem, setNavigationItems, ghost, depth, style, wrapperRef, handleProps}: RouteItemProps, ref) => {
   if (!item || !item.route) return null
 
   const { setModalType } = useContext(ModalContext);
@@ -92,6 +93,18 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
   const handleDelete = () => {
     setActionItem(item)
     setModalType('ItemDelete')
+  }
+
+  const handleRestore = () => {
+    setNavigationItems(navItems =>
+      navItems?.map(navItem => {
+        if (navItem.documentId === item.documentId) {
+          delete navItem.update
+          delete navItem.deleted
+        }
+        return navItem;
+      })
+    );
   }
 
   const elStyle = {
@@ -168,7 +181,8 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
                 </Typography>
               </Status>
             }
-            <SimpleMenu label="Notifications" tag={IconButton} icon={<More />}>
+            <SimpleMenu label="Item actions" tag={IconButton} icon={<More />}>
+            {!item.deleted && <>
               <MenuItem onClick={() => handleEdit()}>
                 {formatMessage({
                   id: getTranslation('edit'),
@@ -189,6 +203,15 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
                   })}
                 </Typography>
               </MenuItem>
+            </>}
+            {(item.deleted || item.update) && <>
+              <MenuItem onClick={() => handleRestore()}>
+                {formatMessage({
+                  id: getTranslation('restore'),
+                  defaultMessage: 'Restore',
+                })}
+              </MenuItem>
+            </>}
             </SimpleMenu>
           </Flex>
         </Flex>
