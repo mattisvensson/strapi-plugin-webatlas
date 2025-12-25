@@ -213,7 +213,7 @@ const Navigation = () => {
         }),
       });
     } finally {
-      loadNavigations();
+      await loadNavigations();
       setIsSavingNavigation(false)
     }
   }
