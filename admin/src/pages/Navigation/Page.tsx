@@ -57,6 +57,7 @@ const Navigation = () => {
   const { getNavigation, updateNavigationItemStructure } = useApi();
   const [isSavingNavigation, setIsSavingNavigation] = useState(false);
   const [loading, setLoading] = useState(true);
+  const cachedNavigations = useRef<NestedNavigation[] | null>(null);
 
   const [projected, setProjected] = useState<Projected | null>(null);
   const [activeItem, setActiveItem] = useState<NestedNavItem | undefined>();
@@ -106,13 +107,11 @@ const Navigation = () => {
           }) + ': ' + updatedNavigations[0]?.name,
         });
         navigate(`/plugins/webatlas/navigation/${updatedNavigations[0]?.documentId}`);
-      }
+        return
+      } 
 
-      setNavigations(updatedNavigations);
-      setSelectedNavigation(selectedNav);
-      setNavigationItems(selectedNav?.items || []);
-      initialNavigationItemsRef.current = cloneDeep(selectedNav?.items) || null;
-
+      cachedNavigations.current = updatedNavigations;
+      switchNavigation(selectedNav, updatedNavigations);
     } catch (error) {
       console.error('Error fetching navigations: ', error);
       toggleNotification({
@@ -125,16 +124,35 @@ const Navigation = () => {
     }
   }
 
+  function switchNavigation(selectedNav: NestedNavigation, updatedNavigations: NestedNavigation[]) {
+    setNavigations(updatedNavigations);
+    setSelectedNavigation(selectedNav);
+    setNavigationItems(selectedNav.items || []);
+    initialNavigationItemsRef.current = cloneDeep(selectedNav.items) || null;
+  }
+
   useEffect(() => {
     async function fetchNavigations() {
       if (!navigationId) {
-        const navigations = await getNavigation({ documentId: navigationId, variant: 'namesOnly' });
-        navigations && navigate(`/plugins/webatlas/navigation/${navigations[0]?.documentId}`);
-      } else {
-        setLoading(true);
-        await loadNavigations();
-        setLoading(false);
+        const navs = await getNavigation({ variant: 'namesOnly' });
+        if (navs && navs.length > 0) {
+          navigate(`/plugins/webatlas/navigation/${navs[0].documentId}`);
+        }
+        return;
       }
+
+      // If cached, use it
+      if (cachedNavigations.current) {
+        const selectedNav = cachedNavigations.current.find(nav => nav.documentId === navigationId);
+        selectedNav && switchNavigation(selectedNav, cachedNavigations.current);
+        setLoading(false);
+        return;
+      }
+
+      // Otherwise, load from API
+      setLoading(true);
+      await loadNavigations();
+      setLoading(false);
     }
     fetchNavigations();
   }, [navigationId]);
