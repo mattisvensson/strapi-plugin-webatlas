@@ -94,9 +94,16 @@ For each selected content type, you have the following settings:
 
 ## 📖 Usage
 
+### Setting the path field
+To set the path (slug) field for a content type, you need to ensure that the content type is enabled for Webatlas in the settings page. Once enabled, the plugin will automatically generate and manage the slug based on your configuration. The generated slug will be visible in the content type's aside panel when editing an entry. The **uid route** and **document route** will also be displayed there. These two path are permanent and cannot be changed.
+
+Hint: If you want a page to be at the root of your website, override the automatic slug generation by setting the slug to `(frontpage)`. 
+
+### API endpoints
+
 Webatlas provides two API endpoints. One to fetch routes and one to fetch navigations.
 
-### Fetch route
+#### Fetch route
 
 `GET /api/webatlas/path`
 
@@ -107,7 +114,7 @@ Query parameters:
 - `fields` (string, optional): Comma-separated list of fields to include in the response.
 - `status` (string, optional): `draft` or `published`. Default is `published`. Returns the draft or published version of the entity.
 
-### Fetch navigation
+#### Fetch navigation
 
 `GET /api/webatlas/navigation`
 
