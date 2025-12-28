@@ -36,7 +36,7 @@ export default function Delete({ variant, item, onDelete }: DeleteProps) {
     try {
       if (variant === "NavDelete") {
         await deleteNavigation(item.documentId);
-        navigate('/plugins/webatlas/navigation');
+        onDelete(item);
       } else if (variant === "ItemDelete") {
         const editedItem = { ...item, deleted: true };
         onDelete(editedItem);
