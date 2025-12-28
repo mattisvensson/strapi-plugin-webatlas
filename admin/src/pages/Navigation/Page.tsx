@@ -144,9 +144,11 @@ const Navigation = () => {
       // If cached, use it
       if (cachedNavigations.current) {
         const selectedNav = cachedNavigations.current.find(nav => nav.documentId === navigationId);
-        selectedNav && switchNavigation(selectedNav, cachedNavigations.current);
-        setLoading(false);
-        return;
+        if (selectedNav) {
+          switchNavigation(selectedNav, cachedNavigations.current);
+          setLoading(false);
+          return;
+        }
       }
 
       // Otherwise, load from API
@@ -395,9 +397,13 @@ const Navigation = () => {
         }
         {modalType === 'NavCreate' && <NavCreate />}
         {modalType === "NavDelete"  &&
-          <Delete variant="NavDelete"
+          <Delete
+            variant="NavDelete"
             item={actionItem as NestedNavigation}
-            onDelete={() => {}}
+            onDelete={async () => {
+              cachedNavigations.current = null;
+              navigate('/plugins/webatlas/navigation');
+            }}
           />
         }
         {modalType === 'NavEdit' &&
