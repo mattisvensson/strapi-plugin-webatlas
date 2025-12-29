@@ -235,6 +235,8 @@ type modalSharedLogic = {
   selectedNavigation: NestedNavigation | undefined,
 }
 
+// Route Page sortByType
+export type RouteSortKey = keyof Pick<Route, 'title' | 'fullPath' | 'type' | undefined>;
 
 declare module '@strapi/strapi' {
   namespace Schema {

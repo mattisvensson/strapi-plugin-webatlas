@@ -10,9 +10,6 @@ export default function TableRow({ route }: { route: Route }) {
   return (
     <Tr>
       <Td>
-        <Typography textColor="neutral800">{route.id}</Typography>
-      </Td>
-      <Td>
         <Typography textColor="neutral800">{route.title}</Typography>
       </Td>
       <Td>
