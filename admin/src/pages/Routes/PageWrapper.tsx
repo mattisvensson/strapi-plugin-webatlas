@@ -1,5 +1,4 @@
 import { Layouts, Page } from '@strapi/strapi/admin';
-import { Box } from '@strapi/design-system';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
 
@@ -19,9 +18,9 @@ export default function PageWrapper({ children }: { children: React.ReactNode })
         })}
       />
       <Layouts.Content>
-        <Box>
+        <>
           {children}
-        </Box>
+        </>
       </Layouts.Content>
     </Page.Main>
   );
