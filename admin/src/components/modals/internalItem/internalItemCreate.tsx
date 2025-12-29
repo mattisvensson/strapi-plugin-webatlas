@@ -7,6 +7,7 @@ import { useModalSharedLogic } from '../useModalSharedLogic';
 import { NavModal } from '../'
 import { useIntl } from 'react-intl';
 import { getTranslation, createTempNavItemObject } from '../../../utils';
+import { FullLoader } from '../../UI';
 
 // TODO: Let the user select if the parent slug should be inherited or not
 // TODO: Add hint if a route is added that already exists in a navigation (because there is only one path per route)
@@ -36,6 +37,7 @@ function ItemCreateComponent({
   onCreate,
 }: ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>) {
   const [loading, setLoading] = useState(false)
+  const [loadingRoute, setLoadingRoute] = useState(true)
   const { formatMessage } = useIntl();
 
   useEffect(() => {
@@ -54,11 +56,12 @@ function ItemCreateComponent({
   useEffect(() => {
     async function fetchRoute() {
       if (selectedContentType?.contentType && selectedEntity?.id) {
+        setLoadingRoute(true)
         try {
           const route = await getRelatedRoute(selectedEntity.documentId)
 
           // TODO: Create a route if not existing or show error
-          if (!route) return
+          if (!route) throw new Error('No route found for the selected entity')
 
           dispatchPath({ type: 'NO_URL_CHECK', payload: route.fullPath });
           dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath });
@@ -80,6 +83,8 @@ function ItemCreateComponent({
           setEntityRoute(route)
         } catch (err) {
           console.log(err)
+        } finally {
+          setLoadingRoute(false)
         }
       }
     }
@@ -116,6 +121,94 @@ function ItemCreateComponent({
     } finally {
       setLoading(false)
     }
+  }
+
+  function ItemDetails() {
+    if (loadingRoute) return <FullLoader height={50}/>
+    return (
+      <>
+        <Grid.Root gap={4}>
+          <Grid.Item col={6} s={12} alignItems="baseline">
+            <Box width="100%">
+              <Field.Root>
+                <Field.Label>
+                  {formatMessage({
+                    id: getTranslation('modal.item.titleField.label'),
+                    defaultMessage: 'Title'
+                  })}
+                </Field.Label>
+                <Field.Input
+                  placeholder={formatMessage({
+                    id: getTranslation('modal.item.titleField.placeholder'),
+                    defaultMessage: 'e.g. About us'
+                  })}
+                  name="title"
+                  value={navItemState.title || ''}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchItemState({ type: 'SET_TITLE', payload: e.target.value })}
+                  required
+                />
+              </Field.Root>
+            </Box>
+          </Grid.Item>
+          <Grid.Item col={6} s={12}>
+            <Box width="100%">
+              <Field.Root>
+                <Field.Label>
+                  {formatMessage({
+                    id: getTranslation('modal.item.routeField.label'),
+                    defaultMessage: 'Route'
+                  })}
+                </Field.Label>
+                <Field.Input
+                  required
+                  placeholder={formatMessage({
+                    id: getTranslation('modal.item.routeField.placeholder'),
+                    defaultMessage: 'e.g. about/'
+                  })}
+                  name="slug"
+                  value={path?.value || ''}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}
+                  onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    if (e.target.value === path.prevValue) return
+                    dispatchPath({ type: 'DEFAULT', payload: e.target.value })}
+                  }
+  
+                />
+              </Field.Root>
+              <URLInfo validationState={validationState} replacement={replacement} />
+            </Box>
+          </Grid.Item>
+        </Grid.Root>
+        {/* TODO: Add visibility toggle to navitem schema */}
+        {/* <Grid.Root gap={8}>
+          <Grid.Item col={6} s={12}>
+            <Box width="100%">
+              <Field.Root hint="This menu item does not show on your site, if set to 'Hidden'">
+                <Field.Label>Visibility</Field.Label>
+                <Toggle
+                  onLabel="Visible"
+                  offLabel="Hidden"
+                  checked={navItemState.active}
+                  onClick={() => dispatchItemState({ type: 'SET_ACTIVE', payload: !navItemState.active })}
+                />
+                <Field.Hint/>
+              </Field.Root>
+            </Box>
+          </Grid.Item>
+        </Grid.Root> */}
+      </>
+    )
+  }
+
+  if (availableEntities && availableEntities.length === 0) {
+    return <NavModal
+      confirmText={formatMessage({ id: getTranslation('add'), defaultMessage: 'Add' })}
+      closeText={formatMessage({ id: getTranslation('cancel'), defaultMessage: 'Cancel' })}
+      titleText={formatMessage({ id: getTranslation('modal.internalItem.titleText.create'), defaultMessage: 'Add new navigation item' })}
+      footer={<></>}
+    >
+      <FullLoader height={50}/>
+    </NavModal>
   }
 
   return (
@@ -199,75 +292,7 @@ function ItemCreateComponent({
           <Box paddingBottom={6} paddingTop={6}>
             <Divider/>
           </Box>
-          <Grid.Root gap={4} paddingBottom={6} >
-            <Grid.Item col={6} s={12} alignItems="baseline">
-              <Box width="100%">
-                <Field.Root>
-                  <Field.Label>
-                    {formatMessage({
-                      id: getTranslation('modal.item.titleField.label'),
-                      defaultMessage: 'Title'
-                    })}
-                  </Field.Label>
-                  <Field.Input
-                    placeholder={formatMessage({
-                      id: getTranslation('modal.item.titleField.placeholder'),
-                      defaultMessage: 'e.g. About us'
-                    })}
-                    name="title"
-                    value={navItemState.title || ''}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchItemState({ type: 'SET_TITLE', payload: e.target.value })}
-                    required
-                  />
-                </Field.Root>
-              </Box>
-            </Grid.Item>
-            <Grid.Item col={6} s={12}>
-              <Box width="100%">
-                <Field.Root>
-                  <Field.Label>
-                    {formatMessage({
-                      id: getTranslation('modal.item.routeField.label'),
-                      defaultMessage: 'Route'
-                    })}
-                  </Field.Label>
-                  <Field.Input
-                    required
-                    placeholder={formatMessage({
-                      id: getTranslation('modal.item.routeField.placeholder'),
-                      defaultMessage: 'e.g. about/'
-                    })}
-                    name="slug"
-                    value={path?.value || ''}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}
-                    onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                      if (e.target.value === path.prevValue) return
-                      dispatchPath({ type: 'DEFAULT', payload: e.target.value })}
-                    }
-    
-                  />
-                </Field.Root>
-                <URLInfo validationState={validationState} replacement={replacement} />
-              </Box>
-            </Grid.Item>
-          </Grid.Root>
-          {/* TODO: Add visibility toggle to navitem schema */}
-          {/* <Grid.Root gap={8}>
-            <Grid.Item col={6} s={12}>
-              <Box width="100%">
-                <Field.Root hint="This menu item does not show on your site, if set to 'Hidden'">
-                  <Field.Label>Visibility</Field.Label>
-                  <Toggle
-                    onLabel="Visible"
-                    offLabel="Hidden"
-                    checked={navItemState.active}
-                    onClick={() => dispatchItemState({ type: 'SET_ACTIVE', payload: !navItemState.active })}
-                  />
-                  <Field.Hint/>
-                </Field.Root>
-              </Box>
-            </Grid.Item>
-          </Grid.Root> */}
+          <ItemDetails />
         </>
       }
     </NavModal>
