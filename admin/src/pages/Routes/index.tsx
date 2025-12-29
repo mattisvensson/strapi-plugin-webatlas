@@ -19,6 +19,9 @@ import TableRow from './TableRow';
 import { useNotification } from '@strapi/strapi/admin'
 import PageWrapper from './PageWrapper';
 import { useSearchParams } from 'react-router-dom';
+import debounce from '../../utils/debounce';
+import { useMemo } from 'react';
+
 
 function SearchInput({
   searchQuery,
@@ -118,12 +121,18 @@ const Routes = () => {
     )
   }, [searchQuery, allRoutes]);
 
+  const debouncedSetSearchParams = useMemo(() =>
+    debounce((value: string) => {
+      value
+        ? setSearchParams({ search: value })
+        : setSearchParams({});
+    }, 300),
+  [setSearchParams]);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setSearchQuery(value);
-    value ?
-      setSearchParams({ search: value })
-      : setSearchParams({});
+    debouncedSetSearchParams(value);
   }
 
   useEffect(() => {
