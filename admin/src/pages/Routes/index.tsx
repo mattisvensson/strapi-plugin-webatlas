@@ -6,7 +6,7 @@
  *
 */
 
-import type { Route } from '../../../../types';
+import type { Route, RouteSortKey } from '../../../../types';
 import { useState, useEffect } from 'react';
 import { Table, Tbody, Box, Grid, Field, EmptyStateLayout, Tr, Td } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
@@ -21,7 +21,7 @@ import PageWrapper from './PageWrapper';
 import { useSearchParams } from 'react-router-dom';
 import debounce from '../../utils/debounce';
 import { useMemo } from 'react';
-
+import compareBy from './compareBy';
 
 function SearchInput({
   searchQuery,
@@ -66,13 +66,21 @@ function SearchInput({
   );
 }
 
-function RouteTable({ routes }: { routes: Route[] }) {
+function RouteTable({
+  routes, 
+  sortKey, 
+  handleSort
+}: { 
+  routes: Route[], 
+  sortKey: RouteSortKey, 
+  handleSort: (key: RouteSortKey) => void
+}) {
   
   const { formatMessage } = useIntl();
 
   return (
     <Table colCount={4} rowCount={routes.length}>
-      <TableHeader />
+      <TableHeader sortKey={sortKey} handleSort={handleSort} />
       <Tbody>
         {routes.length > 0 ? routes.map((route: Route) => (
           <TableRow key={route.id} route={route} />
@@ -107,6 +115,8 @@ const Routes = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get('search') || '';
   const [searchQuery, setSearchQuery] = useState(initialQuery);
+  const [sortKey, setSortKey] = useState<RouteSortKey>(undefined);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     const query = searchQuery.toLowerCase()
@@ -157,6 +167,18 @@ const Routes = () => {
     fetchRoutes();
   }, [])
 
+  const handleSort = (key: RouteSortKey) => {
+    setSortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
+    setSortKey(key);
+  };
+
+  useEffect(() => {
+    const sortedRoutes = sortKey
+      ? [...routes].sort(compareBy(sortKey, sortDirection))
+      : routes;    
+    setRoutes(sortedRoutes);
+  }, [sortKey, sortDirection]);
+
   if (loading) {
     return <PageWrapper>
       <FullLoader />
@@ -171,6 +193,8 @@ const Routes = () => {
       />
       <RouteTable
         routes={routes} 
+        sortKey={sortKey}
+        handleSort={handleSort}
       />
     </PageWrapper>
   );
