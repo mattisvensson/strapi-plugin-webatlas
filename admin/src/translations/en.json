@@ -96,6 +96,9 @@
   "webatlas.route.type.external": "External",
   "webatlas.route.type.wrapper": "Wrapper",
 
+  "webatlas.link.navigation": "Navigation",
+  "webatlas.link.routes": "Routes",
+
   "webatlas.title": "Title",
   "webatlas.route": "Route",
   "webatlas.actions": "Actions",
