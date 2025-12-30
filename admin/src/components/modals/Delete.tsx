@@ -6,7 +6,6 @@ import { NestedNavigation, NestedNavItem } from '../../../../types';
 import { useIntl } from 'react-intl';
 import { getTranslation } from '../../utils';
 import { useApi } from '../../hooks';
-import { useNavigate } from 'react-router-dom';
 
 type NavDelete = {
   variant: "NavDelete";
@@ -30,7 +29,6 @@ export default function Delete({ variant, item, onDelete }: DeleteProps) {
   const { setModalType } = useContext(ModalContext);
   const { formatMessage } = useIntl();
   const { deleteNavigation } = useApi();
-  const navigate = useNavigate();
 
   const handleDelete = async () => {
     try {

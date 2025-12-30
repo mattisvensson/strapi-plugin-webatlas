@@ -400,8 +400,9 @@ const Navigation = () => {
           <Delete
             variant="NavDelete"
             item={actionItem as NestedNavigation}
-            onDelete={async () => {
+            onDelete={async (deletedItem) => {
               cachedNavigations.current = null;
+              setNavigations(navs => navs.filter(nav => nav.id !== deletedItem.id));
               navigate('/plugins/webatlas/navigation');
             }}
           />
@@ -424,9 +425,9 @@ const Navigation = () => {
           <Delete
             variant="ItemDelete" 
             item={actionItem as NestedNavItem} 
-            onDelete={(editedItem) => {
+            onDelete={(deletedItem) => {
               setNavigationItems(items =>
-                items?.map(item => item.id === editedItem.id ? editedItem : item)
+                items?.map(item => item.id === deletedItem.id ? deletedItem : item)
               )
             }}
           />
