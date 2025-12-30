@@ -135,9 +135,9 @@ const Navigation = () => {
     async function fetchNavigations() {
       if (!navigationId) {
         const navs = await getNavigation({ variant: 'namesOnly' });
-        if (navs && navs.length > 0) {
+        if (navs && navs.length > 0)
           navigate(`/plugins/webatlas/navigation/${navs[0].documentId}`);
-        }
+        setLoading(false);
         return;
       }
 
@@ -296,7 +296,7 @@ const Navigation = () => {
     setProjected(projection);
   }, [activeId, overId, offsetLeft, navigationItems]);
 
-  if (loading || !navigationId) {
+  if (loading) {
     return (
       <PageWrapper navigations={navigations} loading={loading}>
         <FullLoader />
