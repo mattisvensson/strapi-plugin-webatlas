@@ -55,37 +55,37 @@ function ItemCreateComponent({
 
   useEffect(() => {
     async function fetchRoute() {
-      if (selectedContentType?.contentType && selectedEntity?.id) {
-        setLoadingRoute(true)
-        try {
-          const route = await getRelatedRoute(selectedEntity.documentId)
+      if (!selectedContentType?.contentType || !selectedEntity?.documentId) return
+      
+      setLoadingRoute(true)
+      try {
+        const route = await getRelatedRoute(selectedEntity.documentId)
 
-          // TODO: Create a route if not existing or show error
-          if (!route) throw new Error('No route found for the selected entity')
+        // TODO: Create a route if not existing or show error
+        if (!route) throw new Error('No route found for the selected entity')
 
-          dispatchPath({ type: 'NO_URL_CHECK', payload: route.fullPath });
-          dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath });
-          dispatchPath({ type: 'SET_INITIALPATH', payload: route.fullPath });
+        dispatchPath({ type: 'NO_URL_CHECK', payload: route.fullPath });
+        dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath });
+        dispatchPath({ type: 'SET_INITIALPATH', payload: route.fullPath });
 
-          dispatchItemState({ type: 'SET_TITLE', payload: route.title })
-          dispatchItemState({ type: 'SET_ACTIVE', payload: route.active })
-          dispatchItemState({ type: 'SET_INTERNAL', payload: route.internal })
-          dispatchItemState({ type: 'SET_OVERRIDE', payload: route.isOverride })
-          
-          initialState.current = {
-            title: route.title,
-            slug: route.fullPath,
-            active: route.active,
-            internal: route.internal,
-            isOverride: route.isOverride,
-          }
-
-          setEntityRoute(route)
-        } catch (err) {
-          console.log(err)
-        } finally {
-          setLoadingRoute(false)
+        dispatchItemState({ type: 'SET_TITLE', payload: route.title })
+        dispatchItemState({ type: 'SET_ACTIVE', payload: route.active })
+        dispatchItemState({ type: 'SET_INTERNAL', payload: route.internal })
+        dispatchItemState({ type: 'SET_OVERRIDE', payload: route.isOverride })
+        
+        initialState.current = {
+          title: route.title,
+          slug: route.fullPath,
+          active: route.active,
+          internal: route.internal,
+          isOverride: route.isOverride,
         }
+
+        setEntityRoute(route)
+      } catch (err) {
+        console.log(err)
+      } finally {
+        setLoadingRoute(false)
       }
     }
     fetchRoute()
