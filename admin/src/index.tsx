@@ -1,5 +1,5 @@
 import { StrapiApp } from '@strapi/admin/strapi-admin';
-import { PLUGIN_ID } from '../../pluginId';
+import { PLUGIN_ID, PLUGIN_NAME } from '../../pluginId';
 import { Initializer } from './components/Initializer';
 import { RouteIcon, NavigationIcon } from './components/PluginIcon';
 import CMEditViewAside from './components/CMEditViewAside';
@@ -49,19 +49,42 @@ export default {
         id: PLUGIN_ID,
         intlLabel: {
           id: `${PLUGIN_ID}.settings.section`,
-          defaultMessage: 'Webatlas',
+          defaultMessage: PLUGIN_NAME,
         },
       },
       {
         intlLabel: {
-          id: `${PLUGIN_ID}.settings.section`,
-          defaultMessage: 'Configuration',
+          id: `${PLUGIN_ID}.settings.section.general`,
+          defaultMessage: 'General',
         },
-        id: PLUGIN_ID,
-        to: `/settings/${PLUGIN_ID}/configuration`,
+        id: `${PLUGIN_ID}-general`,
+        to: `/settings/${PLUGIN_ID}/general`,
         Component: async () => {
           return await import(
-            /* webpackChunkName: "webatlas-settings-page" */ './pages/Settings'
+            /* webpackChunkName: "webatlas-settings-general-page" */ './pages/Settings/General'
+          );
+        },
+        permissions: [
+          // Uncomment to set the permissions of the plugin here
+          // {
+          //   action: '', // the action name should be plugin::plugin-name.actionType
+          //   subject: null,
+          // },
+        ],
+      }
+    )
+    app.addSettingsLink(
+      PLUGIN_ID,      
+      {
+        intlLabel: {
+          id: `${PLUGIN_ID}.settings.navigation`,
+          defaultMessage: 'Navigation',
+        },
+        id: `${PLUGIN_ID}-navigation`,
+        to: `/settings/${PLUGIN_ID}/navigation`,
+        Component: async () => {
+          return await import(
+            /* webpackChunkName: "webatlas-settings-navigation-page" */ './pages/Settings/Navigation'
           );
         },
         permissions: [

@@ -93,6 +93,9 @@ export type ConfigContentType = {
 
 export type PluginConfig = {
   selectedContentTypes: ConfigContentType[];
+  navigation: {
+    maxDepth: number;
+  }
 };
 
 export type Navigation = {

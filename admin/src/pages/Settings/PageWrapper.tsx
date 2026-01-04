@@ -3,19 +3,16 @@ import { Page, Layouts} from '@strapi/strapi/admin'
 import { PLUGIN_NAME } from '../../../../pluginId';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
-import type { ConfigContentType } from '../../../../types';
 
 export default function PageWrapper({ 
-  settingsState, 
-  initialState, 
   save, 
   isSaving,
+  disabledCondition,
   children
-}: { 
-  settingsState?: any, 
-  initialState?: any, 
+}: {
   save?: () => void, 
-  isSaving?: boolean,
+  isSaving: boolean,
+  disabledCondition: boolean,
   children: React.ReactNode 
 }) {
 
@@ -29,16 +26,12 @@ export default function PageWrapper({
           id: getTranslation('settings.page.subtitle'),
           defaultMessage: 'Settings',
         })}
-        primaryAction={ settingsState && initialState && save &&
+        primaryAction={ disabledCondition !== undefined && save &&
           <Button
             type="submit"
             onClick={() => save()}
             loading={isSaving}
-            disabled={
-              JSON.stringify(settingsState) === JSON.stringify(initialState)
-              || settingsState.selectedContentTypes.find((cta: ConfigContentType) => !cta.default) !== undefined
-              || isSaving
-            }
+            disabled={disabledCondition || isSaving}
           >
             {formatMessage({
               id: getTranslation('save'),
