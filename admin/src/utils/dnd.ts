@@ -15,9 +15,9 @@ export function getProjection(
   activeId: UniqueIdentifier,
   overId: UniqueIdentifier,
   dragOffset: number,
+  maxDepthValue: number,
 ) {
   if (!items) return {depth: 0, maxDepth: 0, minDepth: 0};
-  
   const overItemIndex = items.findIndex(({id}) => id === overId);
   const activeItemIndex = items.findIndex(({id}) => id === activeId);
   const activeItem = items[activeItemIndex];
@@ -25,7 +25,7 @@ export function getProjection(
   const previousItem = newItems[overItemIndex - 1];
   const dragDepth = getDragDepth(dragOffset, indentationWidth);
   const projectedDepth = activeItem && typeof activeItem.depth === 'number' ? activeItem.depth + dragDepth : 0;
-  let maxDepth = getMaxDepth({previousItem});
+  let maxDepth = getMaxDepth({previousItem, maxDepthValue});
   let minDepth = 0
   let depth = projectedDepth;
 
@@ -38,9 +38,10 @@ export function getProjection(
   return {depth, maxDepth, minDepth};
 }
 
-function getMaxDepth({previousItem}: {previousItem: NestedNavItem}) {
+function getMaxDepth({previousItem, maxDepthValue}: {previousItem: NestedNavItem, maxDepthValue: number}) {
   if (previousItem && typeof previousItem.depth === 'number') {
-    return previousItem.depth + 1;
+    // Subtract 1 from maxDepthValue to account for zero-based depth
+    return Math.min(previousItem.depth + 1, maxDepthValue - 1);
   }
 
   return 0;
