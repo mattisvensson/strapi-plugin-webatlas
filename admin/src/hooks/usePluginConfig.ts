@@ -6,7 +6,7 @@ type UsePluginConfigResponse = {
   config: PluginConfig | null;
   loading: boolean;
   fetchError: string | null;
-  setConfig: (body: PluginConfig) => Promise<void>;
+  setConfig: (body: Partial<PluginConfig>) => Promise<void>;
 };
 
 export default function usePluginConfig(): UsePluginConfigResponse {
@@ -40,6 +40,11 @@ export default function usePluginConfig(): UsePluginConfigResponse {
           await setConfig(config);
         }
 
+        if (config.navigation?.maxDepth === undefined) {
+          config.navigation = { ...config.navigation, maxDepth: 3 };
+          await setConfig(config);
+        }
+
         setConfigData(config);
       } catch (error: any) {
         setFetchError(error.message);
@@ -51,7 +56,7 @@ export default function usePluginConfig(): UsePluginConfigResponse {
     fetchData();
   }, []);
 
-  async function setConfig(body: PluginConfig): Promise<void> {
+  async function setConfig(body: Partial<PluginConfig>): Promise<void> {
     try {
       await put('/webatlas/config', { ...body });
     } catch (error) {

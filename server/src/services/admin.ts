@@ -1,4 +1,4 @@
-import type { ContentType, NavigationInput, NestedNavigation, NestedNavItem, Route, StructuredNavigationVariant } from "../../../types";
+import type { NavigationInput, NestedNavigation, NestedNavItem, PluginConfig, StructuredNavigationVariant } from "../../../types";
 import duplicateCheck from "../utils/duplicateCheck";
 import { getFullPath, buildStructuredNavigation, transformToUrl } from "../../../utils";
 import { waRoute, waNavigation, waNavItem } from "../utils/pluginHelpers";
@@ -8,25 +8,38 @@ import { createExternalRoute } from "../utils/routeHandler";
 
 export default ({strapi}) => ({
 
-  async updateConfig(newConfig) {
-    if (!newConfig || !newConfig.selectedContentTypes) return
+  async updateConfig(newConfig: Partial<PluginConfig>) {
+    if (!newConfig) return;
+      
+    let newConfigMerged: PluginConfig;
 
     try {
-      const routes = await strapi.documents(waRoute).findMany();
-      const invalidRoutes = routes.filter((route: Route) => !newConfig.selectedContentTypes.find((type: ContentType) => type.uid === route.relatedContentType));
-
-      invalidRoutes?.map(async (route: Route) => {
-        await strapi.documents(waRoute).delete({
-          documentId: route.documentId
-        })
-      })
+      const pluginStore = await strapi.store({ type: 'plugin', name: PLUGIN_ID });
+      const config = await pluginStore.get({ key: "config" });
+      newConfigMerged = { ...config, ...newConfig };
+      await pluginStore.set({ key: "config", value: newConfigMerged });
+      
     } catch (err) {
-      console.log(err)
-      return "Error. Couldn't delete invalid routes"
+      console.log(err);
+      return "Error. Couldn't update config";
     }
 
-    const pluginStore = await strapi.store({ type: 'plugin', name: PLUGIN_ID });
-    await pluginStore.set({ key: "config", value: newConfig });
+    // TODO: Don't delete invalid routes, just mark them as inactive
+    if (newConfigMerged.selectedContentTypes) {
+      try {
+        const routes = await strapi.documents(waRoute).findMany();
+        const invalidRoutes = routes.filter((route) =>
+          !newConfigMerged.selectedContentTypes.find((type) => type.uid === route.relatedContentType)
+        );
+        for (const route of invalidRoutes) {
+          await strapi.documents(waRoute).delete({ documentId: route.documentId });
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    return newConfigMerged;
   },
 
   async getConfig() {
