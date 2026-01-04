@@ -15,7 +15,7 @@ export default function Tooltip({ description }: { description: string }) {
 					<Information aria-hidden="true" />
 				</RadixTooltip.Trigger>
 				<RadixTooltip.Portal>
-					<RadixTooltip.Content sideOffset={5}>
+					<RadixTooltip.Content sideOffset={5} style={{ zIndex: 9999 }}>
 						<Box
 							padding={2}
 							margin={2}
