@@ -15,7 +15,7 @@ import { NavOverview, NavCreate, Delete, NavEdit, ItemCreate, ItemEdit, External
 import { EmptyBox, Center, FullLoader } from '../../components/UI';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
 import type { NestedNavigation, NestedNavItem } from '../../../../types';
-import useApi from '../../hooks/useApi';
+import { useApi, usePluginConfig } from '../../hooks/';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
 import { useNotification, useFetchClient } from '@strapi/strapi/admin'
@@ -58,6 +58,7 @@ const Navigation = () => {
   const [isSavingNavigation, setIsSavingNavigation] = useState(false);
   const [loading, setLoading] = useState(true);
   const cachedNavigations = useRef<NestedNavigation[] | null>(null);
+  const { config } = usePluginConfig();
 
   const [projected, setProjected] = useState<Projected | null>(null);
   const [activeItem, setActiveItem] = useState<NestedNavItem | undefined>();
@@ -290,6 +291,7 @@ const Navigation = () => {
           activeId,
           overId,
           offsetLeft,
+          config?.navigation.maxDepth || 3
         )
         : null;
 
