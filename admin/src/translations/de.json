@@ -123,5 +123,8 @@
   "webatlas.notification.navigation.navigationSaved": "Navigation erfolgreich aktualisiert",
   "webatlas.notification.navigation.fetchFailed": "Fehler beim Abrufen der Navigationen",
   "webatlas.notification.navigation.notFound": "Navigation nicht gefunden. Zur Navigation weitergeleitet",
-  "webatlas.notification.navigation.creationFailed": "Erstellung der Navigation fehlgeschlagen"
+  "webatlas.notification.navigation.creationFailed": "Erstellung der Navigation fehlgeschlagen",
+
+  "webatlas.settings.section.general": "Allgemein",
+  "webatlas.settings.section.navigation": "Navigation"
 }

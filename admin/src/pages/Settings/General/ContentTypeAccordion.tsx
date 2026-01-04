@@ -1,9 +1,9 @@
 import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
-import Tooltip from '../../components/Tooltip'
+import Tooltip from '../../../components/Tooltip'
 import { Box, Accordion, Field } from '@strapi/design-system';
-import { getTranslation } from '../../utils';
+import { getTranslation } from '../../../utils';
 import { useIntl } from 'react-intl';
-import type { ContentType, ConfigContentType } from '../../../../types';
+import type { ContentType, ConfigContentType } from '../../../../../types';
 
 export default function ContentTypeAccordion({ 
   contentType,
