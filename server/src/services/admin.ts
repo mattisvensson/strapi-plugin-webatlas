@@ -217,6 +217,21 @@ export default ({strapi}) => ({
     const newNavItemsMap = new Map<string, NestedNavItem>();
 
     for (const [index, item] of navigationItems.entries()) {
+
+      // This is a quick fix to remove nav items without route
+      // Ideally, nav items without route shouldn't be created at all
+      // TODO: Find out why nav items without route can exist
+      if (!item.route && item.documentId) {
+        try {
+          console.warn('Navigation item without route found. Deleting it. ', item);
+          await deleteNavItem(item.documentId);
+        } catch (error) {
+          console.error('Error deleting navigation item without route ', error);
+        }
+        
+        continue;
+      }
+
       if (item.deleted) {
         try {
           item.documentId && await deleteNavItem(item.documentId);
