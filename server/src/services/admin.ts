@@ -156,14 +156,13 @@ export default ({strapi}) => ({
 
   async createNavigation(data) {
     try {
-      const navigation = await strapi.documents(waNavigation).create({
+      return await strapi.documents(waNavigation).create({
         data: {
           name: data.name,
           slug: transformToUrl(data.name),
           visible: data.isActive,
         },
       });
-      return navigation
     } catch (e) {
       console.log(e)
     }

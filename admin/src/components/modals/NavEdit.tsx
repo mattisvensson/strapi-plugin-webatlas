@@ -1,4 +1,4 @@
-import { Grid, Toggle, Field, Box, Button } from '@strapi/design-system';
+import { Grid, Toggle, Field, Box } from '@strapi/design-system';
 import { useState, useContext } from 'react';
 import { ModalContext } from '../../contexts';
 import { NestedNavigation } from '../../../../types';
@@ -6,10 +6,11 @@ import NavModal from './NavModal'
 import { useApi } from '../../hooks';
 import { useIntl } from 'react-intl';
 import { getTranslation } from '../../utils';
+import { useNotification } from '@strapi/strapi/admin';
 
 type NavEditProps = {
   item: NestedNavigation;
-  onEdit: () => void;
+  onEdit: (editedNavigation: NestedNavigation) => void;
 }
 
 export default function NavEdit({ item, onEdit }: NavEditProps) {
@@ -19,15 +20,23 @@ export default function NavEdit({ item, onEdit }: NavEditProps) {
   const [loading, setLoading] = useState(false)
   const { updateNavigation } = useApi();
   const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
 
   const updateNav = async () => {
     setLoading(true);
     try {
       await updateNavigation(item.documentId, { name, visible });
       setModalType('NavOverview')
-      onEdit();
+      onEdit({ ...item, name, visible });
     } catch (err) {
       console.log(err)
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: getTranslation('notification.navigation.updateFailed'),
+          defaultMessage: 'Updating navigation failed',
+        }),
+      });
     } finally {
       setLoading(false)
     }
@@ -41,23 +50,6 @@ export default function NavEdit({ item, onEdit }: NavEditProps) {
       loadingText={formatMessage({ id: getTranslation('modal.navEdit.loadingText'), defaultMessage: 'Updating' })}
       onConfirm={updateNav}
       loading={loading}
-      modalToOpen='NavOverview'
-      footer={
-        <>
-          <Button onClick={() => setModalType('NavOverview')} variant="tertiary">
-            {formatMessage({
-              id: getTranslation('modal.navEdit.closeText'),
-              defaultMessage: 'Cancel'
-            })}
-          </Button>
-          <Button>
-            {formatMessage({
-              id: getTranslation('modal.navEdit.confirmText'),
-              defaultMessage: 'Update'
-            })}
-          </Button>
-        </>
-      }
     >
       <Grid.Root gap={4}>
         <Grid.Item s={12} m={6}>

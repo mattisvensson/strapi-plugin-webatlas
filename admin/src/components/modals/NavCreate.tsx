@@ -21,25 +21,24 @@ export default function NavCreate() {
     setLoading(true);
     try {
       const { data } = await post('/webatlas/navigation', { name, isActive });
+
+      if (!data.documentId) throw new Error('No documentId returned');
+
+      navigate(`/plugins/webatlas/navigation/${data.documentId}`);
+      setModalType('');
       
-      if (data.documentId) {
-        navigate(`/plugins/webatlas/navigation/${data.documentId}`);
-        setModalType('');
-      } else {
-        toggleNotification({
-          type: 'danger',
-          message: formatMessage({
-            id: getTranslation('notification.navigation.creationFailed'),
-            defaultMessage: 'Creation of navigation failed',
-          }),
-        });
-      }
     } catch (err) {
       console.log(err);
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: getTranslation('notification.navigation.creationFailed'),
+          defaultMessage: 'Creation of navigation failed',
+        }),
+      });
     } finally {
-
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
