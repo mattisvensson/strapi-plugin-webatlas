@@ -124,6 +124,7 @@
   "webatlas.notification.navigation.fetchFailed": "Failed to fetch navigations",
   "webatlas.notification.navigation.notFound": "Navigation not found. Redirected to navigation",
   "webatlas.notification.navigation.creationFailed": "Creation of navigation failed",
+  "webatlas.notification.navigation.updateFailed": "Updating navigation failed",
 
   "webatlas.settings.section.general": "General",
   "webatlas.settings.section.navigation": "Navigation"
