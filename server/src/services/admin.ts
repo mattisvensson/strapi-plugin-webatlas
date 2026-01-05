@@ -255,6 +255,7 @@ export default ({strapi}) => ({
             slug: item.update.slug || item.route.slug,
             fullPath: item.update.fullPath || item.route.fullPath,
             isOverride: item.update.isOverride !== undefined ? item.update.isOverride : item.route.isOverride,
+            visible: item.update.visible !== undefined ? item.update.visible : item.route.visible,
           })
         } catch (error) {
           error = true;

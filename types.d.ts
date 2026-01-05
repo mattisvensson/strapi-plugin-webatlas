@@ -30,6 +30,7 @@ export type Route = {
   relatedDocumentId: string,
   internal: boolean;
   active: boolean;
+  visible: boolean;
   isOverride: boolean;
   wrapper: boolean;
   navitem: {
@@ -51,6 +52,7 @@ export type RouteSettings = {
   isOverride?: boolean;
   internal?: boolean;
   active?: boolean;
+  visible?: boolean;
   navitem?: number;
   wrapper?: boolean
 };
@@ -133,6 +135,29 @@ export type User = {
   username: string | null;
 }
 
+export type ModalAction = 
+  | { type: 'SET_TITLE'; payload: string }
+  | { type: 'SET_SLUG'; payload: string }
+  | { type: 'SET_VISIBILITY'; payload: boolean }
+  | { type: 'SET_INTERNAL'; payload: boolean }
+  | { type: 'SET_OVERRIDE'; payload: boolean };
+
+export type ModalPathAction = 
+  | { type: 'DEFAULT'; payload: string }
+  | { type: 'NO_URL_CHECK'; payload: string }
+  | { type: 'NO_TRANSFORM_AND_CHECK'; payload: string }
+  | { type: 'RESET_URL_CHECK_FLAG'; }
+  | { type: 'SET_UIDPATH'; payload: string }
+  | { type: 'SET_INITIALPATH'; payload: string }
+
+export type ModalPathState = {
+  value?: string;
+  prevValue?: string,
+  uidPath?: string,
+  initialPath?: string,
+  needsUrlCheck: boolean;
+};
+
 
 export type NestedNavigation = {
   id: number;
@@ -164,6 +189,7 @@ export type NestedNavItem = {
     slug?: string;
     fullPath?: string;
     isOverride?: boolean;
+    visible?: boolean;
   }
   isNew?: {
     route: string | null;
@@ -226,12 +252,9 @@ type modalSharedLogic = {
   setValidationState: (value: 'initial' | 'checking' | 'done') => void,
   initialState: React.MutableRefObject<RouteSettings>,
   navItemState: RouteSettings,
-  // dispatchItemState: React.Dispatch<Action>,
-  // path: PathState,
-  // dispatchPath: React.Dispatch<PathAction>,
-  dispatchItemState: React.Dispatch<any>,
-  path: any,
-  dispatchPath: React.Dispatch<any>,
+  dispatchItemState: React.Dispatch<ModalAction>,
+  path: ModalPathState,
+  dispatchPath: React.Dispatch<ModalPathAction>,
   debouncedCheckUrl: (url: string, routeDocumentId?: string | null | undefined) => void,
   modalType: string,
   setModalType: (value: string) => void,

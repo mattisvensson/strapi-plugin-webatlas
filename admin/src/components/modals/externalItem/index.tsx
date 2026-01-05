@@ -1,4 +1,4 @@
-import { Grid, Box, Field } from '@strapi/design-system';
+import { Grid, Box, Field, Toggle } from '@strapi/design-system';
 import { withModalSharedLogic } from '../withModalSharedLogic';
 import { NestedNavItem } from '../../../../../types';
 import { useModalSharedLogic } from '../useModalSharedLogic';
@@ -6,6 +6,7 @@ import React, { useEffect } from 'react';
 import { NavModal } from '../'
 import { useIntl } from 'react-intl';
 import { getTranslation, createTempNavItemObject } from '../../../utils';
+import { Visibility } from '../fields';
 
 type externalCreateProps = {
   variant: 'ExternalCreate';
@@ -54,13 +55,13 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
     if (variant !== 'ExternalEdit' || !item) return;
 
     dispatchItemState({ type: 'SET_TITLE', payload: item.route.title });
-    dispatchItemState({ type: 'SET_ACTIVE', payload: item.route.active });
+    dispatchItemState({ type: 'SET_VISIBILITY', payload: item.route.visible });
     dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.fullPath });
   }, [variant, item, dispatchItemState, dispatchPath]);
 
   const handleConfirm = async () => {
     try {
-      if (!path || !navItemState.title || !selectedNavigation) return
+      if (!path || !path.value || !navItemState.title || !selectedNavigation) return
 
       if (variant === 'ExternalEdit' && item && onSave) {
         onSave({
@@ -80,7 +81,10 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
           navItemState,
           selectedEntity: null,
           selectedContentType: null,
-          path,
+          path: {
+            value: path.value,
+            uidPath: path.uidPath || ''
+          },
           internal: false,
         })
         onCreate(newItem);
@@ -157,23 +161,15 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
             </Field.Root>
           </Box>
         </Grid.Item>
-      </Grid.Root>
-      {/* TODO: Add visibility toggle to navitem schema */}
-      {/* <Box paddingBottom={6} paddingTop={6}>
-        <Divider/>
-      </Box>
-      <Grid.Root gap={8} paddingBottom={6} >
-        <Grid.Item col={6}>
-          <Toggle
-            label="Is visible?"
-            onLabel="Yes"
-            offLabel="No"
-            hint='This menu item does not show on your site, if set to "no".'
-            checked={navItemState.active}
-            onClick={() => dispatchItemState({ type: 'SET_ACTIVE', payload: !navItemState.active })}
-          />
+        <Grid.Item col={6} s={12}>
+          <Box width="100%">
+            <Visibility
+              navItemState={navItemState}
+              dispatchItemState={dispatchItemState}
+            />
+          </Box>
         </Grid.Item>
-      </Grid.Root> */}
+      </Grid.Root>
     </NavModal>
   );
 }

@@ -119,8 +119,8 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
       style={elStyle}
     >
       <Box
-        background={item.route?.active ? 'neutral0' : 'neutral100'}
-        borderColor="neutral150"
+        background={item.route?.visible ? 'neutral0' : 'neutral100'}
+        borderColor={item.route?.visible ? 'neutral100' : 'neutral150'}
         hasRadius
         paddingBottom={4}
         paddingLeft={4}

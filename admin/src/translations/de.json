@@ -70,6 +70,8 @@
   "webatlas.modal.item.titleField.placeholder": "z.B. Über uns",
   "webatlas.modal.item.routeField.label": "Route",
   "webatlas.modal.item.routeField.placeholder": "z.B. ueber/",
+  "webatlas.modal.item.visibility.label": "Sichtbarkeit",
+  "webatlas.modal.item.visibility.tooltip": "Wenn auf 'Versteckt' gesetzt, wird dieses Menüelement nicht auf Ihrer Seite angezeigt",
 
   "webatlas.components.URLInfo.checking": "Überprüfe, ob die URL verfügbar ist...",
   "webatlas.components.URLInfo.available": "URL ist verfügbar",
@@ -115,6 +117,8 @@
   "webatlas.modified": "Geändert",
   "webatlas.deleted": "Gelöscht",
   "webatlas.restore": "Wiederherstellen",
+  "webatlas.visible": "Sichtbar",
+  "webatlas.hidden": "Versteckt",
   
   "webatlas.notification.error": "Ein Fehler ist aufgetreten",
   "webatlas.notification.settings.saved": "Einstellungen erfolgreich gespeichert",

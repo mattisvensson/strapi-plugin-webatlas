@@ -9,6 +9,7 @@ import { isEqual } from 'lodash';
 import { debounce } from '../../../utils';
 import { useIntl } from 'react-intl';
 import { getTranslation } from '../../../utils';
+import { Visibility } from '../fields';
 
 function ItemEditComponent({
   item,
@@ -33,19 +34,19 @@ function ItemEditComponent({
     dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.fullPath })
     dispatchItemState({ type: 'SET_TITLE', payload: item.route.title })
     dispatchItemState({ type: 'SET_SLUG', payload: item.route.slug })
-    dispatchItemState({ type: 'SET_ACTIVE', payload: item.route.active })
+    dispatchItemState({ type: 'SET_VISIBILITY', payload: item.route.visible })
     
-  const initialValues = {
-    title: item.route.title,
-    active: item.route.active,
-    internal: item.route.internal,
-    isOverride: item.route.isOverride,
-    slug: item.route.slug,
-  };
-  
-  initialState.current = initialValues;
-  
-  dispatchPath({ type: 'SET_INITIALPATH', payload: item.route.fullPath });
+    const initialValues = {
+      title: item.route.title,
+      visible: item.route.visible,
+      internal: item.route.internal,
+      isOverride: item.route.isOverride,
+      slug: item.route.slug,
+    };
+    
+    initialState.current = initialValues;
+    
+    dispatchPath({ type: 'SET_INITIALPATH', payload: item.route.fullPath });
   }, [])
 
   useEffect(() => {
@@ -88,6 +89,10 @@ function ItemEditComponent({
 
       onEdit({
         ...item,
+        route: {
+          ...item.route,
+          visible: navItemState.visible != undefined ? navItemState.visible : true,
+        },
         update: {
           title: navItemState.title,
           slug: navItemState.slug,
@@ -201,22 +206,15 @@ function ItemEditComponent({
               <URLInfo validationState={validationState} replacement={replacement} />
             </Box>
           </Grid.Item>
-        </Grid.Root>
-        {/* TODO: Add visibility toggle to navitem schema */}
-        {/* <Grid.Root gap={8}>
           <Grid.Item col={6} s={12}>
             <Box width="100%">
-              <Toggle
-                label="Is visible?"
-                onLabel="Yes"
-                offLabel="No"
-                hint='This menu item does not show on your site, if set to "no".'
-                checked={navItemState.active}
-                onClick={() => dispatchItemState({ type: 'SET_ACTIVE', payload: !navItemState.active })}
+              <Visibility
+                navItemState={navItemState}
+                dispatchItemState={dispatchItemState}
               />
             </Box>
           </Grid.Item>
-        </Grid.Root> */}
+        </Grid.Root>
       </Box>
     </NavModal>)
 }

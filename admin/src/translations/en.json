@@ -70,6 +70,8 @@
   "webatlas.modal.item.titleField.placeholder": "e.g. About Us",
   "webatlas.modal.item.routeField.label": "Route",
   "webatlas.modal.item.routeField.placeholder": "e.g. about/",
+  "webatlas.modal.item.visibility.label": "Visibility",
+  "webatlas.modal.item.visibility.tooltip": "If set to 'Hidden', this menu item will not show on your site",
 
   "webatlas.components.URLInfo.checking": "Checking if URL is available...",
   "webatlas.components.URLInfo.available": "URL is available",
@@ -115,6 +117,8 @@
   "webatlas.modified": "Modified",
   "webatlas.deleted": "Deleted",
   "webatlas.restore": "Restore",
+  "webatlas.visible": "Visible",
+  "webatlas.hidden": "Hidden",
 
   "webatlas.notification.error": "An error occurred",
   "webatlas.notification.settings.saved": "Settings saved successfully",

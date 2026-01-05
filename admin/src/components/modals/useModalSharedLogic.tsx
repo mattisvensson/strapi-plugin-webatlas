@@ -1,42 +1,18 @@
 import { useState, useRef, useReducer, useCallback, useContext } from 'react';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
-import { GroupedEntities, RouteSettings, Entity, Route, modalSharedLogic } from '../../../../types';
+import { GroupedEntities, RouteSettings, Entity, Route, modalSharedLogic, ModalAction, ModalPathAction, ModalPathState } from '../../../../types';
 import { useApi, useAllEntities } from '../../hooks';
 import { debounce, duplicateCheck } from '../../utils';
 import { transformToUrl } from '../../../../utils';
 
-type PathState = {
-	value?: string;
-	prevValue?: string,
-	uidPath?: string,
-	initialPath?: string,
-	needsUrlCheck: boolean;
-};
-
-type Action = 
-  | { type: 'SET_TITLE'; payload: string }
-  | { type: 'SET_SLUG'; payload: string }
-  | { type: 'SET_ACTIVE'; payload: boolean }
-  | { type: 'SET_INTERNAL'; payload: boolean }
-  | { type: 'SET_OVERRIDE'; payload: boolean };
-
-type PathAction = 
-  | { type: 'DEFAULT'; payload: string }
-  | { type: 'NO_URL_CHECK'; payload: string }
-  | { type: 'NO_TRANSFORM_AND_CHECK'; payload: string }
-  | { type: 'RESET_URL_CHECK_FLAG'; }
-  | { type: 'SET_UIDPATH'; payload: string }
-  | { type: 'SET_INITIALPATH'; payload: string }
-
-
-function itemStateReducer(navItemState: RouteSettings, action: Action): RouteSettings {
+function itemStateReducer(navItemState: RouteSettings, action: ModalAction): RouteSettings {
   switch (action.type) {
     case 'SET_TITLE':
       return { ...navItemState, title: action.payload };
     case 'SET_SLUG':
       return { ...navItemState, slug: action.payload };
-    case 'SET_ACTIVE':
-      return { ...navItemState, active: action.payload };
+    case 'SET_VISIBILITY':
+      return { ...navItemState, visible: action.payload };
     case 'SET_INTERNAL':
       return { ...navItemState, internal: action.payload };
     case 'SET_OVERRIDE':
@@ -46,7 +22,7 @@ function itemStateReducer(navItemState: RouteSettings, action: Action): RouteSet
   }
 }
 
-function pathReducer(state: PathState, action: PathAction): PathState {
+function pathReducer(state: ModalPathState, action: ModalPathAction): ModalPathState {
   switch (action.type) {
     case 'DEFAULT':
       return { 

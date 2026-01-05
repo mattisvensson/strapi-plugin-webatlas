@@ -1,4 +1,4 @@
-import { SingleSelect, SingleSelectOption, Box, Divider, Grid, Field } from '@strapi/design-system';
+import { SingleSelect, SingleSelectOption, Box, Divider, Grid, Field, Toggle } from '@strapi/design-system';
 import { withModalSharedLogic } from '../withModalSharedLogic';
 import type { Entity, GroupedEntities, ModalItem_VariantCreate } from '../../../../../types';
 import URLInfo from '../../URLInfo';
@@ -8,6 +8,7 @@ import { NavModal } from '../'
 import { useIntl } from 'react-intl';
 import { getTranslation, createTempNavItemObject } from '../../../utils';
 import { FullLoader } from '../../UI';
+import { Visibility } from '../fields';
 
 // TODO: Let the user select if the parent slug should be inherited or not
 // TODO: Add hint if a route is added that already exists in a navigation (because there is only one path per route)
@@ -64,12 +65,14 @@ function ItemCreateComponent({
         // TODO: Create a route if not existing or show error
         if (!route) throw new Error('No route found for the selected entity')
 
+        console.log('Fetched route for selected entity:', route)
+
         dispatchPath({ type: 'NO_URL_CHECK', payload: route.fullPath });
         dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath });
         dispatchPath({ type: 'SET_INITIALPATH', payload: route.fullPath });
 
         dispatchItemState({ type: 'SET_TITLE', payload: route.title })
-        dispatchItemState({ type: 'SET_ACTIVE', payload: route.active })
+        dispatchItemState({ type: 'SET_VISIBILITY', payload: route.visible })
         dispatchItemState({ type: 'SET_INTERNAL', payload: route.internal })
         dispatchItemState({ type: 'SET_OVERRIDE', payload: route.isOverride })
         
@@ -104,6 +107,7 @@ function ItemCreateComponent({
       //   settings.routeUpdate = { fullPath: path.value }
       // }
 
+      console.log('Creating nav item with navItemState:', navItemState, 'and path:', path)
       const newItem = createTempNavItemObject({
         parentId,
         entityRoute,
@@ -111,7 +115,11 @@ function ItemCreateComponent({
         navItemState,
         selectedEntity,
         selectedContentType,
-        path
+        path: {
+          ...path,
+          value: path.value || '',
+          uidPath: path.uidPath || ''
+        }
       })
       onCreate(newItem)
 
@@ -178,24 +186,15 @@ function ItemCreateComponent({
               <URLInfo validationState={validationState} replacement={replacement} />
             </Box>
           </Grid.Item>
-        </Grid.Root>
-        {/* TODO: Add visibility toggle to navitem schema */}
-        {/* <Grid.Root gap={8}>
           <Grid.Item col={6} s={12}>
             <Box width="100%">
-              <Field.Root hint="This menu item does not show on your site, if set to 'Hidden'">
-                <Field.Label>Visibility</Field.Label>
-                <Toggle
-                  onLabel="Visible"
-                  offLabel="Hidden"
-                  checked={navItemState.active}
-                  onClick={() => dispatchItemState({ type: 'SET_ACTIVE', payload: !navItemState.active })}
-                />
-                <Field.Hint/>
-              </Field.Root>
+              <Visibility
+                navItemState={navItemState}
+                dispatchItemState={dispatchItemState}
+              />
             </Box>
           </Grid.Item>
-        </Grid.Root> */}
+        </Grid.Root>
       </>
     )
   }

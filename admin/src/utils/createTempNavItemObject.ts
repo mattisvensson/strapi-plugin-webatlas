@@ -10,6 +10,7 @@ type CreateTempNavItemObjectParams = {
   } | null;
   navItemState: {
     active?: boolean;
+    visible?: boolean;
     isOverride?: boolean;
     title?: string;
   };
@@ -50,7 +51,8 @@ export default function createTempNavItemObject({
         navigation: selectedNavigation?.documentId ?? null, 
       },
       route: {
-        active: navItemState.active || false,
+        active: true,
+        visible: navItemState.visible !== undefined ? navItemState.visible : true,
         createdAt: new Date().toISOString(),
         documentId: '',
         documentIdPath: selectedEntity ? selectedEntity.documentId : '',
