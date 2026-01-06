@@ -40,6 +40,7 @@ async function createNavItem(data: NavItemSettings): Promise<null | NestedNavIte
         navigation: data.navigation,
         route: data.route || null,
         parent: data.parent || null,
+        order: data.order || 0,
       },
     });
 
@@ -49,11 +50,9 @@ async function createNavItem(data: NavItemSettings): Promise<null | NestedNavIte
   }
 } 
 
-async function updateNavItem(documentId: string, data: NavItemSettings) {
+async function updateNavItem(documentId: string, data: Pick<NavItemSettings, "parent" | "order">) {
   try {
-    const updateData: any = {};
-    if (data.navigation !== undefined && data.navigation !== null && data.navigation !== '') updateData.navigation = data.navigation;
-    if (data.route !== undefined && data.route !== null && data.route !== '') updateData.route = data.route;
+    const updateData: Partial<Pick<NavItemSettings, "parent" | "order">> = {};
     if (data.parent !== undefined) updateData.parent = data.parent;
     if (data.order !== undefined && typeof data.order === 'number') updateData.order = data.order;
 
