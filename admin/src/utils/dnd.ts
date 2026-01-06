@@ -40,8 +40,7 @@ export function getProjection(
 
 function getMaxDepth({previousItem, maxDepthValue}: {previousItem: NestedNavItem, maxDepthValue: number}) {
   if (previousItem && typeof previousItem.depth === 'number') {
-    // Subtract 1 from maxDepthValue to account for zero-based depth
-    return Math.min(previousItem.depth + 1, maxDepthValue - 1);
+    return Math.min(previousItem.depth + 1, maxDepthValue);
   }
 
   return 0;

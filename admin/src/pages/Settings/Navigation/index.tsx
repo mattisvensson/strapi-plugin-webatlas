@@ -119,13 +119,13 @@ const Settings = () => {
         <Field.Input
           id="maxNavDepth"
           type="number"
-          min={1}
+          min={0}
           step={1}
-          value={config?.navigation?.maxDepth !== undefined ? config.navigation.maxDepth : ''}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_MAX_DEPTH', payload: Number(e.target.value) })}
+          value={config?.navigation?.maxDepth !== undefined ? config.navigation.maxDepth + 1 : ''}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_MAX_DEPTH', payload: Number(e.target.value) - 1 })}
           onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
             if (e.target.value === '') return
-            dispatch({ type: 'SET_MAX_DEPTH', payload: Number(e.target.value) })}
+            dispatch({ type: 'SET_MAX_DEPTH', payload: Number(e.target.value) - 1 })}
           }
         />
         <Field.Hint/>

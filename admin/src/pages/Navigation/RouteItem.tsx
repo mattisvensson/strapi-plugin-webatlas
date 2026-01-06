@@ -13,6 +13,7 @@ export interface RouteItemProps {
   setNavigationItems: React.Dispatch<React.SetStateAction<NestedNavItem[] | undefined>>;
   ghost?: boolean;
   depth?: number;
+  maxDepth: number;
   style?: React.CSSProperties;
   wrapperRef?(node: HTMLLIElement): void;
   handleProps?: any;
@@ -34,7 +35,18 @@ function RouteIcon ({ type, color = 'neutral800' }: { type: RouteType | undefine
       return <Box width="16px" height="16px"/>
   }
 }
-export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setParentId, setActionItem, setNavigationItems, ghost, depth, style, wrapperRef, handleProps}: RouteItemProps, ref) => {
+export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
+  item,
+  setParentId,
+  setActionItem,
+  setNavigationItems,
+  ghost,
+  depth,
+  maxDepth,
+  style,
+  wrapperRef,
+  handleProps
+}: RouteItemProps, ref) => {
   if (!item || !item.route) return null
 
   const { setModalType } = useContext(ModalContext);
@@ -189,12 +201,12 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({item, setP
                   defaultMessage: 'Edit',
                 })}
               </MenuItem>
-              <MenuItem onClick={() => handleAddChildren()}>
+              {depth && depth < maxDepth && <MenuItem onClick={() => handleAddChildren()}>
                 {formatMessage({
                   id: getTranslation('navigation.page.navItem.addChildren'),
                   defaultMessage: 'Add children',
                 })}
-              </MenuItem>
+              </MenuItem>}
               <MenuItem onClick={() => handleDelete()}>
                 <Typography textColor="danger600">
                   {formatMessage({

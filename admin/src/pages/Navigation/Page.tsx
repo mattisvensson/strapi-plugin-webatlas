@@ -342,7 +342,7 @@ const Navigation = () => {
               >
                 <SortableContext items={navigationItems} strategy={verticalListSortingStrategy}>
                   {navigationItems.map((item, index) => (
-                    <SortableRouteItem
+                    config?.navigation.maxDepth && <SortableRouteItem
                       key={item.documentId || index} 
                       item={item} 
                       setParentId={setParentId} 
@@ -350,16 +350,18 @@ const Navigation = () => {
                       setNavigationItems={setNavigationItems}
                       indentationWidth={indentationWidth}
                       depth={item.id === activeId && projected ? projected.depth : item.depth}
+                      maxDepth={config.navigation.maxDepth}
                     />
                   ))}
                   {createPortal(
                     <DragOverlay>
                       {activeId && activeItem ? (
-                        <SortableRouteItem
+                        config?.navigation.maxDepth && <SortableRouteItem
                           item={activeItem} 
                           setParentId={setParentId} 
                           setActionItem={setActionItem}
                           setNavigationItems={setNavigationItems}
+                          maxDepth={config.navigation.maxDepth}
                         />
                       ) : null}
                     </DragOverlay>,
