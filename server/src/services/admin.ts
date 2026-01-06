@@ -24,20 +24,25 @@ export default ({strapi}) => ({
       return "Error. Couldn't update config";
     }
 
-    // TODO: Don't delete invalid routes, just mark them as inactive
-    if (newConfigMerged.selectedContentTypes) {
-      try {
-        const routes = await strapi.documents(waRoute).findMany();
-        const invalidRoutes = routes.filter((route) =>
-          !newConfigMerged.selectedContentTypes.find((type) => type.uid === route.relatedContentType)
-        );
-        for (const route of invalidRoutes) {
-          await strapi.documents(waRoute).delete({ documentId: route.documentId });
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    }
+    // TODO: Is it necessary/intended to delete/mark invalid routes here? 
+    // if (newConfigMerged.selectedContentTypes) {
+    //   try {
+    //     const routes = await strapi.documents(waRoute).findMany();
+    //     const invalidRoutes = routes.filter((route: Route) =>
+    //       route.internal && !newConfigMerged.selectedContentTypes.find((type) => type.uid === route.relatedContentType)
+    //     );
+    //     for (const route of invalidRoutes) {
+    //       // await strapi.documents(waNavItem).deleteMany({
+    //       //   where: {
+    //       //     route: route.documentId
+    //       //   }
+    //       // });
+    //       // await strapi.documents(waRoute).delete({ documentId: route.documentId });
+    //     }
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+    // }
 
     return newConfigMerged;
   },
