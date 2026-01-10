@@ -8,11 +8,13 @@ export default function PageWrapper({
   save, 
   isSaving,
   disabledCondition,
+  subtitle,
   children
 }: {
   save?: () => void, 
   isSaving: boolean,
   disabledCondition: boolean,
+  subtitle: string,
   children: React.ReactNode 
 }) {
 
@@ -22,10 +24,7 @@ export default function PageWrapper({
     <Page.Main>
       <Layouts.Header
         title={PLUGIN_NAME}
-        subtitle={formatMessage({
-          id: getTranslation('settings.page.subtitle'),
-          defaultMessage: 'Settings',
-        })}
+        subtitle={subtitle}
         primaryAction={ disabledCondition !== undefined && save &&
           <Button
             type="submit"

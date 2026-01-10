@@ -14,7 +14,9 @@
   "webatlas.routes.page.column.type": "Typ",
   "webatlas.routes.page.searchPlaceholder": "Routen suchen",
 
-  "webatlas.settings.page.subtitle": "Konfigurieren Sie Ihre Webatlas-Plugin-Einstellungen",
+  "webatlas.settings.page.general.subtitle": "Konfigurieren Sie allgemeine Einstellungen",
+  "webatlas.settings.page.general.webatlasVersion": "Webatlas Version",
+  "webatlas.settings.page.navigation.subtitle": "Konfigurieren Sie Navigationseinstellungen",
   "webatlas.settings.page.enabledContentTypes": "Aktivierte Inhaltstypen",
   "webatlas.settings.page.enabledContentTypes.hint": "Wählen Sie die Inhaltstypen aus, für die Sie URL-Aliase aktivieren möchten",
   "webatlas.settings.page.enabledContentTypes.placeholder": "Inhaltstypen auswählen...",
@@ -75,7 +77,6 @@
   "webatlas.components.URLInfo.available": "URL ist verfügbar",
   "webatlas.components.URLInfo.notAvailable": "URL ist nicht verfügbar. Ersetzt durch",
 
-  "webatlas.components.CMEditViewAside.loading": "Wird geladen...",
   "webatlas.components.CMEditViewAside.notAllowed.start": "Dieser Inhaltstyp ist nicht erlaubt für",
   "webatlas.components.CMEditViewAside.notAllowed.end": "Wenn Sie ihn verwenden möchten, wenden Sie sich bitte an Ihren Administrator",
   "webatlas.components.CMEditViewAside.notConfigured.start": "Dieser Inhaltstyp ist nicht konfiguriert für",
@@ -115,6 +116,7 @@
   "webatlas.modified": "Geändert",
   "webatlas.deleted": "Gelöscht",
   "webatlas.restore": "Wiederherstellen",
+  "webatlas.loading": "Laden...",
   
   "webatlas.notification.error": "Ein Fehler ist aufgetreten",
   "webatlas.notification.settings.saved": "Einstellungen erfolgreich gespeichert",

@@ -214,7 +214,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	if (!initialLoadComplete) return (
     <Typography textColor="neutral600">
 			{formatMessage({
-        id: getTranslation('components.CMEditViewAside.loading'),
+        id: getTranslation('loading'),
         defaultMessage: 'Loading...',
       })}
     </Typography>
