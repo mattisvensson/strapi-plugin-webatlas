@@ -18,8 +18,12 @@ import useAllContentTypes from '../../../hooks/useAllContentTypes';
 import { getTranslation } from '../../../utils';
 import { useIntl } from 'react-intl';
 import { FullLoader } from '../../../components/UI';
-import PageWrapper from '../PageWrapper';
+import { PageWrapper, ContentBox, SettingTitle } from '..';
 import ContentTypeAccordion from './ContentTypeAccordion';
+import { PLUGIN_VERSION, PLUGIN_NAME } from '../../../../../pluginId';
+import { Typography } from '@strapi/design-system';
+import { Link } from '@strapi/design-system';
+import { ExternalLink } from '@strapi/icons';
 
 type Action =
   | { type: 'SET_SELECTED_CONTENT_TYPES'; payload: ConfigContentType[] }
@@ -140,62 +144,97 @@ const Settings = () => {
       })}
       disabledCondition={JSON.stringify(config) === JSON.stringify(initialConfig.current)}
     >
-      <Field.Root
-        name="selectedContentTypes"
-        hint={formatMessage({
-          id: getTranslation('settings.page.enabledContentTypes.hint'),
-          defaultMessage: 'Select the content types for which you want to enable URL aliases',
-        })}
-      >
-        <Field.Label>
-          {formatMessage({
-            id: getTranslation('settings.page.enabledContentTypes'),
-            defaultMessage: 'Enabled Content Types',
+      <ContentBox title={formatMessage({
+        id: getTranslation('settings.page.general.contentTypes'),
+        defaultMessage: 'Content Types',
+      })}>
+        <Field.Root
+          name="selectedContentTypes"
+          hint={formatMessage({
+            id: getTranslation('settings.page.enabledContentTypes.hint'),
+            defaultMessage: 'Select the content types for which you want to enable URL aliases',
           })}
-        </Field.Label>
-        <MultiSelect
-          placeholder={formatMessage({
-            id: getTranslation('settings.page.enabledContentTypes.placeholder'),
-            defaultMessage: 'Select content types...',
-          })}
-          onClear={() => dispatch({ type: 'SET_SELECTED_CONTENT_TYPES', payload: [] })}
-          value={[...config?.selectedContentTypes.map((ct: ConfigContentType) => ct.uid) || []]}
-          onChange={(value: string[]) =>
-            dispatch({
-              type: 'SET_SELECTED_CONTENT_TYPES',
-              payload: value.map(v => ({
-                uid: v,
-                default: '',
-                pattern: '',
-              })),
-            })
-          }
-          withTags
         >
-          {allContentTypes && allContentTypes.map(item => 
-            <MultiSelectOption key={item.uid} value={item.uid}>{item.info.displayName}</MultiSelectOption>
-          )}
-        </MultiSelect>
-        <Field.Hint/>
-      </Field.Root>
-      {config?.selectedContentTypes && config.selectedContentTypes.length > 0 && 
-        <Box paddingTop={4}>
-          <Field.Root name="selectedContentTypesAccordion">
-            <Field.Label>
+          <Field.Label>
+            <SettingTitle>
               {formatMessage({
-                id: getTranslation('settings.page.contentTypeSettings'),
-                defaultMessage: 'Content Type settings',
+                id: getTranslation('settings.page.enabledContentTypes'),
+                defaultMessage: 'Enabled Content Types',
               })}
-            </Field.Label>
-            <Accordion.Root>
-              {config.selectedContentTypes?.map((contentTypeSettings: ConfigContentType) => {
-                const ct: ContentType | undefined = allContentTypes?.find((item) => item.uid === contentTypeSettings.uid)
-                return <ContentTypeAccordion key={contentTypeSettings.uid} contentType={ct} contentTypeSettings={contentTypeSettings} dispatch={dispatch} />
+            </SettingTitle>
+          </Field.Label>
+          <MultiSelect
+            placeholder={formatMessage({
+              id: getTranslation('settings.page.enabledContentTypes.placeholder'),
+              defaultMessage: 'Select content types...',
+            })}
+            onClear={() => dispatch({ type: 'SET_SELECTED_CONTENT_TYPES', payload: [] })}
+            value={[...config?.selectedContentTypes.map((ct: ConfigContentType) => ct.uid) || []]}
+            onChange={(value: string[]) =>
+              dispatch({
+                type: 'SET_SELECTED_CONTENT_TYPES',
+                payload: value.map(v => ({
+                  uid: v,
+                  default: '',
+                  pattern: '',
+                })),
+              })
+            }
+            withTags
+          >
+            {allContentTypes && allContentTypes.map(item => 
+              <MultiSelectOption key={item.uid} value={item.uid}>{item.info.displayName}</MultiSelectOption>
+            )}
+          </MultiSelect>
+          <Field.Hint/>
+        </Field.Root>
+        {config?.selectedContentTypes && config.selectedContentTypes.length > 0 && 
+          <Box paddingTop={4}>
+            <Field.Root name="selectedContentTypesAccordion">
+              <Field.Label>
+                <SettingTitle>
+                  {formatMessage({
+                    id: getTranslation('settings.page.contentTypeSettings'),
+                    defaultMessage: 'Content Type settings',
+                  })}
+                </SettingTitle> 
+              </Field.Label>
+              <Accordion.Root>
+                {config.selectedContentTypes?.map((contentTypeSettings: ConfigContentType) => {
+                  const ct: ContentType | undefined = allContentTypes?.find((item) => item.uid === contentTypeSettings.uid)
+                  return <ContentTypeAccordion key={contentTypeSettings.uid} contentType={ct} contentTypeSettings={contentTypeSettings} dispatch={dispatch} />
+                })}
+              </Accordion.Root>
+            </Field.Root>
+          </Box>
+        }
+      </ContentBox>
+      <ContentBox title={formatMessage({
+        id: getTranslation('settings.page.general.details'),
+        defaultMessage: 'Details',
+      })}>
+        <Field.Root name="selectedContentTypesAccordion">
+          <Field.Label>
+            <SettingTitle>
+              { PLUGIN_NAME }{' '}
+              {formatMessage({
+                id: getTranslation('version'),
+                defaultMessage: 'Version',
               })}
-            </Accordion.Root>
-          </Field.Root>
-        </Box>
-      }
+            </SettingTitle>
+          </Field.Label>
+          <Typography>
+            v{PLUGIN_VERSION}
+            <Link
+              href={`https://github.com/mattisvensson/strapi-plugin-webatlas/releases/tag/v${PLUGIN_VERSION}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ marginLeft: 4 }}>
+              <ExternalLink />
+            </Link>
+          </Typography>
+        </Field.Root>
+      </ContentBox>
     </PageWrapper>
   );
 };

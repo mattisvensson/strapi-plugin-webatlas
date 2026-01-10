@@ -1,8 +1,9 @@
-import { Button, Box } from '@strapi/design-system';
+import { Button, Flex } from '@strapi/design-system';
 import { Page, Layouts} from '@strapi/strapi/admin'
 import { PLUGIN_NAME } from '../../../../pluginId';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
+import { Check } from '@strapi/icons';
 
 export default function PageWrapper({ 
   save, 
@@ -31,7 +32,9 @@ export default function PageWrapper({
             onClick={() => save()}
             loading={isSaving}
             disabled={disabledCondition || isSaving}
+            startIcon={<Check />}
           >
+            {/* <Check /> */}
             {formatMessage({
               id: getTranslation('save'),
               defaultMessage: 'Save',
@@ -40,18 +43,9 @@ export default function PageWrapper({
         }
       />
       <Layouts.Content>
-        <Box
-          background='neutral0'
-          borderColor="neutral150"
-          hasRadius
-          paddingBottom={4}
-          paddingLeft={4}
-          paddingRight={4}
-          paddingTop={6}
-          shadow="tableShadow"
-        >
+        <Flex direction="column" alignItems="stretch" gap={6}>
           {children}
-        </Box>
+        </Flex>
       </Layouts.Content>
     </Page.Main>
   )

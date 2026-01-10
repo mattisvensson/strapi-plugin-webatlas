@@ -16,7 +16,8 @@
 
   "webatlas.settings.page.general.subtitle": "Configure general settings",
   "webatlas.settings.page.general.webatlasVersion": "Webatlas Version",
-  "webatlas.settings.page.navigation.subtitle": "Configure navigation settings",
+  "webatlas.settings.page.general.contentTypes": "Content Types",
+  "webatlas.settings.page.general.details": "Details",
   "webatlas.settings.page.enabledContentTypes": "Enabled Content Types",
   "webatlas.settings.page.enabledContentTypes.hint": "Select the content types for which you want to enable URL aliases",
   "webatlas.settings.page.enabledContentTypes.placeholder": "Select content types...",
@@ -28,6 +29,9 @@
   "webatlas.settings.page.urlAliasPattern.hint": "The pattern to prepend to the generated URL alias. For example, if you enter \"blog\" and the value of default field is \"My First Post\", the generated URL alias will be \"blog/my-first-post\". Leave empty for no prefix.",
   "webatlas.settings.page.urlAliasPattern.tooltip": "Leading and trailing slashes will be removed. Spaces will be replaced with hyphens. Special characters will be encoded.",
   "webatlas.settings.page.urlAliasPattern.placeholder": "e.g. blog",
+  "webatlas.settings.page.navigation.subtitle": "Configure navigation settings",
+  "webatlas.settings.page.navigation.navigation": "Navigation",
+  "webatlas.settings.page.navigation.maxNavDepth.label": "Max depth of navigation tree",
 
   "webatlas.modal.navOverview.confirmText": "New navigation",
   "webatlas.modal.navOverview.closeText": "Cancel",
@@ -117,6 +121,7 @@
   "webatlas.deleted": "Deleted",
   "webatlas.restore": "Restore",
   "webatlas.loading": "Loading...",
+  "webatlas.version": "Version",
 
   "webatlas.notification.error": "An error occurred",
   "webatlas.notification.settings.saved": "Settings saved successfully",
