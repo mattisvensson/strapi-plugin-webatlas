@@ -14,7 +14,7 @@ import type { PluginConfig } from '../../../../../types';
 import { getTranslation } from '../../../utils';
 import { useIntl } from 'react-intl';
 import { FullLoader } from '../../../components/UI';
-import PageWrapper from '../PageWrapper';
+import { PageWrapper, ContentBox, SettingTitle } from '../';
 
 type Action =
   | { type: 'SET_MAX_DEPTH'; payload: number }
@@ -115,29 +115,34 @@ const Settings = () => {
       })}
       disabledCondition={JSON.stringify(config) === JSON.stringify(initialConfig.current)}
     >
-      <Field.Root
-        name="maxNavDepth"
-      >
-        <Field.Label>
-          {formatMessage({
-            id: getTranslation('settings.page.maxNavDepth.label'),
-            defaultMessage: 'Max depth of navigation tree',
-          })}
-        </Field.Label>
-        <Field.Input
-          id="maxNavDepth"
-          type="number"
-          min={0}
-          step={1}
-          value={config?.navigation?.maxDepth !== undefined ? config.navigation.maxDepth + 1 : ''}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_MAX_DEPTH', payload: Number(e.target.value) - 1 })}
-          onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-            if (e.target.value === '') return
-            dispatch({ type: 'SET_MAX_DEPTH', payload: Number(e.target.value) - 1 })}
-          }
-        />
-        <Field.Hint/>
-      </Field.Root>
+      <ContentBox title={formatMessage({
+        id: getTranslation('settings.page.navigation.navigation'),
+        defaultMessage: 'Navigation',
+      })}>
+        <Field.Root name="maxNavDepth">
+          <Field.Label>
+            <SettingTitle>
+              {formatMessage({
+                id: getTranslation('settings.page.navigation.maxNavDepth.label'),
+                defaultMessage: 'Max depth of navigation tree',
+              })}
+            </SettingTitle>
+          </Field.Label>
+          <Field.Input
+            id="maxNavDepth"
+            type="number"
+            min={0}
+            step={1}
+            value={config?.navigation?.maxDepth !== undefined ? config.navigation.maxDepth + 1 : ''}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_MAX_DEPTH', payload: Number(e.target.value) - 1 })}
+            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+              if (e.target.value === '') return
+              dispatch({ type: 'SET_MAX_DEPTH', payload: Number(e.target.value) - 1 })}
+            }
+          />
+          <Field.Hint/>
+        </Field.Root>
+      </ContentBox>
     </PageWrapper>
   );
 };
