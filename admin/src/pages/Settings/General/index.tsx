@@ -120,6 +120,10 @@ const Settings = () => {
   if (loading) {
     return <PageWrapper
       isSaving={isSaving}
+      subtitle={formatMessage({
+        id: getTranslation('loading'),
+        defaultMessage: 'Loading...',
+      })}
       disabledCondition={true}
     >
       <FullLoader height={200} />
@@ -130,6 +134,10 @@ const Settings = () => {
     <PageWrapper
       save={save}
       isSaving={isSaving}
+      subtitle={formatMessage({
+        id: getTranslation('settings.page.general.subtitle'),
+        defaultMessage: 'Configure general settings',
+      })}
       disabledCondition={JSON.stringify(config) === JSON.stringify(initialConfig.current)}
     >
       <Field.Root

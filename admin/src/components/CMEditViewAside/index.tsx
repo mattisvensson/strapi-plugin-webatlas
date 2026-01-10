@@ -71,7 +71,7 @@ const CMEditViewAside = () => {
   if (isLoading || !config) return (
     <Typography textColor="neutral600">
       {formatMessage({
-        id: getTranslation('components.CMEditViewAside.loading'),
+        id: getTranslation('loading'),
         defaultMessage: 'Loading...',
       })}
     </Typography>
