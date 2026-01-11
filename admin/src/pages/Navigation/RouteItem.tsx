@@ -201,7 +201,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
                   defaultMessage: 'Edit',
                 })}
               </MenuItem>
-              {depth && depth < maxDepth && <MenuItem onClick={() => handleAddChildren()}>
+              {depth !== undefined && depth < maxDepth && <MenuItem onClick={() => handleAddChildren()}>
                 {formatMessage({
                   id: getTranslation('navigation.page.navItem.addChildren'),
                   defaultMessage: 'Add children',
