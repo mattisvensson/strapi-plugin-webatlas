@@ -7,7 +7,7 @@
  *
 */
 
-import { Plus } from '@strapi/icons';
+import { Check, Plus } from '@strapi/icons';
 import { Flex, Button } from '@strapi/design-system';
 import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
@@ -270,7 +270,6 @@ const Navigation = () => {
         if (curr > prev + 1) curr = prev + 1;
         fixedItems[i].depth = curr;
       }
-      
       setNavigationItems(fixedItems);
     }
   }
@@ -321,6 +320,7 @@ const Navigation = () => {
               onClick={() => saveNavigation()}
               loading={isSavingNavigation}
               variant="primary"
+              startIcon={<Check />}
               disabled={JSON.stringify(navigationItems) === JSON.stringify(initialNavigationItemsRef.current)}
             >
               {formatMessage({
