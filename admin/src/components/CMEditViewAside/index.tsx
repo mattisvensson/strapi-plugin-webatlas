@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { unstable_useContentManagerContext as useContentManagerContext, } from '@strapi/strapi/admin';
+import { unstable_useContentManagerContext as useContentManagerContext, useRBAC } from '@strapi/strapi/admin';
 import { Typography, Link } from '@strapi/design-system';
 import { ConfigContentType } from '../../../../types';
 import { usePluginConfig, useAllContentTypes } from '../../hooks';
@@ -7,10 +7,11 @@ import Alias from './Alias';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
 import { PLUGIN_NAME } from '../../../../pluginId';
+import pluginPermissions from '../../permissions';
 
 // import Navigation from './Navigation';
 
-const CMEditViewAside = () => {
+const CMEditViewAsideContent = () => {
   const { model } = useContentManagerContext()
   const { contentTypes } = useAllContentTypes()
   const { config } = usePluginConfig()
@@ -117,6 +118,28 @@ const CMEditViewAside = () => {
       {/* <Navigation/> */}
     </>
   )
+};
+
+// Main component that checks permissions first
+const CMEditViewAside = () => {
+  const {
+    allowedActions: { canAccessCMAside },
+  } = useRBAC({
+    cmAside: pluginPermissions['cm.aside'],
+  });
+
+  const { formatMessage } = useIntl();
+
+  if (!canAccessCMAside) {
+    return <Typography textColor="neutral600">
+			{formatMessage({
+        id: getTranslation('components.CMEditViewAside.noPermission'),
+        defaultMessage: 'You do not have the required permissions to access this panel.',
+      })}
+    </Typography>
+  }
+
+  return <CMEditViewAsideContent />;
 };
 
 export default CMEditViewAside;

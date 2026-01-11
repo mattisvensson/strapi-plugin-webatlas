@@ -81,6 +81,7 @@
   "webatlas.components.URLInfo.available": "URL is available",
   "webatlas.components.URLInfo.notAvailable": "URL is not available. Replaced with",
 
+  "webatlas.components.CMEditViewAside.noPermission": "You do not have the required permissions to access this panel.",
   "webatlas.components.CMEditViewAside.notAllowed.start": "This content type is not allowed for",
   "webatlas.components.CMEditViewAside.notAllowed.end": "If you wish to use it, please contact your administrator",
   "webatlas.components.CMEditViewAside.notConfigured.start": "This content type is not configured for",

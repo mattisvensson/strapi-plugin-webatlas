@@ -1,4 +1,5 @@
 const pluginPermissions = {
+  'cm.aside': [{ action: 'plugin::webatlas.cm.aside', subject: null }],
   'page.navigation': [{ action: 'plugin::webatlas.page.navigation', subject: null }],
   'page.routes': [{ action: 'plugin::webatlas.page.routes', subject: null }],
   'settings.general': [{ action: 'plugin::webatlas.settings.general', subject: null }],
