@@ -58,11 +58,7 @@ export default {
           );
         },
         permissions: [
-          // Uncomment to set the permissions of the plugin here
-          // {
-          //   action: '', // the action name should be plugin::plugin-name.actionType
-          //   subject: null,
-          // },
+          pluginPermissions['settings.general'][0],
         ],
       }
     )
@@ -81,7 +77,7 @@ export default {
           );
         },
         permissions: [
-          pluginPermissions['settings.configuration'][0],
+          pluginPermissions['settings.navigation'][0],
         ],
       }
     )
