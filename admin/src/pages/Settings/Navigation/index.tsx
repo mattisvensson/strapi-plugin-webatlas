@@ -8,13 +8,14 @@
 
 import { useEffect, useState, useReducer, useRef } from 'react';
 import { Field } from '@strapi/design-system';
-import { useNotification } from '@strapi/strapi/admin'
+import { useNotification, Page } from '@strapi/strapi/admin'
 import usePluginConfig from '../../../hooks/usePluginConfig';
 import type { PluginConfig } from '../../../../../types';
 import { getTranslation } from '../../../utils';
 import { useIntl } from 'react-intl';
 import { FullLoader } from '../../../components/UI';
 import { PageWrapper, ContentBox, SettingTitle } from '../';
+import pluginPermissions from '../../../permissions';
 
 type Action =
   | { type: 'SET_MAX_DEPTH'; payload: number }
@@ -106,44 +107,46 @@ const Settings = () => {
   }
 
   return (
-    <PageWrapper
-      save={save}
-      isSaving={isSaving}
-      subtitle={formatMessage({
-        id: getTranslation('settings.page.navigation.subtitle'),
-        defaultMessage: 'Configure navigation settings',
-      })}
-      disabledCondition={JSON.stringify(config) === JSON.stringify(initialConfig.current)}
-    >
-      <ContentBox title={formatMessage({
-        id: getTranslation('settings.page.navigation.navigation'),
-        defaultMessage: 'Navigation',
-      })}>
-        <Field.Root name="maxNavDepth">
-          <Field.Label>
-            <SettingTitle>
-              {formatMessage({
-                id: getTranslation('settings.page.navigation.maxNavDepth.label'),
-                defaultMessage: 'Max depth of navigation tree',
-              })}
-            </SettingTitle>
-          </Field.Label>
-          <Field.Input
-            id="maxNavDepth"
-            type="number"
-            min={0}
-            step={1}
-            value={config?.navigation?.maxDepth !== undefined ? config.navigation.maxDepth + 1 : ''}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_MAX_DEPTH', payload: Number(e.target.value) - 1 })}
-            onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-              if (e.target.value === '') return
-              dispatch({ type: 'SET_MAX_DEPTH', payload: Number(e.target.value) - 1 })}
-            }
-          />
-          <Field.Hint/>
-        </Field.Root>
-      </ContentBox>
-    </PageWrapper>
+    <Page.Protect permissions={pluginPermissions['settings.navigation']}>
+      <PageWrapper
+        save={save}
+        isSaving={isSaving}
+        subtitle={formatMessage({
+          id: getTranslation('settings.page.navigation.subtitle'),
+          defaultMessage: 'Configure navigation settings',
+        })}
+        disabledCondition={JSON.stringify(config) === JSON.stringify(initialConfig.current)}
+      >
+        <ContentBox title={formatMessage({
+          id: getTranslation('settings.page.navigation.navigation'),
+          defaultMessage: 'Navigation',
+        })}>
+          <Field.Root name="maxNavDepth">
+            <Field.Label>
+              <SettingTitle>
+                {formatMessage({
+                  id: getTranslation('settings.page.navigation.maxNavDepth.label'),
+                  defaultMessage: 'Max depth of navigation tree',
+                })}
+              </SettingTitle>
+            </Field.Label>
+            <Field.Input
+              id="maxNavDepth"
+              type="number"
+              min={0}
+              step={1}
+              value={config?.navigation?.maxDepth !== undefined ? config.navigation.maxDepth + 1 : ''}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_MAX_DEPTH', payload: Number(e.target.value) - 1 })}
+              onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
+                if (e.target.value === '') return
+                dispatch({ type: 'SET_MAX_DEPTH', payload: Number(e.target.value) - 1 })}
+              }
+            />
+            <Field.Hint/>
+          </Field.Root>
+        </ContentBox>
+      </PageWrapper>
+    </Page.Protect>
   );
 };
 
