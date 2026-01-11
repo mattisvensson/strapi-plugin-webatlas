@@ -12,30 +12,37 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     const actions = [
       {
         section: 'plugins',
-        displayName: 'Access the "Navigation" page',
+        displayName: 'Navigation page',
         uid: 'page.navigation',
         subCategory: 'Pages',
         pluginName: 'webatlas',
       },
       {
         section: 'plugins',
-        displayName: 'Access the "Routes" page',
+        displayName: 'Routes page',
         uid: 'page.routes',
         subCategory: 'Pages',
         pluginName: 'webatlas',
       },
       {
         section: 'plugins',
-        displayName: 'Access the "General" page',
+        displayName: 'General page',
         uid: 'settings.general',
         subCategory: 'Settings',
         pluginName: 'webatlas',
       },
       {
         section: 'plugins',
-        displayName: 'Access the "Navigation" page',
+        displayName: 'Navigation page',
         uid: 'settings.navigation',
         subCategory: 'Settings',
+        pluginName: 'webatlas',
+      },
+      {
+        section: 'plugins',
+        displayName: 'Aside panel',
+        uid: 'cm.aside',
+        subCategory: 'Content Manager',
         pluginName: 'webatlas',
       },
     ];
