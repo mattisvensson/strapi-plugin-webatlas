@@ -1,10 +1,8 @@
 import type { NavigationInput, NestedNavigation, NestedNavItem, PluginConfig, StructuredNavigationVariant } from "../../../types";
 import duplicateCheck from "../utils/duplicateCheck";
 import { getFullPath, buildStructuredNavigation, transformToUrl } from "../../../utils";
-import { waRoute, waNavigation, waNavItem } from "../utils/pluginHelpers";
 import { PLUGIN_ID } from "../../../pluginId";
-import { createNavItem, updateNavItem, deleteNavItem } from "../utils/navItemHandler";
-import { createExternalRoute } from "../utils/routeHandler";
+import { reduceDepthOfOrphanedItems, createExternalRoute, createNavItem, updateNavItem, deleteNavItem, waRoute, waNavigation, waNavItem } from "../utils";
 
 export default ({strapi}) => ({
 
@@ -216,13 +214,20 @@ export default ({strapi}) => ({
 
     let error = false;
     const newNavItemsMap = new Map<string, NestedNavItem>();
-
-    // First pass: Handle deletions and updates, and resolve temp parent IDs
+    
+    // First pass: Validate and prepare items
     for (const [index, item] of navigationItems.entries()) {
       // Handle deletions
       if (item.deleted) {
         try {
           item.documentId && await deleteNavItem(item.documentId);
+
+          const newItems = reduceDepthOfOrphanedItems(navigationItems, item.documentId);
+
+          if (!newItems) throw new Error("Failed to reduce depth of orphaned items");
+        
+          navigationItems = newItems;
+          
         } catch (error) {
           error = true;
           console.error('Error deleting navigation item ', error);
@@ -244,14 +249,6 @@ export default ({strapi}) => ({
         continue;
       }
 
-      // Resolve temporary parent IDs
-      if (item.parent?.documentId.startsWith("temp-")) {
-        const newParentItem = newNavItemsMap.get(item.parent.documentId);
-        if (newParentItem) {
-          item.isNew.parent = newParentItem.documentId;
-        }
-      }
-
       // Handle route updates for existing items
       if (item.update && !item.isNew) {
         try {
@@ -268,60 +265,58 @@ export default ({strapi}) => ({
       }
     }
 
-    // Second pass: Process items and calculate correct order and parent relationships
-    const activeItems = navigationItems.filter(item => !item.deleted && item.route);
-    
-    for (const [index, item] of activeItems.entries()) {
+    // Second pass: Process items sequentially and maintain parent/depth tracking
+    let parentIds: string[] = [];
+    let groupIndices: number[] = [];
+
+    for (const [index, item] of navigationItems.entries()) {
       if (typeof item.depth !== 'number') {
         continue;
       }
 
-      try {
-        // Calculate the correct parent for this item based on depth
-        let parentDocumentId: string | null = null;
-        if (item.depth > 0) {
-          // Find the closest previous item with depth = item.depth - 1
-          for (let i = index - 1; i >= 0; i--) {
-            const potentialParent = activeItems[i];
-            if (potentialParent.depth === item.depth - 1) {
-              parentDocumentId = potentialParent.documentId.startsWith("temp-") 
-                ? newNavItemsMap.get(potentialParent.documentId)?.documentId || null
-                : potentialParent.documentId;
-              break;
+      // Handle depth changes and maintain parent stack
+      if (item.depth === 0) {
+        if (groupIndices[0] !== undefined) {
+          groupIndices[0] = groupIndices[0] + 1;
+        } else {
+          groupIndices[0] = 0;
+        }
+        parentIds = [];
+      } else {
+        const previousItem = navigationItems[index - 1];
+        
+        if (previousItem && typeof previousItem.depth === 'number') {
+          if (item.depth === previousItem.depth + 1) {
+            // Going deeper - previous item becomes parent
+            parentIds.push(previousItem.documentId.startsWith("temp-") 
+              ? newNavItemsMap.get(previousItem.documentId)?.documentId || previousItem.documentId
+              : previousItem.documentId);
+            groupIndices[item.depth] = 0;
+          } else if (item.depth <= previousItem.depth) {
+            // Going back up - adjust parent stack
+            const diff = previousItem.depth - item.depth;
+            for (let i = 0; i < diff; i++) {
+              parentIds.pop();
+              groupIndices.pop();
             }
+            groupIndices[item.depth] = (groupIndices[item.depth] || 0) + 1;
+          } else {
+            // Same level or other case
+            groupIndices[item.depth] = (groupIndices[item.depth] || 0) + 1;
           }
         }
+      }
 
-        // Calculate the order among siblings at the same level with the same parent
-        const siblingsBeforeThis = activeItems.slice(0, index).filter(sibling => {
-          if (sibling.depth !== item.depth) return false;
-          
-          let siblingParentId: string | null = null;
-          if (sibling.depth > 0) {
-            // Find the parent for this sibling
-            const siblingIndex = activeItems.indexOf(sibling);
-            for (let i = siblingIndex - 1; i >= 0; i--) {
-              const potentialParent = activeItems[i];
-              if (potentialParent.depth === sibling.depth - 1) {
-                siblingParentId = potentialParent.documentId.startsWith("temp-") 
-                  ? newNavItemsMap.get(potentialParent.documentId)?.documentId || null
-                  : potentialParent.documentId;
-                break;
-              }
-            }
-          }
-          
-          return siblingParentId === parentDocumentId;
-        });
+      const calculatedParent = parentIds.at(-1) || null;
+      const calculatedOrder = groupIndices[item.depth] || 0;
 
-        const calculatedOrder = siblingsBeforeThis.length;
-
+      try {
         // Create or update the item
         if (item.isNew) {
           if (item.isNew.route) {
             await createNavItem({
               route: item.isNew.route,
-              parent: parentDocumentId,
+              parent: calculatedParent,
               navigation: item.isNew.navigation,
               order: calculatedOrder,
             });
@@ -337,7 +332,7 @@ export default ({strapi}) => ({
             const newNavItem = await createNavItem({
               route: newRoute.documentId,
               navigation: navigationId,
-              parent: parentDocumentId,
+              parent: calculatedParent,
               order: calculatedOrder,
             }) 
             if (newNavItem) newNavItemsMap.set(item.documentId, newNavItem);
@@ -345,7 +340,7 @@ export default ({strapi}) => ({
         } else {
           await updateNavItem(item.documentId, {
             order: calculatedOrder,
-            parent: parentDocumentId,
+            parent: calculatedParent,
           });
         }
       } catch (errorMsg) {
