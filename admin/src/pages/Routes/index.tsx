@@ -16,12 +16,13 @@ import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
 import TableHeader from './TableHeader';
 import TableRow from './TableRow';
-import { useNotification } from '@strapi/strapi/admin'
+import { useNotification, Page } from '@strapi/strapi/admin'
 import PageWrapper from './PageWrapper';
 import { useSearchParams } from 'react-router-dom';
 import debounce from '../../utils/debounce';
 import { useMemo } from 'react';
 import compareBy from './compareBy';
+import pluginPermissions from '../../permissions';
 
 function SearchInput({
   searchQuery,
@@ -186,17 +187,19 @@ const Routes = () => {
   }
 
   return (
-    <PageWrapper>
-      <SearchInput
-        handleSearchChange={handleSearchChange}
-        searchQuery={searchQuery}
-      />
-      <RouteTable
-        routes={routes} 
-        sortKey={sortKey}
-        handleSort={handleSort}
-      />
-    </PageWrapper>
+    <Page.Protect permissions={pluginPermissions['page.routes']}>
+      <PageWrapper>
+        <SearchInput
+          handleSearchChange={handleSearchChange}
+          searchQuery={searchQuery}
+        />
+        <RouteTable
+          routes={routes} 
+          sortKey={sortKey}
+          handleSort={handleSort}
+        />
+      </PageWrapper>
+    </Page.Protect>
   );
 };
 
