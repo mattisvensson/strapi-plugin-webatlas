@@ -123,14 +123,14 @@ const CMEditViewAsideContent = () => {
 // Main component that checks permissions first
 const CMEditViewAside = () => {
   const {
-    allowedActions: { canAccessCMAside },
+    allowedActions: { canAside },
   } = useRBAC({
     cmAside: pluginPermissions['cm.aside'],
   });
 
   const { formatMessage } = useIntl();
 
-  if (!canAccessCMAside) {
+  if (!canAside) {
     return <Typography textColor="neutral600">
 			{formatMessage({
         id: getTranslation('components.CMEditViewAside.noPermission'),
