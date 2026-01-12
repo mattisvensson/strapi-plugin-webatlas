@@ -1,13 +1,28 @@
+import { waPlugin } from "../utils"
+
 export default {
   type: 'admin',
   routes: [
+    // Config
     {
       method: 'GET',
       path: '/config',
       handler: 'admin.getConfig',
       config: {
-        policies: [],
-        auth: false,
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          { 
+            name: `${waPlugin}.has-permissions`,
+            config: { 
+              actions: [
+                `${waPlugin}.settings.general`,
+                `${waPlugin}.settings.navigation`,
+                `${waPlugin}.page.navigation`,
+                `${waPlugin}.cm.aside`,
+              ] 
+            }
+          },
+        ],
       }
     },
     {
@@ -15,17 +30,40 @@ export default {
       path: '/config',
       handler: 'admin.updateConfig',
       config: {
-        policies: [],
-        auth: false,
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          { 
+            name: `${waPlugin}.has-permissions`,
+            config: {
+               actions: [
+                `${waPlugin}.settings.general`,
+                `${waPlugin}.settings.navigation`,
+                `${waPlugin}.page.navigation`, // TODO: update usePluginConfig, then remove this
+              ]
+            }
+          }
+        ],
       }
     },
+
+    // Route
     {
       method: 'GET',
       path: '/route',
       handler: 'admin.getRoutes',
       config: {
-        policies: [],
-        auth: false,
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          { 
+            name: `${waPlugin}.has-permissions`,
+            config: { 
+              actions: [
+                `${waPlugin}.page.routes`,
+                `${waPlugin}.cm.aside`,
+              ] 
+            }
+          }
+        ],
       }
     },
     {
@@ -33,8 +71,17 @@ export default {
       path: '/route',
       handler: 'admin.updateRoute',
       config: {
-        policies: [],
-        auth: false,
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          { 
+            name: `${waPlugin}.has-permissions`,
+            config: { 
+              actions: [
+                `${waPlugin}.page.navigation`
+              ] 
+            }
+          }
+        ],
       }
     },
     {
@@ -42,17 +89,38 @@ export default {
       path: '/route/related',
       handler: 'admin.getRelatedRoute',
       config: {
-        policies: [],
-        auth: false,
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          { 
+            name: `${waPlugin}.has-permissions`,
+            config: { 
+              actions: [
+                `${waPlugin}.cm.aside`,
+                `${waPlugin}.page.navigation`
+              ]
+            }
+          }
+        ],
       }
     },
+
+    // Navigation
     {
       method: 'GET',
       path: '/navigation',
       handler: 'admin.getNavigation',
       config: {
-        policies: [],
-        auth: false,
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          { 
+            name: `${waPlugin}.has-permissions`,
+            config: {
+              actions: [
+                `${waPlugin}.page.navigation`
+              ]
+            }
+          }
+        ],
       }
     },
     {
@@ -60,8 +128,17 @@ export default {
       path: '/navigation',
       handler: 'admin.createNavigation',
       config: {
-        policies: [],
-        auth: false,
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          { 
+            name: `${waPlugin}.has-permissions`,
+            config: { 
+              actions: [
+                `${waPlugin}.page.navigation`
+              ]
+            }
+          }
+        ],
       }
     },
     {
@@ -69,8 +146,17 @@ export default {
       path: '/navigation',
       handler: 'admin.updateNavigation',
       config: {
-        policies: [],
-        auth: false,
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          { 
+            name: `${waPlugin}.has-permissions`,
+            config: { 
+              actions: [
+                `${waPlugin}.page.navigation`
+              ]
+            }
+          }
+        ],
       }
     },
     {
@@ -78,8 +164,17 @@ export default {
       path: '/navigation/items',
       handler: 'admin.updateNavigationItemStructure',
       config: {
-        policies: [],
-        auth: false,
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          { 
+            name: `${waPlugin}.has-permissions`,
+            config: { 
+              actions: [
+                `${waPlugin}.page.navigation`
+              ]
+            }
+          }
+        ],
       }
     },
     {
@@ -87,17 +182,38 @@ export default {
       path: '/navigation',
       handler: 'admin.deleteNavigation',
       config: {
-        policies: [],
-        auth: false,
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          { 
+            name: `${waPlugin}.has-permissions`,
+            config: { 
+              actions: [
+                `${waPlugin}.page.navigation`
+              ]
+            }
+          }
+        ],
       }
     },
+
+    // Utility Routes
     {
       method: 'GET',
       path: '/checkUniquePath',
       handler: 'admin.checkUniquePath',
       config: {
-        policies: [],
-        auth: false,
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          { 
+            name: `${waPlugin}.has-permissions`,
+            config: { 
+              actions: [
+                `${waPlugin}.cm.aside`,
+                `${waPlugin}.page.navigation`
+              ]
+            }
+          }
+        ],
       }
     },
   ]
