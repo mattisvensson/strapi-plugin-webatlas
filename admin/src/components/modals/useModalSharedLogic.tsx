@@ -4,6 +4,7 @@ import { GroupedEntities, RouteSettings, Entity, Route, modalSharedLogic } from 
 import { useApi, useAllEntities } from '../../hooks';
 import { debounce, duplicateCheck } from '../../utils';
 import { transformToUrl } from '../../../../utils';
+import { useFetchClient } from '@strapi/strapi/admin';
 
 type PathState = {
 	value?: string;
@@ -90,6 +91,7 @@ export function useModalSharedLogic() {
   // TODO: Fetch entities only once and share between modals
   const { entities } = useAllEntities();
   const { updateRoute, getRelatedRoute } = useApi();
+  const { get } = useFetchClient();
 
   const initialState: React.RefObject<RouteSettings> = useRef({
     title: '',
@@ -113,7 +115,7 @@ export function useModalSharedLogic() {
 		setReplacement('')
 		
 		try {
-			const data = await duplicateCheck(url, routeDocumentId)
+			const data = await duplicateCheck(get, url, routeDocumentId)
 
 			if (!data || data === url) return 
 
