@@ -6,6 +6,7 @@ import { ModalContext } from '../../contexts';
 import { useIntl } from 'react-intl';
 import { getTranslation } from '../../utils';
 import { useNavigate  } from 'react-router-dom';
+import { PLUGIN_ID } from '../../../../utils';
 
 export default function NavCreate() {
   const { post } = useFetchClient();
@@ -20,11 +21,11 @@ export default function NavCreate() {
   const createNavigation = async () => {
     setLoading(true);
     try {
-      const { data } = await post('/webatlas/navigation', { name, isActive });
+      const { data } = await post(`/${PLUGIN_ID}/navigation`, { name, isActive });
 
       if (!data.documentId) throw new Error('No documentId returned');
 
-      navigate(`/plugins/webatlas/navigation/${data.documentId}`);
+      navigate(`/plugins/${PLUGIN_ID}/navigation/${data.documentId}`);
       setModalType('');
       
     } catch (err) {

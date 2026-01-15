@@ -1,4 +1,4 @@
-import transformToUrl from "../../../utils/transformToUrl";
+import { transformToUrl, PLUGIN_ID} from "../../../utils";
 
 /**
  * Checks if a URL is unique by making a GET request to the checkUniquePath endpoint.
@@ -17,7 +17,7 @@ export default async function duplicateCheck(
   if (!url) throw new Error("URL is required");
   
   try {
-    const { data } = await get(`/webatlas/checkUniquePath?path=${transformToUrl(url)}${routeDocumentId ? `&targetRouteDocumentId=${routeDocumentId}` : ''}`);
+    const { data } = await get(`/${PLUGIN_ID}/checkUniquePath?path=${transformToUrl(url)}${routeDocumentId ? `&targetRouteDocumentId=${routeDocumentId}` : ''}`);
 
     if (!data.uniquePath) {
       throw new Error("Network response was not ok");

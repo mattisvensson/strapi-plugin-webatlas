@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { PluginConfig } from '../../../types';
 import { useFetchClient } from '@strapi/strapi/admin';
+import { PLUGIN_ID } from '../../../utils';
 
 type UsePluginConfigResponse = {
   config: PluginConfig | null;
@@ -22,14 +23,14 @@ export default function usePluginConfig(): UsePluginConfigResponse {
       setFetchError(null);
       try {
         const { data: { data: contentTypesArray} } = await get('/content-manager/content-types');
-        let { data: config } = await get('/webatlas/config');
+        let { data: config } = await get(`/${PLUGIN_ID}/config`);
 
         if (!config || !config.selectedContentTypes) {
           throw new Error(`Couldn't fetch plugin config`);
         }
 
         const allowedContentTypes = contentTypesArray.filter((type: any) => 
-          type.pluginOptions?.webatlas?.active === true
+          type.pluginOptions?.[PLUGIN_ID]?.active === true
         );
 
         const contentTypeUids = new Set(allowedContentTypes.map((type: any) => type.uid));
@@ -53,7 +54,7 @@ export default function usePluginConfig(): UsePluginConfigResponse {
 
   async function setConfig(body: Partial<PluginConfig>): Promise<void> {
     try {
-      await put('/webatlas/config', { ...body });
+      await put(`/${PLUGIN_ID}/config`, { ...body });
     } catch (error) {
       throw error;
     }

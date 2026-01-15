@@ -39,6 +39,7 @@ import SortableRouteItem from './SortableRouteItem';
 import PageWrapper from './PageWrapper';
 import cloneDeep from 'lodash/cloneDeep';
 import { useParams, useNavigate  } from 'react-router-dom';
+import { PLUGIN_ID } from '../../../../utils';
 
 type Projected = {
   depth: number;
@@ -107,7 +108,7 @@ const Navigation = () => {
             defaultMessage: 'Navigation not found. Redirected to navigation',
           }) + ': ' + updatedNavigations[0]?.name,
         });
-        navigate(`/plugins/webatlas/navigation/${updatedNavigations[0]?.documentId}`);
+        navigate(`/plugins/${PLUGIN_ID}/navigation/${updatedNavigations[0]?.documentId}`);
         return
       } 
 
@@ -137,7 +138,7 @@ const Navigation = () => {
       if (!navigationId) {
         const navs = await getNavigation({ variant: 'namesOnly' });
         if (navs && navs.length > 0)
-          navigate(`/plugins/webatlas/navigation/${navs[0].documentId}`);
+          navigate(`/plugins/${PLUGIN_ID}/navigation/${navs[0].documentId}`);
         setLoading(false);
         return;
       }
@@ -407,7 +408,7 @@ const Navigation = () => {
             onDelete={(deletedItem) => {
               cachedNavigations.current = null;
               setNavigations(navs => navs.filter(nav => nav.id !== deletedItem.id));
-              navigate('/plugins/webatlas/navigation');
+              navigate(`/plugins/${PLUGIN_ID}/navigation`);
             }}
           />
         }

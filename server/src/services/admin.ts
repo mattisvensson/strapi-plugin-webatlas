@@ -50,7 +50,7 @@ export default ({strapi}) => ({
       key: "config",
     });
     
-    const defaultConfig = strapi.config.get('plugin::webatlas');
+    const defaultConfig = strapi.config.get(`plugin::${PLUGIN_ID}`);
 
     config = {
       ...defaultConfig,

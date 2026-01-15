@@ -6,6 +6,7 @@ import { useContext } from 'react';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
 import { Flex, Button, Box, Typography, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { useNavigate } from 'react-router-dom';
+import { PLUGIN_ID } from '../../../../utils';
 
 export default function PageWrapper({ navigations, loading = false, children }: { navigations: NestedNavigation[], loading?: boolean, children: React.ReactNode }) {
   const { formatMessage } = useIntl();
@@ -47,7 +48,7 @@ export default function PageWrapper({ navigations, loading = false, children }: 
               selected={true}
               onChange={(value: string) => {
                 const navItem = navigations.find(nav => nav.slug === value);
-                navItem && navigate(`/plugins/webatlas/navigation/${navItem.documentId}`);
+                navItem && navigate(`/plugins/${PLUGIN_ID}/navigation/${navItem.documentId}`);
               }}
               disabled={navigations.length === 0}
             >
