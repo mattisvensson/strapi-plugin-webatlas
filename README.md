@@ -128,18 +128,15 @@ Optional parameters:
 
 ## 🧩 Roadmap
 
-- RBAC
-- User action feedback
+- More fine-grained RBAC
 - Internationalization
 - Route page
-  - Filters
   - Nested url structure
 - Entity page
  - Add to navigation from entity
 - Settings
   - Navigation settings
-    - Max nested items
-    - Prevent navigation deletion
+    - Prevent navigation deletion option
 - Navigation page
   - Custom fields for nav items
   - Nested paths through wrapper/external item
