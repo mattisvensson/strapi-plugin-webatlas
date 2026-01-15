@@ -1,6 +1,6 @@
 import type { Core, UID } from '@strapi/strapi';
 import { PluginConfig, ConfigContentType } from "../../types";
-import { transformToUrl, waRoute, waNavItem } from "../../utils";
+import { transformToUrl, waRoute, waNavItem, PLUGIN_ID } from "../../utils";
 import { duplicateCheck } from "./utils";
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
@@ -13,35 +13,35 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
         displayName: 'Navigation page',
         uid: 'page.navigation',
         subCategory: 'Pages',
-        pluginName: 'webatlas',
+        pluginName: PLUGIN_ID,
       },
       {
         section: 'plugins',
         displayName: 'Routes page',
         uid: 'page.routes',
         subCategory: 'Pages',
-        pluginName: 'webatlas',
+        pluginName: PLUGIN_ID,
       },
       {
         section: 'plugins',
         displayName: 'General page',
         uid: 'settings.general',
         subCategory: 'Settings',
-        pluginName: 'webatlas',
+        pluginName: PLUGIN_ID,
       },
       {
         section: 'plugins',
         displayName: 'Navigation page',
         uid: 'settings.navigation',
         subCategory: 'Settings',
-        pluginName: 'webatlas',
+        pluginName: PLUGIN_ID,
       },
       {
         section: 'plugins',
         displayName: 'Aside panel',
         uid: 'cm.aside',
         subCategory: 'Content Manager',
-        pluginName: 'webatlas',
+        pluginName: PLUGIN_ID,
       },
     ];
 
@@ -55,7 +55,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     throw new Error('strapi.store is undefined');
   }
 
-  const pluginStore = strapi.store({ type: 'plugin', name: 'webatlas' });
+  const pluginStore = strapi.store({ type: 'plugin', name: PLUGIN_ID });
   const config = await pluginStore.get({
     key: "config",
   }) as PluginConfig;

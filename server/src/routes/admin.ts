@@ -1,4 +1,4 @@
-import { waPlugin } from "../../../utils"
+import { PLUGIN_ID } from "../../../utils"
 
 export default {
   type: 'admin',
@@ -12,13 +12,13 @@ export default {
         policies: [
           'admin::isAuthenticatedAdmin',
           { 
-            name: `${waPlugin}.has-permissions`,
+            name: `plugin::${PLUGIN_ID}.has-permissions`,
             config: { 
               actions: [
-                `${waPlugin}.settings.general`,
-                `${waPlugin}.settings.navigation`,
-                `${waPlugin}.page.navigation`,
-                `${waPlugin}.cm.aside`,
+                `plugin::${PLUGIN_ID}.settings.general`,
+                `plugin::${PLUGIN_ID}.settings.navigation`,
+                `plugin::${PLUGIN_ID}.page.navigation`,
+                `plugin::${PLUGIN_ID}.cm.aside`,
               ] 
             }
           },
@@ -33,12 +33,12 @@ export default {
         policies: [
           'admin::isAuthenticatedAdmin',
           { 
-            name: `${waPlugin}.has-permissions`,
+            name: `plugin::${PLUGIN_ID}.has-permissions`,
             config: {
                actions: [
-                `${waPlugin}.settings.general`,
-                `${waPlugin}.settings.navigation`,
-                `${waPlugin}.page.navigation`, // TODO: update usePluginConfig, then remove this
+                `plugin::${PLUGIN_ID}.settings.general`,
+                `plugin::${PLUGIN_ID}.settings.navigation`,
+                `plugin::${PLUGIN_ID}.page.navigation`, // TODO: update usePluginConfig, then remove this
               ]
             }
           }
@@ -55,11 +55,11 @@ export default {
         policies: [
           'admin::isAuthenticatedAdmin',
           { 
-            name: `${waPlugin}.has-permissions`,
+            name: `plugin::${PLUGIN_ID}.has-permissions`,
             config: { 
               actions: [
-                `${waPlugin}.page.routes`,
-                `${waPlugin}.cm.aside`,
+                `plugin::${PLUGIN_ID}.page.routes`,
+                `plugin::${PLUGIN_ID}.cm.aside`,
               ] 
             }
           }
@@ -74,10 +74,10 @@ export default {
         policies: [
           'admin::isAuthenticatedAdmin',
           { 
-            name: `${waPlugin}.has-permissions`,
+            name: `plugin::${PLUGIN_ID}.has-permissions`,
             config: { 
               actions: [
-                `${waPlugin}.page.navigation`
+                `plugin::${PLUGIN_ID}.page.navigation`
               ] 
             }
           }
@@ -92,11 +92,11 @@ export default {
         policies: [
           'admin::isAuthenticatedAdmin',
           { 
-            name: `${waPlugin}.has-permissions`,
+            name: `plugin::${PLUGIN_ID}.has-permissions`,
             config: { 
               actions: [
-                `${waPlugin}.cm.aside`,
-                `${waPlugin}.page.navigation`
+                `plugin::${PLUGIN_ID}.cm.aside`,
+                `plugin::${PLUGIN_ID}.page.navigation`
               ]
             }
           }
@@ -113,10 +113,10 @@ export default {
         policies: [
           'admin::isAuthenticatedAdmin',
           { 
-            name: `${waPlugin}.has-permissions`,
+            name: `plugin::${PLUGIN_ID}.has-permissions`,
             config: {
               actions: [
-                `${waPlugin}.page.navigation`
+                `plugin::${PLUGIN_ID}.page.navigation`
               ]
             }
           }
@@ -131,10 +131,10 @@ export default {
         policies: [
           'admin::isAuthenticatedAdmin',
           { 
-            name: `${waPlugin}.has-permissions`,
+            name: `plugin::${PLUGIN_ID}.has-permissions`,
             config: { 
               actions: [
-                `${waPlugin}.page.navigation`
+                `plugin::${PLUGIN_ID}.page.navigation`
               ]
             }
           }
@@ -149,10 +149,10 @@ export default {
         policies: [
           'admin::isAuthenticatedAdmin',
           { 
-            name: `${waPlugin}.has-permissions`,
+            name: `plugin::${PLUGIN_ID}.has-permissions`,
             config: { 
               actions: [
-                `${waPlugin}.page.navigation`
+                `plugin::${PLUGIN_ID}.page.navigation`
               ]
             }
           }
@@ -167,10 +167,10 @@ export default {
         policies: [
           'admin::isAuthenticatedAdmin',
           { 
-            name: `${waPlugin}.has-permissions`,
+            name: `plugin::${PLUGIN_ID}.has-permissions`,
             config: { 
               actions: [
-                `${waPlugin}.page.navigation`
+                `plugin::${PLUGIN_ID}.page.navigation`
               ]
             }
           }
@@ -185,10 +185,10 @@ export default {
         policies: [
           'admin::isAuthenticatedAdmin',
           { 
-            name: `${waPlugin}.has-permissions`,
+            name: `plugin::${PLUGIN_ID}.has-permissions`,
             config: { 
               actions: [
-                `${waPlugin}.page.navigation`
+                `plugin::${PLUGIN_ID}.page.navigation`
               ]
             }
           }
@@ -205,11 +205,11 @@ export default {
         policies: [
           'admin::isAuthenticatedAdmin',
           { 
-            name: `${waPlugin}.has-permissions`,
+            name: `plugin::${PLUGIN_ID}.has-permissions`,
             config: { 
               actions: [
-                `${waPlugin}.cm.aside`,
-                `${waPlugin}.page.navigation`
+                `plugin::${PLUGIN_ID}.cm.aside`,
+                `plugin::${PLUGIN_ID}.page.navigation`
               ]
             }
           }

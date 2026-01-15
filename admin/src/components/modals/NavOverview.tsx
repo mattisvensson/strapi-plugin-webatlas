@@ -8,6 +8,7 @@ import Center from '../UI/Center';
 import { useIntl } from 'react-intl';
 import { getTranslation } from '../../utils';
 import { useNavigate  } from 'react-router-dom';
+import { PLUGIN_ID } from '../../../../utils';
 
 type NavOverviewProps = {
   navigations: NestedNavigation[],
@@ -22,7 +23,7 @@ export default function NavOverview ({ navigations, setActionItem }: NavOverview
   const navigate = useNavigate();
 
   const handleSelect = (nav: NestedNavigation) => {
-    navigate(`/plugins/webatlas/navigation/${nav.documentId}`);
+    navigate(`/plugins/${PLUGIN_ID}/navigation/${nav.documentId}`);
     setModalType('')
   }
 
