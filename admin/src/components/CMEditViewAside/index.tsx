@@ -38,37 +38,6 @@ const CMEditViewAsideContent = () => {
     setIsLoading(false);
   }, [config])
 
-  useEffect(() => {
-    const isWebatlasLabel = (label: Element) => label.textContent?.startsWith('webatlas_');
-    
-    document.querySelectorAll('label').forEach(label => {
-      if (!isWebatlasLabel(label)) return;
-      
-      const container = label.parentElement?.parentElement;
-      const parent = container?.parentElement;
-      const greatGrandParent = parent?.parentElement?.parentElement;
-      
-      if (!container || !parent) return;
-      
-      const parentWebatlasCount = Array.from(parent.querySelectorAll('label')).filter(isWebatlasLabel).length;
-      const childrenCount = parent.children.length;
-      
-      // Remove great grandparent if it only has webatlas fields
-      if (greatGrandParent && greatGrandParent?.querySelectorAll('label').length === 
-          Array.from(greatGrandParent.querySelectorAll('label')).filter(isWebatlasLabel).length) {
-        greatGrandParent.remove();
-      }
-      // Remove parent if: single child OR two children with two webatlas fields  
-      else if (childrenCount === 1 || (childrenCount === 2 && parentWebatlasCount === 2)) {
-        parent.remove();
-      }
-      // Remove container if: two children with one webatlas field OR fallback
-      else {
-        container.remove();
-      }
-    });
-  }, []);
-
   if (isLoading || !config) return (
     <Typography textColor="neutral600">
       {formatMessage({
@@ -122,13 +91,45 @@ const CMEditViewAsideContent = () => {
 
 // Main component that checks permissions first
 const CMEditViewAside = () => {
+
+  const { formatMessage } = useIntl();
+
+  useEffect(() => {
+    const isWebatlasLabel = (label: Element) => label.textContent?.startsWith('webatlas_');
+    
+    document.querySelectorAll('label').forEach(label => {
+      if (!isWebatlasLabel(label)) return;
+      
+      const container = label.parentElement?.parentElement;
+      const parent = container?.parentElement;
+      const greatGrandParent = parent?.parentElement?.parentElement;
+      
+      if (!container || !parent) return;
+      
+      const parentWebatlasCount = Array.from(parent.querySelectorAll('label')).filter(isWebatlasLabel).length;
+      const childrenCount = parent.children.length;
+      
+      // Remove great grandparent if it only has webatlas fields
+      if (greatGrandParent && greatGrandParent?.querySelectorAll('label').length === 
+          Array.from(greatGrandParent.querySelectorAll('label')).filter(isWebatlasLabel).length) {
+        greatGrandParent.remove();
+      }
+      // Remove parent if: single child OR two children with two webatlas fields  
+      else if (childrenCount === 1 || (childrenCount === 2 && parentWebatlasCount === 2)) {
+        parent.remove();
+      }
+      // Remove container if: two children with one webatlas field OR fallback
+      else {
+        container.remove();
+      }
+    });
+  }, []);
+
   const {
     allowedActions: { canAside },
   } = useRBAC({
     cmAside: pluginPermissions['cm.aside'],
   });
-
-  const { formatMessage } = useIntl();
 
   if (!canAside) {
     return <Typography textColor="neutral600">
