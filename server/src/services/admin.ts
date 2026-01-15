@@ -50,17 +50,19 @@ export default ({strapi}) => ({
     let config = await pluginStore.get({
       key: "config",
     });
+    
+    const defaultConfig = strapi.config.get('plugin::webatlas');
 
-    if (!config) {
-      config = await pluginStore.set({
-        key: "config",
-        value: {
-          selectedContentTypes: [],
-        },
-      });
-    }
+    config = {
+      ...defaultConfig,
+      ...config,
+      navigation: {
+        ...defaultConfig.navigation,
+        ...config?.navigation
+      }
+    };
 
-    return config
+    return config;
   },
 
   async getRoutes() {
