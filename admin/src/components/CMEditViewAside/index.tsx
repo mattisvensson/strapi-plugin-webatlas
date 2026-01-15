@@ -1,12 +1,12 @@
+import type { ConfigContentType } from '../../../../types';
 import { useState, useEffect } from 'react';
 import { unstable_useContentManagerContext as useContentManagerContext, useRBAC } from '@strapi/strapi/admin';
 import { Typography, Link } from '@strapi/design-system';
-import { ConfigContentType } from '../../../../types';
 import { usePluginConfig, useAllContentTypes } from '../../hooks';
 import Alias from './Alias';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
-import { PLUGIN_NAME } from '../../../../pluginId';
+import { PLUGIN_NAME } from '../../../../utils';
 import pluginPermissions from '../../permissions';
 
 // import Navigation from './Navigation';

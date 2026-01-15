@@ -1,6 +1,6 @@
-import { buildStructuredNavigation, extractRouteAndItems, getFullPopulateObject, cleanRootKeys, removeWaFields } from "../../../utils";
+import { buildStructuredNavigation, extractRouteAndItems, getFullPopulateObject, cleanRootKeys, removeWaFields } from "../utils";
 import { StructuredNavigationVariant } from "../../../types";
-import { waRoute, waNavigation} from "../utils/pluginHelpers";
+import { waRoute, waNavigation} from "../../../utils";
 
 export default ({strapi}) => ({
   async getEntityByPath(slug: string, populate: string, populateDeepDepth: string, fields: any, status: 'draft' | 'published' = 'published') {

@@ -1,4 +1,4 @@
-import { NestedNavigation, NestedNavItem, StructuredNavigationVariant } from "../types";
+import { NestedNavigation, NestedNavItem, StructuredNavigationVariant } from "../../../types";
 
 export default function buildStructuredNavigation(navigation: NestedNavigation, variant: StructuredNavigationVariant = 'nested') {
   const itemsById = new Map<string, NestedNavItem>();

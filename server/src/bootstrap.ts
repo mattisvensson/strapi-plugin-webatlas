@@ -1,9 +1,7 @@
-import { PluginConfig, ConfigContentType } from "../../types";
-import transformToUrl from "../../utils/transformToUrl";
-import duplicateCheck from "./utils/duplicateCheck";
-import { waRoute, waNavItem } from "./utils/pluginHelpers";
 import type { Core, UID } from '@strapi/strapi';
-
+import { PluginConfig, ConfigContentType } from "../../types";
+import { transformToUrl, waRoute, waNavItem } from "../../utils";
+import { duplicateCheck } from "./utils";
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 

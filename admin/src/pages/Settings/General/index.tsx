@@ -7,12 +7,12 @@
  *
 */
 
+import type { ContentType, ConfigContentType, PluginConfig } from '../../../../../types';
 import { useEffect, useState, useReducer, useRef } from 'react';
 import { Box, Accordion, Field } from '@strapi/design-system';
 import { useNotification, Page } from '@strapi/strapi/admin'
 import { MultiSelect, MultiSelectOption } from '@strapi/design-system';
 import usePluginConfig from '../../../hooks/usePluginConfig';
-import type { ContentType, ConfigContentType, PluginConfig } from '../../../../../types';
 import transformToUrl from '../../../../../utils/transformToUrl';
 import useAllContentTypes from '../../../hooks/useAllContentTypes';
 import { getTranslation } from '../../../utils';
@@ -20,7 +20,7 @@ import { useIntl } from 'react-intl';
 import { FullLoader } from '../../../components/UI';
 import { PageWrapper, ContentBox, SettingTitle } from '..';
 import ContentTypeAccordion from './ContentTypeAccordion';
-import { PLUGIN_VERSION, PLUGIN_NAME } from '../../../../../pluginId';
+import { PLUGIN_VERSION, PLUGIN_NAME } from '../../../../../utils/pluginId';
 import { Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system';
 import { ExternalLink } from '@strapi/icons';

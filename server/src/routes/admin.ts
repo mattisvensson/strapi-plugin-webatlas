@@ -1,4 +1,4 @@
-import { waPlugin } from "../utils"
+import { waPlugin } from "../../../utils"
 
 export default {
   type: 'admin',

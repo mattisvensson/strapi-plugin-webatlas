@@ -1,8 +1,13 @@
 import duplicateCheck from "./duplicateCheck";
 import { createNavItem, updateNavItem, deleteNavItem } from "./navItemHandler";
-import { getAdminService, getClientService, waPlugin, waNavigation, waNavItem, waRoute } from "./pluginHelpers";
+import { getAdminService, getClientService } from "./pluginHelpers";
 import reduceDepthOfOrphanedItems from "./reduceDepthOfOrphanedItems";
 import { createExternalRoute } from "./routeHandler";
+import buildStructuredNavigation from './buildStructuredNavigation';
+import extractRouteAndItems from './extractRouteAndItems';
+import getFullPopulateObject from './populateDeep';
+import cleanRootKeys from './cleanRootKeys';
+import removeWaFields from './removeWaFields';
 
 export {
   duplicateCheck,
@@ -11,10 +16,11 @@ export {
   deleteNavItem,
   getAdminService,
   getClientService,
-  waPlugin,
-  waNavigation,
-  waNavItem,
-  waRoute,
   reduceDepthOfOrphanedItems,
-  createExternalRoute
+  createExternalRoute,
+  buildStructuredNavigation,
+  extractRouteAndItems,
+  getFullPopulateObject,
+  cleanRootKeys,
+  removeWaFields,
 }

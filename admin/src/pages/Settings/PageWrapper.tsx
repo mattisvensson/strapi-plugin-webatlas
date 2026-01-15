@@ -1,6 +1,6 @@
 import { Button, Flex } from '@strapi/design-system';
 import { Page, Layouts} from '@strapi/strapi/admin'
-import { PLUGIN_NAME } from '../../../../pluginId';
+import { PLUGIN_NAME } from '../../../../utils/pluginId';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
 import { Check } from '@strapi/icons';
