@@ -35,12 +35,12 @@ export default function usePluginConfig(): UsePluginConfigResponse {
         const contentTypeUids = new Set(allowedContentTypes.map((type: any) => type.uid));
         const activeContentTypes = config.selectedContentTypes.filter((type: any) => contentTypeUids.has(type.uid));
 
-        if (JSON.stringify(activeContentTypes) !== JSON.stringify(config.selectedContentTypes)) {
-          config = { ...config, selectedContentTypes: activeContentTypes}
-          await setConfig(config);
-        }
+        const displayConfig = { 
+          ...config, 
+          selectedContentTypes: activeContentTypes
+        };
 
-        setConfigData(config);
+        setConfigData(displayConfig);
       } catch (error: any) {
         setFetchError(error.message);
       } finally {
