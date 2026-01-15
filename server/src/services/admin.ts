@@ -1,8 +1,7 @@
 import type { NavigationInput, NestedNavigation, NestedNavItem, PluginConfig, StructuredNavigationVariant } from "../../../types";
 import duplicateCheck from "../utils/duplicateCheck";
-import { getFullPath, buildStructuredNavigation, transformToUrl } from "../../../utils";
-import { PLUGIN_ID } from "../../../pluginId";
-import { reduceDepthOfOrphanedItems, createExternalRoute, createNavItem, updateNavItem, deleteNavItem, waRoute, waNavigation, waNavItem } from "../utils";
+import { getFullPath, transformToUrl, waRoute, waNavigation, waNavItem, PLUGIN_ID } from "../../../utils";
+import { reduceDepthOfOrphanedItems, createExternalRoute, createNavItem, updateNavItem, deleteNavItem, buildStructuredNavigation } from "../utils";
 
 export default ({strapi}) => ({
 

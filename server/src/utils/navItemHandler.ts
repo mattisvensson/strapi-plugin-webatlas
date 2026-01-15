@@ -1,7 +1,6 @@
-import type { NavItemSettings, NestedNavItem } from "../../../types";
-import { getFullPath } from "../../../utils";
-import { waRoute, waNavItem } from "../utils/pluginHelpers";
 import type { UID } from '@strapi/strapi';
+import type { NavItemSettings, NestedNavItem } from "../../../types";
+import { getFullPath, waRoute, waNavItem } from "../../../utils";
 
 async function createNavItem(data: NavItemSettings): Promise<null | NestedNavItem> {
   try {

@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
-
-import { PLUGIN_ID } from '../../../pluginId';
+import { PLUGIN_ID } from '../../../utils/pluginId';
 
 type InitializerProps = {
   setPlugin: (id: string) => void;

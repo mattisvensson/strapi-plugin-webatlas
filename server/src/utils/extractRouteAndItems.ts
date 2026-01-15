@@ -1,5 +1,5 @@
-import { NestedNavItem } from "../types";
-import { PLUGIN_ID } from "../pluginId";
+import { NestedNavItem } from "../../../types";
+import { PLUGIN_ID } from "../../../utils";
 
 export default function extractRouteAndItems(items: NestedNavItem[]) {
   return items.map((item: any) => {

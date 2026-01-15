@@ -1,6 +1,6 @@
-import type { RouteSettings } from "../../../types";
-import { waRoute } from "../utils/pluginHelpers";
 import type { UID } from '@strapi/strapi';
+import type { RouteSettings } from "../../../types";
+import { waRoute } from "../../../utils/";
 
 async function createExternalRoute(data: RouteSettings) {
   try {

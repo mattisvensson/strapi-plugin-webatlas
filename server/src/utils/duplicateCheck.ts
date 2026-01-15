@@ -1,4 +1,4 @@
-import { waRoute } from "./pluginHelpers";
+import { waRoute } from "../../../utils";
 import type { UID } from '@strapi/strapi';
 
 async function checkPathExists(path: string, targetRoutePath?: string | null): Promise<boolean> {
