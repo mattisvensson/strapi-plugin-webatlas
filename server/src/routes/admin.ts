@@ -37,9 +37,7 @@ export default {
             config: {
                actions: [
                 `plugin::${PLUGIN_ID}.settings.general`,
-                `plugin::${PLUGIN_ID}.settings.navigation`,
-                `plugin::${PLUGIN_ID}.page.navigation`, // TODO: update usePluginConfig, then remove this
-              ]
+                `plugin::${PLUGIN_ID}.settings.navigation`,]
             }
           }
         ],
