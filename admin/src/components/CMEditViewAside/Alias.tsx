@@ -1,7 +1,7 @@
 import { Checkbox, Box, Flex, Typography, Field, Divider } from '@strapi/design-system';
 import { useState, useEffect, useRef, useCallback, useReducer, useMemo } from 'react';
 import transformToUrl from '../../../../utils/transformToUrl';
-import { unstable_useContentManagerContext as useContentManagerContext } from '@strapi/strapi/admin';
+import { unstable_useContentManagerContext as useContentManagerContext, useFetchClient } from '@strapi/strapi/admin';
 import { ConfigContentType } from '../../../../types';
 import Tooltip from '../Tooltip';
 import debounce from '../../utils/debounce';
@@ -66,6 +66,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	const { initialValues, values, onChange } = form;
 	const { getRelatedRoute } = useApi()
 	const { formatMessage } = useIntl();
+	const { get } = useFetchClient();
 
 	const [routeId, setRouteId] = useState<number | null>()
 	const [isOverride, setIsOverride] = useState(false);
@@ -197,7 +198,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 		setReplacement('')
 		
 		try {
-			const data = await duplicateCheck(url)
+			const data = await duplicateCheck(get, url)
 
 			if (!data || data === url) return 
 			
