@@ -40,11 +40,6 @@ export default function usePluginConfig(): UsePluginConfigResponse {
           await setConfig(config);
         }
 
-        if (config.navigation?.maxDepth === undefined) {
-          config.navigation = { ...config.navigation, maxDepth: 3 };
-          await setConfig(config);
-        }
-
         setConfigData(config);
       } catch (error: any) {
         setFetchError(error.message);
