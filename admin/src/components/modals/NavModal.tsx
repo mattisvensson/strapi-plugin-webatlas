@@ -18,6 +18,7 @@ export default function NavModal({
   footer,
   currentModalType = null,
   currentModalMode = 'create',
+  disabled,
 }: { 
   triggerText?: string, 
   triggerVariant?: "primary" | "secondary",
@@ -32,6 +33,7 @@ export default function NavModal({
   footer?: React.ReactNode,
   currentModalType?: 'ItemCreate' | 'WrapperCreate' | 'ExternalCreate' | null,
   currentModalMode?: 'create' | 'edit',
+  disabled?: boolean,
 }) {
 
   const { setModalType } = useContext(ModalContext);
@@ -90,7 +92,13 @@ export default function NavModal({
                       </SingleSelectOption>
                     </SingleSelect>
                   )}
-                  <Button type="submit" onClick={modalToOpen ? () => setModalType(modalToOpen) : null}>{loading ? loadingText : confirmText }</Button>
+                  <Button
+                    type="submit"
+                    onClick={modalToOpen ? () => setModalType(modalToOpen) : null}
+                    disabled={disabled}
+                  >
+                    {loading ? loadingText : confirmText }
+                  </Button>
                 </Flex>
               </>
             )}

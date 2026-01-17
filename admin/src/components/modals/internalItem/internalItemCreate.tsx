@@ -95,7 +95,7 @@ function ItemCreateComponent({
     try {
       setLoading(true)
 
-      if (!entityRoute || !selectedNavigation) return
+      if (!selectedContentType?.contentType || !selectedEntity?.documentId || !path || !path.value?.trim() || !navItemState.title || !navItemState.title?.trim() || !selectedNavigation || !entityRoute) return
 
       // TODO: Handle route update if path changed
       // if (path.value !== path.initialPath) {
@@ -221,6 +221,8 @@ function ItemCreateComponent({
       loading={loading}
       modalToOpen=''
       currentModalType="ItemCreate"
+      currentModalMode={'create'}
+      disabled={!selectedContentType?.contentType || !selectedEntity?.documentId || !path || !path.value?.trim() || !navItemState.title || !navItemState.title?.trim()}
     >
       <Grid.Root gap={4}>
         <Grid.Item col={6} s={12}>

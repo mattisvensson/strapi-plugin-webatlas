@@ -60,7 +60,7 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
 
   const handleConfirm = async () => {
     try {
-      if (!path || !navItemState.title || !selectedNavigation) return
+      if (!path || path.value?.trim() === '' || !navItemState.title || navItemState.title?.trim() === '' || !selectedNavigation) return
 
       if (variant === 'ExternalEdit' && item && onSave) {
         onSave({
@@ -111,6 +111,7 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
       modalToOpen=''
       currentModalType="ExternalCreate"
       currentModalMode={variant === 'ExternalCreate' ? 'create' : 'edit'}
+      disabled={!path || !path.value?.trim() || !navItemState.title || !navItemState.title?.trim()}
     >
       <Grid.Root gap={8}>
         <Grid.Item col={6} s={12}>

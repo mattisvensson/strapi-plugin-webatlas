@@ -21,6 +21,7 @@ export default function NavEdit({ item, onEdit }: NavEditProps) {
   const { updateNavigation } = useApi();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
+  const initialNavState = { name: item.name, visible: item.visible };
 
   const updateNav = async () => {
     setLoading(true);
@@ -50,6 +51,7 @@ export default function NavEdit({ item, onEdit }: NavEditProps) {
       loadingText={formatMessage({ id: getTranslation('modal.navEdit.loadingText'), defaultMessage: 'Updating' })}
       onConfirm={updateNav}
       loading={loading}
+      disabled={name.trim() === '' || (name === initialNavState.name && visible === initialNavState.visible)}
     >
       <Grid.Root gap={4}>
         <Grid.Item s={12} m={6}>

@@ -51,6 +51,7 @@ export default function NavCreate() {
       loadingText={formatMessage({ id: getTranslation('modal.navCreate.loadingText'), defaultMessage: 'Creating' })}
       onConfirm={onConfirm}
       loading={loading}
+      disabled={name.trim() === ''}
     >
       <Grid.Root gap={4}>
         <Grid.Item col={12} s={12}>
