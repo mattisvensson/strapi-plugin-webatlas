@@ -63,11 +63,6 @@ export default function useApi() {
     return data
   };
 
-  const getStructuredNavigation = async (documentId: string, variant: StructuredNavigationVariant = 'nested') => {
-    const { data } = await get(`/${PLUGIN_ID}/navigation?documentId=${documentId}&variant=${variant}`);
-    return data
-  }
-
   const getNavigation = async ({ documentId, variant }: {documentId?: string, variant?: StructuredNavigationVariant | "namesOnly"} = {}) => {
     const query = [];
     if (documentId) query.push(`documentId=${documentId}`);
@@ -102,7 +97,6 @@ export default function useApi() {
     getRelatedRoute,
     getRoutes,
     updateRoute,
-    getStructuredNavigation,
     getNavigation,
     deleteNavigation,
     updateNavigation,
