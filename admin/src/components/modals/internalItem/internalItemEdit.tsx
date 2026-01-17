@@ -113,6 +113,7 @@ function ItemEditComponent({
       modalToOpen=''
       currentModalType="ItemCreate"
       currentModalMode="edit"
+      disabled={isEqual(navItemState, initialState.current) && path.value === path.initialPath}
     >
       <Grid.Root gap={8}>
         <Grid.Item col={6} s={12}>
@@ -152,7 +153,7 @@ function ItemEditComponent({
         <Divider/>
       </Box>
       <Box>
-        <Grid.Root gap={8} paddingBottom={6}>
+        <Grid.Root gap={8}>
           <Grid.Item col={6} s={12} alignItems="baseline">
             <Box width="100%">
               <Field.Root>

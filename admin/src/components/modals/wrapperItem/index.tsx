@@ -114,6 +114,7 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
       modalToOpen=''
       currentModalType="WrapperCreate"
       currentModalMode={variant === 'WrapperCreate' ? 'create' : 'edit'}
+      disabled={!navItemState.title || navItemState.title.trim() === ''}
     >
       <Grid.Root gap={8}>
         <Grid.Item col={6} s={12}>
