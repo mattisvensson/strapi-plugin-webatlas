@@ -14,6 +14,9 @@ async function checkPathExists(path: string, targetRoutePath?: string | null): P
         {
           uidPath: path,
         },
+        {
+          documentIdPath: path,
+        },
       ], 
     },
   });
