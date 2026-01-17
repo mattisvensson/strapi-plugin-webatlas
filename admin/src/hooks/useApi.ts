@@ -23,7 +23,7 @@ export default function useApi() {
       if (contentTypes && contentTypes.length > 0) {
         entities = await Promise.all(
           contentTypes.map(async (contentType: ConfigContentType) => {
-            const { data } = await get(`/content-manager/collection-types/${contentType.uid}`);
+            const { data } = await get(`/content-manager/collection-types/${contentType.uid}?pageSize=9999`);
             const entity = allContentTypes.find((ct: ContentType) => ct.uid === contentType.uid);
             if (!entity) {
               throw new Error(`Content type ${contentType} not found`);
