@@ -1,27 +1,28 @@
 import { useState, useContext } from 'react';
 import { Grid, Box, Field } from '@strapi/design-system';
-import { useNotification, useFetchClient } from '@strapi/strapi/admin';
+import { useNotification } from '@strapi/strapi/admin';
 import NavModal from './NavModal';
 import { ModalContext } from '../../contexts';
 import { useIntl } from 'react-intl';
 import { getTranslation } from '../../utils';
 import { useNavigate  } from 'react-router-dom';
 import { PLUGIN_ID } from '../../../../utils';
+import { useApi } from '../../hooks';
 
 export default function NavCreate() {
-  const { post } = useFetchClient();
   const { setModalType } = useContext(ModalContext);
   const [name, setName] = useState('');
-  const [isActive, setIsActive] = useState(true) // Temporary not used
+  const [visible, setVisible] = useState(true) // Temporary not used
   const [loading, setLoading] = useState(false)
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const navigate = useNavigate();
+  const {  createNavigation } = useApi();
 
-  const createNavigation = async () => {
+  const onConfirm = async () => {
     setLoading(true);
     try {
-      const { data } = await post(`/${PLUGIN_ID}/navigation`, { name, isActive });
+      const data = await createNavigation({ name, visible });
 
       if (!data.documentId) throw new Error('No documentId returned');
 
@@ -48,7 +49,7 @@ export default function NavCreate() {
       closeText={formatMessage({ id: getTranslation('modal.navCreate.closeText'), defaultMessage: 'Cancel' })}
       titleText={formatMessage({ id: getTranslation('modal.navCreate.titleText'), defaultMessage: 'Create new navigation' })}
       loadingText={formatMessage({ id: getTranslation('modal.navCreate.loadingText'), defaultMessage: 'Creating' })}
-      onConfirm={createNavigation}
+      onConfirm={onConfirm}
       loading={loading}
     >
       <Grid.Root gap={4}>
@@ -87,8 +88,8 @@ export default function NavCreate() {
                   id: getTranslation('modal.activeField.offLabel'),
                   defaultMessage: 'No'
                 })}
-                checked={isActive}
-                onChange={() => setIsActive(prev => !prev)}
+                checked={visible}
+                onChange={() => setVisible(prev => !prev)}
               />
             </Field.Root>
           </Box>

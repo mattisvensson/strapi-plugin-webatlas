@@ -57,8 +57,11 @@ const admin = () => ({
   },
   async createNavigation (ctx) {
     try {
-      const data = ctx.request.body;
-      return await getAdminService().createNavigation(data);
+      const { data } = ctx.request.body;
+      
+      if (!data || !data.name) return ctx.throw(400, 'Navigation name is required');
+      
+      return await getAdminService().createNavigation(data.name, data.visible);
     } catch (e) {
       return ctx.throw(500, e)
     }
