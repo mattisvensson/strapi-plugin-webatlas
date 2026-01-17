@@ -3,7 +3,7 @@ import { useFetchClient } from '@strapi/strapi/admin';
 import { PLUGIN_ID } from '../../../utils';
 
 export default function useApi() {
-  const { get, put, del } = useFetchClient();
+  const { get, put, del, post } = useFetchClient();
 
   const fetchAllContentTypes = async () => {
     const { data } = await get('/content-manager/content-types');
@@ -71,6 +71,13 @@ export default function useApi() {
     return data
   }
 
+  const createNavigation = async (body: NavigationInput) => {
+    const { data } = await post(`/${PLUGIN_ID}/navigation`, {
+      data: body,
+    });
+    return data
+  }
+
   const deleteNavigation = async (documentId: string) => {
     const { data } = await del(`/${PLUGIN_ID}/navigation?documentId=${documentId}`);
     return data
@@ -98,6 +105,7 @@ export default function useApi() {
     getRoutes,
     updateRoute,
     getNavigation,
+    createNavigation,
     deleteNavigation,
     updateNavigation,
     updateNavigationItemStructure,

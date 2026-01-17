@@ -158,13 +158,13 @@ export default ({strapi}) => ({
     }
   },
 
-  async createNavigation(data) {
+  async createNavigation(name: string, visible: boolean) {
     try {
       return await strapi.documents(waNavigation).create({
         data: {
-          name: data.name,
-          slug: transformToUrl(data.name),
-          visible: data.isActive,
+          name: name,
+          slug: transformToUrl(name),
+          visible: visible,
         },
       });
     } catch (e) {
