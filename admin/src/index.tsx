@@ -92,10 +92,7 @@ export default {
 
   bootstrap(app: StrapiApp) {
     // @ts-expect-error
-    app.getPlugin('content-manager').apis.addEditViewSidePanel([() => ({
-      title: 'URL Alias',
-      content: <CMEditViewAside />,
-    })]);
+    app.getPlugin('content-manager').apis.addEditViewSidePanel([CMEditViewAside]);
   },
 
   async registerTrads({ locales }: { locales: string[] }) {
