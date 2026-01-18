@@ -86,9 +86,9 @@ export type ContentType = {
 
 export type ConfigContentType = {
   uid: string;
+  label: string;
   default: string;
   pattern?: string;
-  apiField?: string;
 }
 
 export type PluginConfig = {
@@ -122,7 +122,6 @@ export type Entity = {
 
 export type GroupedEntities = {
   entities: Entity[],
-  label: string,
   contentType: ConfigContentType,
 }
 
