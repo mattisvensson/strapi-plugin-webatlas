@@ -1,129 +1,103 @@
 import type { ConfigContentType } from '../../../../types';
 import { useState, useEffect } from 'react';
-import { unstable_useContentManagerContext as useContentManagerContext, useRBAC } from '@strapi/strapi/admin';
-import { Typography, Link } from '@strapi/design-system';
+import { useRBAC } from '@strapi/strapi/admin';
+import type { PanelComponent, PanelComponentProps } from '@strapi/content-manager/strapi-admin';
+import { Typography } from '@strapi/design-system';
 import { usePluginConfig, useAllContentTypes } from '../../hooks';
 import Alias from './Alias';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
-import { PLUGIN_NAME } from '../../../../utils';
 import pluginPermissions from '../../permissions';
+import { PLUGIN_NAME } from '../../../../utils';
 
-// import Navigation from './Navigation';
-
-const CMEditViewAsideContent = () => {
-  const { model } = useContentManagerContext()
+const CMEditViewAside: PanelComponent = ({
+  // activeTab,
+  // collectionType,
+  // document,
+  documentId,
+  // meta,
+  model,
+}: PanelComponentProps) => {
   const { contentTypes } = useAllContentTypes()
   const { config } = usePluginConfig()
+  const { formatMessage } = useIntl();
 
-  const [contentTypeConfig, setContentTypeConfig] = useState<ConfigContentType | null>(null);
   const [isAllowedContentType, setIsAllowedContentType] = useState(false);
-  const [isActiveContentType, setIsActiveContentType] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [contentTypeConfig, setContentTypeConfig] = useState<ConfigContentType | null>(null);
+  const [isActiveContentType, setIsActiveContentType] = useState(false);
 
-  const { formatMessage } = useIntl();
+  const panelTitle = PLUGIN_NAME;
 
+  // Check if content type is allowed - moved to useEffect to prevent infinite re-renders
   useEffect(() => {
-    if (!config) return
-    
-    const contentType = contentTypes?.find((ct) => ct.uid === model)
-    if (contentType?.pluginOptions?.webatlas?.active) setIsAllowedContentType(true)
-    
-    config?.selectedContentTypes?.map((type) => {
-      if (type.uid === model) {
-        setIsActiveContentType(true);
-        setContentTypeConfig(type);
-      }
-    })
-    setIsLoading(false);
-  }, [config])
-
-  if (isLoading || !config) return (
-    <Typography textColor="neutral600">
-      {formatMessage({
-        id: getTranslation('loading'),
-        defaultMessage: 'Loading...',
-      })}
-    </Typography>
-  )
-
-  if (!isAllowedContentType) return (
-    <Typography textColor="neutral600">
-      {formatMessage({
-        id: getTranslation('components.CMEditViewAside.notAllowed.start'),
-        defaultMessage: 'This content type is not allowed for',
-      })}
-      {" "}<strong>{PLUGIN_NAME}</strong>.{" "}
-      {formatMessage({
-        id: getTranslation('components.CMEditViewAside.notAllowed.end'),
-        defaultMessage: 'If you wish to use it, please contact your administrator',
-      })}.
-    </Typography>
-  )
-
-  if (!isActiveContentType || !contentTypeConfig) return (
-    <Typography textColor="neutral600">
-      {formatMessage({
-        id: getTranslation('components.CMEditViewAside.notConfigured.start'),
-        defaultMessage: 'This content type is not configured for',
-      })}
-      {" "}<strong>{PLUGIN_NAME}</strong>.{" "}
-      {formatMessage({
-        id: getTranslation('components.CMEditViewAside.notConfigured.middle'),
-        defaultMessage: 'If you wish to use it, please configure it in the',
-      })}
-      {" "}<Link href="/admin/settings/webatlas/configuration">
-        {formatMessage({
-          id: getTranslation('components.CMEditViewAside.notConfigured.end'),
-          defaultMessage: 'settings',
-        })}
-      </Link>.
-    </Typography>
-  )
-
-  return (
-    <>
-      <Alias config={contentTypeConfig}/>
-      {/* <Navigation/> */}
-    </>
-  )
-};
-
-// Main component that checks permissions first
-const CMEditViewAside = () => {
-
-  const { formatMessage } = useIntl();
+    const contentType = contentTypes?.find((ct) => ct.uid === model);
+    setIsAllowedContentType(!!contentType?.pluginOptions?.webatlas?.active);
+  }, [contentTypes, model]);
 
   useEffect(() => {
     const isWebatlasLabel = (label: Element) => label.textContent?.startsWith('webatlas_');
     
-    document.querySelectorAll('label').forEach(label => {
-      if (!isWebatlasLabel(label)) return;
+    const cleanupLabels = () => {
+      const labels = document.querySelectorAll('label');
       
-      const container = label.parentElement?.parentElement;
-      const parent = container?.parentElement;
-      const greatGrandParent = parent?.parentElement?.parentElement;
+      labels.forEach((label: Element) => {
+        if (!isWebatlasLabel(label)) return;
+        const container = label.parentElement?.parentElement;
+        const parent = container?.parentElement;
+        const greatGrandParent = parent?.parentElement?.parentElement;
+        
+        if (!container || !parent) return;
+        
+        const parentWebatlasCount = Array.from(parent.querySelectorAll('label')).filter(isWebatlasLabel).length;
+        const childrenCount = parent.children.length;
+        
+        // Remove great grandparent if it only has webatlas fields
+        if (greatGrandParent && greatGrandParent?.querySelectorAll('label').length === 
+            Array.from(greatGrandParent.querySelectorAll('label')).filter(isWebatlasLabel).length) {
+          greatGrandParent.remove();
+        }
+        // Remove parent if: single child OR two children with two webatlas fields  
+        else if (childrenCount === 1 || (childrenCount === 2 && parentWebatlasCount === 2)) {
+          parent.remove();
+        }
+        // Remove container if: two children with one webatlas field OR fallback
+        else {
+          container.remove();
+        }
+      });
+    };
+
+    // Delay execution to ensure DOM is populated by Strapi's form system
+    const timeoutId = setTimeout(() => {
+      cleanupLabels();
       
-      if (!container || !parent) return;
+      // Also try again after a longer delay in case form takes time to render
+      const secondTimeoutId = setTimeout(cleanupLabels, 1000);
       
-      const parentWebatlasCount = Array.from(parent.querySelectorAll('label')).filter(isWebatlasLabel).length;
-      const childrenCount = parent.children.length;
-      
-      // Remove great grandparent if it only has webatlas fields
-      if (greatGrandParent && greatGrandParent?.querySelectorAll('label').length === 
-          Array.from(greatGrandParent.querySelectorAll('label')).filter(isWebatlasLabel).length) {
-        greatGrandParent.remove();
-      }
-      // Remove parent if: single child OR two children with two webatlas fields  
-      else if (childrenCount === 1 || (childrenCount === 2 && parentWebatlasCount === 2)) {
-        parent.remove();
-      }
-      // Remove container if: two children with one webatlas field OR fallback
-      else {
-        container.remove();
+      // Cleanup function will clear this timeout if component unmounts
+      return () => clearTimeout(secondTimeoutId);
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [documentId, model]);
+
+  
+  useEffect(() => {
+    if (!config) return;
+        
+    // Reset state first
+    setIsActiveContentType(false);
+    setContentTypeConfig(null);
+    
+    config?.selectedContentTypes?.forEach((type) => {
+      if (type.uid === model) {
+        setIsActiveContentType(true);
+        setContentTypeConfig(type);
       }
     });
-  }, []);
+    setIsLoading(false);
+  }, [config, model])
 
   const {
     allowedActions: { canAside },
@@ -131,16 +105,29 @@ const CMEditViewAside = () => {
     cmAside: pluginPermissions['cm.aside'],
   });
 
-  if (!canAside) {
-    return <Typography textColor="neutral600">
-			{formatMessage({
-        id: getTranslation('components.CMEditViewAside.noPermission'),
-        defaultMessage: 'You do not have the required permissions to access this panel.',
-      })}
-    </Typography>
+  if (!canAside || !isAllowedContentType || !isActiveContentType || !contentTypeConfig) return null
+
+  if (!config) {
+    console.error('CMEditViewAside: Plugin is not configured.');
+    return null
   }
 
-  return <CMEditViewAsideContent />;
+  if (isLoading) return {
+    title: panelTitle,
+    content: (
+      <Typography textColor="neutral600">
+        {formatMessage({
+          id: getTranslation('loading'),
+          defaultMessage: 'Loading...',
+        })}
+      </Typography>
+    )
+  }
+
+  return {
+    title: panelTitle,
+    content: <Alias config={contentTypeConfig} />,
+  };
 };
 
 export default CMEditViewAside;
