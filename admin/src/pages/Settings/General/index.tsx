@@ -27,7 +27,7 @@ import { ExternalLink } from '@strapi/icons';
 import pluginPermissions from '../../../permissions';
 
 type Action =
-  | { type: 'SET_SELECTED_CONTENT_TYPES'; payload: ConfigContentType[] }
+  | { type: 'SET_SELECTED_CONTENT_TYPES'; payload: Pick<ConfigContentType, 'uid' | 'label'>[] }
   | { type: 'SET_DEFAULT_FIELD'; payload: { ctUid: string; field: string } }
   | { type: 'SET_PATTERN'; payload: { ctUid: string; pattern: string } }
   | { type: 'SET_CONFIG'; payload: PluginConfig }
@@ -39,7 +39,11 @@ function reducer(newConfig: PluginConfig | null, action: Action): PluginConfig |
     case 'SET_SELECTED_CONTENT_TYPES':
       if (!newConfig) return null;
       updatedContentTypes = action.payload.map(ct => {
-        return newConfig?.selectedContentTypes.find((cta: ConfigContentType) => cta.uid === ct.uid) || ct
+        return newConfig?.selectedContentTypes.find((cta: ConfigContentType) => cta.uid === ct.uid) || {
+          ...ct,
+          default: '',
+          pattern: '',
+        }
       })
       return { ...newConfig, selectedContentTypes: updatedContentTypes || [] };
     case 'SET_DEFAULT_FIELD':
@@ -172,16 +176,20 @@ const Settings = () => {
               })}
               onClear={() => dispatch({ type: 'SET_SELECTED_CONTENT_TYPES', payload: [] })}
               value={[...config?.selectedContentTypes.map((ct: ConfigContentType) => ct.uid) || []]}
-              onChange={(value: string[]) =>
+              onChange={(value: string[]) => {
+                const selectedContentTypes = value.map(uid => {
+                  const contentType = allContentTypes?.find(ct => ct.uid === uid);
+                  return {
+                    uid: uid,
+                    label: contentType?.info.displayName || uid,
+                  };
+                }).filter(ct => ct);
+                
                 dispatch({
                   type: 'SET_SELECTED_CONTENT_TYPES',
-                  payload: value.map(v => ({
-                    uid: v,
-                    default: '',
-                    pattern: '',
-                  })),
+                  payload: selectedContentTypes,
                 })
-              }
+              }}
               withTags
             >
               {allContentTypes && allContentTypes.map(item => 

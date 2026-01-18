@@ -235,13 +235,13 @@ function ItemCreateComponent({
                 })}
               </Field.Label>
               <SingleSelect
-                value={selectedContentType ? selectedContentType.label : ''}
+                value={selectedContentType ? selectedContentType.contentType.label : ''}
                 placeholder={formatMessage({
                   id: getTranslation('modal.internalItem.contentType.placeholder'),
                   defaultMessage: 'Select a content type'
                 })}
                 onChange={(value: string) => {
-                  const [contentType] = availableEntities.filter((group: GroupedEntities) => group.label === value)
+                  const [contentType] = availableEntities.filter((group: GroupedEntities) => group.contentType.label === value)
                   if (contentType) {
                     setSelectedContentType(contentType)
                     setSelectedEntity(null)
@@ -251,7 +251,7 @@ function ItemCreateComponent({
               >
                 {availableEntities &&
                   availableEntities.map((group: GroupedEntities, index: number) =>
-                    <SingleSelectOption key={index} value={group.label}>{group.label}</SingleSelectOption>)
+                    <SingleSelectOption key={index} value={group.contentType.label}>{group.contentType.label}</SingleSelectOption>)
                 }
               </SingleSelect>
             </Field.Root>

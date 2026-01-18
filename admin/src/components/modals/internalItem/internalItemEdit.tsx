@@ -107,7 +107,7 @@ function ItemEditComponent({
     <NavModal
       confirmText={formatMessage({ id: getTranslation('save'), defaultMessage: 'Save' })}
       closeText={formatMessage({ id: getTranslation('cancel'), defaultMessage: 'Cancel' })}
-      titleText={`${formatMessage({ id: getTranslation('edit'), defaultMessage: 'Edit' })} ${selectedContentType.label} "${item.route.title}"`}
+      titleText={`${formatMessage({ id: getTranslation('edit'), defaultMessage: 'Edit' })} ${selectedContentType.contentType.label} "${item.route.title}"`}
       loadingText={formatMessage({ id: getTranslation('modal.internalItem.loadingText.edit'), defaultMessage: 'Saving' })}
       onConfirm={updateItem}
       modalToOpen=''
@@ -126,7 +126,7 @@ function ItemEditComponent({
                 })}
               </Field.Label>
               <Field.Input
-                value={selectedContentType.label}
+                value={selectedContentType.contentType.label}
                 disabled
               />
             </Field.Root>
