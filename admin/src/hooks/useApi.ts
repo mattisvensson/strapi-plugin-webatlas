@@ -6,39 +6,74 @@ export default function useApi() {
   const { get, put, del, post } = useFetchClient();
 
   const fetchAllContentTypes = async () => {
-    const { data } = await get('/content-manager/content-types');
-    return data.data
+    try {
+      const { data } = await get('/content-manager/content-types');
+      return data.data;
+    } catch (error) {
+      console.warn('Cannot fetch all content types:', error);
+      return [];
+    }
   }
 
-  const fetchAllEntities = async (contentTypes?: ConfigContentType[]) => {
+  const fetchConfiguredContentTypes = async () => {
     try {
-      if (!contentTypes) {
-        const { data } = await get(`/${PLUGIN_ID}/config`)
-        contentTypes = data?.selectedContentTypes || []
+      const { data: config } = await get(`/${PLUGIN_ID}/config`);
+      const configuredTypes = config?.selectedContentTypes || [];
+      
+      if (configuredTypes.length === 0) {
+        return [];
       }
 
       const allContentTypes = await fetchAllContentTypes();
+      const configuredUIDs = new Set(configuredTypes.map((ct: ConfigContentType) => ct.uid));
+      
+      return allContentTypes.filter((ct: ContentType) => configuredUIDs.has(ct.uid));
+    } catch (err) {
+      console.error('Error fetching configured content types:', err);
+      return [];
+    }
+  }
+
+  const fetchAllEntities = async (): Promise<GroupedEntities[]> => {
+    try {
+      
+      const { data } = await get(`/${PLUGIN_ID}/config`)
+      const contentTypes = data?.selectedContentTypes || []
+      
+
+      if (!contentTypes || contentTypes.length === 0) {
+        return [];
+      }
 
       let entities: GroupedEntities[] = [];
-      if (contentTypes && contentTypes.length > 0) {
-        entities = await Promise.all(
-          contentTypes.map(async (contentType: ConfigContentType) => {
+
+      const entityResults = await Promise.allSettled(
+        contentTypes.map(async (contentType: ConfigContentType) => {
+          try {
             const { data } = await get(`/content-manager/collection-types/${contentType.uid}?pageSize=9999`);
-            const entity = allContentTypes.find((ct: ContentType) => ct.uid === contentType.uid);
-            if (!entity) {
-              throw new Error(`Content type ${contentType} not found`);
+ 
+            if (!data || !data.results) {
+              return null;
             }
+            
             return {
               entities: data.results,
-              label: entity.info.displayName,
               contentType
-            }
-          })
-        );
-      }
+            };
+          } catch (err) {
+            console.warn(`Cannot access entities for ${contentType.uid}:`, err);
+            return null;
+          }
+        })
+      );
+
+      entities = entityResults
+        .map(result => result.status === 'fulfilled' ? result.value : null)
+        .filter(Boolean) as GroupedEntities[];
+
       return entities;
     } catch (err) {
-      console.error(err);
+      console.error('Error fetching entities:', err);
       throw err;
     }
   }
@@ -46,7 +81,6 @@ export default function useApi() {
   const getRelatedRoute = async (relatedDocumentId: string) => {
     const { data } = await get(`/${PLUGIN_ID}/route/related?documentId=${relatedDocumentId}`);
     return data
-    
   };
 
   const getRoutes = async () => {
@@ -100,6 +134,7 @@ export default function useApi() {
 
   return { 
     fetchAllContentTypes,
+    fetchConfiguredContentTypes,
     fetchAllEntities,
     getRelatedRoute,
     getRoutes,
