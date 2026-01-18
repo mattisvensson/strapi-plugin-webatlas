@@ -1,7 +1,7 @@
 import { Checkbox, Box, Flex, Typography, Field, Divider } from '@strapi/design-system';
 import { useState, useEffect, useRef, useCallback, useReducer, useMemo } from 'react';
 import transformToUrl from '../../../../utils/transformToUrl';
-import { unstable_useContentManagerContext as useContentManagerContext, useFetchClient } from '@strapi/strapi/admin';
+import { unstable_useContentManagerContext as useContentManagerContext, useFetchClient, useRBAC } from '@strapi/strapi/admin';
 import { ConfigContentType } from '../../../../types';
 import Tooltip from '../Tooltip';
 import debounce from '../../utils/debounce';
@@ -62,11 +62,30 @@ function reducer(state: PathState, action: Action): PathState {
 }
 
 const Alias = ({ config }: { config: ConfigContentType }) => {
-	const { form } = useContentManagerContext()
+	const { form, model } = useContentManagerContext()
 	const { initialValues, values, onChange } = form;
 	const { getRelatedRoute } = useApi()
 	const { formatMessage } = useIntl();
 	const { get } = useFetchClient();
+
+	const { allowedActions: {
+		canUpdate,
+		canCreate
+	}} = useRBAC([
+		{
+			action: 'plugin::content-manager.explorer.update',
+			subject: model,
+			properties: {},
+			conditions: [],
+		},
+		{
+			action: 'plugin::content-manager.explorer.create',
+			subject: model,
+			properties: {},
+			conditions: [],
+		},
+	]);
+	console.log('RBAC Actions:', { canUpdate, canCreate });
 
 	const [routeId, setRouteId] = useState<number | null>()
 	const [isOverride, setIsOverride] = useState(false);
@@ -291,6 +310,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 							id="override-url"
 							checked={isOverride}
 							onCheckedChange={() => setIsOverride(prev => !prev)}
+							disabled={(!routeId && !canCreate) || (routeId && !canUpdate)}
 						>
 							<Typography textColor="neutral600">
 								{formatMessage({
