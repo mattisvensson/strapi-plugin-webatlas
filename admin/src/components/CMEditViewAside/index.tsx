@@ -32,7 +32,7 @@ const CMEditViewAside: PanelComponent = ({
   // Check if content type is allowed - moved to useEffect to prevent infinite re-renders
   useEffect(() => {
     const contentType = contentTypes?.find((ct) => ct.uid === model);
-    setIsAllowedContentType(!!contentType?.pluginOptions?.webatlas?.active);
+    setIsAllowedContentType(!!contentType?.pluginOptions?.webatlas?.enabled);
   }, [contentTypes, model]);
 
   useEffect(() => {
