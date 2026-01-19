@@ -3,8 +3,8 @@ export default {
   info: {
     singularName: "navitem",
     pluralName: "navitems",
-    displayName: "Navigation Items",
-    name: "navitems"
+    displayName: "Navigation Item",
+    name: "navitem"
   },
   options: {
     increments: true,
