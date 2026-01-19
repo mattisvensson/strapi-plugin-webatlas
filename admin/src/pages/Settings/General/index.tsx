@@ -69,7 +69,7 @@ const Settings = () => {
   const { config: fetchedConfig, setConfig, loading, fetchError } = usePluginConfig();
   const [config, dispatch] = useReducer(reducer, fetchedConfig);
   const { contentTypes: allContentTypesData } = useAllContentTypes();
-  const allContentTypes = allContentTypesData?.filter((ct: ContentType) => ct.pluginOptions?.webatlas?.active === true);
+  const allContentTypes = allContentTypesData?.filter((ct: ContentType) => ct.pluginOptions?.webatlas?.enabled === true);
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const [isSaving, setIsSaving] = useState(false);

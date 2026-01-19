@@ -79,7 +79,7 @@ export type ContentType = {
   }
   pluginOptions: {
     webatlas?: {
-      active: boolean;
+      enabled: boolean;
     };
   };
 };

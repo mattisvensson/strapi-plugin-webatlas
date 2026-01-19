@@ -6,7 +6,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   Object.values(strapi.contentTypes).forEach((contentType: ContentType) => {
 
     // Only add fields to content types that have webatlas enabled in plugin options
-    if (!contentType.pluginOptions?.webatlas?.active) return;
+    if (!contentType.pluginOptions?.webatlas?.enabled) return;
 
     const { attributes } = contentType;
 

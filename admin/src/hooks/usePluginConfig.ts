@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { PluginConfig } from '../../../types';
+import { ContentType, PluginConfig } from '../../../types';
 import { useFetchClient } from '@strapi/strapi/admin';
 import { PLUGIN_ID } from '../../../utils';
 
@@ -29,12 +29,12 @@ export default function usePluginConfig(): UsePluginConfigResponse {
           throw new Error(`Couldn't fetch plugin config`);
         }
 
-        const allowedContentTypes = contentTypesArray.filter((type: any) => 
-          type.pluginOptions?.[PLUGIN_ID]?.active === true
+        const allowedContentTypes = contentTypesArray.filter((type: ContentType) => 
+          type.pluginOptions?.webatlas?.enabled === true
         );
 
-        const contentTypeUids = new Set(allowedContentTypes.map((type: any) => type.uid));
-        const activeContentTypes = config.selectedContentTypes.filter((type: any) => contentTypeUids.has(type.uid));
+        const contentTypeUids = new Set(allowedContentTypes.map((type: ContentType) => type.uid));
+        const activeContentTypes = config.selectedContentTypes.filter((type: ContentType) => contentTypeUids.has(type.uid));
 
         const displayConfig = { 
           ...config, 
