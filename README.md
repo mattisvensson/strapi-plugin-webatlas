@@ -15,13 +15,13 @@ This plugin is still in the early stages of development. Many features are plann
 
 ### Table of Contents
 
-1. [💎 Versions](#versions)
-2. [✨ Features](#features)
-3. [⏳ Installation](#installation)
-4. [🖐 Requirements](#requirements)
-5. [🔧 Configuration](#configuration)
-6. [📖 Usage](#usage)
-7. [🧩 Roadmap](#roadmap)
+1. [💎 Versions](#-versions)
+2. [✨ Features](#-features)
+3. [⏳ Installation](#-installation)
+4. [🖐 Requirements](#-requirements)
+5. [🔧 Configuration](#-configuration)
+6. [📖 Usage](#-usage)
+7. [🧩 Roadmap](#-roadmap)
 
 ## 💎 Versions
 
@@ -71,26 +71,19 @@ Your schema should contain the following:
   // ... other schema properties ...
   "pluginOptions": {
     "webatlas": {
-      "active": true
+      "enabled": true
     },
     // ... other plugin options ...
   }
 }
 ```
 
-You can then still enable or disable the plugin for each content type in the settings page of the plugin without the need to edit the schema file again or redeploy your Strapi instance.
-
 ### Settings page
 
 Use the settings page to configure the plugin.
 
-- **Enable content types:** Select for which content types the plugin should be available.
-
-For each selected content type, you have the following settings:
-
 - **Default URL Alias field:** Select a field from which the slug will automatically be generated. For example, use the 'title' field or a dedicated slug field.
 - **URL Alias pattern:** Create a default pattern for the slug. For example, when creating a 'news' content type and you want your url structure to be like '/news/some-title' for all entities, enter 'news' in this setting field. The slug will automatically be appended to this string.
-- **URL Alias API field:** Allows you to append the current URL (slug) of an entity to a specific field. This is especially useful when working with components like a "teaser"—for example, you can store the slug in a hidden field within the teaser component. This way, you can fetch just the teaser via the API while still having access to its full URL.
 
 ## 📖 Usage
 

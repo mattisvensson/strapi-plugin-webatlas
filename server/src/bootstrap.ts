@@ -1,5 +1,5 @@
 import type { Core, UID } from '@strapi/strapi';
-import { PluginConfig, ConfigContentType } from "../../types";
+import { PluginConfig, ConfigContentType, ContentType } from "../../types";
 import { transformToUrl, waRoute, waNavItem, PLUGIN_ID } from "../../utils";
 import { duplicateCheck } from "./utils";
 
@@ -51,16 +51,42 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     strapi.log.error(`Bootstrap failed. ${String(error)}`);
   }
 
-  if (!strapi.store) {
-    throw new Error('strapi.store is undefined');
-  }
+  const contentTypes = strapi.contentTypes;
+  const enabledContentTypes = Object.values(contentTypes).filter((type) => 
+    type.pluginOptions?.webatlas?.enabled === true
+  );
 
   const pluginStore = strapi.store({ type: 'plugin', name: PLUGIN_ID });
   const config = await pluginStore.get({
     key: "config",
   }) as PluginConfig;
 
-  if (!config?.selectedContentTypes) return
+  let newConfig: PluginConfig = { 
+    ...config, 
+    selectedContentTypes: [...(config?.selectedContentTypes || [])],
+    navigation: {
+      maxDepth: config?.navigation?.maxDepth || 1,
+      ...config?.navigation
+    }
+  };
+
+  enabledContentTypes.forEach((type: ContentType) => {
+    const exists = config?.selectedContentTypes?.find((ct) => ct.uid === type.uid);
+    if (!exists) {
+      newConfig.selectedContentTypes.push({
+        uid: type.uid,
+        label: type.info.displayName,
+        default: null,
+        pattern: null
+      });
+    }
+  })
+
+  if(JSON.stringify(newConfig) !== JSON.stringify(config)) {
+    await pluginStore.set({ key: "config", value: newConfig });
+  }
+
+  if (!enabledContentTypes.length) return
 
   strapi.db?.lifecycles.subscribe({
     models: [waNavItem],
@@ -106,10 +132,10 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   })
 
   strapi.db?.lifecycles.subscribe({
-    models: config.selectedContentTypes.map((type: any) => type.uid),
+    models: enabledContentTypes.map((type: ContentType) => type.uid),
     
     async beforeCreate(event: any) {
-      const validContentTypes = config.selectedContentTypes.filter((type: any) => strapi.contentTypes[type.uid]);
+      const validContentTypes = config.selectedContentTypes.filter((type: ConfigContentType) => strapi.contentTypes[type.uid]);
       await pluginStore.set({ key: "config", value: {selectedContentTypes: validContentTypes} });
       
       // Transform path to URL format
@@ -118,7 +144,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     },
     
     async afterCreate(event: any) {
-      const ctSettings: ConfigContentType | undefined = config.selectedContentTypes.find((type: any) => type.uid === event.model.uid);
+      const ctSettings: ConfigContentType | undefined = config.selectedContentTypes.find((type: ConfigContentType) => type.uid === event.model.uid);
 
       const {
         webatlas_path, 
@@ -154,7 +180,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async afterUpdate(event: any) {
-      const ctSettings = config.selectedContentTypes.find((type: any) => type.uid === event.model.uid);
+      const ctSettings = config.selectedContentTypes.find((type: ConfigContentType) => type.uid === event.model.uid);
 
       const {
         webatlas_path, 
