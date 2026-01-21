@@ -11,7 +11,6 @@ import type { ContentType, ConfigContentType, PluginConfig } from '../../../../.
 import { useEffect, useState, useReducer, useRef } from 'react';
 import { Box, Accordion, Field } from '@strapi/design-system';
 import { useNotification, Page } from '@strapi/strapi/admin'
-import { MultiSelect, MultiSelectOption } from '@strapi/design-system';
 import usePluginConfig from '../../../hooks/usePluginConfig';
 import transformToUrl from '../../../../../utils/transformToUrl';
 import useAllContentTypes from '../../../hooks/useAllContentTypes';
@@ -27,7 +26,6 @@ import { ExternalLink } from '@strapi/icons';
 import pluginPermissions from '../../../permissions';
 
 type Action =
-  | { type: 'SET_SELECTED_CONTENT_TYPES'; payload: Pick<ConfigContentType, 'uid' | 'label'>[] }
   | { type: 'SET_DEFAULT_FIELD'; payload: { ctUid: string; field: string } }
   | { type: 'SET_PATTERN'; payload: { ctUid: string; pattern: string } }
   | { type: 'SET_CONFIG'; payload: PluginConfig }
@@ -36,16 +34,6 @@ function reducer(newConfig: PluginConfig | null, action: Action): PluginConfig |
   let updatedContentTypes
 
   switch (action.type) {
-    case 'SET_SELECTED_CONTENT_TYPES':
-      if (!newConfig) return null;
-      updatedContentTypes = action.payload.map(ct => {
-        return newConfig?.selectedContentTypes.find((cta: ConfigContentType) => cta.uid === ct.uid) || {
-          ...ct,
-          default: '',
-          pattern: '',
-        }
-      })
-      return { ...newConfig, selectedContentTypes: updatedContentTypes || [] };
     case 'SET_DEFAULT_FIELD':
       if (!newConfig) return null;
       updatedContentTypes = newConfig?.selectedContentTypes.map(ct =>
@@ -154,70 +142,40 @@ const Settings = () => {
           id: getTranslation('settings.page.general.contentTypes'),
           defaultMessage: 'Content Types',
         })}>
-          <Field.Root
-            name="selectedContentTypes"
-            hint={formatMessage({
-              id: getTranslation('settings.page.enabledContentTypes.hint'),
-              defaultMessage: 'Select the content types for which you want to enable URL aliases',
-            })}
-          >
-            <Field.Label>
-              <SettingTitle>
-                {formatMessage({
-                  id: getTranslation('settings.page.enabledContentTypes'),
-                  defaultMessage: 'Enabled Content Types',
-                })}
-              </SettingTitle>
-            </Field.Label>
-            <MultiSelect
-              placeholder={formatMessage({
-                id: getTranslation('settings.page.enabledContentTypes.placeholder'),
-                defaultMessage: 'Select content types...',
-              })}
-              onClear={() => dispatch({ type: 'SET_SELECTED_CONTENT_TYPES', payload: [] })}
-              value={[...config?.selectedContentTypes.map((ct: ConfigContentType) => ct.uid) || []]}
-              onChange={(value: string[]) => {
-                const selectedContentTypes = value.map(uid => {
-                  const contentType = allContentTypes?.find(ct => ct.uid === uid);
-                  return {
-                    uid: uid,
-                    label: contentType?.info.displayName || uid,
-                  };
-                }).filter(ct => ct);
-                
-                dispatch({
-                  type: 'SET_SELECTED_CONTENT_TYPES',
-                  payload: selectedContentTypes,
-                })
-              }}
-              withTags
-            >
-              {allContentTypes && allContentTypes.map(item => 
-                <MultiSelectOption key={item.uid} value={item.uid}>{item.info.displayName}</MultiSelectOption>
-              )}
-            </MultiSelect>
-            <Field.Hint/>
-          </Field.Root>
-          {config?.selectedContentTypes && config.selectedContentTypes.length > 0 && 
-            <Box paddingTop={4}>
-              <Field.Root name="selectedContentTypesAccordion">
-                <Field.Label>
-                  <SettingTitle>
-                    {formatMessage({
-                      id: getTranslation('settings.page.contentTypeSettings'),
-                      defaultMessage: 'Content Type settings',
-                    })}
-                  </SettingTitle> 
-                </Field.Label>
-                <Accordion.Root>
-                  {config.selectedContentTypes?.map((contentTypeSettings: ConfigContentType) => {
-                    const ct: ContentType | undefined = allContentTypes?.find((item) => item.uid === contentTypeSettings.uid)
-                    return <ContentTypeAccordion key={contentTypeSettings.uid} contentType={ct} contentTypeSettings={contentTypeSettings} dispatch={dispatch} />
+          {config?.selectedContentTypes && config.selectedContentTypes.length > 0 ? 
+            <Field.Root name="selectedContentTypesAccordion">
+              <Field.Label>
+                <SettingTitle>
+                  {formatMessage({
+                    id: getTranslation('settings.page.contentTypeSettings'),
+                    defaultMessage: 'Content Type settings',
                   })}
-                </Accordion.Root>
-              </Field.Root>
-            </Box>
-          }
+                </SettingTitle> 
+              </Field.Label>
+              <Accordion.Root>
+                {config.selectedContentTypes?.map((contentTypeSettings: ConfigContentType) => {
+                  const ct: ContentType | undefined = allContentTypes?.find((item) => item.uid === contentTypeSettings.uid)
+                  return <ContentTypeAccordion key={contentTypeSettings.uid} contentType={ct} contentTypeSettings={contentTypeSettings} dispatch={dispatch} />
+                })}
+              </Accordion.Root>
+            </Field.Root>
+           : (
+            <Typography>
+              {formatMessage({
+                id: getTranslation('settings.page.general.noContentTypesEnabled'),
+                defaultMessage: 'No content types are enabled for Webatlas. Please enable at least one content type to use this plugin.',
+              })}
+              <Link
+                href='https://github.com/mattisvensson/strapi-plugin-webatlas?tab=readme-ov-file#-configuration'
+                isExternal
+                style={{ marginLeft: 4 }}>
+                {formatMessage({
+                  id: getTranslation('settings.page.general.noContentTypesEnabled.moreInfo'),
+                  defaultMessage: 'More info',
+                })}
+              </Link>
+            </Typography>
+          )}
         </ContentBox>
         <ContentBox title={formatMessage({
           id: getTranslation('settings.page.general.details'),
