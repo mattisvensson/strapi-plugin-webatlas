@@ -90,6 +90,7 @@
   "webatlas.components.CMEditViewAside.alias.documentIdRoute.label": "Dokumenten-ID Route",
   "webatlas.components.CMEditViewAside.alias.documentIdRoute.hint": "Permanente Dokumenten-ID-Route, kann nicht geändert werden",
   "webatlas.components.CMEditViewAside.alias.newRouteInfo": "Eine neue URL-Route wird beim Speichern dieses Eintrags erstellt.",
+  "components.CMEditViewAside.alias.urlInput.noSourceField": "Verwenden Sie die Überschreibungsoption, um eine benutzerdefinierte URL festzulegen.",
 
   "webatlas.route.type.internal": "Intern",
   "webatlas.route.type.external": "Extern",
