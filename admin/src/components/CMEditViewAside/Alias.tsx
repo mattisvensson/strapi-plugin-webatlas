@@ -267,15 +267,21 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 					}
 					<Field.Root
 						hint={
-							formatMessage({
-								id: getTranslation('components.CMEditViewAside.alias.urlInput.start'),
-								defaultMessage: 'Edit the',
-							})
-							+ " \"" + config.default + "\" " +
-							formatMessage({
-								id: getTranslation('components.CMEditViewAside.alias.urlInput.end'),
-								defaultMessage: 'field to generate a URL',
-							})
+							config.default ?
+								formatMessage({
+									id: getTranslation('components.CMEditViewAside.alias.urlInput.start'),
+									defaultMessage: 'Edit the',
+								})
+								+ " \"" + config.default + "\" " +
+								formatMessage({
+									id: getTranslation('components.CMEditViewAside.alias.urlInput.end'),
+									defaultMessage: 'field to generate a URL',
+								})
+								:
+								formatMessage({
+									id: getTranslation('components.CMEditViewAside.alias.urlInput.noSourceField'),
+									defaultMessage: 'Use the override option to set a custom URL.',
+								})
 						}
 					>
 						<Field.Label>
