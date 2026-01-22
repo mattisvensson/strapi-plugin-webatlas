@@ -2,7 +2,7 @@ import { Checkbox, Box, Flex, Typography, Field, Divider } from '@strapi/design-
 import { useState, useEffect, useRef, useCallback, useReducer, useMemo } from 'react';
 import transformToUrl from '../../../../utils/transformToUrl';
 import { unstable_useContentManagerContext as useContentManagerContext, useFetchClient, useRBAC } from '@strapi/strapi/admin';
-import { ConfigContentType } from '../../../../types';
+import { ConfigContentType, Route } from '../../../../types';
 import Tooltip from '../Tooltip';
 import debounce from '../../utils/debounce';
 import URLInfo from '../URLInfo';
@@ -184,11 +184,11 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 
 				if (!route) return
 
-				initialPath.current = initialValues.webatlas_path || route.uIdPath
+				initialPath.current = initialValues.webatlas_path || route.uidPath
 				setRouteId(route.id)
 				setIsOverride(route.isOverride || false)
 				
-				dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: route.fullPath || '' });
+				dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: route.path || '' });
 				dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath || '' });
 				dispatchPath({ type: 'SET_DOCUMENTIDPATH', payload: route.documentIdPath || '' });
 			

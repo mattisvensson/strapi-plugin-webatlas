@@ -1,3 +1,4 @@
+import { Route } from "../../../types";
 import { waRoute } from "../../../utils";
 import type { UID } from '@strapi/strapi';
 
@@ -6,7 +7,7 @@ async function checkPathExists(path: string, targetRoutePath?: string | null): P
     filters: { 
       $or: [
         {
-          fullPath: path,
+          path: path,
         },
         {
           slug: path,
@@ -19,9 +20,9 @@ async function checkPathExists(path: string, targetRoutePath?: string | null): P
         },
       ], 
     },
-  });
+  }) as Route[];
 
-  if (targetRoutePath && entities && entities[0]?.fullPath === targetRoutePath) 
+  if (targetRoutePath && entities && entities[0]?.path === targetRoutePath) 
     return false;
 
   return entities?.length > 0;
@@ -36,8 +37,8 @@ export default async function duplicateCheck(initialPath: string, targetRouteDoc
     if (targetRouteDocumentId) {
       const route = await strapi.documents(waRoute as UID.ContentType).findOne({
         documentId: targetRouteDocumentId
-      });
-      if (route) targetRoutePath = route.fullPath;
+      }) as Route;
+      if (route) targetRoutePath = route.path;
     }
   
     // Check if the path exists

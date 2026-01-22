@@ -64,9 +64,9 @@ function ItemCreateComponent({
         // TODO: Create a route if not existing or show error
         if (!route) throw new Error('No route found for the selected entity')
 
-        dispatchPath({ type: 'NO_URL_CHECK', payload: route.fullPath });
+        dispatchPath({ type: 'NO_URL_CHECK', payload: route.path });
         dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath });
-        dispatchPath({ type: 'SET_INITIALPATH', payload: route.fullPath });
+        dispatchPath({ type: 'SET_INITIALPATH', payload: route.path });
 
         dispatchItemState({ type: 'SET_TITLE', payload: route.title })
         dispatchItemState({ type: 'SET_ACTIVE', payload: route.active })
@@ -75,7 +75,7 @@ function ItemCreateComponent({
         
         initialState.current = {
           title: route.title,
-          slug: route.fullPath,
+          slug: route.path,
           active: route.active,
           internal: route.internal,
           isOverride: route.isOverride,
@@ -99,9 +99,9 @@ function ItemCreateComponent({
 
       // TODO: Handle route update if path changed
       // if (path.value !== path.initialPath) {
-      //   if (navItemState.slug !== entityRoute.fullPath) navItemState.isOverride = true
-      //   await updateRoute({fullPath: path.value}, entityRoute.documentId)
-      //   settings.routeUpdate = { fullPath: path.value }
+      //   if (navItemState.slug !== entityRoute.path) navItemState.isOverride = true
+      //   await updateRoute({path: path.value}, entityRoute.documentId)
+      //   settings.routeUpdate = { path: path.value }
       // }
 
       const newItem = createTempNavItemObject({

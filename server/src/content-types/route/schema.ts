@@ -44,6 +44,10 @@ export default {
       type: "string",
       configurable: false,
     },
+    path: {
+      type: "string",
+      configurable: false,
+    },
     slug: {
       type: "string",
       configurable: false,

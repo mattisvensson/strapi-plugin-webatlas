@@ -152,7 +152,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
             <RouteIcon type={type}/>
             <Flex gap={2}>
               <Typography fontWeight="bold">{item.update?.title ? item.update.title : item.route.title}</Typography>
-              <Typography textColor="neutral400">{type === 'internal' && '/'}{item.update?.fullPath ? item.update.fullPath : item.route.fullPath}</Typography>
+              <Typography textColor="neutral400">{type === 'internal' && '/'}{item.update?.path ? item.update.path : item.route.path}</Typography>
             </Flex>
             {item.isNew && !item.deleted &&
               <Status variant="alternative" size="S">

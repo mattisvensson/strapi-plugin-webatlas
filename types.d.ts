@@ -22,7 +22,7 @@ export type Route = {
   documentId: string,
   title: string;
   slug: string;
-  fullPath: string;
+  path: string;
   uidPath: string;
   documentIdPath: string,
   relatedContentType: string;
@@ -44,7 +44,7 @@ export type RouteSettings = {
   relatedId?: number;
   relatedDocumentId?: string;
   title?: string;
-  fullPath?: string;
+  path?: string;
   slug?: string;
   uidPath?: string;
   documentIdPath?: string;
@@ -96,6 +96,7 @@ export type PluginConfig = {
   navigation: {
     maxDepth: number;
   }
+  migrationVersion: string;
 };
 
 export type Navigation = {
@@ -161,7 +162,7 @@ export type NestedNavItem = {
   update?: {
     title?: string;
     slug?: string;
-    fullPath?: string;
+    path?: string;
     isOverride?: boolean;
   }
   isNew?: {
@@ -192,7 +193,7 @@ export type SoftAddedNavItem = {
   navigation: string | null;
   parent: string | null;
   routeUpdate?: {
-    fullPath?: string;
+    path?: string;
   }
 }
 
@@ -218,7 +219,7 @@ type modalSharedLogic = {
   setEntityRoute: (value: Route) => void,
   entities: GroupedEntities[],
   updateRoute: (body: RouteSettings, documentId: string) => Promise<any>,
-  getRelatedRoute: (relatedDocumentId: string) => Promise<any>,
+  getRelatedRoute: (relatedDocumentId: string) => Promise<Route>,
   replacement: string,
   setReplacement: (value: string) => void,
   validationState: 'initial' | 'checking' | 'done',
@@ -238,7 +239,7 @@ type modalSharedLogic = {
 }
 
 // Route Page sortByType
-export type RouteSortKey = keyof Pick<Route, 'title' | 'fullPath' | 'type' | undefined>;
+export type RouteSortKey = keyof Pick<Route, 'title' | 'path' | 'type' | undefined>;
 
 declare module '@strapi/strapi' {
   namespace Schema {

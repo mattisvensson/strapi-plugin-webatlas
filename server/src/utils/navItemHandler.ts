@@ -1,6 +1,6 @@
 import type { UID } from '@strapi/strapi';
-import type { NavItemSettings, NestedNavItem } from "../../../types";
-import { getFullPath, waRoute, waNavItem } from "../../../utils";
+import type { NavItemSettings, NestedNavItem, Route } from "../../../types";
+import { getPath, waRoute, waNavItem } from "../../../utils";
 
 async function createNavItem(data: NavItemSettings): Promise<null | NestedNavItem> {
   try {
@@ -9,20 +9,20 @@ async function createNavItem(data: NavItemSettings): Promise<null | NestedNavIte
     const parent = data.parent ? await strapi.documents(waNavItem as UID.ContentType).findOne({
       documentId: data.parent,
       populate: ['route']
-    }) : null;
+    }) as NestedNavItem : null;
 
     const route = data.route ? await strapi.documents(waRoute as UID.ContentType).findOne({
       documentId: data.route
-    }) : null;
+    }) as Route : null;
 
-    let fullPath = route.slug
+    let path = route.slug
 
-    if (route.internal && !route.isOverride && parent?.route.internal) fullPath = getFullPath(parent?.route?.fullPath, route.slug)
+    if (route.internal && !route.isOverride && parent?.route.internal) path = getPath(parent?.route?.path, route.slug)
 
     await strapi.documents(waRoute as UID.ContentType).update({
       documentId: data.route,
       data: {
-        fullPath,
+        path,
       }
     });
 
@@ -30,7 +30,7 @@ async function createNavItem(data: NavItemSettings): Promise<null | NestedNavIte
     // await strapi.documents(route.relatedContentType).update({
     //   documentId: route.relatedDocumentId,
     //   data: {
-    //     webatlas_path: fullPath
+    //     webatlas_path: path
     //   }
     // });
 

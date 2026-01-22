@@ -7,8 +7,8 @@ async function createExternalRoute(data: RouteSettings) {
     return await strapi.documents(waRoute as UID.ContentType).create({
       data: {
         title: data.title,
-        slug: data.fullPath,
-        fullPath: data.fullPath,
+        slug: data.path,
+        path: data.path,
         relatedContentType: '',
         relatedId: 0,
         relatedDocumentId: '',

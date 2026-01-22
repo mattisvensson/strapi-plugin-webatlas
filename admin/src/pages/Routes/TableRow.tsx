@@ -13,7 +13,7 @@ export default function TableRow({ route }: { route: Route }) {
         <Typography textColor="neutral800">{route.title}</Typography>
       </Td>
       <Td>
-        <Typography textColor="neutral800">{route.fullPath}</Typography>
+        <Typography textColor="neutral800">{route.path}</Typography>
       </Td>
       <Td>
         <Typography textColor="neutral800">

@@ -1,4 +1,4 @@
-import { ContentType, GroupedEntities, RouteSettings, ConfigContentType, StructuredNavigationVariant, NavigationInput, NestedNavItem } from '../../../types';
+import { ContentType, Route, GroupedEntities, RouteSettings, ConfigContentType, StructuredNavigationVariant, NavigationInput, NestedNavItem } from '../../../types';
 import { useFetchClient } from '@strapi/strapi/admin';
 import { PLUGIN_ID } from '../../../utils';
 
@@ -78,7 +78,7 @@ export default function useApi() {
     }
   }
 
-  const getRelatedRoute = async (relatedDocumentId: string) => {
+  const getRelatedRoute = async (relatedDocumentId: string): Promise<Route> => {
     const { data } = await get(`/${PLUGIN_ID}/route/related?documentId=${relatedDocumentId}`);
     return data
   };

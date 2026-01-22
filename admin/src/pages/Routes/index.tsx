@@ -125,7 +125,7 @@ const Routes = () => {
       allRoutes.filter((route) =>
         JSON.stringify(route.id).toLowerCase().includes(query) ||
         route.title.toLowerCase().includes(query) ||
-        route.fullPath.toLowerCase().includes(query) ||
+        route.path.toLowerCase().includes(query) ||
         route.relatedDocumentId.toLowerCase().includes(query) ||
         route.relatedContentType.toLowerCase().includes(query)
       )
