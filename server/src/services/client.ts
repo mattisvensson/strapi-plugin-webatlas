@@ -10,7 +10,6 @@ export default ({strapi}) => ({
           $or: [
             { path: slug },
             { uidPath: slug },
-            { documentIdPath: slug },
           ],
         },
       });
@@ -35,7 +34,7 @@ export default ({strapi}) => ({
       const [contentTypeKey, contentType] = contentTypeObject;
 
       const entity = await strapi.documents(route.relatedContentType).findOne({
-        documentId: route.documentIdPath,
+        documentId: route.relatedDocumentId,
         populate: populateObject,
         fields: fields,
         status: status,

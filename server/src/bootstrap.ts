@@ -220,7 +220,6 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           slug: path,
           path: path,
           uidPath: `${event.model.singularName}/${event.result.id}`,
-          documentIdPath: event.result.documentId,
           isOverride: webatlas_override || false,
           title: title
         },
@@ -261,7 +260,6 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
             relatedId: event.result.id,
             relatedDocumentId: event.result.documentId,
             uidPath: `${event.model.singularName}/${event.result.id}`,
-            documentIdPath: event.result.documentId,
             ...routeData
           }
         })

@@ -24,7 +24,6 @@ export type Route = {
   slug: string;
   path: string;
   uidPath: string;
-  documentIdPath: string,
   relatedContentType: string;
   relatedId: number;
   relatedDocumentId: string,
@@ -47,7 +46,6 @@ export type RouteSettings = {
   path?: string;
   slug?: string;
   uidPath?: string;
-  documentIdPath?: string;
   isOverride?: boolean;
   internal?: boolean;
   active?: boolean;

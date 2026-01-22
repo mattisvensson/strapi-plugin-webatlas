@@ -53,7 +53,6 @@ export default function createTempNavItemObject({
         active: navItemState.active || false,
         createdAt: new Date().toISOString(),
         documentId: '',
-        documentIdPath: selectedEntity ? selectedEntity.documentId : '',
         path: path?.value || '',
         id: 0,
         internal: internal,

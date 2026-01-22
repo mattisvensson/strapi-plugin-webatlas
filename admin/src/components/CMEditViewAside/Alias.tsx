@@ -17,13 +17,11 @@ type Action =
   | { type: 'NO_TRANSFORM_AND_CHECK'; payload: string }
   | { type: 'RESET_URL_CHECK_FLAG'; }
   | { type: 'SET_UIDPATH'; payload: string }
-  | { type: 'SET_DOCUMENTIDPATH'; payload: string }
 
 type PathState = {
 	value?: string;
 	prevValue?: string,
 	uIdPath?: string,
-	documentIdPath?: string,
 	needsUrlCheck: boolean;
 };
 
@@ -54,8 +52,6 @@ function reducer(state: PathState, action: Action): PathState {
 			return { ...state, needsUrlCheck: false };
 		case 'SET_UIDPATH':
 			return { ...state, uIdPath: action.payload };
-		case 'SET_DOCUMENTIDPATH':
-			return { ...state, documentIdPath: action.payload };
 		default:
 			throw new Error();
 	}
@@ -190,7 +186,6 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 				
 				dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: route.path || '' });
 				dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath || '' });
-				dispatchPath({ type: 'SET_DOCUMENTIDPATH', payload: route.documentIdPath || '' });
 			
 				// Set the prevValueRef to prevent immediate override
 				const key = config?.default;
@@ -327,7 +322,7 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 						</Checkbox>
 					</Flex>
 				</Box>
-				{path.uIdPath && path.documentIdPath && (
+				{path.uIdPath && (
 					<>	
 						<Box>
 							<Divider/>
@@ -348,25 +343,6 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 									value={path.uIdPath}
 									disabled
 								/>
-								<Field.Hint/>
-							</Field.Root>
-						</Box>
-						<Box>
-							<Field.Root
-								hint={formatMessage({
-									id: getTranslation('components.CMEditViewAside.alias.documentIdRoute.hint'),
-									defaultMessage: 'Permanent Document ID route, cannot be changed',
-								})}
-								label={formatMessage({
-									id: getTranslation('components.CMEditViewAside.alias.documentIdRoute.label'),
-									defaultMessage: 'Document ID route',
-								})}
-								>
-								<Field.Label/>
-								<Field.Input
-									value={path.documentIdPath}
-									disabled
-									/>
 								<Field.Hint/>
 							</Field.Root>
 						</Box>

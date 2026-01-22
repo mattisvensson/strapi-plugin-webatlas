@@ -56,10 +56,6 @@ export default {
       type: "string",
       configurable: false,
     },
-    documentIdPath: {
-      type: "string",
-      configurable: false,
-    },
     isOverride: {
       type: 'boolean',
       default: false,
