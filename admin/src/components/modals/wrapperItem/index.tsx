@@ -54,7 +54,7 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
 
     dispatchItemState({ type: 'SET_TITLE', payload: item.route.title })
     dispatchItemState({ type: 'SET_ACTIVE', payload: item.route.active })
-    dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.fullPath })
+    dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.path })
   }, [])
 
   const onConfirm = async () => {

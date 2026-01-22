@@ -1,6 +1,6 @@
-import type { NavigationInput, NestedNavigation, NestedNavItem, PluginConfig, StructuredNavigationVariant } from "../../../types";
+import type { NavigationInput, NestedNavigation, NestedNavItem, PluginConfig, Route, RouteSettings, StructuredNavigationVariant } from "../../../types";
 import duplicateCheck from "../utils/duplicateCheck";
-import { getFullPath, transformToUrl, waRoute, waNavigation, waNavItem, PLUGIN_ID } from "../../../utils";
+import { getPath, transformToUrl, waRoute, waNavigation, waNavItem, PLUGIN_ID } from "../../../utils";
 import { reduceDepthOfOrphanedItems, createExternalRoute, createNavItem, updateNavItem, deleteNavItem, buildStructuredNavigation } from "../utils";
 
 export default ({strapi}) => ({
@@ -73,25 +73,25 @@ export default ({strapi}) => ({
       console.log(e)
     }
   },
-
+  // TODO: Types
   async updateRoute(documentId: string, data: any) {
     try {
-      let checkedPath = data.fullPath
+      let checkedPath = data.path
 
       if (data.internal) {
         const parent = data.parent ? await strapi.documents(waNavItem).findOne({
           documentId: data.parent
         }) : null;
         
-        const fullPath = data.isOverride ? data.slug : getFullPath(parent?.fullPath, data.slug)
-        checkedPath = await duplicateCheck(fullPath, documentId);
+        const path = data.isOverride ? data.slug : getPath(parent?.path, data.slug)
+        checkedPath = await duplicateCheck(path, documentId);
       }
 
       const entity = await strapi.documents(waRoute).update({
         documentId: documentId,
         data: {
           ...data,
-          fullPath: checkedPath,
+          path: checkedPath,
         }
       });
 
@@ -256,7 +256,7 @@ export default ({strapi}) => ({
           await this.updateRoute(item.route.documentId, {
             title: item.update.title || item.route.title,
             slug: item.update.slug || item.route.slug,
-            fullPath: item.update.fullPath || item.route.fullPath,
+            path: item.update.path || item.route.path,
             isOverride: item.update.isOverride !== undefined ? item.update.isOverride : item.route.isOverride,
           })
         } catch (error) {
@@ -325,7 +325,7 @@ export default ({strapi}) => ({
             const newRoute = await createExternalRoute({
                 title: item.route.title,
                 slug: item.route.slug,
-                fullPath: item.route.fullPath,
+                path: item.route.path,
                 wrapper: item.route.wrapper,
                 internal: item.route.internal,
             })

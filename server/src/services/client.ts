@@ -8,7 +8,7 @@ export default ({strapi}) => ({
       const route = await strapi.documents(waRoute).findFirst({
         filters: {
           $or: [
-            { fullPath: slug },
+            { path: slug },
             { uidPath: slug },
             { documentIdPath: slug },
           ],

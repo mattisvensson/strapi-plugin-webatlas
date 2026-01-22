@@ -30,7 +30,7 @@ function ItemEditComponent({
   const { formatMessage } = useIntl();
 
   useEffect(() => {
-    dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.fullPath })
+    dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.path })
     dispatchItemState({ type: 'SET_TITLE', payload: item.route.title })
     dispatchItemState({ type: 'SET_SLUG', payload: item.route.slug })
     dispatchItemState({ type: 'SET_ACTIVE', payload: item.route.active })
@@ -45,7 +45,7 @@ function ItemEditComponent({
   
   initialState.current = initialValues;
   
-  dispatchPath({ type: 'SET_INITIALPATH', payload: item.route.fullPath });
+  dispatchPath({ type: 'SET_INITIALPATH', payload: item.route.path });
   }, [])
 
   useEffect(() => {
@@ -84,14 +84,14 @@ function ItemEditComponent({
     try {
       if (isEqual(navItemState, initialState.current) && path.value === path.initialPath) return
       
-      const isOverride = path.value !== item.route.fullPath ? true : navItemState.isOverride
+      const isOverride = path.value !== item.route.path ? true : navItemState.isOverride
 
       onEdit({
         ...item,
         update: {
           title: navItemState.title,
           slug: navItemState.slug,
-          fullPath: path.value,
+          path: path.value,
           isOverride,
         },
     });

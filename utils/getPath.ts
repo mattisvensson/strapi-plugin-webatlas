@@ -1,4 +1,4 @@
-export default function getFullPath(parentPath: string, slug: string) {
+export default function getPath(parentPath: string, slug: string) {
 
 	if (!slug) return null;
 	if (!parentPath) return slug;

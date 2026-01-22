@@ -54,7 +54,7 @@ export default function createTempNavItemObject({
         createdAt: new Date().toISOString(),
         documentId: '',
         documentIdPath: selectedEntity ? selectedEntity.documentId : '',
-        fullPath: path?.value || '',
+        path: path?.value || '',
         id: 0,
         internal: internal,
         isOverride: navItemState.isOverride || false,

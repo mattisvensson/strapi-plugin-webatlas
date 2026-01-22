@@ -25,14 +25,14 @@ export default function TableHeader({
           </Typography>
           {sortKey === 'title' && <ChevronDown />}
         </Th>
-        <Th onClick={() => handleSort('fullPath')} cursor="pointer">
+        <Th onClick={() => handleSort('path')} cursor="pointer">
           <Typography variant="sigma">
             {formatMessage({
               id: getTranslation('route'),
               defaultMessage: 'Route',
             })}
           </Typography>
-          {sortKey === 'fullPath' && <ChevronDown />}
+          {sortKey === 'path' && <ChevronDown />}
         </Th>
         <Th onClick={() => handleSort('type')} cursor="pointer">
           <Typography variant="sigma">

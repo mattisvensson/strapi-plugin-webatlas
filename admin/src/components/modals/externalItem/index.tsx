@@ -55,7 +55,7 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
 
     dispatchItemState({ type: 'SET_TITLE', payload: item.route.title });
     dispatchItemState({ type: 'SET_ACTIVE', payload: item.route.active });
-    dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.fullPath });
+    dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.path });
   }, [variant, item, dispatchItemState, dispatchPath]);
 
   const handleConfirm = async () => {
@@ -67,7 +67,7 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
           ...item,
           update: {
             title: navItemState.title,
-            fullPath: path.value,
+            path: path.value,
             // internal: false,
             // active: navItemState.active,
           }
