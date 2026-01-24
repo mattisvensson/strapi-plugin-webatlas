@@ -1,6 +1,6 @@
 import type { Route } from '../../../../types';
 import { Typography, Tr, Td, Flex, LinkButton } from '@strapi/design-system';
-import { getTranslation, getRouteType } from '../../utils';
+import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
 import { Pencil } from '@strapi/icons';
 
@@ -18,14 +18,14 @@ export default function TableRow({ route }: { route: Route }) {
       <Td>
         <Typography textColor="neutral800">
           {formatMessage({
-            id: getTranslation(`route.type.${getRouteType(route)}`),
+            id: getTranslation(`route.type.${route.type}`),
             defaultMessage: '-',
           })}
         </Typography>
       </Td>
       <Td>
         <Flex gap={2} justifyContent="end">
-          {route.internal && 
+          {route.type === "internal" && 
             <LinkButton
               variant="secondary"
               startIcon={<Pencil />} 

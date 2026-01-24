@@ -27,10 +27,9 @@ export type Route = {
   relatedContentType: string;
   relatedId: number;
   relatedDocumentId: string,
-  internal: boolean;
+  type: 'internal' | 'external' | 'wrapper';
   active: boolean;
   isOverride: boolean;
-  wrapper: boolean;
   navitem: {
     id: number;
   } | null;
@@ -47,10 +46,9 @@ export type RouteSettings = {
   slug?: string;
   uidPath?: string;
   isOverride?: boolean;
-  internal?: boolean;
   active?: boolean;
   navitem?: number;
-  wrapper?: boolean
+  type?: 'internal' | 'external' | 'wrapper';
 };
 
 export type MainModal = {

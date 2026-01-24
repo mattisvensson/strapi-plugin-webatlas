@@ -13,8 +13,7 @@ async function createExternalRoute(data: RouteSettings) {
         relatedId: 0,
         relatedDocumentId: '',
         uidPath: '',
-        internal: false,
-        wrapper: data.wrapper,
+        type: data.type || 'external',
       },
     });
   } catch (e) {

@@ -6,11 +6,9 @@ export default function compareBy(field: RouteSortKey, direction: 'asc' | 'desc'
   }
   if (field === 'type') {
     return (a: Route, b: Route) => {
-      const typeA = a.internal ? 'internal' : 'external';
-      const typeB = b.internal ? 'internal' : 'external';
       return direction === 'asc'
-        ? typeA.localeCompare(typeB)
-        : typeB.localeCompare(typeA);
+        ? a.type.localeCompare(b.type)
+        : b.type.localeCompare(a.type);
     };
   }
   return (a: Route, b: Route) => {

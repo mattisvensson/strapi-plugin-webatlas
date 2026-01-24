@@ -19,8 +19,7 @@ type CreateTempNavItemObjectParams = {
     value: string;
     uidPath: string;
   };
-  wrapper?: boolean;
-  internal?: boolean;
+  type?: 'internal' | 'external' | 'wrapper';
 };
 
 export default function createTempNavItemObject({ 
@@ -31,8 +30,7 @@ export default function createTempNavItemObject({
   selectedEntity, 
   selectedContentType,
   path,
-  wrapper = false,
-  internal = true,
+  type = 'internal',
 }: CreateTempNavItemObjectParams): NestedNavItem {
     const tempNavItem: NestedNavItem = {
       id: Math.floor(Math.random() * -1000000), // Temporary negative ID
@@ -55,7 +53,7 @@ export default function createTempNavItemObject({
         documentId: '',
         path: path?.value || '',
         id: 0,
-        internal: internal,
+        type: type,
         isOverride: navItemState.isOverride || false,
         relatedContentType: selectedContentType ? JSON.stringify(selectedContentType.contentType) : '',
         relatedDocumentId: selectedEntity ? selectedEntity.documentId : '',
@@ -64,7 +62,6 @@ export default function createTempNavItemObject({
         title: navItemState.title || '',
         uidPath: path?.uidPath || '',
         updatedAt: new Date().toISOString(),
-        wrapper: wrapper,
         navitem: null,
       },
     }

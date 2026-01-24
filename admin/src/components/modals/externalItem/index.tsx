@@ -81,7 +81,7 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
           selectedEntity: null,
           selectedContentType: null,
           path,
-          internal: false,
+          type: "external",
         })
         onCreate(newItem);
       }

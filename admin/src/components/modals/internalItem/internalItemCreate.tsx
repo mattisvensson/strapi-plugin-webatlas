@@ -70,14 +70,12 @@ function ItemCreateComponent({
 
         dispatchItemState({ type: 'SET_TITLE', payload: route.title })
         dispatchItemState({ type: 'SET_ACTIVE', payload: route.active })
-        dispatchItemState({ type: 'SET_INTERNAL', payload: route.internal })
         dispatchItemState({ type: 'SET_OVERRIDE', payload: route.isOverride })
         
         initialState.current = {
           title: route.title,
           slug: route.path,
           active: route.active,
-          internal: route.internal,
           isOverride: route.isOverride,
         }
 

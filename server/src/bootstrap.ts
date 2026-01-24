@@ -2,57 +2,13 @@ import type { Core, UID } from '@strapi/strapi';
 import { PluginConfig, ConfigContentType, ContentType } from "../../types";
 import { transformToUrl, waRoute, waNavItem, PLUGIN_ID } from "../../utils";
 import { duplicateCheck } from "./utils";
-
-// Migration function to handle fullPath -> path rename
-async function migrateFullPathToPath(strapi: Core.Strapi) {
-  try {
-    const pluginStore = strapi.store({ type: 'plugin', name: PLUGIN_ID });
-    const config = await pluginStore.get({ type: 'plugin', name: PLUGIN_ID }) as PluginConfig;
-    const migrationVersion = config?.migrationVersion || '0.0.0';
-
-    if (migrationVersion >= '1.0.0') {
-      console.log('Webatlas: Migration already completed, skipping...');
-      return;
-    }
-
-    const routes = await strapi.db.query(waRoute).findMany({
-      select: ['documentId', 'fullPath', 'path'],
-    });
-
-    let migratedCount = 0;
-    for (const route of routes) {
-      if (route.fullPath && !route.path) {
-        await strapi.db.query(waRoute).update({
-          where: { documentId: route.documentId },
-          data: { 
-            path: route.fullPath,
-          }
-        });
-        migratedCount++;
-      }
-    }
-
-    await pluginStore.set({ 
-      type: 'plugin', 
-      name: PLUGIN_ID, 
-      value: { 
-        ...config,
-        migrationVersion: '1.0.0' 
-      }
-    });
-
-    console.log(`Webatlas: Successfully migrated ${migratedCount} routes from fullPath to path`);
-  } catch (error) {
-    console.warn('Webatlas migration warning:', error.message);
-  }
-}
+import { runMigrations } from "./migrations";
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
   try {
-    // Migration: Copy fullPath to path for existing routes
-    // Will be removed in the next minor release
-    await migrateFullPathToPath(strapi);
+    // Run all pending migrations
+    await runMigrations(strapi);
 
     // Register permission actions.
     const actions = [
@@ -155,7 +111,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
         if (!navItem || !navItem.route) return
   
-        event.state = navItem.route.id && !navItem.route.internal ? { id: navItem.route.id } : null
+        event.state = navItem.route.id && navItem.route.type === 'external' ? { id: navItem.route.id } : null
       } catch (err) {
         console.log(err)
       }
