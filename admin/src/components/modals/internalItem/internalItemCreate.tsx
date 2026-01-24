@@ -1,7 +1,7 @@
 import { SingleSelect, SingleSelectOption, Box, Divider, Grid, Field } from '@strapi/design-system';
 import { withModalSharedLogic } from '../withModalSharedLogic';
 import type { Entity, GroupedEntities, ModalItem_VariantCreate } from '../../../../../types';
-import URLInfo from '../../URLInfo';
+import PathInfo from '../../PathInfo';
 import { useEffect, useState } from 'react';
 import { useModalSharedLogic } from '../useModalSharedLogic';
 import { NavModal } from '../'
@@ -153,14 +153,14 @@ function ItemCreateComponent({
               <Field.Root>
                 <Field.Label>
                   {formatMessage({
-                    id: getTranslation('modal.item.routeField.label'),
-                    defaultMessage: 'Route'
+                    id: getTranslation('modal.item.pathField.label'),
+                    defaultMessage: 'Path'
                   })}
                 </Field.Label>
                 <Field.Input
                   required
                   placeholder={formatMessage({
-                    id: getTranslation('modal.item.routeField.placeholder'),
+                    id: getTranslation('modal.item.pathField.placeholder'),
                     defaultMessage: 'e.g. about/'
                   })}
                   name="slug"
@@ -173,7 +173,7 @@ function ItemCreateComponent({
   
                 />
               </Field.Root>
-              <URLInfo validationState={validationState} replacement={replacement} />
+              <PathInfo validationState={validationState} replacement={replacement} />
             </Box>
           </Grid.Item>
         </Grid.Root>

@@ -1,21 +1,21 @@
 import { StrapiApp } from '@strapi/admin/strapi-admin';
 import { PLUGIN_ID, PLUGIN_NAME } from '../../utils';
 import { Initializer } from './components/Initializer';
-import { RouteIcon, NavigationIcon } from './components/PluginIcon';
+import { PathIcon, NavigationIcon } from './components/PluginIcon';
 import CMEditViewAside from './components/CMEditViewAside';
 import pluginPermissions from './permissions';
 
 export default {
   register(app: StrapiApp) {
     app.addMenuLink({
-      to: `/plugins/${PLUGIN_ID}/routes`,
-      icon: RouteIcon,
+      to: `/plugins/${PLUGIN_ID}/paths`,
+      icon: PathIcon,
       intlLabel: {
-        id: `${PLUGIN_ID}.link.routes`,
-        defaultMessage: 'Routes',
+        id: `${PLUGIN_ID}.link.paths`,
+        defaultMessage: 'Paths',
       },
       Component: async () => {
-        const component = await import('./pages/Routes');
+        const component = await import('./pages/Paths');
         return { default: component.default };
       },
       permissions: [

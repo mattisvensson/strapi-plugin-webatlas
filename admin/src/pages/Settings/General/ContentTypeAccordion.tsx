@@ -35,19 +35,19 @@ export default function ContentTypeAccordion({
             <Field.Root
               name="selectedContentTypes"
               hint={formatMessage({
-                id: getTranslation('settings.page.defaultField.hint'),
-                defaultMessage: 'The selected field from the content type will be used to generate the URL alias. Use a field that is unique and descriptive, such as a "title" or "name".',
+                id: getTranslation('settings.page.generate.hint'),
+                defaultMessage: 'The selected field from the content type will be used to generate the path. Use a field that is unique and descriptive, such as a "title" or "name".',
               })}
               error={!contentTypeSettings.default && formatMessage({
-                id: getTranslation('settings.page.defaultField.error'),
+                id: getTranslation('settings.page.generate.error'),
                 defaultMessage: 'Please select a default field',
               })}
               required
             >
               <Field.Label>
                 {formatMessage({
-                  id: getTranslation('settings.page.defaultField'),
-                  defaultMessage: 'Default URL Alias field',
+                  id: getTranslation('settings.page.generate'),
+                  defaultMessage: 'Generate paths from',
                 })}
               </Field.Label>
               <SingleSelect
@@ -74,19 +74,19 @@ export default function ContentTypeAccordion({
             </Field.Root>
             <Box paddingTop={4}>
               <Field.Root
-                name="urlAliasPattern"
+                name="pattern"
                 hint={formatMessage({
-                  id: getTranslation('settings.page.urlAliasPattern.hint'),
-                  defaultMessage: 'The pattern to prepend to the generated URL alias. For example, if you enter "blog" and the value of default field is "My First Post", the generated URL alias will be "blog/my-first-post". Leave empty for no prefix.',
+                  id: getTranslation('settings.page.pattern.hint'),
+                  defaultMessage: 'The pattern to prepend to the generated path. For example, if you enter "blog" and the value of default field is "My First Post", the generated path will be "blog/my-first-post". Leave empty for no prefix.',
                 })}
               >
                 <Field.Label>
                   {formatMessage({
-                    id: getTranslation('settings.page.urlAliasPattern'),
-                    defaultMessage: 'URL Alias Pattern',
+                    id: getTranslation('settings.page.pattern'),
+                    defaultMessage: 'Path Pattern',
                   })}
                   <Tooltip description={formatMessage({
-                    id: getTranslation('settings.page.urlAliasPattern.tooltip'),
+                    id: getTranslation('settings.page.pattern.tooltip'),
                     defaultMessage: 'Leading and trailing slashes will be removed. Spaces will be replaced with hyphens. Special characters will be encoded.',
                   })} />
                 </Field.Label>
@@ -96,7 +96,7 @@ export default function ContentTypeAccordion({
                   disabled={!contentTypeSettings.default}
                   type="text"
                   placeholder={formatMessage({
-                    id: getTranslation('settings.page.urlAliasPattern.placeholder'),
+                    id: getTranslation('settings.page.pattern.placeholder'),
                     defaultMessage: 'e.g. blog',
                   })}
                 />

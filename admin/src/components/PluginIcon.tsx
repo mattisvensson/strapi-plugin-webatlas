@@ -1,6 +1,6 @@
 import { Link, List } from '@strapi/icons';
 
-const RouteIcon = () => <Link />;
+const PathIcon = () => <Link />;
 const NavigationIcon = () => <List />;
 
-export { RouteIcon, NavigationIcon };
+export { PathIcon, NavigationIcon };

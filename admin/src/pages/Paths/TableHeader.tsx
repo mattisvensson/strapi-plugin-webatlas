@@ -28,8 +28,8 @@ export default function TableHeader({
         <Th onClick={() => handleSort('path')} cursor="pointer">
           <Typography variant="sigma">
             {formatMessage({
-              id: getTranslation('route'),
-              defaultMessage: 'Route',
+              id: getTranslation('path'),
+              defaultMessage: 'Path',
             })}
           </Typography>
           {sortKey === 'path' && <ChevronDown />}
@@ -37,7 +37,7 @@ export default function TableHeader({
         <Th onClick={() => handleSort('type')} cursor="pointer">
           <Typography variant="sigma">
             {formatMessage({
-              id: getTranslation('routes.page.column.type'),
+              id: getTranslation('paths.page.column.type'),
               defaultMessage: 'Type',
             })}
           </Typography>
