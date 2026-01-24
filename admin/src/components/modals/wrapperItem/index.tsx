@@ -65,8 +65,7 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
       const data = {
         title: navItemState.title,
         active: navItemState.active,
-        internal: false,
-        wrapper: true,
+        type: "wrapper",
       }
 
       if (variant === 'WrapperEdit' && item && onSave) {
@@ -84,7 +83,7 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
           navItemState,
           selectedEntity: null,
           selectedContentType: null,
-          wrapper: true,
+          type: "wrapper",
         })
         onCreate(newItem);
       }

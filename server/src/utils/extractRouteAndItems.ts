@@ -17,26 +17,19 @@ export default function extractRouteAndItems(items: NestedNavItem[]) {
       if (items.length > 0) route.items = items;
     }
 
-    let type: 'internal' | 'external' | 'wrapper'
-
-    if (!route.internal && route.wrapper) 
-      type = 'wrapper'
-    else if (!route.internal && !route.wrapper)
-      type = 'external'
-    else
-      type = 'internal'
-
     delete route.relatedContentType
+    delete route.relatedDocumentId
     delete route.relatedId
     delete route.createdAt
     delete route.updatedAt
     delete route.isOverride
+    // TODO: remove when migrated completely
     delete route.internal
     delete route.wrapper
     
     return { 
-      __component: type === 'wrapper' ? `${PLUGIN_ID}.wrapper` : `${PLUGIN_ID}.route`,
-      type: type,
+      __component: route.type === 'wrapper' ? `${PLUGIN_ID}.wrapper` : `${PLUGIN_ID}.route`,
+      type: route.type,
       ...route
     };
   });

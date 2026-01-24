@@ -17,7 +17,7 @@ async function createNavItem(data: NavItemSettings): Promise<null | NestedNavIte
 
     let path = route.slug
 
-    if (route.internal && !route.isOverride && parent?.route.internal) path = getPath(parent?.route?.path, route.slug)
+    if (route.type === "internal" && !route.isOverride && parent?.route.type === "internal") path = getPath(parent?.route?.path, route.slug)
 
     await strapi.documents(waRoute as UID.ContentType).update({
       documentId: data.route,

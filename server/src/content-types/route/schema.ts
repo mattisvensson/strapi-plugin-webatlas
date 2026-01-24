@@ -13,7 +13,7 @@ export default {
   },
   pluginOptions: {
     "content-manager": {
-      visible: false
+      visible: true
     },
     "content-type-builder": {
       visible: false
@@ -77,6 +77,13 @@ export default {
       relation: "oneToMany",
       target: "plugin::webatlas.navitem",
       mappedBy: "route",
+    },
+     type: {
+      type: 'enumeration',
+      enum: ['internal', 'external', 'wrapper'],
+      default: 'internal',
+      configurable: false,
+      required: true,
     },
     wrapper: {
       type: "boolean",

@@ -326,8 +326,7 @@ export default ({strapi}) => ({
                 title: item.route.title,
                 slug: item.route.slug,
                 path: item.route.path,
-                wrapper: item.route.wrapper,
-                internal: item.route.internal,
+                type: item.route.type,
             })
 
             const newNavItem = await createNavItem({

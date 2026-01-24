@@ -21,9 +21,8 @@ export interface RouteItemProps {
   indentationWidth?: number;
 }
 
-type RouteType = "internal" | "external" | "wrapper"
 
-function RouteIcon ({ type, color = 'neutral800' }: { type: RouteType | undefined, color?: string }): ReactElement {
+function RouteIcon ({ type, color = 'neutral800' }: { type: 'internal' | 'external' | 'wrapper' | undefined, color?: string }): ReactElement {
   switch (type) {
     case "external":
       return <ExternalLink color={color}/>
@@ -76,17 +75,6 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
     }
   }
 
-  const [type, setType] = useState<RouteType>()
-  useEffect(() => {
-    if (!item.route.internal && !item.route.wrapper) {
-      setType("external")
-    } else if (item.route.wrapper) {
-      setType("wrapper")
-    } else {
-      setType("internal")
-    }
-  }, [item])
-
   const handleAddChildren = () => {
     setParentId(item.documentId)
     setModalType('ItemCreate')
@@ -96,8 +84,8 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
     setActionItem(item)
 
     let newModal = 'ItemEdit'
-    if (!item.route.internal) newModal = 'ExternalEdit'
-    if (item.route.wrapper) newModal = 'WrapperEdit'
+    if (item.route.type === 'external') newModal = 'ExternalEdit'
+    if (item.route.type === 'wrapper') newModal = 'WrapperEdit'
     
     setModalType(newModal)
   }
@@ -149,10 +137,10 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
               height="32px"
               background="neutral150"
             />
-            <RouteIcon type={type}/>
+            <RouteIcon type={item.route.type}/>
             <Flex gap={2}>
               <Typography fontWeight="bold">{item.update?.title ? item.update.title : item.route.title}</Typography>
-              <Typography textColor="neutral400">{type === 'internal' && '/'}{item.update?.path ? item.update.path : item.route.path}</Typography>
+              <Typography textColor="neutral400">{item.route.type === 'internal' && '/'}{item.update?.path ? item.update.path : item.route.path}</Typography>
             </Flex>
             {item.isNew && !item.deleted &&
               <Status variant="alternative" size="S">
@@ -186,7 +174,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
             }
           </Flex>
           <Flex direction="row" gap={4}>
-            {type === 'internal' && item.status &&
+            {item.route.type === 'internal' && item.status &&
               <Status variant={itemStatusOptions[item.status].variant} size="S">
                 <Typography fontWeight="bold">
                   {itemStatusOptions[item.status].status}

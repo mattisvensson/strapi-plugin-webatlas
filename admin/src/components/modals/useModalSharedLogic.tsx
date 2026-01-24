@@ -18,8 +18,7 @@ type Action =
   | { type: 'SET_TITLE'; payload: string }
   | { type: 'SET_SLUG'; payload: string }
   | { type: 'SET_ACTIVE'; payload: boolean }
-  | { type: 'SET_INTERNAL'; payload: boolean }
-  | { type: 'SET_OVERRIDE'; payload: boolean };
+  | { type: 'SET_OVERRIDE'; payload: boolean }
 
 type PathAction = 
   | { type: 'DEFAULT'; payload: string }
@@ -38,8 +37,6 @@ function itemStateReducer(navItemState: RouteSettings, action: Action): RouteSet
       return { ...navItemState, slug: action.payload };
     case 'SET_ACTIVE':
       return { ...navItemState, active: action.payload };
-    case 'SET_INTERNAL':
-      return { ...navItemState, internal: action.payload };
     case 'SET_OVERRIDE':
       return { ...navItemState, isOverride: action.payload };
     default:

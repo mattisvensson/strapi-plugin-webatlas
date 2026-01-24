@@ -38,7 +38,6 @@ function ItemEditComponent({
   const initialValues = {
     title: item.route.title,
     active: item.route.active,
-    internal: item.route.internal,
     isOverride: item.route.isOverride,
     slug: item.route.slug,
   };
