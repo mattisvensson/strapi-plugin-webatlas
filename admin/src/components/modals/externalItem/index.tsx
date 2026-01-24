@@ -101,7 +101,7 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
       closeText={formatMessage({ id: getTranslation('cancel'), defaultMessage: 'Cancel' })}
       titleText={variant ===  'ExternalCreate' ?
         formatMessage({ id: getTranslation('modal.externalItem.titleText.create'), defaultMessage: 'Create new external item' }) : 
-        formatMessage({ id: getTranslation('modal.externalItem.titleText.edit'), defaultMessage: `Edit external route "${navItemState.title}"` })
+        formatMessage({ id: getTranslation('modal.externalItem.titleText.edit'), defaultMessage: `Edit external path "${navItemState.title}"` })
       }
       loadingText={variant === 'ExternalCreate' ? 
         formatMessage({ id: getTranslation('modal.externalItem.loadingText.create'), defaultMessage: 'Adding' }) : 
@@ -141,14 +141,14 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
             <Field.Root>
               <Field.Label>
                 {formatMessage({
-                  id: getTranslation('modal.item.routeField.label'),
+                  id: getTranslation('modal.item.pathField.label'),
                   defaultMessage: 'Path'
                 })}
               </Field.Label>
               <Field.Input
                 required
                 placeholder={formatMessage({
-                  id: getTranslation('modal.externalItem.routeField.placeholder'),
+                  id: getTranslation('modal.externalItem.pathField.placeholder'),
                   defaultMessage: 'e.g. https://example.com'
                 })}
                 name="slug"

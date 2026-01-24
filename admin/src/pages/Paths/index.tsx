@@ -42,8 +42,8 @@ function SearchInput({
             <Field.Input
               name="search"
               placeholder={formatMessage({
-                id: getTranslation('routes.page.searchPlaceholder'),
-                defaultMessage: 'Search routes',
+                id: getTranslation('paths.page.searchPlaceholder'),
+                defaultMessage: 'Search paths',
               })}
               value={searchQuery}
               onChange={handleSearchChange}
@@ -91,8 +91,8 @@ function RouteTable({
               <EmptyStateLayout 
                 content={
                   formatMessage({
-                    id: getTranslation('routes.page.emptyRoutes'),
-                    defaultMessage: 'No routes found',
+                    id: getTranslation('paths.page.emptyPaths'),
+                    defaultMessage: 'No paths found',
                   })
                 } 
                 shadow={false}
@@ -105,7 +105,7 @@ function RouteTable({
   )
 }
 
-const Routes = () => {
+const Paths = () => {
   const { getRoutes } = useApi();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
@@ -153,12 +153,12 @@ const Routes = () => {
         setAllRoutes(data);
         setRoutes(data);
       } catch (err) {
-        console.error('Failed to fetch routes:', err);
+        console.error('Failed to fetch paths:', err);
         toggleNotification({
           type: 'danger',
           message: formatMessage({
-            id: getTranslation('notification.routes.fetchFailed'),
-            defaultMessage: 'Failed to fetch routes',
+            id: getTranslation('notification.paths.fetchFailed'),
+            defaultMessage: 'Failed to fetch paths',
           }),
         });
       } finally {
@@ -203,4 +203,4 @@ const Routes = () => {
   );
 };
 
-export default Routes;
+export default Paths;

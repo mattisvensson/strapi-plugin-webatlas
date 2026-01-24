@@ -5,7 +5,7 @@ import { unstable_useContentManagerContext as useContentManagerContext, useFetch
 import { ConfigContentType, Route } from '../../../../types';
 import Tooltip from '../Tooltip';
 import debounce from '../../utils/debounce';
-import URLInfo from '../URLInfo';
+import PathInfo from '../PathInfo';
 import duplicateCheck from '../../utils/duplicateCheck';
 import { useApi } from '../../hooks'
 import { useIntl } from 'react-intl';
@@ -57,7 +57,7 @@ function reducer(state: PathState, action: Action): PathState {
 	}
 }
 
-const Alias = ({ config }: { config: ConfigContentType }) => {
+const Path = ({ config }: { config: ConfigContentType }) => {
 	const { form, model } = useContentManagerContext()
 	const { initialValues, values, onChange } = form;
 	const { getRelatedRoute } = useApi()
@@ -251,8 +251,8 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 						<>
 							<Typography textColor="neutral600" marginBottom={2}>
 								{formatMessage({
-									id: getTranslation('components.CMEditViewAside.alias.newRouteInfo'),
-									defaultMessage: 'A new URL route will be created upon saving this entry.',
+									id: getTranslation('components.CMEditViewAside.path.newPathInfo'),
+									defaultMessage: 'A new path will be created upon saving this entry.',
 								})}
 							</Typography>
 							<Box paddingBottom={2} paddingTop={2}>
@@ -264,33 +264,33 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 						hint={
 							config.default ?
 								formatMessage({
-									id: getTranslation('components.CMEditViewAside.alias.urlInput.start'),
+									id: getTranslation('components.CMEditViewAside.path.input.start'),
 									defaultMessage: 'Edit the',
 								})
 								+ " \"" + config.default + "\" " +
 								formatMessage({
-									id: getTranslation('components.CMEditViewAside.alias.urlInput.end'),
-									defaultMessage: 'field to generate a URL',
+									id: getTranslation('components.CMEditViewAside.path.input.end'),
+									defaultMessage: 'field to generate a path',
 								})
 								:
 								formatMessage({
-									id: getTranslation('components.CMEditViewAside.alias.urlInput.noSourceField'),
-									defaultMessage: 'Use the override option to set a custom URL.',
+									id: getTranslation('components.CMEditViewAside.path.input.noSourceField'),
+									defaultMessage: 'Use the override option to set a custom path',
 								})
 						}
 					>
 						<Field.Label>
 							{formatMessage({
-								id: getTranslation('components.CMEditViewAside.alias.urlInput.label'),
-								defaultMessage: 'URL',
+								id: getTranslation('components.CMEditViewAside.path.input.label'),
+								defaultMessage: 'Path',
 							})}
 							<Tooltip description={formatMessage({
-								id: getTranslation('components.CMEditViewAside.alias.urlInput.tooltip'),
+								id: getTranslation('components.CMEditViewAside.path.input.tooltip'),
 								defaultMessage: 'The following characters are valid: A-Z, a-z, 0-9, /, -, _, $, ., +, !, *, \', (, )',
 							})} />
 						</Field.Label>
 						<Field.Input
-							id="url-input"
+							id="path-input"
 							value={path.value}
 							onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}
 							disabled={!isOverride}
@@ -302,21 +302,21 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 						/>
 						<Field.Hint/>
 					</Field.Root>
-					<URLInfo validationState={validationState} replacement={replacement} setUrlStatus={setUrlIsValid} />
+					<PathInfo validationState={validationState} replacement={replacement} setUrlStatus={setUrlIsValid} />
 					<Flex
 						gap={2}
 						paddingTop={2}
 					>
 						<Checkbox
-							id="override-url"
+							id="path-override-checkbox"
 							checked={isOverride}
 							onCheckedChange={() => setIsOverride(prev => !prev)}
 							disabled={(!routeId && !canCreate) || (routeId && !canUpdate)}
 						>
 							<Typography textColor="neutral600">
 								{formatMessage({
-									id: getTranslation('components.CMEditViewAside.alias.overrideCheckbox'),
-									defaultMessage: 'Override automatic URL generation',
+									id: getTranslation('components.CMEditViewAside.path.overrideCheckbox'),
+									defaultMessage: 'Override automatic path generation',
 								})}
 							</Typography>
 						</Checkbox>
@@ -330,15 +330,10 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 						<Box>
 							<Field.Root
 								hint={formatMessage({
-									id: getTranslation('components.CMEditViewAside.alias.uidRoute.hint'),
-									defaultMessage: 'Permanent UID route, cannot be changed',
+									id: getTranslation('components.CMEditViewAside.path.uidPath.hint'),
+									defaultMessage: 'Permanent UID path, cannot be changed',
 								})}
-								label={formatMessage({
-									id: getTranslation('components.CMEditViewAside.alias.uidRoute.label'),
-									defaultMessage: 'UID route',
-								})}
-								>
-								<Field.Label/>
+							>
 								<Field.Input
 									value={path.uIdPath}
 									disabled
@@ -353,4 +348,4 @@ const Alias = ({ config }: { config: ConfigContentType }) => {
 	)
 };
 
-export default Alias;
+export default Path;

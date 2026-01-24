@@ -18,7 +18,7 @@ export default function TableRow({ route }: { route: Route }) {
       <Td>
         <Typography textColor="neutral800">
           {formatMessage({
-            id: getTranslation(`route.type.${route.type}`),
+            id: getTranslation(`path.type.${route.type}`),
             defaultMessage: '-',
           })}
         </Typography>

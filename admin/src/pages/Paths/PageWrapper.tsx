@@ -9,12 +9,12 @@ export default function PageWrapper({ children }: { children: React.ReactNode })
     <Page.Main>
       <Layouts.Header
         title={formatMessage({
-          id: getTranslation('routes.page.title'),
-          defaultMessage: 'Routes',
+          id: getTranslation('paths.page.title'),
+          defaultMessage: 'Paths',
         })}
         subtitle={formatMessage({
-          id: getTranslation('routes.page.subtitle'),
-          defaultMessage: 'Overview of all existing routes',
+          id: getTranslation('paths.page.subtitle'),
+          defaultMessage: 'Overview of all existing paths',
         })}
       />
       <Layouts.Content>

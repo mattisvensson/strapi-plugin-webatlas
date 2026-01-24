@@ -4,7 +4,7 @@ import { useRBAC } from '@strapi/strapi/admin';
 import type { PanelComponent, PanelComponentProps } from '@strapi/content-manager/strapi-admin';
 import { Typography } from '@strapi/design-system';
 import { usePluginConfig, useAllContentTypes } from '../../hooks';
-import Alias from './Alias';
+import Path from './Path';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
 import pluginPermissions from '../../permissions';
@@ -126,7 +126,7 @@ const CMEditViewAside: PanelComponent = ({
 
   return {
     title: panelTitle,
-    content: <Alias config={contentTypeConfig} />,
+    content: <Path config={contentTypeConfig} />,
   };
 };
 

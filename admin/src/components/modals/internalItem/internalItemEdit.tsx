@@ -1,7 +1,7 @@
 import { Box, Divider, Grid, Field } from '@strapi/design-system';
 import { withModalSharedLogic } from '../withModalSharedLogic';
 import { GroupedEntities, ModalItem_VariantEdit } from '../../../../../types';
-import URLInfo from '../../URLInfo';
+import PathInfo from '../../PathInfo';
 import { useEffect, useMemo } from 'react';
 import { useModalSharedLogic } from '../useModalSharedLogic';
 import { NavModal } from '../'
@@ -180,13 +180,13 @@ function ItemEditComponent({
               <Field.Root>
                 <Field.Label>
                   {formatMessage({
-                    id: getTranslation('modal.item.routeField.label'),
-                    defaultMessage: 'Route'
+                    id: getTranslation('modal.item.pathField.label'),
+                    defaultMessage: 'Path'
                   })}
                 </Field.Label>
                 <Field.Input
                   placeholder={formatMessage({
-                    id: getTranslation('modal.item.routeField.placeholder'),
+                    id: getTranslation('modal.item.pathField.placeholder'),
                     defaultMessage: 'e.g. about/'
                   })}
                   value={path.value || ''}
@@ -198,7 +198,7 @@ function ItemEditComponent({
                   required
                 />
               </Field.Root>
-              <URLInfo validationState={validationState} replacement={replacement} />
+              <PathInfo validationState={validationState} replacement={replacement} />
             </Box>
           </Grid.Item>
         </Grid.Root>
