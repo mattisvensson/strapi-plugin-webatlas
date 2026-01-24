@@ -8,6 +8,7 @@ export default {
   },
   options: {
     increments: true,
+    timestamps: true,
     comment: ""
   },
   pluginOptions: {
