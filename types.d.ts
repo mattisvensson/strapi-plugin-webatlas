@@ -235,7 +235,7 @@ type modalSharedLogic = {
 }
 
 // Route Page sortByType
-export type RouteSortKey = keyof Pick<Route, 'title' | 'path' | 'type' | undefined>;
+export type RouteSortKey = keyof Pick<Route, 'title' | 'path' | 'type'>;
 
 declare module '@strapi/strapi' {
   namespace Schema {
