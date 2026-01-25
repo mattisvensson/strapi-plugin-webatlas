@@ -9,14 +9,10 @@
 import type { Route } from '../../../../types';
 import type { RouteSortKey } from '../../types';
 import { useState, useEffect } from 'react';
-import { Table, Tbody, Box, Grid, Field, EmptyStateLayout, Tr, Td } from '@strapi/design-system';
-import { Cross } from '@strapi/icons';
 import { useApi } from '../../hooks';
 import { FullLoader } from '../../components/UI';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
-import TableHeader from './TableHeader';
-import TableRow from './TableRow';
 import { useNotification, Page } from '@strapi/strapi/admin'
 import PageWrapper from './PageWrapper';
 import { useSearchParams } from 'react-router-dom';
@@ -24,87 +20,8 @@ import debounce from '../../utils/debounce';
 import { useMemo } from 'react';
 import compareBy from './compareBy';
 import pluginPermissions from '../../permissions';
-
-function SearchInput({
-  searchQuery,
-  handleSearchChange
-}: {
-  searchQuery: string;
-  handleSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-}) {
-
-  const { formatMessage } = useIntl();
-
-  return (
-    <Grid.Root style={{ marginBottom: '16px' }}>
-      <Grid.Item col={4} s={12}>
-        <Box width="100%">
-          <Field.Root>
-            <Field.Input
-              name="search"
-              placeholder={formatMessage({
-                id: getTranslation('paths.page.searchPlaceholder'),
-                defaultMessage: 'Search paths',
-              })}
-              value={searchQuery}
-              onChange={handleSearchChange}
-              endAction={
-                searchQuery ? (
-                  <button
-                    type="button"
-                    onClick={() => handleSearchChange({ target: { value: '' } } as React.ChangeEvent<HTMLInputElement>)}
-                    style={{ color: 'inherit', background: 'none', border: 'none', cursor: 'pointer' }}
-                    aria-label="Clear search"
-                  >
-                    <Cross />
-                  </button>
-                ) : null
-              }
-            />
-          </Field.Root>
-        </Box>
-      </Grid.Item>
-    </Grid.Root>
-  );
-}
-
-function RouteTable({
-  routes, 
-  sortKey, 
-  handleSort
-}: { 
-  routes: Route[], 
-  sortKey: RouteSortKey, 
-  handleSort: (key: RouteSortKey) => void
-}) {
-  
-  const { formatMessage } = useIntl();
-
-  return (
-    <Table colCount={4} rowCount={routes.length}>
-      <TableHeader sortKey={sortKey} handleSort={handleSort} />
-      <Tbody>
-        {routes.length > 0 ? routes.map((route: Route) => (
-          <TableRow key={route.id} route={route} />
-        )) : 
-          <Tr>
-            <Td colSpan={4}>
-              <EmptyStateLayout 
-                content={
-                  formatMessage({
-                    id: getTranslation('paths.page.emptyPaths'),
-                    defaultMessage: 'No paths found',
-                  })
-                } 
-                shadow={false}
-              />
-            </Td>
-          </Tr>
-        }
-      </Tbody>
-    </Table>
-  )
-}
+import SearchInput from './SearchInput';
+import PathTable from './PathTable';
 
 const Paths = () => {
   const { getRoutes } = useApi();
@@ -174,12 +91,11 @@ const Paths = () => {
     setSortKey(key);
   };
 
-  useEffect(() => {
-    const sortedRoutes = sortKey
+  const sortedRoutes = useMemo(() => {
+    return sortKey
       ? [...routes].sort(compareBy(sortKey, sortDirection))
-      : routes;    
-    setRoutes(sortedRoutes);
-  }, [sortKey, sortDirection]);
+      : routes;
+  }, [routes, sortKey, sortDirection]);
 
   if (loading) {
     return <PageWrapper>
@@ -194,8 +110,8 @@ const Paths = () => {
           handleSearchChange={handleSearchChange}
           searchQuery={searchQuery}
         />
-        <RouteTable
-          routes={routes} 
+        <PathTable
+          routes={sortedRoutes} 
           sortKey={sortKey}
           handleSort={handleSort}
         />
