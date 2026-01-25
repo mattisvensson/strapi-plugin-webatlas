@@ -40,10 +40,6 @@ export default {
       required: true,
       configurable: false,
     },
-    fullPath: {
-      type: "string",
-      configurable: false,
-    },
     path: {
       type: "string",
       configurable: false,
@@ -59,11 +55,6 @@ export default {
     isOverride: {
       type: 'boolean',
       default: false,
-      configurable: false,
-    },
-    internal: {
-      type: 'boolean',
-      default: true,
       configurable: false,
     },
     active: {
@@ -84,11 +75,6 @@ export default {
       default: 'internal',
       configurable: false,
       required: true,
-    },
-    wrapper: {
-      type: "boolean",
-      default: false,
-      configurable: false,
     },
   }
 }

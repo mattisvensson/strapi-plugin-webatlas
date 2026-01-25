@@ -2,14 +2,10 @@ import type { Core, UID } from '@strapi/strapi';
 import { PluginConfig, ConfigContentType, ContentType } from "../../types";
 import { transformToUrl, waRoute, waNavItem, PLUGIN_ID } from "../../utils";
 import { duplicateCheck } from "./utils";
-import { runMigrations } from "./migrations";
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
   try {
-    // Run all pending migrations
-    await runMigrations(strapi);
-
     // Register permission actions.
     const actions = [
       {
