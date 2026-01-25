@@ -231,7 +231,10 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 				alignItems='stretch'
 				gap={1}
 			>
-				{!routeId && <NewPathInfo />}
+				{!routeId && <>
+					<NewPathInfo />
+					<Divider marginTop={2} marginBottom={2} />
+				</>}
 				<Box>
 					<PathInput path={path} dispatchPath={dispatchPath} isOverride={isOverride} urlIsValid={urlIsValid} config={config} />
 					{validationState !== 'initial' && <PathInfo validationState={validationState} replacement={replacement} setUrlStatus={setUrlIsValid} />}
