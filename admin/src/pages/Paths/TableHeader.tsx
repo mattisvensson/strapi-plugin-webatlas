@@ -1,4 +1,4 @@
-import type { RouteSortKey } from '../../../../types';
+import type { RouteSortKey } from '../../types';
 import { Typography, Thead, Tr, Th, VisuallyHidden } from '@strapi/design-system';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
