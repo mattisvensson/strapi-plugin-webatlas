@@ -6,7 +6,8 @@
  *
 */
 
-import type { Route, RouteSortKey } from '../../../../types';
+import type { Route } from '../../../../types';
+import type { RouteSortKey } from '../../types';
 import { useState, useEffect } from 'react';
 import { Table, Tbody, Box, Grid, Field, EmptyStateLayout, Tr, Td } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
@@ -116,7 +117,7 @@ const Paths = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get('search') || '';
   const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const [sortKey, setSortKey] = useState<RouteSortKey>(undefined);
+  const [sortKey, setSortKey] = useState<RouteSortKey>('title');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {

@@ -1,4 +1,5 @@
-import type { Route, RouteSortKey } from '../../../../types';
+import type { Route } from '../../../../types';
+import type { RouteSortKey } from '../../types';
 
 export default function compareBy(field: RouteSortKey, direction: 'asc' | 'desc') {
   if (!field) {
