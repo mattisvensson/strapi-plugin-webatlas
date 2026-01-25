@@ -38,7 +38,7 @@ export default function PathInfo({validationState, replacement, setUrlStatus}: P
 	}, [validationState, replacement, formatMessage, setUrlStatus]);
 
 	return (
-		<Box paddingTop={2}>
+		<Box paddingTop={1}>
 			<Typography textColor={color}>{text}</Typography>
 		</Box>
 	)

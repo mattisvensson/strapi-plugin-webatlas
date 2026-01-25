@@ -1,6 +1,6 @@
 import type { ConfigContentType } from '../../../../types';
 import type { PanelAction, PanelPathState } from '../../types';
-import { Box, Flex, Typography } from '@strapi/design-system';
+import { Box, Flex, Typography, Divider } from '@strapi/design-system';
 import { useState, useEffect, useRef, useCallback, useReducer, useMemo } from 'react';
 import { debounce, duplicateCheck, getTranslation } from '../../utils';
 import { transformToUrl } from '../../../../utils';
@@ -229,15 +229,19 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 			<Flex
 				direction='column'
 				alignItems='stretch'
-				gap={4}
+				gap={1}
 			>
+				{!routeId && <NewPathInfo />}
 				<Box>
-					{!routeId && <NewPathInfo />}
 					<PathInput path={path} dispatchPath={dispatchPath} isOverride={isOverride} urlIsValid={urlIsValid} config={config} />
-					<PathInfo validationState={validationState} replacement={replacement} setUrlStatus={setUrlIsValid} />
-					<OverrideCheckbox isOverride={isOverride} setIsOverride={setIsOverride} disabledCondition={!canCreate && !canUpdate} />
+					{validationState !== 'initial' && <PathInfo validationState={validationState} replacement={replacement} setUrlStatus={setUrlIsValid} />}
 				</Box>
-				{path.uIdPath && <UidPathDisplay path={path.uIdPath} />}
+				<OverrideCheckbox isOverride={isOverride} setIsOverride={setIsOverride} disabledCondition={!canCreate && !canUpdate} />
+				{path.uIdPath && <>
+					<Divider marginTop={2} marginBottom={2}/>
+					<UidPathDisplay path={path.uIdPath} />
+				</>
+				}
 			</Flex>
 		</Box>
 	)
