@@ -2,16 +2,13 @@ import { Box, Field, SingleSelect, SingleSelectOption } from "@strapi/design-sys
 import { ParentSelectProps } from "../../types";
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 
 function ParentSelect({ routeId, routes, selectedParent, setSelectedParent }: ParentSelectProps) {
   const { formatMessage } = useIntl();
 
-  const [sortedRoutes, setSortedRoutes] = useState(routes);
-
-  useEffect(() => {
-    const sorted = [...routes].sort((a, b) => a.title.localeCompare(b.title));
-    setSortedRoutes(sorted);
+  const sortedRoutes = useMemo(() => {
+    return [...routes].sort((a, b) => a.title.localeCompare(b.title));
   }, [routes]);
 
   return (
