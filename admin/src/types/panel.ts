@@ -1,3 +1,5 @@
+import { Route } from "../../../types";
+
 export type PanelAction = 
   | { type: 'DEFAULT'; payload: string }
   | { type: 'NO_URL_CHECK'; payload: string }
@@ -11,3 +13,10 @@ export type PanelPathState = {
   uIdPath?: string,
   needsUrlCheck: boolean;
 };
+
+export type ParentSelectProps = {
+  routeId: string | null;
+  routes: Route[];
+  selectedParent: string | null;
+  setSelectedParent: (value: string | null) => void;
+}

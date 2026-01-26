@@ -1,4 +1,4 @@
-import type { ConfigContentType } from '../../../../types';
+import type { ConfigContentType, Route } from '../../../../types';
 import type { PanelAction, PanelPathState } from '../../types';
 import { Box, Flex, Typography, Divider } from '@strapi/design-system';
 import { useState, useEffect, useRef, useCallback, useReducer, useMemo } from 'react';
@@ -12,6 +12,7 @@ import OverrideCheckbox from './OverrideCheckbox';
 import NewPathInfo from './NewPathInfo';
 import UidPathDisplay from './UidPathDisplay';
 import PathInput from './PathInput';
+import ParentSelect from './ParentSelect';
 
 function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 	switch (action.type) {
@@ -48,7 +49,7 @@ function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 const Panel = ({ config }: { config: ConfigContentType }) => {
 	const { form, model } = useContentManagerContext()
 	const { initialValues, values, onChange } = form;
-	const { getRelatedRoute } = useApi()
+	const { getRelatedRoute, getRoutes } = useApi()
 	const { formatMessage } = useIntl();
 	const { get } = useFetchClient();
 	const { allowedActions: {
@@ -69,7 +70,9 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		},
 	]);
 
-	const [routeId, setRouteId] = useState<number | null>(null);
+	const [routeId, setRouteId] = useState<string | null>(null);
+	const [routes, setRoutes] = useState<Route[]>([]);
+	const [selectedParent, setSelectedParent] = useState<string | null>(null);
 	const [isOverride, setIsOverride] = useState(false);
 	const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
 	const [replacement, setReplacement] = useState<string>('');
@@ -166,7 +169,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 				if (!route) return
 
 				initialPath.current = initialValues.webatlas_path || route.uidPath
-				setRouteId(route.id)
+				setRouteId(route.documentId)
 				setIsOverride(route.isOverride || false)
 				
 				dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: route.path || '' });
@@ -189,7 +192,21 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	useEffect(() => {
 		if (initialValues.webatlas_path) dispatchPath({ type: 'NO_URL_CHECK', payload: initialValues.webatlas_path });
 		if (initialValues.webatlas_override) setIsOverride(initialValues.webatlas_override);
+		if (initialValues.webatlas_parent) setSelectedParent(initialValues.webatlas_parent);
 	}, [])
+					
+	useEffect(() => {
+		async function fetchAllRoutes() {
+			const allRoutes = await getRoutes();
+			setRoutes(allRoutes);
+		}
+		fetchAllRoutes();
+	}, [])
+
+	useEffect(() => {
+		if (selectedParent === null) return;
+		onChange('webatlas_parent', selectedParent);
+	}, [selectedParent])
 
 	async function checkUrl(url: string) {
 		if (!url) return
@@ -235,13 +252,26 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 					<NewPathInfo />
 					<Divider marginTop={2} marginBottom={2} />
 				</>}
+				{routeId && <ParentSelect
+					routeId={routeId}
+					routes={routes}
+					selectedParent={selectedParent}
+					setSelectedParent={setSelectedParent}
+				/>}
 				<Box>
-					<PathInput path={path} dispatchPath={dispatchPath} isOverride={isOverride} urlIsValid={urlIsValid} config={config} />
+					<PathInput
+						parent={routes.find(route => route.documentId === selectedParent)}
+						path={path}
+						dispatchPath={dispatchPath}
+						isOverride={isOverride}
+						urlIsValid={urlIsValid}
+						config={config}
+					/>
 					{validationState !== 'initial' && <PathInfo validationState={validationState} replacement={replacement} setUrlStatus={setUrlIsValid} />}
 				</Box>
 				<OverrideCheckbox isOverride={isOverride} setIsOverride={setIsOverride} disabledCondition={!canCreate && !canUpdate} />
 				{path.uIdPath && <>
-					<Divider marginTop={2} marginBottom={2}/>
+					<Divider marginTop={2} marginBottom={2} />
 					<UidPathDisplay path={path.uIdPath} />
 				</>
 				}

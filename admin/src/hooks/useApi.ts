@@ -83,7 +83,7 @@ export default function useApi() {
     return data
   };
 
-  const getRoutes = async () => {
+  const getRoutes = async (): Promise<Route[]> => {
     const { data } = await get(`/${PLUGIN_ID}/route`);
     return data
   };
