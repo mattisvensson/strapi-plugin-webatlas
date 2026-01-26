@@ -3,6 +3,7 @@ import type { PanelAction, PanelPathState } from '../../types';
 import { Field, Tooltip } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { getTranslation } from '../../utils';
+import { useMemo } from 'react';
 
 type PathInputProps = {
   parent?: Route;
@@ -15,6 +16,19 @@ type PathInputProps = {
 
 function PathInput({ parent, path, dispatchPath, isOverride, urlIsValid, config }: PathInputProps) {
   const { formatMessage } = useIntl();
+
+  const inputBorder = useMemo(() => {
+    if (urlIsValid === 'valid') {
+      return "1px solid #5cb176";
+    } else if (urlIsValid === 'invalid') {
+      return "1px solid #ee5e52";
+    }
+    return null;
+  }, [urlIsValid]);
+
+  const value = useMemo(() => {
+    return parent ? `${parent.path}/${path.value}` : path.value;
+  }, [parent, path.value]);
 
   return (
     <Field.Root
@@ -48,14 +62,14 @@ function PathInput({ parent, path, dispatchPath, isOverride, urlIsValid, config 
       </Field.Label>
       <Field.Input
         id="path-input"
-        value={parent ? `${parent.path}/${path.value}` : path.value}
+        value={value}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}
         disabled={!isOverride}
         onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
           if (e.target.value === path.prevValue) return
           dispatchPath({ type: 'DEFAULT', payload: e.target.value })}
         }
-        style={{ outline: urlIsValid !== null ? (urlIsValid === 'valid' ? "1px solid #5cb176" : "1px solid #ee5e52") : undefined }}
+        style={{ outline: inputBorder }}
       />
       <Field.Hint/>
     </Field.Root>
