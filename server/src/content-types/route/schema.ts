@@ -76,5 +76,19 @@ export default {
       configurable: false,
       required: true,
     },
+    parent: {
+      type: "relation",
+      relation: "manyToOne",
+      target: "plugin::webatlas.route",
+      inversedBy: "children",
+      configurable: false,
+    },
+    children: {
+      type: "relation",
+      relation: "oneToMany", 
+      target: "plugin::webatlas.route",
+      mappedBy: "parent",
+      configurable: false,
+    },
   }
 }
