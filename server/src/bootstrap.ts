@@ -148,7 +148,8 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
       const {
         webatlas_path, 
-        webatlas_override
+        webatlas_override,
+        webatlas_parent,
       } = event.params.data;
 
       if (!webatlas_path) return;
@@ -173,7 +174,8 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           path: path,
           uidPath: `${event.model.singularName}/${event.result.id}`,
           isOverride: webatlas_override || false,
-          title: title
+          title: title,
+          parent: webatlas_parent || null,
         },
       });
     },
@@ -184,6 +186,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       const {
         webatlas_path, 
         webatlas_override,
+        webatlas_parent,
         documentId,
       } = event.params.data;
 
@@ -203,6 +206,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
         path: path,
         slug: path,
         isOverride: webatlas_override || false,
+        parent: webatlas_parent || null,
       }
       
       if (!relatedRoute) {
