@@ -1,31 +1,20 @@
-import { Checkbox, Box, Flex, Typography, Field, Divider } from '@strapi/design-system';
+import type { ConfigContentType, Route } from '../../../../types';
+import type { PanelAction, PanelPathState } from '../../types';
+import { Box, Flex, Typography, Divider } from '@strapi/design-system';
 import { useState, useEffect, useRef, useCallback, useReducer, useMemo } from 'react';
-import transformToUrl from '../../../../utils/transformToUrl';
+import { debounce, duplicateCheck, getTranslation } from '../../utils';
+import { transformToUrl } from '../../../../utils';
 import { unstable_useContentManagerContext as useContentManagerContext, useFetchClient, useRBAC } from '@strapi/strapi/admin';
-import { ConfigContentType, Route } from '../../../../types';
-import Tooltip from '../Tooltip';
-import debounce from '../../utils/debounce';
 import PathInfo from '../PathInfo';
-import duplicateCheck from '../../utils/duplicateCheck';
 import { useApi } from '../../hooks'
 import { useIntl } from 'react-intl';
-import { getTranslation } from '../../utils';
+import OverrideCheckbox from './OverrideCheckbox';
+import NewPathInfo from './NewPathInfo';
+import UidPathDisplay from './UidPathDisplay';
+import PathInput from './PathInput';
+import ParentSelect from './ParentSelect';
 
-type Action = 
-  | { type: 'DEFAULT'; payload: string }
-  | { type: 'NO_URL_CHECK'; payload: string }
-  | { type: 'NO_TRANSFORM_AND_CHECK'; payload: string }
-  | { type: 'RESET_URL_CHECK_FLAG'; }
-  | { type: 'SET_UIDPATH'; payload: string }
-
-type PathState = {
-	value?: string;
-	prevValue?: string,
-	uIdPath?: string,
-	needsUrlCheck: boolean;
-};
-
-function reducer(state: PathState, action: Action): PathState {
+function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 	switch (action.type) {
 		case 'DEFAULT':
       return { 
@@ -57,13 +46,12 @@ function reducer(state: PathState, action: Action): PathState {
 	}
 }
 
-const Path = ({ config }: { config: ConfigContentType }) => {
+const Panel = ({ config }: { config: ConfigContentType }) => {
 	const { form, model } = useContentManagerContext()
 	const { initialValues, values, onChange } = form;
-	const { getRelatedRoute } = useApi()
+	const { getRelatedRoute, getRoutes } = useApi()
 	const { formatMessage } = useIntl();
 	const { get } = useFetchClient();
-
 	const { allowedActions: {
 		canUpdate,
 		canCreate
@@ -81,9 +69,10 @@ const Path = ({ config }: { config: ConfigContentType }) => {
 			conditions: [],
 		},
 	]);
-	console.log('RBAC Actions:', { canUpdate, canCreate });
 
-	const [routeId, setRouteId] = useState<number | null>()
+	const [routeId, setRouteId] = useState<string | null>(null);
+	const [routes, setRoutes] = useState<Route[]>([]);
+	const [selectedParent, setSelectedParent] = useState<string | null>(null);
 	const [isOverride, setIsOverride] = useState(false);
 	const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
 	const [replacement, setReplacement] = useState<string>('');
@@ -159,7 +148,6 @@ const Path = ({ config }: { config: ConfigContentType }) => {
 		debouncedValueEffect(values);
   }, [values, debouncedValueEffect, initialLoadComplete]);
 
-
   useEffect(() => {
 		if (path.needsUrlCheck && path.value) {
 			if (path.uIdPath === path.value || initialPath.current === path.value) return
@@ -181,7 +169,7 @@ const Path = ({ config }: { config: ConfigContentType }) => {
 				if (!route) return
 
 				initialPath.current = initialValues.webatlas_path || route.uidPath
-				setRouteId(route.id)
+				setRouteId(route.documentId)
 				setIsOverride(route.isOverride || false)
 				
 				dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: route.path || '' });
@@ -204,7 +192,21 @@ const Path = ({ config }: { config: ConfigContentType }) => {
 	useEffect(() => {
 		if (initialValues.webatlas_path) dispatchPath({ type: 'NO_URL_CHECK', payload: initialValues.webatlas_path });
 		if (initialValues.webatlas_override) setIsOverride(initialValues.webatlas_override);
+		if (initialValues.webatlas_parent) setSelectedParent(initialValues.webatlas_parent);
 	}, [])
+					
+	useEffect(() => {
+		async function fetchAllRoutes() {
+			const allRoutes = await getRoutes();
+			setRoutes(allRoutes);
+		}
+		fetchAllRoutes();
+	}, [])
+
+	useEffect(() => {
+		if (selectedParent === null) return;
+		onChange('webatlas_parent', selectedParent);
+	}, [selectedParent])
 
 	async function checkUrl(url: string) {
 		if (!url) return
@@ -244,108 +246,38 @@ const Path = ({ config }: { config: ConfigContentType }) => {
 			<Flex
 				direction='column'
 				alignItems='stretch'
-				gap={4}
+				gap={1}
 			>
+				{!routeId && <>
+					<NewPathInfo />
+					<Divider marginTop={2} marginBottom={2} />
+				</>}
+				{routeId && <ParentSelect
+					routeId={routeId}
+					routes={routes}
+					selectedParent={selectedParent}
+					setSelectedParent={setSelectedParent}
+				/>}
 				<Box>
-					{!routeId && 
-						<>
-							<Typography textColor="neutral600" marginBottom={2}>
-								{formatMessage({
-									id: getTranslation('components.CMEditViewAside.path.newPathInfo'),
-									defaultMessage: 'A new path will be created upon saving this entry.',
-								})}
-							</Typography>
-							<Box paddingBottom={2} paddingTop={2}>
-								<Divider/>
-							</Box>
-						</>
-					}
-					<Field.Root
-						hint={
-							config.default ?
-								formatMessage({
-									id: getTranslation('components.CMEditViewAside.path.input.start'),
-									defaultMessage: 'Edit the',
-								})
-								+ " \"" + config.default + "\" " +
-								formatMessage({
-									id: getTranslation('components.CMEditViewAside.path.input.end'),
-									defaultMessage: 'field to generate a path',
-								})
-								:
-								formatMessage({
-									id: getTranslation('components.CMEditViewAside.path.input.noSourceField'),
-									defaultMessage: 'Use the override option to set a custom path',
-								})
-						}
-					>
-						<Field.Label>
-							{formatMessage({
-								id: getTranslation('components.CMEditViewAside.path.input.label'),
-								defaultMessage: 'Path',
-							})}
-							<Tooltip description={formatMessage({
-								id: getTranslation('components.CMEditViewAside.path.input.tooltip'),
-								defaultMessage: 'The following characters are valid: A-Z, a-z, 0-9, /, -, _, $, ., +, !, *, \', (, )',
-							})} />
-						</Field.Label>
-						<Field.Input
-							id="path-input"
-							value={path.value}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}
-							disabled={!isOverride}
-							onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-								if (e.target.value === path.prevValue) return
-								dispatchPath({ type: 'DEFAULT', payload: e.target.value })}
-							}
-							style={{ outline: urlIsValid !== null ? (urlIsValid === 'valid' ? "1px solid #5cb176" : "1px solid #ee5e52") : undefined }}
-						/>
-						<Field.Hint/>
-					</Field.Root>
-					<PathInfo validationState={validationState} replacement={replacement} setUrlStatus={setUrlIsValid} />
-					<Flex
-						gap={2}
-						paddingTop={2}
-					>
-						<Checkbox
-							id="path-override-checkbox"
-							checked={isOverride}
-							onCheckedChange={() => setIsOverride(prev => !prev)}
-							disabled={(!routeId && !canCreate) || (routeId && !canUpdate)}
-						>
-							<Typography textColor="neutral600">
-								{formatMessage({
-									id: getTranslation('components.CMEditViewAside.path.overrideCheckbox'),
-									defaultMessage: 'Override automatic path generation',
-								})}
-							</Typography>
-						</Checkbox>
-					</Flex>
+					<PathInput
+						parent={routes.find(route => route.documentId === selectedParent)}
+						path={path}
+						dispatchPath={dispatchPath}
+						isOverride={isOverride}
+						urlIsValid={urlIsValid}
+						config={config}
+					/>
+					{validationState !== 'initial' && <PathInfo validationState={validationState} replacement={replacement} setUrlStatus={setUrlIsValid} />}
 				</Box>
-				{path.uIdPath && (
-					<>	
-						<Box>
-							<Divider/>
-						</Box>
-						<Box>
-							<Field.Root
-								hint={formatMessage({
-									id: getTranslation('components.CMEditViewAside.path.uidPath.hint'),
-									defaultMessage: 'Permanent UID path, cannot be changed',
-								})}
-							>
-								<Field.Input
-									value={path.uIdPath}
-									disabled
-								/>
-								<Field.Hint/>
-							</Field.Root>
-						</Box>
-					</>
-				)}
+				<OverrideCheckbox isOverride={isOverride} setIsOverride={setIsOverride} disabledCondition={!canCreate && !canUpdate} />
+				{path.uIdPath && <>
+					<Divider marginTop={2} marginBottom={2} />
+					<UidPathDisplay path={path.uIdPath} />
+				</>
+				}
 			</Flex>
 		</Box>
 	)
 };
 
-export default Path;
+export default Panel;

@@ -28,5 +28,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       type: 'boolean',
       private: true,
     });    
+    set(attributes, 'webatlas_parent', {
+      ...fieldSettings,
+      type: 'string',
+      private: true,
+    });    
   });
 };
