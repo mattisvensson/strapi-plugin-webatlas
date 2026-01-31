@@ -8,6 +8,7 @@ import extractRouteAndItems from './extractRouteAndItems';
 import getFullPopulateObject from './populateDeep';
 import cleanRootKeys from './cleanRootKeys';
 import removeWaFields from './removeWaFields';
+import buildCanonicalPath from './buildCanonicalPath';
 
 export {
   duplicateCheck,
@@ -23,4 +24,5 @@ export {
   getFullPopulateObject,
   cleanRootKeys,
   removeWaFields,
+  buildCanonicalPath
 }
