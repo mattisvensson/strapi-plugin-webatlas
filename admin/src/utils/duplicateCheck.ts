@@ -5,6 +5,7 @@ import { transformToUrl, PLUGIN_ID} from "../../../utils";
  * @param get The authenticated GET function from useFetchClient
  * @param url The URL to check.
  * @param routeDocumentId The ID of the route to exclude from the check.
+ * @param withoutTransform If true, the URL will not be transformed/normalized before checking.
  * @returns A promise that resolves to the response text if the request is successful.
  * @throws {Error} Throws an error if the request fails or the network response is not ok.
  */
