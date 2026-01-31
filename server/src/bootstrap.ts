@@ -1,7 +1,8 @@
 import type { Core, UID } from '@strapi/strapi';
-import { PluginConfig, ConfigContentType, ContentType } from "../../types";
+import { PluginConfig, ConfigContentType, ContentType, Route } from "../../types";
 import { transformToUrl, waRoute, waNavItem, PLUGIN_ID } from "../../utils";
-import { duplicateCheck } from "./utils";
+import { duplicateCheck } from "./utils"; 
+import { buildCanonicalPath} from "./utils";
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
@@ -163,8 +164,9 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       if (relatedRoute) return;
 
       const title = ctSettings?.default ? event.params.data[ctSettings.default] : '';
-
       const path = await duplicateCheck(transformToUrl(webatlas_path));
+      const canonicalPath = await buildCanonicalPath(path, webatlas_parent);
+
       await strapi.documents(waRoute as UID.ContentType).create({
         data: {
           relatedContentType: event.model.uid,
@@ -176,6 +178,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           isOverride: webatlas_override || false,
           title: title,
           parent: webatlas_parent || null,
+          canonicalPath: canonicalPath,
         },
       });
     },
@@ -192,14 +195,15 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (!webatlas_path) return
 
-      const relatedRoute = await strapi.db?.query(waRoute).findOne({
-        where: {
+      const relatedRoute = await strapi.documents(waRoute as UID.ContentType).findFirst({
+        filters: {
           relatedDocumentId: documentId
         },
-      });
+      }) as Route | null;
 
       const title = ctSettings?.default ? event.params.data[ctSettings.default] : ''
       const path = await duplicateCheck(transformToUrl(webatlas_path), relatedRoute ? relatedRoute.documentId : null);
+      const canonicalPath = await buildCanonicalPath(path, webatlas_parent);
 
       const routeData: any = {
         title,
@@ -216,6 +220,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
             relatedId: event.result.id,
             relatedDocumentId: event.result.documentId,
             uidPath: `${event.model.singularName}/${event.result.id}`,
+            canonicalPath: canonicalPath,
             ...routeData
           }
         })
@@ -223,7 +228,8 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
         await strapi.documents(waRoute as UID.ContentType).update({ 
           documentId: relatedRoute.documentId,
           data: {
-            ...routeData
+            ...routeData,
+            canonicalPath: canonicalPath
           }
         })
       }
