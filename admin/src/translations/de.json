@@ -90,6 +90,8 @@
   "webatlas.components.CMEditViewAside.path.input.noSourceField": "Verwenden Sie die Überschreibungsoption, um einen benutzerdefinierten Pfad festzulegen.",
   "webatlas.components.CMEditViewAside.path.input.parentSelect.label": "Platzieren unter",
   "webatlas.components.CMEditViewAside.path.input.parentSelect.rootPath": "Keine (Stammverzeichnis)",
+  "webatlas.components.CMEditViewAside.canonicalPath.input.label": "Kanonischer Pfad",
+  "webatlas.components.CMEditViewAside.canonicalPath.input.tooltip": "Pfad, der zeigt, wie Ihre Inhalte organisiert sind, unabhängig von der Navigation",
 
   "webatlas.path.type.internal": "Intern",
   "webatlas.path.type.external": "Extern",

@@ -1,15 +1,24 @@
 import { Box, Field, SingleSelect, SingleSelectOption } from "@strapi/design-system";
-import { ParentSelectProps } from "../../types";
+import { RouteStructureProps } from "../../types";
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
 import { useMemo } from "react";
+import Tooltip from '../Tooltip'
 
-function ParentSelect({ routeId, routes, selectedParent, setSelectedParent }: ParentSelectProps) {
+function RouteStructure({ routeId, routes, selectedParent, setSelectedParent, slug }: RouteStructureProps) {
   const { formatMessage } = useIntl();
 
   const sortedRoutes = useMemo(() => {
     return [...routes].sort((a, b) => a.title.localeCompare(b.title));
   }, [routes]);
+
+  const parent = useMemo(() => {
+    return routes.find(route => route.documentId === selectedParent);
+  }, [routes, selectedParent]);
+
+  const value = useMemo(() => {
+    return `${parent?.canonicalPath || ''}/${slug}`;
+  }, [parent, slug]);
 
   return (
     <Box paddingBottom={2}>
@@ -43,8 +52,26 @@ function ParentSelect({ routeId, routes, selectedParent, setSelectedParent }: Pa
           })}
         </SingleSelect>
       </Field.Root>
+      <Field.Root marginTop={4}>
+        <Field.Label>
+          {formatMessage({
+            id: getTranslation('components.CMEditViewAside.canonicalPath.input.label'),
+            defaultMessage: 'Canonical Path',
+          })}
+          <Tooltip description={formatMessage({
+            id: getTranslation('components.CMEditViewAside.canonicalPath.input.tooltip'),
+            defaultMessage: 'Path that shows how your content is organized, regardless of navigation',
+          })} />
+        </Field.Label>
+        <Field.Input
+          id="canonicalPath-input"
+          value={value}
+          disabled
+        />
+        <Field.Hint/>
+      </Field.Root>
     </Box>
   )
 }
 
-export default ParentSelect;
+export default RouteStructure;
