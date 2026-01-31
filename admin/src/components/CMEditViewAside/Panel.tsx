@@ -39,6 +39,8 @@ function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 			};
 		case 'RESET_URL_CHECK_FLAG':
 			return { ...state, needsUrlCheck: false };
+		case 'SET_REPLACEMENT':
+			return { ...state, replacement: action.payload };
 		case 'SET_UIDPATH':
 			return { ...state, uIdPath: action.payload };
 		default:
@@ -75,14 +77,14 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	const [selectedParent, setSelectedParent] = useState<Route | null>(null);
 	const [isOverride, setIsOverride] = useState(false);
 	const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
-	const [replacement, setReplacement] = useState<string>('');
 	const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 	const [urlIsValid, setUrlIsValid] = useState<'valid' | 'invalid' | null>(null);
 	const [path, dispatchPath] = useReducer(reducer, {
 		needsUrlCheck: false,
 		value: '',
 		prevValue: '',
-		uIdPath: ''
+		uIdPath: '',
+		replacement: '',
 	});
   const hasUserChangedField = useRef(false);
 	const initialPath = useRef('')
@@ -227,7 +229,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	async function checkUrl(url: string) {
 		if (!url) return
 		setValidationState('checking')
-		setReplacement('')
+		dispatchPath({ type: 'SET_REPLACEMENT', payload: '' });
 		
 		try {
 			const data = await duplicateCheck(get, url)
@@ -235,7 +237,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 			if (!data || data === url) return 
 			
 			dispatchPath({ type: 'NO_URL_CHECK', payload: data });
-			setReplacement(data)
+			dispatchPath({ type: 'SET_REPLACEMENT', payload: data });
 		} catch (err) {
 			console.log(err)
 		} finally {
@@ -284,7 +286,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 						urlIsValid={urlIsValid}
 						config={config}
 					/>
-					{validationState !== 'initial' && <PathInfo validationState={validationState} replacement={replacement} setUrlStatus={setUrlIsValid} />}
+					{validationState !== 'initial' && <PathInfo validationState={validationState} replacement={path.replacement} setUrlStatus={setUrlIsValid} />}
 				</Box>
 				<OverrideCheckbox isOverride={isOverride} setIsOverride={setIsOverride} disabledCondition={!canCreate && !canUpdate} />
 				{path.uIdPath && <>

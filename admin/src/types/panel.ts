@@ -5,6 +5,7 @@ export type PanelAction =
   | { type: 'NO_URL_CHECK'; payload: string }
   | { type: 'NO_TRANSFORM_AND_CHECK'; payload: string }
   | { type: 'RESET_URL_CHECK_FLAG'; }
+  | { type: 'SET_REPLACEMENT'; payload: string }
   | { type: 'SET_UIDPATH'; payload: string }
 
 export type PanelPathState = {
@@ -12,6 +13,7 @@ export type PanelPathState = {
   prevValue?: string,
   uIdPath?: string,
   needsUrlCheck: boolean;
+  replacement?: string;
 };
 
 export type RouteStructureProps = {
