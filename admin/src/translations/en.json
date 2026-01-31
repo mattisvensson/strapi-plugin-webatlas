@@ -90,6 +90,8 @@
   "webatlas.components.CMEditViewAside.path.input.noSourceField": "Use the override option to set a custom Path.",
   "webatlas.components.CMEditViewAside.path.input.parentSelect.label": "Place under",
   "webatlas.components.CMEditViewAside.path.input.parentSelect.rootPath": "None (root path)",
+  "webatlas.components.CMEditViewAside.canonicalPath.input.label": "Canonical Path",
+  "webatlas.components.CMEditViewAside.canonicalPath.input.tooltip": "Path that shows how your content is organized, regardless of navigation",
 
   "webatlas.path.type.internal": "Internal",
   "webatlas.path.type.external": "External",

@@ -14,7 +14,8 @@ export type PanelPathState = {
   needsUrlCheck: boolean;
 };
 
-export type ParentSelectProps = {
+export type RouteStructureProps = {
+  slug?: string;
   routeId: string | null;
   routes: Route[];
   selectedParent: string | null;

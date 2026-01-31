@@ -1,12 +1,12 @@
 import type { ConfigContentType, Route } from '../../../../types';
 import type { PanelAction, PanelPathState } from '../../types';
-import { Field, Tooltip } from '@strapi/design-system';
+import { Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { getTranslation } from '../../utils';
 import { useMemo } from 'react';
+import Tooltip from '../Tooltip'
 
 type PathInputProps = {
-  parent?: Route;
   path: PanelPathState;
   dispatchPath: React.Dispatch<PanelAction>;
   isOverride: boolean;
@@ -14,7 +14,7 @@ type PathInputProps = {
   config: ConfigContentType;
 }
 
-function PathInput({ parent, path, dispatchPath, isOverride, urlIsValid, config }: PathInputProps) {
+function PathInput({ path, dispatchPath, isOverride, urlIsValid, config }: PathInputProps) {
   const { formatMessage } = useIntl();
 
   const inputBorder = useMemo(() => {
@@ -25,10 +25,6 @@ function PathInput({ parent, path, dispatchPath, isOverride, urlIsValid, config 
     }
     return null;
   }, [urlIsValid]);
-
-  const value = useMemo(() => {
-    return parent ? `${parent.path}/${path.value}` : path.value;
-  }, [parent, path.value]);
 
   return (
     <Field.Root
@@ -62,7 +58,7 @@ function PathInput({ parent, path, dispatchPath, isOverride, urlIsValid, config 
       </Field.Label>
       <Field.Input
         id="path-input"
-        value={value}
+        value={path.value}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}
         disabled={!isOverride}
         onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
