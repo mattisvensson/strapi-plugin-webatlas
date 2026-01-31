@@ -12,12 +12,14 @@ import { transformToUrl, PLUGIN_ID} from "../../../utils";
 export default async function duplicateCheck(
   get: (url: string) => Promise<any>, 
   url: string, 
-  routeDocumentId?: string | null
+  routeDocumentId?: string | null,
+  withoutTransform: boolean = false
 ): Promise<string> {
   if (!url) throw new Error("URL is required");
   
   try {
-    const { data } = await get(`/${PLUGIN_ID}/checkUniquePath?path=${transformToUrl(url)}${routeDocumentId ? `&targetRouteDocumentId=${routeDocumentId}` : ''}`);
+    const pathToCheck = withoutTransform ? url : transformToUrl(url);
+    const { data } = await get(`/${PLUGIN_ID}/checkUniquePath?path=${pathToCheck}${routeDocumentId ? `&targetRouteDocumentId=${routeDocumentId}` : ''}`);
 
     if (!data.uniquePath) {
       throw new Error("Network response was not ok");
