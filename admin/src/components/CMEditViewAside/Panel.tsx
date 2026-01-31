@@ -12,7 +12,7 @@ import OverrideCheckbox from './OverrideCheckbox';
 import NewPathInfo from './NewPathInfo';
 import UidPathDisplay from './UidPathDisplay';
 import PathInput from './PathInput';
-import ParentSelect from './ParentSelect';
+import RouteStructure from './RouteStructure';
 
 function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 	switch (action.type) {
@@ -148,6 +148,16 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		debouncedValueEffect(values);
   }, [values, debouncedValueEffect, initialLoadComplete]);
 
+	const generateFieldValue = useMemo(() => {
+		const key = config?.default;
+		if (!key) return '';
+
+		const currentValue = values[key];
+		if (!currentValue) return '';
+
+		return transformToUrl(currentValue)
+	}, [values, config]);
+
   useEffect(() => {
 		if (path.needsUrlCheck && path.value) {
 			if (path.uIdPath === path.value || initialPath.current === path.value) return
@@ -193,9 +203,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		if (initialValues.webatlas_path) dispatchPath({ type: 'NO_URL_CHECK', payload: initialValues.webatlas_path });
 		if (initialValues.webatlas_override) setIsOverride(initialValues.webatlas_override);
 		if (initialValues.webatlas_parent) setSelectedParent(initialValues.webatlas_parent);
-	}, [])
-					
-	useEffect(() => {
+	
 		async function fetchAllRoutes() {
 			const allRoutes = await getRoutes();
 			setRoutes(allRoutes);
@@ -252,15 +260,16 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 					<NewPathInfo />
 					<Divider marginTop={2} marginBottom={2} />
 				</>}
-				{routeId && <ParentSelect
+				<RouteStructure
+					slug={generateFieldValue}
 					routeId={routeId}
 					routes={routes}
 					selectedParent={selectedParent}
 					setSelectedParent={setSelectedParent}
-				/>}
+				/>
+				<Divider marginTop={2} marginBottom={2} />
 				<Box>
 					<PathInput
-						parent={routes.find(route => route.documentId === selectedParent)}
 						path={path}
 						dispatchPath={dispatchPath}
 						isOverride={isOverride}
