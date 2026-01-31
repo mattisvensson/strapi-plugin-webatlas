@@ -87,7 +87,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	});
   const hasUserChangedField = useRef(false);
 	const initialPath = useRef('')
-	const prevValueRef = useRef<string | null>(null);
+	const prevSourceValueRef = useRef<string | null>(null);
 
 	const debouncedCheckUrl = useCallback(debounce(checkUrl, 250), []);
 
@@ -113,7 +113,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		// 3. Not in override mode
 		if (initialLoadComplete && 
 				(hasUserChangedField.current || !routeId) && 
-				prevValueRef.current !== currentValue && 
+				prevSourceValueRef.current !== currentValue && 
 				!isOverride) {
 			
 			const path = config.pattern ? `${config.pattern}/${currentValue}` : `${currentValue}`;
@@ -122,7 +122,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 			} else {
 				dispatchPath({ type: 'DEFAULT', payload: path });
 			}
-			prevValueRef.current = currentValue;
+			prevSourceValueRef.current = currentValue;
 		}
 	}, 500), [config?.default, config?.pattern, initialValues, isOverride, initialLoadComplete, routeId]);
 
@@ -149,7 +149,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		debouncedValueEffect(values);
   }, [values, debouncedValueEffect, initialLoadComplete]);
 
-	const generateFieldValue = useMemo(() => {
+	const sourceFieldValue = useMemo(() => {
 		const key = config?.default;
 		if (!key) return '';
 
@@ -186,10 +186,10 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 				dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: route.path || '' });
 				dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath || '' });
 			
-				// Set the prevValueRef to prevent immediate override
+				// Set the prevSourceValueRef to prevent immediate override
 				const key = config?.default;
         if (key) {
-          prevValueRef.current = values[key];
+          prevSourceValueRef.current = values[key];
         }
 			} catch (err) {
 				setRouteId(null)
@@ -269,7 +269,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 					<Divider marginTop={2} marginBottom={2} />
 				</>}
 				<RouteStructure
-					slug={generateFieldValue}
+					slug={sourceFieldValue}
 					routeId={routeId}
 					routes={routes}
 					selectedParent={selectedParent}
