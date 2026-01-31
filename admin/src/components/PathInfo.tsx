@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 
 interface PathProps {
   validationState: 'initial' | 'checking' | 'done';
-	replacement?: string;
+	replacement: string | null;
 	setUrlStatus?: (isValid: 'valid' | 'invalid') => void;
 }
 

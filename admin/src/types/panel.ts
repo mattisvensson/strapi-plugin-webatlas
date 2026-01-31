@@ -13,7 +13,7 @@ export type PanelPathState = {
   prevValue?: string,
   uIdPath?: string,
   needsUrlCheck: boolean;
-  replacement?: string;
+  replacement: string | null;
 };
 
 export type RouteStructureProps = {

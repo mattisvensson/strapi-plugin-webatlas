@@ -78,13 +78,12 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	const [isOverride, setIsOverride] = useState(false);
 	const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
 	const [initialLoadComplete, setInitialLoadComplete] = useState(false);
-	const [urlIsValid, setUrlIsValid] = useState<'valid' | 'invalid' | null>(null);
 	const [path, dispatchPath] = useReducer(reducer, {
 		needsUrlCheck: false,
 		value: '',
 		prevValue: '',
 		uIdPath: '',
-		replacement: '',
+		replacement: null,
 	});
   const hasUserChangedField = useRef(false);
 	const initialPath = useRef('')
@@ -241,7 +240,6 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		} catch (err) {
 			console.log(err)
 		} finally {
-			setUrlIsValid(null);
 			setValidationState('done')
 		}
 	}
@@ -283,12 +281,18 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 						path={path}
 						dispatchPath={dispatchPath}
 						isOverride={isOverride}
-						urlIsValid={urlIsValid}
 						config={config}
 					/>
-					{validationState !== 'initial' && <PathInfo validationState={validationState} replacement={path.replacement} setUrlStatus={setUrlIsValid} />}
+					{validationState !== 'initial' && <PathInfo
+						validationState={validationState}
+						replacement={path.replacement}
+					/>}
 				</Box>
-				<OverrideCheckbox isOverride={isOverride} setIsOverride={setIsOverride} disabledCondition={!canCreate && !canUpdate} />
+				<OverrideCheckbox
+					isOverride={isOverride}
+					setIsOverride={setIsOverride}
+					disabledCondition={!canCreate && !canUpdate}
+				/>
 				{path.uIdPath && <>
 					<Divider marginTop={2} marginBottom={2} />
 					<UidPathDisplay path={path.uIdPath} />
