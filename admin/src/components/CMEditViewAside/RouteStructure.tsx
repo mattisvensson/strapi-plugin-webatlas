@@ -16,25 +16,26 @@ function RouteStructure({ routeId, routes, selectedParent, setSelectedParent, sl
     return [...routes].sort((a, b) => a.title.localeCompare(b.title));
   }, [routes]);
 
-  const parent = useMemo(() => {
-    return routes.find(route => route.documentId === selectedParent);
-  }, [routes, selectedParent]);
-
   async function checkPath() {
     if (!slug) return;
 
-    const path = `${parent?.canonicalPath || ''}/${transformToUrl(slug)}`;
+    const path = `${selectedParent?.canonicalPath || ''}/${transformToUrl(slug)}`;
     const result = await duplicateCheck(get, path, routeId, true);
 
     setCanonicalPath(result);
     return result;
   }
 
-  const debouncedCheckUrl = useCallback(debounce(checkPath, 250), [parent, slug]);
+  const debouncedCheckUrl = useCallback(debounce(checkPath, 250), [selectedParent, slug]);
 
   useEffect(() => {
     debouncedCheckUrl()
-  }, [parent, slug])
+  }, [selectedParent, slug])
+
+  const handleSelectParent = (value: string) => {
+    const parentRoute = routes.find(route => route.documentId === value) || null;
+    setSelectedParent(parentRoute);
+  }
 
   return (
     <Box paddingBottom={2}>
@@ -46,8 +47,8 @@ function RouteStructure({ routeId, routes, selectedParent, setSelectedParent, sl
           })}
         </Field.Label>
         <SingleSelect 
-          value={selectedParent}
-          onValueChange={setSelectedParent}
+          value={selectedParent?.documentId || ""}
+          onValueChange={handleSelectParent}
         >
           <SingleSelectOption value="">
             {formatMessage({ 

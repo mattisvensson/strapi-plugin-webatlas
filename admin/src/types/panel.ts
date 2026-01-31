@@ -18,6 +18,6 @@ export type RouteStructureProps = {
   slug?: string;
   routeId: string | null;
   routes: Route[];
-  selectedParent: string | null;
-  setSelectedParent: (value: string | null) => void;
+  selectedParent: Route | null;
+  setSelectedParent: (value: Route | null) => void;
 }

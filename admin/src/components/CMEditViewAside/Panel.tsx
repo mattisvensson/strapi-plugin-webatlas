@@ -72,7 +72,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 
 	const [routeId, setRouteId] = useState<string | null>(null);
 	const [routes, setRoutes] = useState<Route[]>([]);
-	const [selectedParent, setSelectedParent] = useState<string | null>(null);
+	const [selectedParent, setSelectedParent] = useState<Route | null>(null);
 	const [isOverride, setIsOverride] = useState(false);
 	const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
 	const [replacement, setReplacement] = useState<string>('');
@@ -200,9 +200,17 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	}, [config])
 
 	useEffect(() => {
+		if (initialValues.webatlas_parent && routes.length > 0 && !selectedParent) {
+			const parentRoute = routes.find(route => route.documentId === initialValues.webatlas_parent);
+			if (parentRoute) {
+				setSelectedParent(parentRoute);
+			}
+		}
+	}, [initialValues, routes])
+
+	useEffect(() => {
 		if (initialValues.webatlas_path) dispatchPath({ type: 'NO_URL_CHECK', payload: initialValues.webatlas_path });
 		if (initialValues.webatlas_override) setIsOverride(initialValues.webatlas_override);
-		if (initialValues.webatlas_parent) setSelectedParent(initialValues.webatlas_parent);
 	
 		async function fetchAllRoutes() {
 			const allRoutes = await getRoutes();
