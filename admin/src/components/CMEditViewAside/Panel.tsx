@@ -155,7 +155,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		const currentValue = values[key];
 		if (!currentValue) return '';
 
-		return transformToUrl(currentValue)
+		return currentValue
 	}, [values, config]);
 
   useEffect(() => {
