@@ -10,21 +10,17 @@ type PathInputProps = {
   path: PanelPathState;
   dispatchPath: React.Dispatch<PanelAction>;
   isOverride: boolean;
-  urlIsValid: 'valid' | 'invalid' | null;
   config: ConfigContentType;
 }
 
-function PathInput({ path, dispatchPath, isOverride, urlIsValid, config }: PathInputProps) {
+function PathInput({ path, dispatchPath, isOverride, config }: PathInputProps) {
   const { formatMessage } = useIntl();
 
   const inputBorder = useMemo(() => {
-    if (urlIsValid === 'valid') {
-      return "1px solid #5cb176";
-    } else if (urlIsValid === 'invalid') {
-      return "1px solid #ee5e52";
-    }
-    return null;
-  }, [urlIsValid]);
+    if (path.replacement === null) return "";
+    if (path.replacement) return "1px solid #ee5e52";
+    return "1px solid #5cb176";
+  }, [path.replacement]);
 
   return (
     <Field.Root
