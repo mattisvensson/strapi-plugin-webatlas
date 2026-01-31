@@ -44,6 +44,10 @@ export default {
       type: "string",
       configurable: false,
     },
+    canonicalPath: {
+      type: "string",
+      configurable: false,
+    },
     slug: {
       type: "string",
       configurable: false,
