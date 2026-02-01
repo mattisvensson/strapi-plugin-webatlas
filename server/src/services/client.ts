@@ -9,6 +9,7 @@ export default ({strapi}) => ({
         filters: {
           $or: [
             { path: slug },
+            { canonicalPath: slug },
             { uidPath: slug },
           ],
         },
