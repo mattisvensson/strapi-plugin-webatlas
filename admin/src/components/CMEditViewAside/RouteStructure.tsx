@@ -1,36 +1,16 @@
 import { Box, Field, SingleSelect, SingleSelectOption } from "@strapi/design-system";
 import { RouteStructureProps } from "../../types";
-import { duplicateCheck, getTranslation, debounce } from '../../utils';
+import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import Tooltip from '../Tooltip'
-import { useFetchClient } from "@strapi/strapi/admin";
-import { transformToUrl } from "../../../../utils";
 
-function RouteStructure({ routeId, routes, selectedParent, setSelectedParent, slug }: RouteStructureProps) {
+function RouteStructure({ routeId, routes, selectedParent, setSelectedParent, canonicalPath }: RouteStructureProps) {
   const { formatMessage } = useIntl();
-  const { get } = useFetchClient();
-  const [canonicalPath, setCanonicalPath] = useState('');
 
   const sortedRoutes = useMemo(() => {
     return [...routes].sort((a, b) => a.title.localeCompare(b.title));
   }, [routes]);
-
-  async function checkPath() {
-    if (!slug) return;
-
-    const path = `${selectedParent?.canonicalPath || ''}/${transformToUrl(slug)}`;
-    const result = await duplicateCheck(get, path, routeId, true);
-
-    setCanonicalPath(result);
-    return result;
-  }
-
-  const debouncedCheckUrl = useCallback(debounce(checkPath, 250), [selectedParent, slug]);
-
-  useEffect(() => {
-    debouncedCheckUrl()
-  }, [selectedParent, slug])
 
   const handleSelectParent = (value: string) => {
     const parentRoute = routes.find(route => route.documentId === value) || null;
