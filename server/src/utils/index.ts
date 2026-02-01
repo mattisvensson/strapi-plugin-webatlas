@@ -9,6 +9,7 @@ import getFullPopulateObject from './populateDeep';
 import cleanRootKeys from './cleanRootKeys';
 import removeWaFields from './removeWaFields';
 import buildCanonicalPath from './buildCanonicalPath';
+import cascadeCanonicalPathUpdates from "./cascadeCanonicalPathUpdates";
 
 export {
   duplicateCheck,
@@ -24,5 +25,6 @@ export {
   getFullPopulateObject,
   cleanRootKeys,
   removeWaFields,
-  buildCanonicalPath
+  buildCanonicalPath,
+  cascadeCanonicalPathUpdates,
 }
