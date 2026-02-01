@@ -170,10 +170,10 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
   useEffect(() => {
 		if (path.needsUrlCheck && path.value) {
 			if (path.uIdPath === path.value || initialPath.current === path.value) return
-			debouncedCheckPath(path.value);
+			debouncedCheckPath(path.value, routeId);
 			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
     }
-  }, [path.needsUrlCheck]);
+  }, [path.needsUrlCheck, path.value, path.uIdPath, routeId]);
 
 	useEffect(() => {
 		async function getTypes() {
@@ -231,7 +231,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	}, [])
 
 	useEffect(() => {
-		if (!sourceFieldValue || !routeId) return;
+		if (!sourceFieldValue) return;
 
 		const canonicalPath = getCanonicalPath(selectedParent, sourceFieldValue);
 		dispatchPath({ type: 'DEFAULT', payload: canonicalPath });
@@ -253,7 +253,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		}
 	}
 
-	async function checkPath(path: string) {
+	async function checkPath(path: string, routeId: string | null) {
 		if (!path) return
 		setValidationState('checking')
 		dispatchPath({ type: 'SET_REPLACEMENT', payload: '' });
