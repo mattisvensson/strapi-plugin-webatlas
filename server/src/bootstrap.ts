@@ -1,8 +1,7 @@
 import type { Core, UID } from '@strapi/strapi';
 import { PluginConfig, ConfigContentType, ContentType, Route } from "../../types";
 import { transformToUrl, waRoute, waNavItem, PLUGIN_ID } from "../../utils";
-import { duplicateCheck } from "./utils"; 
-import { buildCanonicalPath} from "./utils";
+import { duplicateCheck, buildCanonicalPath, cascadeCanonicalPathUpdates } from "./utils"; 
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
@@ -233,6 +232,8 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           }
         })
       }
+
+      await cascadeCanonicalPathUpdates(relatedRoute.documentId, canonicalPath);
     },
 
     async afterDelete(event: any) {
