@@ -46,7 +46,20 @@ export default ({strapi}) => ({
       let cleanEntity = cleanRootKeys(entity)
       cleanEntity = removeWaFields(cleanEntity)
 
-      return { contentType: contentType.info.singularName, ...cleanEntity }
+      const webatlasFields = {
+        path: route.path,
+        canonicalPath: route.canonicalPath,
+        slug: route.slug,
+        uidPath: route.uidPath,
+      }
+
+      return {
+        contentType: contentType.info.singularName,
+        webatlas: {
+          ...webatlasFields,
+        },
+        ...cleanEntity
+      }
     } catch (e) {
       console.log(e)
       return e
