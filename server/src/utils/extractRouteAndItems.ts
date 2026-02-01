@@ -23,9 +23,6 @@ export default function extractRouteAndItems(items: NestedNavItem[]) {
     delete route.createdAt
     delete route.updatedAt
     delete route.isOverride
-    // TODO: remove when migrated completely
-    delete route.internal
-    delete route.wrapper
     
     return { 
       __component: route.type === 'wrapper' ? `${PLUGIN_ID}.wrapper` : `${PLUGIN_ID}.route`,
