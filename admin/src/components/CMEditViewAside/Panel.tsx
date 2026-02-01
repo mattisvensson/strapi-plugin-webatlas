@@ -245,7 +245,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		if (!path) return
 		
 		try {
-			const result = await duplicateCheck(get, path, documentId, true)
+			const result = await duplicateCheck({fetchFunction: get, path, routeDocumentId: documentId, withoutTransform: true});
 
 			dispatchPath({ type: 'SET_CANONICALPATH', payload: result });
 		} catch (err) {
@@ -259,7 +259,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		dispatchPath({ type: 'SET_REPLACEMENT', payload: '' });
 		
 		try {
-			const data = await duplicateCheck(get, path, routeId, true)
+			const data = await duplicateCheck({fetchFunction: get, path, routeDocumentId: routeId, withoutTransform: true});
 
 			if (!data || data === path) return 
 			
