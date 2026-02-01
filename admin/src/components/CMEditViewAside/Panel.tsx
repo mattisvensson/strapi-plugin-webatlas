@@ -14,19 +14,24 @@ import UidPathDisplay from './UidPathDisplay';
 import PathInput from './PathInput';
 import RouteStructure from './RouteStructure';
 
+function getCanonicalPath(selectedParent: Route | null, sourceFieldValue: string) {
+	const parentPath = selectedParent ? selectedParent.canonicalPath + '/' : '';
+	return `${parentPath}${transformToUrl(sourceFieldValue)}`
+}
+
 function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 	switch (action.type) {
 		case 'DEFAULT':
       return { 
 				...state,
-				value: transformToUrl(action.payload), 
+				value: action.payload, 
 				prevValue: state.value,
 				needsUrlCheck: true 
 			};
 		case 'NO_URL_CHECK':
 			return {
 				...state,
-				value: transformToUrl(action.payload), 
+				value: action.payload, 
 				prevValue: state.value,
 				needsUrlCheck: false 
 			};
@@ -43,6 +48,8 @@ function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 			return { ...state, replacement: action.payload };
 		case 'SET_UIDPATH':
 			return { ...state, uIdPath: action.payload };
+		case 'SET_CANONICALPATH':
+			return { ...state, canonicalPath: action.payload };
 		default:
 			throw new Error();
 	}
@@ -82,19 +89,31 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		needsUrlCheck: false,
 		value: '',
 		prevValue: '',
-		uIdPath: '',
 		replacement: null,
+		uIdPath: '',
+		canonicalPath: '',
 	});
   const hasUserChangedField = useRef(false);
 	const initialPath = useRef('')
 	const prevSourceValueRef = useRef<string | null>(null);
+	const sourceFieldValue = useMemo(() => {
+		const key = config?.default;
+		if (!key) return '';
 
-	const debouncedCheckUrl = useCallback(debounce(checkUrl, 250), []);
+		const currentValue = values[key];
+		if (!currentValue) return '';
+
+		return currentValue
+	}, [values, config]);
+
+	const debouncedCheckPath = useCallback(debounce(checkPath, 250), []);
+	const debouncedCheckCanonicalPath = useCallback(debounce(checkCanonicalPath, 250), []);
 
 	useEffect(() => {
 		onChange('webatlas_path', path.value);
 		onChange('webatlas_override', isOverride);
-	}, [path.value, isOverride])
+		onChange('webatlas_parent', selectedParent?.documentId || null);
+	}, [path.value, isOverride, selectedParent])
 
 	const debouncedValueEffect = useMemo(() => debounce((currentValues: any) => {
 		const key = config?.default;
@@ -116,7 +135,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 				prevSourceValueRef.current !== currentValue && 
 				!isOverride) {
 			
-			const path = config.pattern ? `${config.pattern}/${currentValue}` : `${currentValue}`;
+			const path = getCanonicalPath(selectedParent, currentValue);
 			if (currentValue === initialValues[key]) {
 				dispatchPath({ type: 'NO_URL_CHECK', payload: path });
 			} else {
@@ -124,7 +143,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 			}
 			prevSourceValueRef.current = currentValue;
 		}
-	}, 500), [config?.default, config?.pattern, initialValues, isOverride, initialLoadComplete, routeId]);
+	}, 500), [config?.default, initialValues, isOverride, initialLoadComplete, routeId, selectedParent]);
 
   // Track when user changes the source field
   useEffect(() => {
@@ -135,8 +154,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
     const initialValue = initialValues[key];
 
 		if (currentValue && !isOverride) {
-			const path = config.pattern ? `${config.pattern}/${currentValue}` : `${currentValue}`;
-			onChange('webatlas_path', transformToUrl(path));
+			onChange('webatlas_path', transformToUrl(currentValue));
 		}
 
     if (!initialLoadComplete) return;
@@ -147,22 +165,12 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
     }
 
 		debouncedValueEffect(values);
-  }, [values, debouncedValueEffect, initialLoadComplete]);
-
-	const sourceFieldValue = useMemo(() => {
-		const key = config?.default;
-		if (!key) return '';
-
-		const currentValue = values[key];
-		if (!currentValue) return '';
-
-		return currentValue
-	}, [values, config]);
+  }, [values, debouncedValueEffect, initialLoadComplete, selectedParent]);
 
   useEffect(() => {
 		if (path.needsUrlCheck && path.value) {
 			if (path.uIdPath === path.value || initialPath.current === path.value) return
-			debouncedCheckUrl(path.value);
+			debouncedCheckPath(path.value);
 			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
     }
   }, [path.needsUrlCheck]);
@@ -193,7 +201,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
         }
 			} catch (err) {
 				setRouteId(null)
-				console.log(err)
+				console.error(err)
 			}
 			setInitialLoadComplete(true); // Mark initial load as complete
 		}
@@ -205,6 +213,8 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 			const parentRoute = routes.find(route => route.documentId === initialValues.webatlas_parent);
 			if (parentRoute) {
 				setSelectedParent(parentRoute);
+				const canonicalPath = getCanonicalPath(parentRoute, sourceFieldValue);
+				dispatchPath({ type: 'DEFAULT', payload: canonicalPath });
 			}
 		}
 	}, [initialValues, routes])
@@ -221,24 +231,42 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	}, [])
 
 	useEffect(() => {
-		if (selectedParent === null) return;
-		onChange('webatlas_parent', selectedParent);
-	}, [selectedParent])
+		if (!sourceFieldValue || !routeId) return;
 
-	async function checkUrl(url: string) {
-		if (!url) return
+		const canonicalPath = getCanonicalPath(selectedParent, sourceFieldValue);
+		dispatchPath({ type: 'DEFAULT', payload: canonicalPath });
+		dispatchPath({ type: 'SET_CANONICALPATH', payload: canonicalPath });
+
+		debouncedCheckCanonicalPath(canonicalPath, routeId)
+		dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
+	}, [selectedParent, sourceFieldValue, routeId])
+
+	async function checkCanonicalPath(path: string, documentId: string | null) {
+		if (!path) return
+		
+		try {
+			const result = await duplicateCheck(get, path, documentId, true)
+
+			dispatchPath({ type: 'SET_CANONICALPATH', payload: result });
+		} catch (err) {
+			console.error(err)
+		}
+	}
+
+	async function checkPath(path: string) {
+		if (!path) return
 		setValidationState('checking')
 		dispatchPath({ type: 'SET_REPLACEMENT', payload: '' });
 		
 		try {
-			const data = await duplicateCheck(get, url)
+			const data = await duplicateCheck(get, path, routeId, true)
 
-			if (!data || data === url) return 
+			if (!data || data === path) return 
 			
 			dispatchPath({ type: 'NO_URL_CHECK', payload: data });
 			dispatchPath({ type: 'SET_REPLACEMENT', payload: data });
 		} catch (err) {
-			console.log(err)
+			console.error(err)
 		} finally {
 			setValidationState('done')
 		}
@@ -269,7 +297,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 					<Divider marginTop={2} marginBottom={2} />
 				</>}
 				<RouteStructure
-					slug={sourceFieldValue}
+					canonicalPath={path.canonicalPath}
 					routeId={routeId}
 					routes={routes}
 					selectedParent={selectedParent}

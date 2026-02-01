@@ -7,6 +7,7 @@ export type PanelAction =
   | { type: 'RESET_URL_CHECK_FLAG'; }
   | { type: 'SET_REPLACEMENT'; payload: string }
   | { type: 'SET_UIDPATH'; payload: string }
+  | { type: 'SET_CANONICALPATH'; payload: string }
 
 export type PanelPathState = {
   value?: string;
@@ -14,10 +15,11 @@ export type PanelPathState = {
   uIdPath?: string,
   needsUrlCheck: boolean;
   replacement: string | null;
+  canonicalPath?: string;
 };
 
 export type RouteStructureProps = {
-  slug?: string;
+  canonicalPath?: string;
   routeId: string | null;
   routes: Route[];
   selectedParent: Route | null;
