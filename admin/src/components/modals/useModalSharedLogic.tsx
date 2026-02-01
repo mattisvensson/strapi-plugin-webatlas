@@ -112,7 +112,7 @@ export function useModalSharedLogic() {
 		setReplacement('')
 		
 		try {
-			const data = await duplicateCheck(get, url, routeDocumentId)
+			const data = await duplicateCheck({fetchFunction: get, path: url, routeDocumentId})
 
 			if (!data || data === url) return 
 
