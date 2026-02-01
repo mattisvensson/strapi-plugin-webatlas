@@ -2,7 +2,7 @@ import type { UID } from '@strapi/strapi';
 import { waRoute } from "../../../utils";
 import { Route } from '../../../types/route';
 
-export default async function buildCanonicalPath(slug: string, parentDocumentId?: string): Promise<string> {
+export default async function buildCanonicalPath(slug: string, parentDocumentId: string): Promise<string> {
   try {
     const parentRoute: Route | null = await strapi.documents(waRoute as UID.ContentType).findOne({
       documentId: parentDocumentId
