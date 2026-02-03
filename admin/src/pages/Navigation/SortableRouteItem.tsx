@@ -18,7 +18,7 @@ export default function SortableRouteItem({item, depth, setNavigationItems, ...p
   } = useSortable({id: item.id});
 
   const style: CSSProperties = {
-    transform: CSS.Translate.toString(transform),
+    transform: transform ? CSS.Translate.toString(transform) : undefined,
   };
 
   return (

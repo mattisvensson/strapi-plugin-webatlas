@@ -81,7 +81,6 @@ const Path = ({ config }: { config: ConfigContentType }) => {
 			conditions: [],
 		},
 	]);
-	console.log('RBAC Actions:', { canUpdate, canCreate });
 
 	const [routeId, setRouteId] = useState<number | null>()
 	const [isOverride, setIsOverride] = useState(false);
