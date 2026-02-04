@@ -1,4 +1,4 @@
-import { ContentType, Route, GroupedEntities, RouteSettings, ConfigContentType, StructuredNavigationVariant, NavigationInput, NestedNavItem } from '../../../types';
+import { ContentType, Route, GroupedEntities, RouteSettings, ConfigContentType, StructuredNavigationVariant, NavigationInput, NestedNavItem, RouteHierarchyItems } from '../../../types';
 import { useFetchClient } from '@strapi/strapi/admin';
 import { PLUGIN_ID } from '../../../utils';
 
@@ -97,6 +97,12 @@ export default function useApi() {
     return data
   };
 
+  const getRouteHierarchy = async (documentId: string): Promise<RouteHierarchyItems> => {
+    const { data } = await get(`/${PLUGIN_ID}/route/hierarchy/${documentId}`);
+    return data
+  };
+
+
   const getNavigation = async ({ documentId, variant }: {documentId?: string, variant?: StructuredNavigationVariant | "namesOnly"} = {}) => {
     const query = [];
     if (documentId) query.push(`documentId=${documentId}`);
@@ -139,6 +145,7 @@ export default function useApi() {
     getRelatedRoute,
     getRoutes,
     updateRoute,
+    getRouteHierarchy,
     getNavigation,
     createNavigation,
     deleteNavigation,
