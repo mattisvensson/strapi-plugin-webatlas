@@ -201,7 +201,7 @@ function ItemCreateComponent({
     }
   }
 
-  if ((availableEntities && availableEntities.length === 0) || loadingRoute) {
+  if ((availableEntities && availableEntities.length === 0)) {
     return <NavModal
       confirmText={formatMessage({ id: getTranslation('add'), defaultMessage: 'Add' })}
       closeText={formatMessage({ id: getTranslation('cancel'), defaultMessage: 'Cancel' })}
@@ -295,14 +295,18 @@ function ItemCreateComponent({
           <Box paddingBottom={6} paddingTop={6}>
             <Divider/>
           </Box>
-          <ItemDetails
-            navItemState={navItemState}
-            dispatchItemState={dispatchItemState}
-            path={path}
-            dispatchPath={dispatchPath}
-            validationState={validationState}
-            replacement={replacement}
-          />
+          {loadingRoute ? 
+            <FullLoader height={50}/>
+           :
+            <ItemDetails
+              navItemState={navItemState}
+              dispatchItemState={dispatchItemState}
+              path={path}
+              dispatchPath={dispatchPath}
+              validationState={validationState}
+              replacement={replacement}
+            />
+          }
         </>
       }
     </NavModal>
