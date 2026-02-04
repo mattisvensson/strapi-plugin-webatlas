@@ -102,6 +102,24 @@ export default {
         ],
       }
     },
+    {
+      method: 'GET',
+      path: '/route/hierarchy/:documentId',
+      handler: 'admin.getRouteHierarchy',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          { 
+            name: `plugin::${PLUGIN_ID}.has-permissions`,
+            config: { 
+              actions: [
+                `plugin::${PLUGIN_ID}.cm.aside`,
+              ]
+            }
+          }
+        ],
+      }
+    },
 
     // Navigation
     {
