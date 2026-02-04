@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import { useMemo } from "react";
 import Tooltip from '../Tooltip'
 
-function RouteStructure({ routeId, routes, selectedParent, setSelectedParent, canonicalPath }: RouteStructureProps) {
+function RouteStructure({ routeId, routes, selectedParent, setSelectedParent, canonicalPath, excludedRouteIds }: RouteStructureProps) {
   const { formatMessage } = useIntl();
 
   const sortedRoutes = useMemo(() => {
@@ -37,7 +37,10 @@ function RouteStructure({ routeId, routes, selectedParent, setSelectedParent, ca
             })}
           </SingleSelectOption>
           {sortedRoutes.map((route) => {
-            if (route.documentId === routeId) return null
+            if (
+              route.documentId === routeId
+              || (excludedRouteIds?.includes(route.documentId) && route.documentId !== selectedParent?.documentId)
+            ) return null;
             return (
               <SingleSelectOption 
                 key={route.documentId}
