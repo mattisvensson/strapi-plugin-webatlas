@@ -63,7 +63,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
   let newConfig: PluginConfig = { 
     ...config, 
-    selectedContentTypes: [...(config?.selectedContentTypes || [])],
+    selectedContentTypes: [],
     navigation: {
       maxDepth: config?.navigation?.maxDepth || 1,
       ...config?.navigation
@@ -71,15 +71,15 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   enabledContentTypes.forEach((type: ContentType) => {
-    const exists = config?.selectedContentTypes?.find((ct) => ct.uid === type.uid);
-    if (!exists) {
-      newConfig.selectedContentTypes.push({
-        uid: type.uid,
-        label: type.info.displayName,
-        default: null,
-        pattern: null
-      });
-    }
+    const existingConfig = config?.selectedContentTypes?.find((ct) => ct.uid === type.uid);
+    
+    // Normalize to only include the required keys: uid, label, default, pattern
+    newConfig.selectedContentTypes.push({
+      uid: type.uid,
+      label: type.info.displayName,
+      default: existingConfig?.default || null,
+      pattern: existingConfig?.pattern || null
+    });
   })
 
   if(JSON.stringify(newConfig) !== JSON.stringify(config)) {
