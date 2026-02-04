@@ -79,7 +79,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		},
 	]);
 
-	const [routeId, setRouteId] = useState<string | null>(null);
+	const [route, setRoute] = useState<Route | null>(null);
 	const [routes, setRoutes] = useState<Route[]>([]);
 	const [selectedParent, setSelectedParent] = useState<Route | null>(null);
 	const [isOverride, setIsOverride] = useState(false);
@@ -131,7 +131,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		// 2. User has manually changed the field OR no route exists
 		// 3. Not in override mode
 		if (initialLoadComplete && 
-				(hasUserChangedField.current || !routeId) && 
+				(hasUserChangedField.current || !route) && 
 				prevSourceValueRef.current !== currentValue && 
 				!isOverride) {
 			
@@ -143,7 +143,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 			}
 			prevSourceValueRef.current = currentValue;
 		}
-	}, 500), [config?.default, initialValues, isOverride, initialLoadComplete, routeId, selectedParent]);
+	}, 500), [config?.default, initialValues, isOverride, initialLoadComplete, route, selectedParent]);
 
   // Track when user changes the source field
   useEffect(() => {
@@ -170,10 +170,10 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
   useEffect(() => {
 		if (path.needsUrlCheck && path.value) {
 			if (path.uIdPath === path.value || initialPath.current === path.value) return
-			debouncedCheckPath(path.value, routeId);
+			debouncedCheckPath(path.value, route?.documentId || null);
 			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
     }
-  }, [path.needsUrlCheck, path.value, path.uIdPath, routeId]);
+  }, [path.needsUrlCheck, path.value, path.uIdPath, route]);
 
 	useEffect(() => {
 		async function getTypes() {
@@ -188,7 +188,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 				if (!route) return
 
 				initialPath.current = initialValues.webatlas_path || route.uidPath
-				setRouteId(route.documentId)
+				setRoute(route)
 				setIsOverride(route.isOverride || false)
 				
 				dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: route.path || '' });
@@ -200,7 +200,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
           prevSourceValueRef.current = values[key];
         }
 			} catch (err) {
-				setRouteId(null)
+				setRoute(null)
 				console.error(err)
 			}
 			setInitialLoadComplete(true); // Mark initial load as complete
@@ -237,9 +237,9 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		!isOverride && dispatchPath({ type: 'DEFAULT', payload: canonicalPath });
 		dispatchPath({ type: 'SET_CANONICALPATH', payload: canonicalPath });
 
-		debouncedCheckCanonicalPath(canonicalPath, routeId)
+		debouncedCheckCanonicalPath(canonicalPath, route?.documentId || null)
 		dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
-	}, [selectedParent, sourceFieldValue, routeId, isOverride]);
+	}, [selectedParent, sourceFieldValue, route, isOverride]);
 
 	async function checkCanonicalPath(path: string, documentId: string | null) {
 		if (!path) return
@@ -253,13 +253,13 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		}
 	}
 
-	async function checkPath(path: string, routeId: string | null) {
+	async function checkPath(path: string, route: string | null) {
 		if (!path) return
 		setValidationState('checking')
 		dispatchPath({ type: 'SET_REPLACEMENT', payload: '' });
 		
 		try {
-			const data = await duplicateCheck({fetchFunction: get, path, routeDocumentId: routeId, withoutTransform: true});
+			const data = await duplicateCheck({fetchFunction: get, path, routeDocumentId: route, withoutTransform: true});
 
 			if (!data || data === path) return 
 			
@@ -292,13 +292,13 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 				alignItems='stretch'
 				gap={1}
 			>
-				{!routeId && <>
+				{!route && <>
 					<NewPathInfo />
 					<Divider marginTop={2} marginBottom={2} />
 				</>}
 				<RouteStructure
 					canonicalPath={path.canonicalPath}
-					routeId={routeId}
+					routeId={route?.documentId || ''}
 					routes={routes}
 					selectedParent={selectedParent}
 					setSelectedParent={setSelectedParent}
