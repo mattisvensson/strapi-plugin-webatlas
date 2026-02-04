@@ -36,20 +36,16 @@ function RouteStructure({ routeId, routes, selectedParent, setSelectedParent, ca
               defaultMessage: 'None (root path)'
             })}
           </SingleSelectOption>
-          {sortedRoutes.map((route) => {
-            if (
-              route.documentId === routeId
-              || (excludedRouteIds?.includes(route.documentId) && route.documentId !== selectedParent?.documentId)
-            ) return null;
-            return (
+          {sortedRoutes
+            .filter((route) => !excludedRouteIds?.includes(route.documentId) || route.documentId === selectedParent?.documentId)
+            .map((route) =>
               <SingleSelectOption 
                 key={route.documentId}
                 value={route.documentId}
               >
                 {route.title}
               </SingleSelectOption>
-            )
-          })}
+          )}
         </SingleSelect>
       </Field.Root>
       <Field.Root marginTop={4}>

@@ -121,13 +121,10 @@ export default ({strapi}) => ({
 
       if (!route) throw new Error("Route not found");
 
-      const ancestors = await getRouteAncestors(route.documentId)
       const descendants = await getRouteDescendants(route.documentId)
 
-      return {
-        ancestors,
-        descendants
-      }
+      return [route.documentId, ...descendants]
+      
     } catch (e) {
       console.log(e)
     }
