@@ -234,12 +234,12 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		if (!sourceFieldValue) return;
 
 		const canonicalPath = getCanonicalPath(selectedParent, sourceFieldValue);
-		dispatchPath({ type: 'DEFAULT', payload: canonicalPath });
+		!isOverride && dispatchPath({ type: 'DEFAULT', payload: canonicalPath });
 		dispatchPath({ type: 'SET_CANONICALPATH', payload: canonicalPath });
 
 		debouncedCheckCanonicalPath(canonicalPath, routeId)
 		dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
-	}, [selectedParent, sourceFieldValue, routeId])
+	}, [selectedParent, sourceFieldValue, routeId, isOverride]);
 
 	async function checkCanonicalPath(path: string, documentId: string | null) {
 		if (!path) return
