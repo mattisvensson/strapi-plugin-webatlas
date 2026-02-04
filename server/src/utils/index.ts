@@ -10,6 +10,8 @@ import cleanRootKeys from './cleanRootKeys';
 import removeWaFields from './removeWaFields';
 import buildCanonicalPath from './buildCanonicalPath';
 import cascadeCanonicalPathUpdates from "./cascadeCanonicalPathUpdates";
+import getRouteAncestors from "./getRouteAncestors";
+import getRouteDescendants from "./getRouteDescendants";
 
 export {
   duplicateCheck,
@@ -27,4 +29,6 @@ export {
   removeWaFields,
   buildCanonicalPath,
   cascadeCanonicalPathUpdates,
-}
+  getRouteAncestors,
+  getRouteDescendants,
+};
