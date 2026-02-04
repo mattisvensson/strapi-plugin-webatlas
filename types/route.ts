@@ -34,3 +34,8 @@ export type RouteSettings = {
   navitem?: number;
   type?: 'internal' | 'external' | 'wrapper';
 };
+
+export type RouteHierarchyItems = {
+  ancestors: string[];
+  descendants: string[];
+};
