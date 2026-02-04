@@ -24,4 +24,5 @@ export type RouteStructureProps = {
   routes: Route[];
   selectedParent: Route | null;
   setSelectedParent: (value: Route | null) => void;
+  excludedRouteIds?: string[];
 }

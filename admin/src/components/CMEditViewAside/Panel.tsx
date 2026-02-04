@@ -58,7 +58,7 @@ function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 const Panel = ({ config }: { config: ConfigContentType }) => {
 	const { form, model } = useContentManagerContext()
 	const { initialValues, values, onChange } = form;
-	const { getRelatedRoute, getRoutes } = useApi()
+	const { getRelatedRoute, getRoutes, getRouteHierarchy } = useApi()
 	const { formatMessage } = useIntl();
 	const { get } = useFetchClient();
 	const { allowedActions: {
@@ -81,6 +81,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 
 	const [route, setRoute] = useState<Route | null>(null);
 	const [routes, setRoutes] = useState<Route[]>([]);
+	const [excludedRouteIds, setExcludedRouteIds] = useState<string[]>([]);
 	const [selectedParent, setSelectedParent] = useState<Route | null>(null);
 	const [isOverride, setIsOverride] = useState(false);
 	const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
@@ -231,6 +232,19 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	}, [])
 
 	useEffect(() => {
+		if (!route || !route.documentId) return;
+
+		const documentId = route.documentId;
+
+		async function fetchRouteHierarchy() {
+			const routeHierarchy = await getRouteHierarchy(documentId);
+			const excludedIds = [...routeHierarchy.ancestors, ...routeHierarchy.descendants, documentId];
+			setExcludedRouteIds(excludedIds);
+		}
+		fetchRouteHierarchy();
+	}, [route])
+
+	useEffect(() => {
 		if (!sourceFieldValue) return;
 
 		const canonicalPath = getCanonicalPath(selectedParent, sourceFieldValue);
@@ -302,6 +316,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 					routes={routes}
 					selectedParent={selectedParent}
 					setSelectedParent={setSelectedParent}
+					excludedRouteIds={excludedRouteIds}
 				/>
 				<Divider marginTop={2} marginBottom={2} />
 				<Box>
