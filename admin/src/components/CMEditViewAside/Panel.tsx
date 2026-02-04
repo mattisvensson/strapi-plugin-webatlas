@@ -237,9 +237,8 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		const documentId = route.documentId;
 
 		async function fetchRouteHierarchy() {
-			const routeHierarchy = await getRouteHierarchy(documentId);
-			const excludedIds = [...routeHierarchy.ancestors, ...routeHierarchy.descendants, documentId];
-			setExcludedRouteIds(excludedIds);
+			const routeHierarchyIds = await getRouteHierarchy(documentId);
+			setExcludedRouteIds(routeHierarchyIds);
 		}
 		fetchRouteHierarchy();
 	}, [route])
