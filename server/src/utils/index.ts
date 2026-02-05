@@ -13,6 +13,7 @@ import cascadeCanonicalPathUpdates from "./cascadeCanonicalPathUpdates";
 import getRouteAncestors from "./getRouteAncestors";
 import getRouteDescendants from "./getRouteDescendants";
 import getExternalRouteIds from "./getExternalRouteIds";
+import validateRouteDependencies from "./validateRouteDependencies";
 
 export {
   duplicateCheck,
@@ -33,4 +34,5 @@ export {
   getRouteAncestors,
   getRouteDescendants,
   getExternalRouteIds,
+  validateRouteDependencies,
 };
