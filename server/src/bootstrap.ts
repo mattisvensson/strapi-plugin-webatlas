@@ -1,7 +1,7 @@
 import type { Core, UID } from '@strapi/strapi';
 import { PluginConfig, ConfigContentType, ContentType, Route } from "../../types";
 import { transformToUrl, waRoute, waNavItem, PLUGIN_ID } from "../../utils";
-import { duplicateCheck, buildCanonicalPath, cascadeCanonicalPathUpdates } from "./utils"; 
+import { duplicateCheck, buildCanonicalPath, cascadeCanonicalPathUpdates, validateRouteDependencies } from "./utils"; 
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
@@ -200,16 +200,26 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
         },
       }) as Route | null;
 
+      let parent = null
+      if (webatlas_parent) {
+        try {
+          const isValid = await validateRouteDependencies(relatedRoute.documentId, webatlas_parent);
+          if (isValid) parent = webatlas_parent
+        } catch (err) {
+          console.error(`Route dependency validation failed: ${err.message}`)
+        }
+      }
+
       const title = ctSettings?.default ? event.params.data[ctSettings.default] : ''
       const path = await duplicateCheck(transformToUrl(webatlas_path), relatedRoute ? relatedRoute.documentId : null);
-      const canonicalPath = await buildCanonicalPath(path, webatlas_parent);
+      const canonicalPath = await buildCanonicalPath(path, parent);
 
       const routeData: any = {
         title,
         path: path,
         slug: path,
         isOverride: webatlas_override || false,
-        parent: webatlas_parent || null,
+        parent: parent,
       }
       
       if (!relatedRoute) {
