@@ -1,7 +1,7 @@
 import type { NavigationInput, NestedNavigation, NestedNavItem, PluginConfig, StructuredNavigationVariant } from "../../../types";
 import duplicateCheck from "../utils/duplicateCheck";
 import { getPath, transformToUrl, waRoute, waNavigation, waNavItem, PLUGIN_ID } from "../../../utils";
-import { reduceDepthOfOrphanedItems, createExternalRoute, createNavItem, updateNavItem, deleteNavItem, buildStructuredNavigation, getRouteAncestors, getRouteDescendants } from "../utils";
+import { reduceDepthOfOrphanedItems, createExternalRoute, createNavItem, updateNavItem, deleteNavItem, buildStructuredNavigation, getExternalRouteIds, getRouteDescendants } from "../utils";
 
 export default ({strapi}) => ({
 
@@ -122,8 +122,9 @@ export default ({strapi}) => ({
       if (!route) throw new Error("Route not found");
 
       const descendants = await getRouteDescendants(route.documentId)
+      const externalRouteIds = await getExternalRouteIds()
 
-      return [route.documentId, ...descendants]
+      return [route.documentId, ...descendants, ...externalRouteIds]
       
     } catch (e) {
       console.log(e)
