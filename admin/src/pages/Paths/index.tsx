@@ -34,7 +34,7 @@ const Paths = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialQuery = searchParams.get('search') || '';
   const [searchQuery, setSearchQuery] = useState(initialQuery);
-  const [sortKey, setSortKey] = useState<RouteSortKey>('title');
+  const [sortKey, setSortKey] = useState<RouteSortKey>('canonicalPath');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {

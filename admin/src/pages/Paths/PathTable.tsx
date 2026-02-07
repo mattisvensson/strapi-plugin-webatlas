@@ -18,15 +18,20 @@ function PathTable({
   
   const { formatMessage } = useIntl();
 
+  const TABLE_COL_COUNT = 5;
+
   return (
-    <Table colCount={4} rowCount={routes.length}>
+    <Table
+      colCount={TABLE_COL_COUNT}
+      rowCount={routes.length}
+    >
       <TableHeader sortKey={sortKey} handleSort={handleSort} />
       <Tbody>
         {routes.length > 0 ? routes.map((route: Route) => (
           <TableRow key={route.id} route={route} />
         )) : 
           <Tr>
-            <Td colSpan={4}>
+            <Td colSpan={TABLE_COL_COUNT}>
               <EmptyStateLayout 
                 content={
                   formatMessage({
