@@ -162,9 +162,19 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (relatedRoute) return;
 
+      let parent = null
+      if (webatlas_parent) {
+        try {
+          const isValid = await validateRouteDependencies(relatedRoute.documentId, webatlas_parent);
+          if (isValid) parent = webatlas_parent
+        } catch (err) {
+          console.error(`Route dependency validation failed: ${err.message}`)
+        }
+      }
+
       const title = ctSettings?.default ? event.params.data[ctSettings.default] : '';
       const path = await duplicateCheck(transformToUrl(webatlas_path));
-      const canonicalPath = await buildCanonicalPath(path, webatlas_parent);
+      const canonicalPath = await buildCanonicalPath(path, parent);
 
       await strapi.documents(waRoute as UID.ContentType).create({
         data: {
@@ -176,7 +186,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           uidPath: `${event.model.singularName}/${event.result.id}`,
           isOverride: webatlas_override || false,
           title: title,
-          parent: webatlas_parent || null,
+          parent: parent,
           canonicalPath: canonicalPath,
         },
       });
