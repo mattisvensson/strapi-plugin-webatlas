@@ -2,10 +2,14 @@ import type { Core, UID } from '@strapi/strapi';
 import { PluginConfig, ConfigContentType, ContentType, Route } from "../../types";
 import { transformToUrl, waRoute, waNavItem, PLUGIN_ID } from "../../utils";
 import { duplicateCheck, buildCanonicalPath, cascadeCanonicalPathUpdates, validateRouteDependencies } from "./utils"; 
+import runMigrations from './migrations';
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
   try {
+    // Run migrations first
+    await runMigrations(strapi)
+    
     // Register permission actions.
     const actions = [
       {
@@ -67,7 +71,8 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     navigation: {
       maxDepth: config?.navigation?.maxDepth || 1,
       ...config?.navigation
-    }
+    },
+    migrationVersion: config?.migrationVersion || '0'
   };
 
   enabledContentTypes.forEach((type: ContentType) => {
