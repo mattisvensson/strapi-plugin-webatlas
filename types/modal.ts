@@ -1,4 +1,4 @@
-import type { Entity, GroupedEntities, NestedNavItem, NestedNavigation, Route, RouteSettings } from './';
+import type { GroupedEntities, NestedNavItem, NestedNavigation, Route, RouteSettings } from './';
 
 export type ModalItem_VariantCreate = {
   parentId?: string;
@@ -12,18 +12,9 @@ export type ModalItem_VariantEdit = {
 
 export type modalSharedLogic = {
   availableEntities: GroupedEntities[],
-  setAvailableEntities: (value: GroupedEntities[]) => void,
-  selectedEntity: Entity | null | undefined,
-  setSelectedEntity: (value: Entity | null | undefined) => void,
   selectedContentType: GroupedEntities | undefined,
   setSelectedContentType: (value: GroupedEntities) => void,
-  entityRoute: Route | undefined,
-  setEntityRoute: (value: Route) => void,
   entities: GroupedEntities[],
-  updateRoute: (body: RouteSettings, documentId: string) => Promise<any>,
-  getRelatedRoute: (relatedDocumentId: string) => Promise<Route>,
-  replacement: string,
-  setReplacement: (value: string) => void,
   validationState: 'initial' | 'checking' | 'done',
   setValidationState: (value: 'initial' | 'checking' | 'done') => void,
   initialState: React.RefObject<RouteSettings>,

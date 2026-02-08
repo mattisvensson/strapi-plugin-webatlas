@@ -1,6 +1,6 @@
 import { SingleSelect, SingleSelectOption, Box, Divider, Grid, Field } from '@strapi/design-system';
 import { withModalSharedLogic } from '../withModalSharedLogic';
-import type { Entity, GroupedEntities, ModalItem_VariantCreate } from '../../../../../types';
+import type { Entity, GroupedEntities, ModalItem_VariantCreate, Route } from '../../../../../types';
 import PathInfo from '../../PathInfo';
 import { useEffect, useState } from 'react';
 import { useModalSharedLogic } from '../useModalSharedLogic';
@@ -8,13 +8,14 @@ import { NavModal } from '../'
 import { useIntl } from 'react-intl';
 import { getTranslation, createTempNavItemObject } from '../../../utils';
 import { FullLoader } from '../../UI';
+import { useApi } from '../../../hooks';
 
 // TODO: Let the user select if the parent slug should be inherited or not
 // TODO: Add hint if a route is added that already exists in a navigation (because there is only one path per route)
 
-type ItemDetailsProps = Pick<ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>, 'navItemState' | 'dispatchItemState' | 'path' | 'dispatchPath' | 'validationState' | 'replacement'>;
+type ItemDetailsProps = Pick<ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>, 'navItemState' | 'dispatchItemState' | 'path' | 'dispatchPath' | 'validationState' >;
 
-function ItemDetails({ navItemState, dispatchItemState, path, dispatchPath, validationState, replacement }: ItemDetailsProps) {
+function ItemDetails({ navItemState, dispatchItemState, path, dispatchPath, validationState }: ItemDetailsProps) {
   const { formatMessage } = useIntl();
   
   return (
@@ -22,7 +23,7 @@ function ItemDetails({ navItemState, dispatchItemState, path, dispatchPath, vali
       <Grid.Root gap={4}>
         <Grid.Item col={6} s={12} alignItems="baseline">
           <Box width="100%">
-            <Field.Root>
+            <Field.Root required>
               <Field.Label>
                 {formatMessage({
                   id: getTranslation('modal.item.titleField.label'),
@@ -44,7 +45,7 @@ function ItemDetails({ navItemState, dispatchItemState, path, dispatchPath, vali
         </Grid.Item>
         <Grid.Item col={6} s={12}>
           <Box width="100%">
-            <Field.Root>
+            <Field.Root required>
               <Field.Label>
                 {formatMessage({
                   id: getTranslation('modal.item.pathField.label'),
@@ -52,7 +53,6 @@ function ItemDetails({ navItemState, dispatchItemState, path, dispatchPath, vali
                 })}
               </Field.Label>
               <Field.Input
-                required
                 placeholder={formatMessage({
                   id: getTranslation('modal.item.pathField.placeholder'),
                   defaultMessage: 'e.g. about/'
@@ -67,7 +67,7 @@ function ItemDetails({ navItemState, dispatchItemState, path, dispatchPath, vali
 
               />
             </Field.Root>
-            <PathInfo validationState={validationState} replacement={replacement} />
+            <PathInfo validationState={validationState} replacement={path.replacement} />
           </Box>
         </Grid.Item>
       </Grid.Root>
@@ -94,16 +94,8 @@ function ItemDetails({ navItemState, dispatchItemState, path, dispatchPath, vali
 
 function ItemCreateComponent({ 
   availableEntities,
-  setAvailableEntities,
-  selectedEntity,
-  setSelectedEntity,
   selectedContentType,
   setSelectedContentType,
-  entityRoute,
-  setEntityRoute,
-  entities,
-  getRelatedRoute,
-  replacement,
   validationState,
   initialState,
   navItemState,
@@ -116,50 +108,48 @@ function ItemCreateComponent({
   parentId,
   onCreate,
 }: ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>) {
+  const [route, setRoute] = useState<Route | null>(null);
+  const [entity, setEntity] = useState<Entity | null>(null);
   const [loading, setLoading] = useState(false)
   const [loadingRoute, setLoadingRoute] = useState(true)
   const { formatMessage } = useIntl();
-
-  useEffect(() => {
-    if (!entities) return
-    setAvailableEntities(entities)
-  }, [entities])
+  const { getRelatedRoute } = useApi();
 
   useEffect(() => {
     if (path.needsUrlCheck && path.value) {
       if (path.uidPath === path.value || path.initialPath === path.value) return
-			debouncedCheckUrl(path.value, entityRoute?.documentId);
+			debouncedCheckUrl(path.value, route?.documentId);
 			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
     }
-  }, [path.needsUrlCheck, entityRoute?.documentId]);
+  }, [path.needsUrlCheck, route?.documentId]);
 
   useEffect(() => {
     async function fetchRoute() {
-      if (!selectedContentType?.contentType || !selectedEntity?.documentId) return setLoadingRoute(false)
+      if (!selectedContentType?.contentType || !entity?.documentId) return setLoadingRoute(false)
       
       setLoadingRoute(true)
       try {
-        const route = await getRelatedRoute(selectedEntity.documentId)
+        const relatedRoute = await getRelatedRoute(entity.documentId)
 
         // TODO: Create a route if not existing or show error
-        if (!route) throw new Error('No route found for the selected entity')
+        if (!relatedRoute) throw new Error('No route found for the selected entity')
 
-        dispatchPath({ type: 'NO_URL_CHECK', payload: route.path });
-        dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath });
-        dispatchPath({ type: 'SET_INITIALPATH', payload: route.path });
+        dispatchPath({ type: 'NO_URL_CHECK', payload: relatedRoute.path });
+        dispatchPath({ type: 'SET_UIDPATH', payload: relatedRoute.uidPath });
+        dispatchPath({ type: 'SET_INITIALPATH', payload: relatedRoute.path });
 
-        dispatchItemState({ type: 'SET_TITLE', payload: route.title })
-        dispatchItemState({ type: 'SET_ACTIVE', payload: route.active })
-        dispatchItemState({ type: 'SET_OVERRIDE', payload: route.isOverride })
+        dispatchItemState({ type: 'SET_TITLE', payload: relatedRoute.title })
+        dispatchItemState({ type: 'SET_ACTIVE', payload: relatedRoute.active })
+        dispatchItemState({ type: 'SET_OVERRIDE', payload: relatedRoute.isOverride })
         
         initialState.current = {
-          title: route.title,
-          slug: route.path,
-          active: route.active,
-          isOverride: route.isOverride,
+          title: relatedRoute.title,
+          slug: relatedRoute.path,
+          active: relatedRoute.active,
+          isOverride: relatedRoute.isOverride,
         }
 
-        setEntityRoute(route)
+        setRoute(relatedRoute)
       } catch (err) {
         console.log(err)
       } finally {
@@ -167,27 +157,27 @@ function ItemCreateComponent({
       }
     }
     fetchRoute()
-  }, [selectedEntity])
+  }, [entity])
   
   const addItem = async () => {
     try {
       setLoading(true)
 
-      if (!selectedContentType?.contentType || !selectedEntity?.documentId || !path || !path.value?.trim() || !navItemState.title || !navItemState.title?.trim() || !selectedNavigation || !entityRoute) return
+      if (!selectedContentType?.contentType || !entity?.documentId || !path || !path.value?.trim() || !navItemState.title || !navItemState.title?.trim() || !selectedNavigation || !route) return
 
       // TODO: Handle route update if path changed
       // if (path.value !== path.initialPath) {
-      //   if (navItemState.slug !== entityRoute.path) navItemState.isOverride = true
-      //   await updateRoute({path: path.value}, entityRoute.documentId)
+      //   if (navItemState.slug !== route.path) navItemState.isOverride = true
+      //   await updateRoute({path: path.value}, route.documentId)
       //   settings.routeUpdate = { path: path.value }
       // }
 
       const newItem = createTempNavItemObject({
         parentId,
-        entityRoute,
+        entityRoute: route,
         selectedNavigation,
         navItemState,
-        selectedEntity,
+        selectedEntity: entity,
         selectedContentType,
         path
       })
@@ -223,7 +213,7 @@ function ItemCreateComponent({
       modalToOpen=''
       currentModalType="ItemCreate"
       currentModalMode={'create'}
-      disabled={!selectedContentType?.contentType || !selectedEntity?.documentId || !path || !path.value?.trim() || !navItemState.title || !navItemState.title?.trim()}
+      disabled={!selectedContentType?.contentType || !entity?.documentId || !path || !path.value?.trim() || !navItemState.title || !navItemState.title?.trim()}
     >
       <Grid.Root gap={4}>
         <Grid.Item col={6} s={12}>
@@ -245,7 +235,7 @@ function ItemCreateComponent({
                   const [contentType] = availableEntities.filter((group: GroupedEntities) => group.contentType.label === value)
                   if (contentType) {
                     setSelectedContentType(contentType)
-                    setSelectedEntity(null)
+                    setEntity(null)
                   }
                 }}
                 disabled={availableEntities && availableEntities.length === 0}
@@ -268,21 +258,21 @@ function ItemCreateComponent({
                 })}
               </Field.Label>
               <SingleSelect
-                value={selectedEntity ? selectedEntity.id : ''}
+                value={entity ? entity.documentId : ''}
                 placeholder={formatMessage({
                   id: getTranslation('modal.internalItem.entity.placeholder'),
                   defaultMessage: 'Select an entity'
                 })}
-                onChange={(value: number) => {
+                onChange={(value: string) => {
                   const flatEntities = availableEntities.flatMap((group: GroupedEntities) => group.entities);
-                  const route = flatEntities.find((route: Entity) => route.id === Number(value));
-                  if (route) setSelectedEntity(route);
+                  const route = flatEntities.find((route: Entity) => route.documentId === value);
+                  if (route) setEntity(route);
                 }}
                 disabled={!selectedContentType || (selectedContentType?.entities && selectedContentType?.entities.length === 0)}
               >
                 {selectedContentType &&
                   selectedContentType.entities?.map((entity: Entity) =>
-                    <SingleSelectOption key={entity.id} value={entity.id}>{entity.id} - {entity[selectedContentType.contentType.default]}</SingleSelectOption>
+                    <SingleSelectOption key={entity.id} value={entity.documentId}>{entity[selectedContentType.contentType.default]}</SingleSelectOption>
                   )
                 }
               </SingleSelect>
@@ -290,7 +280,7 @@ function ItemCreateComponent({
           </Box>
         </Grid.Item>
       </Grid.Root>
-      {selectedEntity && selectedContentType &&
+      {entity && selectedContentType &&
         <>
           <Box paddingBottom={6} paddingTop={6}>
             <Divider/>
@@ -304,7 +294,6 @@ function ItemCreateComponent({
               path={path}
               dispatchPath={dispatchPath}
               validationState={validationState}
-              replacement={replacement}
             />
           }
         </>
