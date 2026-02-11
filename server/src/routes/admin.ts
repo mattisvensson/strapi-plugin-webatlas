@@ -49,7 +49,7 @@ export default {
     {
       method: 'GET',
       path: '/route',
-      handler: 'admin.getRoutes',
+      handler: 'admin.getAllRoutes',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',

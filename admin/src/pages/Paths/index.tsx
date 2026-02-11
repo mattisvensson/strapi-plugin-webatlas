@@ -24,7 +24,7 @@ import SearchInput from './SearchInput';
 import PathTable from './PathTable';
 
 const Paths = () => {
-  const { getRoutes } = useApi();
+  const { getAllRoutes } = useApi();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   
@@ -67,7 +67,7 @@ const Paths = () => {
   useEffect(() => {
     async function fetchRoutes() {
       try {
-        const data = await getRoutes();
+        const data = await getAllRoutes();
         setAllRoutes(data);
         setRoutes(data);
       } catch (err) {

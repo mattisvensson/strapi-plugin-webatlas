@@ -64,9 +64,8 @@ export default ({strapi}) => ({
     return config;
   },
 
-  async getRoutes() {
+  async getAllRoutes() {
     try {
-      // TODO: populate parent and navigation?
       const entities = await strapi.documents(waRoute).findMany();
       return entities;
     } catch (e) {
