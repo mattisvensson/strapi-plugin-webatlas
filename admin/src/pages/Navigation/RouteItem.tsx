@@ -1,14 +1,14 @@
 import { Box, Typography, Flex, SimpleMenu, MenuItem, IconButton, Status } from '@strapi/design-system';
 import { NestedNavItem, NestedNavigation } from '../../../../types';
 import { ModalContext } from '../../contexts';
-import { useContext, useEffect, useState, ReactElement, forwardRef } from 'react';
+import { useContext, ReactElement, forwardRef } from 'react';
 import { Link as LinkIcon, ExternalLink, OneToMany, More, Drag } from '@strapi/icons';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
 
 export interface RouteItemProps {
   item: NestedNavItem;
-  setParentId: (id: string) => void;
+  setParentNavItem: (item: NestedNavItem | null) => void;
   setActionItem: React.Dispatch<React.SetStateAction<NestedNavItem | NestedNavigation | undefined>>;
   setNavigationItems: React.Dispatch<React.SetStateAction<NestedNavItem[] | undefined>>;
   ghost?: boolean;
@@ -36,7 +36,7 @@ function RouteIcon ({ type, color = 'neutral800' }: { type: 'internal' | 'extern
 }
 export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
   item,
-  setParentId,
+  setParentNavItem,
   setActionItem,
   setNavigationItems,
   ghost,
@@ -76,7 +76,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
   }
 
   const handleAddChildren = () => {
-    setParentId(item.documentId)
+    setParentNavItem(item)
     setModalType('ItemCreate')
   }
 

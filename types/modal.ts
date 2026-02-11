@@ -1,7 +1,7 @@
-import type { GroupedEntities, NestedNavItem, NestedNavigation, Route, RouteSettings } from './';
+import type { GroupedEntities, NestedNavItem, NestedNavigation, RouteSettings } from './';
 
 export type ModalItem_VariantCreate = {
-  parentId?: string;
+  parentNavItem: NestedNavItem | null;
   onCreate: (newItem: NestedNavItem) => void;
 }
 

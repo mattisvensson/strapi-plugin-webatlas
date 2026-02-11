@@ -9,7 +9,7 @@ import { getTranslation, createTempNavItemObject } from '../../../utils';
 
 type externalCreateProps = {
   variant: 'ExternalCreate';
-  parentId?: string;
+  parentNavItemId?: string;
   onCreate: (newItem: NestedNavItem) => void;
 }
 
@@ -43,7 +43,7 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
     selectedNavigation,
   } = props;
 
-  const parentId = isExternalCreateProps(props) ? props.parentId : undefined;
+  const parentNavItemId = isExternalCreateProps(props) ? props.parentNavItemId : undefined;
   const onCreate = isExternalCreateProps(props) ? props.onCreate : undefined;
   const onSave = isExternalEditProps(props) ? props.onSave : undefined;
   const item = isExternalEditProps(props) ? props.item : undefined;
@@ -74,7 +74,7 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
         });
       } else if (onCreate) {
         const newItem = createTempNavItemObject({
-          parentId,
+          parentNavItemId,
           entityRoute: null,
           selectedNavigation,
           navItemState,
