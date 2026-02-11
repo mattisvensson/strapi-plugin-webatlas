@@ -16,9 +16,9 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async getRoutes(ctx) {
+  async getAllRoutes(ctx) {
     try {
-      return await getAdminService().getRoutes();
+      return await getAdminService().getAllRoutes();
     } catch (e) {
       return ctx.throw(500, e)
     }

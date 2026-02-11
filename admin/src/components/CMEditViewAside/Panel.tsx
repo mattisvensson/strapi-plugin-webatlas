@@ -58,7 +58,7 @@ function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 const Panel = ({ config }: { config: ConfigContentType }) => {
 	const { form, model } = useContentManagerContext()
 	const { initialValues, values, onChange } = form;
-	const { getRelatedRoute, getRoutes, getRouteHierarchy } = useApi()
+	const { getRelatedRoute, getAllRoutes, getRouteHierarchy } = useApi()
 	const { formatMessage } = useIntl();
 	const { get } = useFetchClient();
 	const { allowedActions: {
@@ -225,7 +225,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		if (initialValues.webatlas_override) setIsOverride(initialValues.webatlas_override);
 	
 		async function fetchAllRoutes() {
-			const allRoutes = await getRoutes();
+			const allRoutes = await getAllRoutes();
 			setRoutes(allRoutes);
 		}
 		fetchAllRoutes();
