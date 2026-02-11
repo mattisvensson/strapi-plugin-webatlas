@@ -54,7 +54,7 @@ const Navigation = () => {
   const [navigationItems, setNavigationItems] = useState<NestedNavItem[]>();
   const initialNavigationItemsRef = useRef<NestedNavItem[] | null>(null);
   const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>();
-  const [parentId, setParentId] = useState<string | undefined>();
+  const [parentNavItem, setParentNavItem] = useState<NestedNavItem | null>(null);
   const { getNavigation, updateNavigationItemStructure } = useApi();
   const [isSavingNavigation, setIsSavingNavigation] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -164,7 +164,7 @@ const Navigation = () => {
   useEffect(() => {
     if (modalType === 'NavOverview' || modalType === '') {
       setActionItem(undefined)
-      setParentId(undefined)
+      setParentNavItem(null)
     }
   }, [modalType]);
 
@@ -346,7 +346,7 @@ const Navigation = () => {
                     config?.navigation.maxDepth && <SortableRouteItem
                       key={item.documentId || index} 
                       item={item} 
-                      setParentId={setParentId} 
+                      setParentNavItem={setParentNavItem} 
                       setActionItem={setActionItem} 
                       setNavigationItems={setNavigationItems}
                       indentationWidth={indentationWidth}
@@ -359,7 +359,7 @@ const Navigation = () => {
                       {activeId && activeItem ? (
                         config?.navigation.maxDepth && <SortableRouteItem
                           item={activeItem} 
-                          setParentId={setParentId} 
+                          setParentNavItem={setParentNavItem} 
                           setActionItem={setActionItem}
                           setNavigationItems={setNavigationItems}
                           maxDepth={config.navigation.maxDepth}
@@ -425,7 +425,7 @@ const Navigation = () => {
         }
         {modalType === 'ItemCreate' && 
           <ItemCreate
-            parentId={parentId}
+            parentNavItem={parentNavItem}
             onCreate={(newItem) => {
               handleSoftAddedItem(newItem)
             }}
@@ -455,7 +455,7 @@ const Navigation = () => {
         {modalType === 'ExternalCreate' &&
           <ExternalItem
             variant={modalType}
-            parentId={parentId}
+            parentNavItemId={parentNavItem?.documentId}
             onCreate={(newItem) => {
               handleSoftAddedItem(newItem)
             }}
@@ -475,7 +475,7 @@ const Navigation = () => {
         {modalType === 'WrapperCreate' &&
           <WrapperItem
             variant={modalType}
-            parentId={parentId}
+            parentNavItemId={parentNavItem?.documentId}
             onCreate={(newItem) => {
               handleSoftAddedItem(newItem)
             }}

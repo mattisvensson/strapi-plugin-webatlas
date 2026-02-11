@@ -9,7 +9,7 @@ import { getTranslation, createTempNavItemObject } from '../../../utils';
 
 type wrapperCreateProps = {
   variant: 'WrapperCreate';
-  parentId?: string;
+  parentNavItemId?: string;
   onCreate: (newItem: NestedNavItem) => void;
 }
 
@@ -42,7 +42,7 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
     selectedNavigation,
   } = props;
 
-  const parentId = isWrapperCreateProps(props) ? props.parentId : undefined;
+  const parentNavItemId = isWrapperCreateProps(props) ? props.parentNavItemId : undefined;
   const onCreate = isWrapperCreateProps(props) ? props.onCreate : undefined;
   const onSave = isWrapperEditProps(props) ? props.onSave : undefined;
   const item = isWrapperEditProps(props) ? props.item : undefined;
@@ -77,7 +77,7 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
         })
       } else if (onCreate) {
         const newItem = createTempNavItemObject({
-          parentId,
+          parentNavItemId,
           entityRoute: null,
           selectedNavigation,
           navItemState,

@@ -1,7 +1,7 @@
 import type { NestedNavItem, Entity, GroupedEntities } from '../../../types';
 
 type CreateTempNavItemObjectParams = {
-  parentId: string | undefined;
+  parentNavItemId: string | undefined;
   entityRoute: {
     documentId: string;
   } | null;
@@ -23,7 +23,7 @@ type CreateTempNavItemObjectParams = {
 };
 
 export default function createTempNavItemObject({ 
-  parentId, 
+  parentNavItemId, 
   entityRoute, 
   selectedNavigation, 
   navItemState, 
@@ -40,11 +40,11 @@ export default function createTempNavItemObject({
       depth: 0,
       status: null,
       order: 0,
-      parent: parentId ? { documentId: parentId } : null,
+      parent: parentNavItemId ? { documentId: parentNavItemId } : null,
       items: [],
       isNew: {
         route: entityRoute?.documentId ?? null,
-        parent: parentId ?? null,
+        parent: parentNavItemId ?? null,
         navigation: selectedNavigation?.documentId ?? null, 
       },
       route: {
