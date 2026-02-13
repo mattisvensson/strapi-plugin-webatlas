@@ -46,6 +46,17 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
+  async getRouteHierarchy (ctx) {
+    try {
+      const { documentId } = ctx.params;
+
+      if (!documentId) return ctx.throw(400, 'Route documentId is required');
+
+      return await getAdminService().getRouteHierarchy(documentId);
+    } catch (e) {
+      return ctx.throw(500, e)
+    }
+  },
   async getNavigation (ctx) {
     try {
       const { documentId, variant } = ctx.query;

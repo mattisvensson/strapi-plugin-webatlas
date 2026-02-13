@@ -5,11 +5,10 @@ import { useState, useEffect } from 'react';
 
 interface PathProps {
   validationState: 'initial' | 'checking' | 'done';
-	replacement: string;
-	setUrlStatus?: (isValid: 'valid' | 'invalid') => void;
+	replacement: string | null;
 }
 
-export default function PathInfo({validationState, replacement, setUrlStatus}: PathProps) {
+export default function PathInfo({ validationState, replacement }: PathProps) {
 	const [color, setColor] = useState<string | null>(null);
 	const [text, setText] = useState<string | null>(null);
 	const { formatMessage } = useIntl();
@@ -33,12 +32,11 @@ export default function PathInfo({validationState, replacement, setUrlStatus}: P
 					id: getTranslation('components.pathInfo.available'),
 					defaultMessage: 'Path is available.',
 				}))
-			if (setUrlStatus) setUrlStatus(replacement ? 'invalid' : 'valid');
 		}
-	}, [validationState, replacement, formatMessage, setUrlStatus]);
+	}, [validationState, replacement, formatMessage]);
 
 	return (
-		<Box paddingTop={2}>
+		<Box paddingTop={1}>
 			<Typography textColor={color}>{text}</Typography>
 		</Box>
 	)

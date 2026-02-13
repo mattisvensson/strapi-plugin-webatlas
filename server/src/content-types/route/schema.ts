@@ -44,6 +44,10 @@ export default {
       type: "string",
       configurable: false,
     },
+    canonicalPath: {
+      type: "string",
+      configurable: false,
+    },
     slug: {
       type: "string",
       configurable: false,
@@ -75,6 +79,20 @@ export default {
       default: 'internal',
       configurable: false,
       required: true,
+    },
+    parent: {
+      type: "relation",
+      relation: "manyToOne",
+      target: "plugin::webatlas.route",
+      inversedBy: "children",
+      configurable: false,
+    },
+    children: {
+      type: "relation",
+      relation: "oneToMany", 
+      target: "plugin::webatlas.route",
+      mappedBy: "parent",
+      configurable: false,
     },
   }
 }

@@ -43,7 +43,7 @@ export type PluginConfig = {
   navigation: {
     maxDepth: number;
   }
-  migrationVersion: string;
+  migrationVersion?: string;
 };
 
 

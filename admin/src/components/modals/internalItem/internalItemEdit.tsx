@@ -15,7 +15,6 @@ function ItemEditComponent({
   selectedContentType,
   setSelectedContentType,
   entities,
-  replacement,
   validationState,
   initialState,
   navItemState,
@@ -35,16 +34,16 @@ function ItemEditComponent({
     dispatchItemState({ type: 'SET_SLUG', payload: item.route.slug })
     dispatchItemState({ type: 'SET_ACTIVE', payload: item.route.active })
     
-  const initialValues = {
-    title: item.route.title,
-    active: item.route.active,
-    isOverride: item.route.isOverride,
-    slug: item.route.slug,
-  };
-  
-  initialState.current = initialValues;
-  
-  dispatchPath({ type: 'SET_INITIALPATH', payload: item.route.path });
+    const initialValues = {
+      title: item.route.title,
+      active: item.route.active,
+      isOverride: item.route.isOverride,
+      slug: item.route.slug,
+    };
+    
+    initialState.current = initialValues;
+    
+    dispatchPath({ type: 'SET_INITIALPATH', payload: item.route.path });
   }, [])
 
   useEffect(() => {
@@ -198,7 +197,7 @@ function ItemEditComponent({
                   required
                 />
               </Field.Root>
-              <PathInfo validationState={validationState} replacement={replacement} />
+              <PathInfo validationState={validationState} replacement={path.replacement} />
             </Box>
           </Grid.Item>
         </Grid.Root>

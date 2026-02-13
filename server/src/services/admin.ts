@@ -1,7 +1,7 @@
-import type { NavigationInput, NestedNavigation, NestedNavItem, PluginConfig, Route, RouteSettings, StructuredNavigationVariant } from "../../../types";
+import type { NavigationInput, NestedNavigation, NestedNavItem, PluginConfig, StructuredNavigationVariant } from "../../../types";
 import duplicateCheck from "../utils/duplicateCheck";
 import { getPath, transformToUrl, waRoute, waNavigation, waNavItem, PLUGIN_ID } from "../../../utils";
-import { reduceDepthOfOrphanedItems, createExternalRoute, createNavItem, updateNavItem, deleteNavItem, buildStructuredNavigation } from "../utils";
+import { reduceDepthOfOrphanedItems, createExternalRoute, createNavItem, updateNavItem, deleteNavItem, buildStructuredNavigation, getExternalRouteIds, getRouteDescendants } from "../utils";
 
 export default ({strapi}) => ({
 
@@ -108,6 +108,24 @@ export default ({strapi}) => ({
           relatedDocumentId: documentId
         },
       });
+    } catch (e) {
+      console.log(e)
+    }
+  },
+
+  async getRouteHierarchy(documentId: string) {
+    try {
+      const route = await strapi.documents(waRoute).findOne({
+        documentId: documentId,
+      });
+
+      if (!route) throw new Error("Route not found");
+
+      const descendants = await getRouteDescendants(route.documentId)
+      const externalRouteIds = await getExternalRouteIds()
+
+      return [route.documentId, ...descendants, ...externalRouteIds]
+      
     } catch (e) {
       console.log(e)
     }

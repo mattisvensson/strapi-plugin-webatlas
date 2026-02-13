@@ -83,7 +83,7 @@ export default function useApi() {
     return data
   };
 
-  const getRoutes = async () => {
+  const getRoutes = async (): Promise<Route[]> => {
     const { data } = await get(`/${PLUGIN_ID}/route`);
     return data
   };
@@ -96,6 +96,12 @@ export default function useApi() {
     });
     return data
   };
+
+  const getRouteHierarchy = async (documentId: string): Promise<string[]> => {
+    const { data } = await get(`/${PLUGIN_ID}/route/hierarchy/${documentId}`);
+    return data
+  };
+
 
   const getNavigation = async ({ documentId, variant }: {documentId?: string, variant?: StructuredNavigationVariant | "namesOnly"} = {}) => {
     const query = [];
@@ -139,6 +145,7 @@ export default function useApi() {
     getRelatedRoute,
     getRoutes,
     updateRoute,
+    getRouteHierarchy,
     getNavigation,
     createNavigation,
     deleteNavigation,

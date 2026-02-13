@@ -5,6 +5,7 @@ export type Route = {
   slug: string;
   path: string;
   uidPath: string;
+  canonicalPath: string;
   relatedContentType: string;
   relatedId: number;
   relatedDocumentId: string,
@@ -14,6 +15,8 @@ export type Route = {
   navitem: {
     id: number;
   } | null;
+  parent?: Route;
+  children?: Route[];
   createdAt: string;
   updatedAt: string;
 };

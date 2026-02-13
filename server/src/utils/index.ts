@@ -8,6 +8,12 @@ import extractRouteAndItems from './extractRouteAndItems';
 import getFullPopulateObject from './populateDeep';
 import cleanRootKeys from './cleanRootKeys';
 import removeWaFields from './removeWaFields';
+import buildCanonicalPath from './buildCanonicalPath';
+import cascadeCanonicalPathUpdates from "./cascadeCanonicalPathUpdates";
+import getRouteAncestors from "./getRouteAncestors";
+import getRouteDescendants from "./getRouteDescendants";
+import getExternalRouteIds from "./getExternalRouteIds";
+import validateRouteDependencies from "./validateRouteDependencies";
 
 export {
   duplicateCheck,
@@ -23,4 +29,10 @@ export {
   getFullPopulateObject,
   cleanRootKeys,
   removeWaFields,
-}
+  buildCanonicalPath,
+  cascadeCanonicalPathUpdates,
+  getRouteAncestors,
+  getRouteDescendants,
+  getExternalRouteIds,
+  validateRouteDependencies,
+};
