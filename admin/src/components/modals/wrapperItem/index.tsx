@@ -36,7 +36,7 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
   const {
     variant,
     navItemState,
-    dispatchItemState,
+    dispatchNavItemState,
     dispatchPath,
     setModalType,
     selectedNavigation,
@@ -52,8 +52,8 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
   useEffect(() => {
     if (variant !== 'WrapperEdit' || !item) return
 
-    dispatchItemState({ type: 'SET_TITLE', payload: item.route.title })
-    dispatchItemState({ type: 'SET_ACTIVE', payload: item.route.active })
+    dispatchNavItemState({ type: 'SET_TITLE', payload: item.route.title })
+    dispatchNavItemState({ type: 'SET_ACTIVE', payload: item.route.active })
     dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.path })
   }, [])
 
@@ -132,43 +132,13 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
                 })}
                 name="title"
                 value={navItemState.title || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchItemState({ type: 'SET_TITLE', payload: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchNavItemState({ type: 'SET_TITLE', payload: e.target.value })}
                 required
               />
             </Field.Root>
           </Box>        
         </Grid.Item>
       </Grid.Root>
-      {/* TODO: Add visibility toggle to navitem schema */}
-      {/* <Box paddingBottom={6} paddingTop={6}>
-        <Divider/>
-      </Box>
-      <Grid.Root gap={8} paddingBottom={6} >
-        <Grid.Item col={6}>
-        <Box width="100%">
-            <Field.Root>
-              <Field.Label>
-                {formatMessage({
-                  id: getTranslation('modal.activeField.label'),
-                  defaultMessage: 'Active'
-                })}
-              </Field.Label>
-              <Toggle
-                onLabel={formatMessage({
-                  id: getTranslation('modal.activeField.onLabel'),
-                  defaultMessage: 'Yes'
-                })}
-                offLabel={formatMessage({
-                  id: getTranslation('modal.activeField.offLabel'),
-                  defaultMessage: 'No'
-                })}
-                checked={navItemState.active}
-                onChange={() => dispatchItemState({ type: 'SET_ACTIVE', payload: !navItemState.active })}
-              />
-            </Field.Root>
-          </Box>
-        </Grid.Item>
-      </Grid.Root> */}
     </NavModal>
   );
 }

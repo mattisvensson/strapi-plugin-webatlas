@@ -12,7 +12,7 @@ type Action =
   | { type: 'SET_ACTIVE'; payload: boolean }
   | { type: 'SET_OVERRIDE'; payload: boolean }
 
-function itemStateReducer(navItemState: RouteSettings, action: Action): RouteSettings {
+function navItemStateReducer(navItemState: RouteSettings, action: Action): RouteSettings {
   switch (action.type) {
     case 'SET_TITLE':
       return { ...navItemState, title: action.payload };
@@ -87,11 +87,11 @@ export function useModalSharedLogic() {
     title: '',
     slug: '',
     active: true,
-    internal: true,
+    type: 'internal',
     isOverride: false,
   });
 
-  const [navItemState, dispatchItemState] = useReducer(itemStateReducer, initialState.current);
+  const [navItemState, dispatchNavItemState] = useReducer(navItemStateReducer, initialState.current);
   const [path, dispatchPath] = useReducer(pathReducer, {
 		needsUrlCheck: false,
 		value: '',
@@ -135,7 +135,7 @@ export function useModalSharedLogic() {
     setValidationState,
     initialState,
     navItemState,
-    dispatchItemState,
+    dispatchNavItemState,
     path,
     dispatchPath,
     debouncedCheckUrl,
