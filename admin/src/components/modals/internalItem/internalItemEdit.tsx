@@ -18,7 +18,7 @@ function ItemEditComponent({
   validationState,
   initialState,
   navItemState,
-  dispatchItemState,
+  dispatchNavItemState,
   path,
   dispatchPath,
   debouncedCheckUrl,
@@ -30,9 +30,9 @@ function ItemEditComponent({
 
   useEffect(() => {
     dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.path })
-    dispatchItemState({ type: 'SET_TITLE', payload: item.route.title })
-    dispatchItemState({ type: 'SET_SLUG', payload: item.route.slug })
-    dispatchItemState({ type: 'SET_ACTIVE', payload: item.route.active })
+    dispatchNavItemState({ type: 'SET_TITLE', payload: item.route.title })
+    dispatchNavItemState({ type: 'SET_SLUG', payload: item.route.slug })
+    dispatchNavItemState({ type: 'SET_ACTIVE', payload: item.route.active })
     
     const initialValues = {
       title: item.route.title,
@@ -168,7 +168,7 @@ function ItemEditComponent({
                   })}
                   name="title"
                   value={navItemState.title || ''}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchItemState({ type: 'SET_TITLE', payload: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchNavItemState({ type: 'SET_TITLE', payload: e.target.value })}
                   required
                 />
               </Field.Root>
@@ -201,21 +201,6 @@ function ItemEditComponent({
             </Box>
           </Grid.Item>
         </Grid.Root>
-        {/* TODO: Add visibility toggle to navitem schema */}
-        {/* <Grid.Root gap={8}>
-          <Grid.Item col={6} s={12}>
-            <Box width="100%">
-              <Toggle
-                label="Is visible?"
-                onLabel="Yes"
-                offLabel="No"
-                hint='This menu item does not show on your site, if set to "no".'
-                checked={navItemState.active}
-                onClick={() => dispatchItemState({ type: 'SET_ACTIVE', payload: !navItemState.active })}
-              />
-            </Box>
-          </Grid.Item>
-        </Grid.Root> */}
       </Box>
     </NavModal>)
 }

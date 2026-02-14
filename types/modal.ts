@@ -19,7 +19,7 @@ export type modalSharedLogic = {
   setValidationState: (value: 'initial' | 'checking' | 'done') => void,
   initialState: React.RefObject<RouteSettings>,
   navItemState: RouteSettings,
-  dispatchItemState: React.Dispatch<any>,
+  dispatchNavItemState: React.Dispatch<any>,
   path: any,
   dispatchPath: React.Dispatch<any>,
   debouncedCheckUrl: (url: string, routeDocumentId?: string | null | undefined) => void,
