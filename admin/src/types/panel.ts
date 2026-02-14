@@ -12,7 +12,7 @@ export type PanelAction =
 export type PanelPathState = {
   value?: string;
   prevValue?: string,
-  uIdPath?: string,
+  uidPath?: string,
   needsUrlCheck: boolean;
   replacement: string | null;
   canonicalPath?: string;
