@@ -1,4 +1,5 @@
 import type { NestedNavItem, Entity, GroupedEntities } from '../../../types';
+import type { PanelPathState } from '../types';
 
 type CreateTempNavItemObjectParams = {
   parentNavItemId: string | undefined;
@@ -15,10 +16,7 @@ type CreateTempNavItemObjectParams = {
   };
   selectedEntity: Entity | undefined | null;
   selectedContentType: GroupedEntities | undefined | null;
-  path?: {
-    value: string;
-    uidPath: string;
-  };
+  path?: PanelPathState;
   type?: 'internal' | 'external' | 'wrapper';
 };
 
