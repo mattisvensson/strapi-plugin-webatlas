@@ -61,7 +61,7 @@ function pathReducer(state: ExtendedPanelPathState, action: ExtendedPanelAction)
     case 'SET_REPLACEMENT':
       return { ...state, replacement: action.payload };
     case 'SET_UIDPATH':
-      return { ...state, uIdPath: action.payload };
+      return { ...state, uidPath: action.payload };
     case 'SET_CANONICALPATH':
       return { ...state, canonicalPath: action.payload };
     case 'SET_INITIALPATH':
@@ -97,7 +97,7 @@ export function useModalSharedLogic() {
 		value: '',
 		prevValue: '',
 		replacement: null,
-		uIdPath: '',
+		uidPath: '',
 		canonicalPath: '',
     initialPath: '',
 	});

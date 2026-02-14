@@ -47,7 +47,7 @@ function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 		case 'SET_REPLACEMENT':
 			return { ...state, replacement: action.payload };
 		case 'SET_UIDPATH':
-			return { ...state, uIdPath: action.payload };
+			return { ...state, uidPath: action.payload };
 		case 'SET_CANONICALPATH':
 			return { ...state, canonicalPath: action.payload };
 		default:
@@ -91,7 +91,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		value: '',
 		prevValue: '',
 		replacement: null,
-		uIdPath: '',
+		uidPath: '',
 		canonicalPath: '',
 	});
   const hasUserChangedField = useRef(false);
@@ -170,11 +170,11 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 
   useEffect(() => {
 		if (path.needsUrlCheck && path.value) {
-			if (path.uIdPath === path.value || initialPath.current === path.value) return
+			if (path.uidPath === path.value || initialPath.current === path.value) return
 			debouncedCheckPath(path.value, route?.documentId || null);
 			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
     }
-  }, [path.needsUrlCheck, path.value, path.uIdPath, route]);
+  }, [path.needsUrlCheck, path.value, path.uidPath, route]);
 
 	useEffect(() => {
 		async function getTypes() {
@@ -335,9 +335,9 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 					setIsOverride={setIsOverride}
 					disabledCondition={!canCreate && !canUpdate}
 				/>
-				{path.uIdPath && <>
+				{path.uidPath && <>
 					<Divider marginTop={2} marginBottom={2} />
-					<UidPathDisplay path={path.uIdPath} />
+					<UidPathDisplay path={path.uidPath} />
 				</>
 				}
 			</Flex>
