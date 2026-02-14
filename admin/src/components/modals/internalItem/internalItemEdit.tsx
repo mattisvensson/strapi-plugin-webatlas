@@ -1,6 +1,7 @@
+import type { GroupedEntities } from '../../../../../types';
+import type { ModalItem_VariantEdit } from '../../../types';
 import { Box, Divider, Grid, Field } from '@strapi/design-system';
 import { withModalSharedLogic } from '../withModalSharedLogic';
-import { GroupedEntities, ModalItem_VariantEdit } from '../../../../../types';
 import PathInfo from '../../PathInfo';
 import { useEffect, useMemo } from 'react';
 import { useModalSharedLogic } from '../useModalSharedLogic';
