@@ -1,18 +1,12 @@
-import type { GroupedEntities, RouteSettings, modalSharedLogic } from '../../../../types';
-import type { PanelPathState, PanelAction } from '../../types';
+import type { GroupedEntities, RouteSettings } from '../../../../types';
+import type { ExtendedPanelPathState, ExtendedPanelAction, navItemStateAction, modalSharedLogic } from '../../types';
 import { useState, useRef, useReducer, useCallback, useContext, useMemo } from 'react';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
 import { useAllEntities } from '../../hooks';
 import { debounce, duplicateCheck } from '../../utils';
 import { useFetchClient } from '@strapi/strapi/admin';
 
-type Action = 
-  | { type: 'SET_TITLE'; payload: string }
-  | { type: 'SET_SLUG'; payload: string }
-  | { type: 'SET_ACTIVE'; payload: boolean }
-  | { type: 'SET_OVERRIDE'; payload: boolean }
-
-function navItemStateReducer(navItemState: RouteSettings, action: Action): RouteSettings {
+function navItemStateReducer(navItemState: RouteSettings, action: navItemStateAction): RouteSettings {
   switch (action.type) {
     case 'SET_TITLE':
       return { ...navItemState, title: action.payload };
@@ -26,12 +20,6 @@ function navItemStateReducer(navItemState: RouteSettings, action: Action): Route
       throw new Error();
   }
 }
-
-type ExtendedPanelPathState = PanelPathState & {
-  initialPath: string
-};
-
-type ExtendedPanelAction = PanelAction | { type: 'SET_INITIALPATH'; payload: string };
 
 function pathReducer(state: ExtendedPanelPathState, action: ExtendedPanelAction): ExtendedPanelPathState {
   switch (action.type) {
