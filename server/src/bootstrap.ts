@@ -170,7 +170,9 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       let parent = null
       if (webatlas_parent) {
         try {
-          const isValid = await validateRouteDependencies(relatedRoute.documentId, webatlas_parent);
+          const isValid = await validateRouteDependencies({
+            newParentId: webatlas_parent
+          });
           if (isValid) parent = webatlas_parent
         } catch (err) {
           console.error(`Route dependency validation failed: ${err.message}`)
@@ -218,7 +220,10 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       let parent = null
       if (webatlas_parent) {
         try {
-          const isValid = await validateRouteDependencies(relatedRoute.documentId, webatlas_parent);
+          const isValid = await validateRouteDependencies({
+            routeId: relatedRoute ? relatedRoute.documentId : null,
+            newParentId: webatlas_parent
+          });
           if (isValid) parent = webatlas_parent
         } catch (err) {
           console.error(`Route dependency validation failed: ${err.message}`)
@@ -236,9 +241,11 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
         isOverride: webatlas_override || false,
         parent: parent,
       }
+
+      let routeDocumentId: string | undefined = relatedRoute?.documentId
       
       if (!relatedRoute) {
-        await strapi.documents(waRoute as UID.ContentType).create({
+        const createdRoute = await strapi.documents(waRoute as UID.ContentType).create({
           data: {
             relatedContentType: event.model.uid,
             relatedId: event.result.id,
@@ -248,6 +255,8 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
             ...routeData
           }
         })
+
+        routeDocumentId = (createdRoute as any)?.documentId as string | undefined
       } else {
         await strapi.documents(waRoute as UID.ContentType).update({ 
           documentId: relatedRoute.documentId,
@@ -258,7 +267,9 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
         })
       }
 
-      await cascadeCanonicalPathUpdates(relatedRoute.documentId, canonicalPath);
+      if (routeDocumentId) {
+        await cascadeCanonicalPathUpdates(routeDocumentId, canonicalPath);
+      }
     },
 
     async afterDelete(event: any) {
