@@ -95,13 +95,21 @@ export function useModalSharedLogic() {
   const { modalType, setModalType } = useContext(ModalContext);
   const { selectedNavigation } = useContext(SelectedNavigationContext);
 
-  async function checkUrl(url: string, routeDocumentId?: string | null) {
+  async function checkUrl({
+    url,
+    routeDocumentId,
+    withoutTransform = false
+  }: {
+    url: string, 
+    routeDocumentId?: string | null, 
+    withoutTransform?: boolean
+  }) {
 		if (!url) return
     setValidationState('checking')
 		dispatchPath({ type: 'SET_REPLACEMENT', payload: '' });
 		
 		try {
-			const data = await duplicateCheck({fetchFunction: get, path: url, routeDocumentId})
+			const data = await duplicateCheck({fetchFunction: get, path: url, routeDocumentId, withoutTransform });
 
 			if (!data || data === url) return 
 

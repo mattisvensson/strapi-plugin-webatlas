@@ -57,7 +57,7 @@ function ItemEditComponent({
   useEffect(() => {
     if (path.needsUrlCheck && path.value) {
       if (path.uidPath === path.value || path.initialPath === path.value) return
-      debouncedCheckUrl(path.value, item.route.documentId);
+      debouncedCheckUrl({url: path.value, routeDocumentId: item.route.documentId});
       dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
     }
   }, [path.needsUrlCheck, item.route.documentId]);
