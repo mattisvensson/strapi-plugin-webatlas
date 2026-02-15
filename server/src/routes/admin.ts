@@ -120,6 +120,24 @@ export default {
         ],
       }
     },
+    {
+      method: 'GET',
+      path: '/route/:documentId',
+      handler: 'admin.getRoute',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          { 
+            name: `plugin::${PLUGIN_ID}.has-permissions`,
+            config: { 
+              actions: [
+                `plugin::${PLUGIN_ID}.page.navigation`,
+              ] 
+            }
+          }
+        ],
+      }
+    },
 
     // Navigation
     {

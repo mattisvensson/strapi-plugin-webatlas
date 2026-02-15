@@ -64,6 +64,16 @@ export default ({strapi}) => ({
     return config;
   },
 
+  async getRoute(documentId: string) {
+    try {
+      return await strapi.documents(waRoute).findOne({
+        documentId: documentId,
+      });
+    } catch (e) {
+      console.log(e)
+    }
+  },
+
   async getAllRoutes() {
     try {
       const entities = await strapi.documents(waRoute).findMany();
@@ -106,6 +116,7 @@ export default ({strapi}) => ({
         where: {
           relatedDocumentId: documentId
         },
+        populate: ['parent']
       });
     } catch (e) {
       console.log(e)

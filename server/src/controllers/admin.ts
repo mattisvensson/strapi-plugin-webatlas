@@ -16,6 +16,17 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
+  async getRoute(ctx) {
+    try {
+      const { documentId } = ctx.params;
+
+      if (!documentId) return ctx.throw(400, 'Route documentId is required');
+
+      return await getAdminService().getRoute(documentId);
+    } catch (e) {
+      return ctx.throw(500, e)
+    }
+  },
   async getAllRoutes(ctx) {
     try {
       return await getAdminService().getAllRoutes();
