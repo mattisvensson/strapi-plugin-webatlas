@@ -23,7 +23,7 @@ export type modalSharedLogic = {
   dispatchNavItemState: React.Dispatch<any>,
   path: ExtendedPanelPathState,
   dispatchPath: React.Dispatch<ExtendedPanelAction>,
-  debouncedCheckUrl: (url: string, routeDocumentId?: string | null | undefined) => void,
+  debouncedCheckUrl: ({url, routeDocumentId, withoutTransform}: {url: string, routeDocumentId?: string | null, withoutTransform?: boolean}) => void,
   modalType: string,
   setModalType: (value: string) => void,
   selectedNavigation: NestedNavigation | undefined,
