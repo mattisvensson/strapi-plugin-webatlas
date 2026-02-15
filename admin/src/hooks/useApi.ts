@@ -83,6 +83,11 @@ export default function useApi() {
     return data
   };
 
+  const getRoute = async (documentId: string): Promise<Route> => {
+    const { data } = await get(`/${PLUGIN_ID}/route/${documentId}`);
+    return data
+  };
+
   const getAllRoutes = async (): Promise<Route[]> => {
     const { data } = await get(`/${PLUGIN_ID}/route`);
     return data
@@ -143,6 +148,7 @@ export default function useApi() {
     fetchConfiguredContentTypes,
     fetchAllEntities,
     getRelatedRoute,
+    getRoute, 
     getAllRoutes,
     updateRoute,
     getRouteHierarchy,
