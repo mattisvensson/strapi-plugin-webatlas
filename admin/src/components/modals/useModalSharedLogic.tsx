@@ -10,8 +10,6 @@ function navItemStateReducer(navItemState: RouteSettings, action: navItemStateAc
   switch (action.type) {
     case 'SET_TITLE':
       return { ...navItemState, title: action.payload };
-    case 'SET_SLUG':
-      return { ...navItemState, slug: action.payload };
     case 'SET_ACTIVE':
       return { ...navItemState, active: action.payload };
     case 'SET_OVERRIDE':
@@ -50,6 +48,8 @@ function pathReducer(state: ExtendedPanelPathState, action: ExtendedPanelAction)
       return { ...state, replacement: action.payload };
     case 'SET_UIDPATH':
       return { ...state, uidPath: action.payload };
+    case 'SET_SLUG':
+      return { ...state, slug: action.payload };
     case 'SET_CANONICALPATH':
       return { ...state, canonicalPath: action.payload };
     case 'SET_INITIALPATH':
@@ -84,6 +84,7 @@ export function useModalSharedLogic() {
 		needsUrlCheck: false,
 		value: '',
 		prevValue: '',
+    slug: '',
 		replacement: null,
 		uidPath: '',
 		canonicalPath: '',

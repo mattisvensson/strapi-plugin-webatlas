@@ -32,7 +32,6 @@ function ItemEditComponent({
   useEffect(() => {
     dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.path })
     dispatchNavItemState({ type: 'SET_TITLE', payload: item.route.title })
-    dispatchNavItemState({ type: 'SET_SLUG', payload: item.route.slug })
     dispatchNavItemState({ type: 'SET_ACTIVE', payload: item.route.active })
     
     const initialValues = {
@@ -89,7 +88,7 @@ function ItemEditComponent({
         ...item,
         update: {
           title: navItemState.title,
-          slug: navItemState.slug,
+          slug: path.slug,
           path: path.value,
           isOverride,
         },

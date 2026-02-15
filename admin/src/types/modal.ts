@@ -30,15 +30,17 @@ export type modalSharedLogic = {
 }
 
 export type ExtendedPanelPathState = PanelPathState & {
-  initialPath: string
+  initialPath: string,
+  slug: string,
 };
 
-export type ExtendedPanelAction = PanelAction | { type: 'SET_INITIALPATH'; payload: string };
+export type ExtendedPanelAction = PanelAction 
+  | { type: 'SET_INITIALPATH'; payload: string }
+  | { type: 'SET_SLUG'; payload: string }
 
 
 export type navItemStateAction = 
   | { type: 'SET_TITLE'; payload: string }
-  | { type: 'SET_SLUG'; payload: string }
   | { type: 'SET_ACTIVE'; payload: boolean }
   | { type: 'SET_OVERRIDE'; payload: boolean }
 
