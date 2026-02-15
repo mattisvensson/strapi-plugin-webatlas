@@ -72,9 +72,11 @@
   "webatlas.modal.externalItem.loadingText.edit": "Wird gespeichert",
   "webatlas.modal.externalItem.pathField.placeholder": "z.B. https://example.com",
   "webatlas.modal.item.titleField.label": "Titel",
-  "webatlas.modal.item.titleField.placeholder": "z.B. Über uns",
+  "webatlas.modal.item.canonicalPathField.label": "Kanonischer Pfad",
+  "webatlas.modal.item.canonicalPathField.tooltip": "Basierend auf der Inhaltsstruktur",
+  "webatlas.modal.item.slugField.label": "Slug",
+  "webatlas.modal.item.navigationPosition.label": "Navigationsposition",
   "webatlas.modal.item.pathField.label": "Pfad",
-  "webatlas.modal.item.pathField.placeholder": "z.B. ueber/",
 
   "webatlas.components.pathInfo.checking": "Überprüfe, ob der Pfad verfügbar ist...",
   "webatlas.components.pathInfo.available": "Pfad ist verfügbar",
