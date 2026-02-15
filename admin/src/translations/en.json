@@ -72,9 +72,11 @@
   "webatlas.modal.externalItem.loadingText.edit": "Saving",
   "webatlas.modal.externalItem.pathField.placeholder": "e.g. https://example.com",
   "webatlas.modal.item.titleField.label": "Title",
-  "webatlas.modal.item.titleField.placeholder": "e.g. About Us",
+  "webatlas.modal.item.canonicalPathField.label": "Canonical Path",
+  "webatlas.modal.item.canonicalPathField.tooltip": "Based on content hierarchy",
+  "webatlas.modal.item.slugField.label": "Slug",
+  "webatlas.modal.item.navigationPosition.label": "Navigation Position",
   "webatlas.modal.item.pathField.label": "Path",
-  "webatlas.modal.item.pathField.placeholder": "e.g. about/",
 
   "webatlas.components.pathInfo.checking": "Checking if path is available...",
   "webatlas.components.pathInfo.available": "Path is available",
