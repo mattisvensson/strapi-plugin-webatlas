@@ -1,4 +1,4 @@
-import type { NestedNavItem, Entity, GroupedEntities } from '../../../types';
+import type { NestedNavItem, Entity, GroupedEntities, RouteType } from '../../../types';
 import type { PanelPathState } from '../types';
 
 type CreateTempNavItemObjectParams = {
@@ -17,7 +17,7 @@ type CreateTempNavItemObjectParams = {
   selectedEntity: Entity | undefined | null;
   selectedContentType: GroupedEntities | undefined | null;
   path?: PanelPathState;
-  type?: 'internal' | 'external' | 'wrapper';
+  type?: RouteType;
 };
 
 export default function createTempNavItemObject({ 
