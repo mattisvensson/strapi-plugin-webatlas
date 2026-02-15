@@ -9,7 +9,7 @@ export type Route = {
   relatedContentType: string;
   relatedId: number;
   relatedDocumentId: string,
-  type: 'internal' | 'external' | 'wrapper';
+  type: RouteType;
   active: boolean;
   isOverride: boolean;
   navitem: {
@@ -32,5 +32,7 @@ export type RouteSettings = {
   isOverride?: boolean;
   active?: boolean;
   navitem?: number;
-  type?: 'internal' | 'external' | 'wrapper';
+  type?: RouteType;
 };
+
+export type RouteType = 'internal' | 'external' | 'wrapper';
