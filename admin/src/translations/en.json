@@ -77,6 +77,7 @@
   "webatlas.modal.item.slugField.label": "Slug",
   "webatlas.modal.item.navigationPosition.label": "Navigation Position",
   "webatlas.modal.item.pathField.label": "Path",
+  "webatlas.modal.item.canonicalPathMismatch": "Warning: Canonical Path does not match navigation path",
 
   "webatlas.components.pathInfo.checking": "Checking if path is available...",
   "webatlas.components.pathInfo.available": "Path is available",

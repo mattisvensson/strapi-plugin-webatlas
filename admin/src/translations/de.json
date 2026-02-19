@@ -77,6 +77,7 @@
   "webatlas.modal.item.slugField.label": "Slug",
   "webatlas.modal.item.navigationPosition.label": "Navigationsposition",
   "webatlas.modal.item.pathField.label": "Pfad",
+  "webatlas.modal.item.canonicalPathMismatch": "Warnung: Der kanonische Pfad stimmt nicht mit dem Navigationspfad überein",
 
   "webatlas.components.pathInfo.checking": "Überprüfe, ob der Pfad verfügbar ist...",
   "webatlas.components.pathInfo.available": "Pfad ist verfügbar",
@@ -120,7 +121,7 @@
   "webatlas.restore": "Wiederherstellen",
   "webatlas.loading": "Laden...",
   "webatlas.version": "Version",
-  
+
   "webatlas.notification.error": "Ein Fehler ist aufgetreten",
   "webatlas.notification.settings.saved": "Einstellungen erfolgreich gespeichert",
   "webatlas.notification.paths.fetchFailed": "Pfade konnten nicht abgerufen werden",
