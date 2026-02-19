@@ -1,5 +1,5 @@
 import type { NestedNavItem, Entity, GroupedEntities, RouteType } from '../../../types';
-import type { PanelPathState } from '../types';
+import type { ExtendedPanelPathState } from '../types';
 
 type CreateTempNavItemObjectParams = {
   parentNavItemId: string | undefined;
@@ -16,7 +16,7 @@ type CreateTempNavItemObjectParams = {
   };
   selectedEntity: Entity | undefined | null;
   selectedContentType: GroupedEntities | undefined | null;
-  path?: PanelPathState;
+  path?: ExtendedPanelPathState;
   type?: RouteType;
 };
 
@@ -57,7 +57,7 @@ export default function createTempNavItemObject({
       relatedContentType: selectedContentType ? selectedContentType.contentType.uid : '',
       relatedDocumentId: selectedEntity ? selectedEntity.documentId : '',
       relatedId: selectedEntity ? selectedEntity.id : 0,
-      slug: path?.value || '',
+      slug: path?.slug || '',
       title: navItemState.title || '',
       uidPath: path?.uidPath || '',
       updatedAt: new Date().toISOString(),
