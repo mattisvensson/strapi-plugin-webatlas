@@ -7,6 +7,7 @@
   "webatlas.navigation.page.newItemButton": "Neues Element",
   "webatlas.navigation.page.selectNavigation": "Navigation auswählen",
   "webatlas.navigation.page.navItem.addChildren": "Unterelement hinzufügen",
+  "webatlas.navigation.page.navItem.viewEntity": "Entität anzeigen",
 
   "webatlas.paths.page.title": "Pfad",
   "webatlas.paths.page.subtitle": "Übersicht aller vorhandenen Pfade",

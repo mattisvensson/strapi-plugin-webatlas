@@ -7,6 +7,7 @@
   "webatlas.navigation.page.newItemButton": "New Item",
   "webatlas.navigation.page.selectNavigation": "Select Navigation",
   "webatlas.navigation.page.navItem.addChildren": "Add children",
+  "webatlas.navigation.page.navItem.viewEntity": "View entity",
 
   "webatlas.paths.page.title": "Paths",
   "webatlas.paths.page.subtitle": "Overview of all existing paths",

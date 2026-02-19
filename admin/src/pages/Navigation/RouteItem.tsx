@@ -5,6 +5,7 @@ import { useContext, ReactElement, forwardRef } from 'react';
 import { Link as LinkIcon, ExternalLink, OneToMany, More, Drag } from '@strapi/icons';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
+import { Link as RouterLink } from 'react-router-dom';
 
 export interface RouteItemProps {
   item: NestedNavItem;
@@ -50,6 +51,10 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
 
   const { setModalType } = useContext(ModalContext);
   const { formatMessage } = useIntl();
+
+  const viewEntityTo = item.route.relatedContentType && item.route.relatedDocumentId
+    ? `/content-manager/collection-types/${item.route.relatedContentType}/${item.route.relatedDocumentId}`
+    : null;
 
   const itemStatusOptions = {
     published: {
@@ -211,6 +216,18 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
                   defaultMessage: 'Edit',
                 })}
               </MenuItem>
+              {item.route.type === 'internal' && viewEntityTo && <MenuItem
+                isLink
+                as={RouterLink}
+                to={viewEntityTo}
+              >
+                <Typography>
+                  {formatMessage({
+                    id: getTranslation('navigation.page.navItem.viewEntity'),
+                    defaultMessage: 'View Entity',
+                  })}
+                </Typography>
+              </MenuItem>}
               {depth !== undefined && depth < maxDepth && <MenuItem onClick={() => handleAddChildren()}>
                 {formatMessage({
                   id: getTranslation('navigation.page.navItem.addChildren'),
