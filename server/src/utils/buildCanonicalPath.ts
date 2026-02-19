@@ -8,11 +8,12 @@ export default async function buildCanonicalPath(slug: string, parentDocumentId:
       documentId: parentDocumentId
     }) as Route | null;
 
-    const canonicalPath = `${parentRoute?.canonicalPath || ''}/${slug}`; 
+    const parentCanonicalPath = parentRoute?.canonicalPath || '';
+    const canonicalPath = `${parentCanonicalPath ? parentCanonicalPath + '/' : ''}${slug}`;
 
     return canonicalPath;
   } catch (err) {
     console.error('Error building canonical path:', err);
-    return '/' + slug; // Fallback to just the slug
+    return slug; // Fallback to just the slug
   }
 }
