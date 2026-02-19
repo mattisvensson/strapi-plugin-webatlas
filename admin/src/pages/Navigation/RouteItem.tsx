@@ -57,21 +57,27 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
         id: getTranslation('published'),
         defaultMessage: 'Published',
       }),
+      backgroundColor: 'success100',
       textColor: 'success600',
+      borderColor: 'success200',
     },
     draft: {
       status: formatMessage({
         id: getTranslation('draft'),
         defaultMessage: 'Draft',
       }),
+      backgroundColor: 'secondary100',
       textColor: 'secondary600',
+      borderColor: 'secondary200',
     },
     modified: {
       status: formatMessage({
         id: getTranslation('modified'),
         defaultMessage: 'Modified',
       }),
+      backgroundColor: 'alternative100',
       textColor: 'alternative600',
+      borderColor: 'alternative200',
     }
   }
 
@@ -143,7 +149,11 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
               <Typography textColor="neutral400">{item.route.type === 'internal' && '/'}{item.update?.path ? item.update.path : item.route.path}</Typography>
             </Flex>
             {item.isNew && !item.deleted &&
-              <Badge backgroundColor="neutral100" textColor="success600">
+              <Badge
+                backgroundColor="success100"
+                textColor="success600"
+                borderColor="success200"
+              >
                 <Typography fontWeight="bold">
                   {formatMessage({
                     id: getTranslation('new'),
@@ -153,7 +163,11 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
               </Badge>
             }
             {item.update && !item.deleted &&
-              <Badge backgroundColor="neutral100" textColor="warning600">
+              <Badge
+                backgroundColor="warning100"
+                textColor="warning600"
+                borderColor="warning200"
+              >
                 <Typography fontWeight="bold">
                   {formatMessage({
                     id: getTranslation('updated'),
@@ -163,7 +177,11 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
               </Badge>
             }
             {item.deleted &&
-              <Badge backgroundColor="neutral100" textColor="danger600">
+              <Badge
+                backgroundColor="danger100"
+                textColor="danger600"
+                borderColor="danger200"
+              >
                 <Typography fontWeight="bold">
                   {formatMessage({
                     id: getTranslation('deleted'),
@@ -175,7 +193,11 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
           </Flex>
           <Flex direction="row" gap={4}>
             {item.route.type === 'internal' && item.status &&
-              <Badge backgroundColor="neutral100" textColor={itemStatusOptions[item.status].textColor}>
+              <Badge
+                backgroundColor={itemStatusOptions[item.status].backgroundColor}
+                textColor={itemStatusOptions[item.status].textColor}
+                borderColor={itemStatusOptions[item.status].borderColor}
+              >
                 <Typography fontWeight="bold">
                   {itemStatusOptions[item.status].status}
                 </Typography>
