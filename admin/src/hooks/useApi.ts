@@ -19,14 +19,14 @@ export default function useApi() {
     try {
       const { data: config } = await get(`/${PLUGIN_ID}/config`);
       const configuredTypes = config?.selectedContentTypes || [];
-      
+
       if (configuredTypes.length === 0) {
         return [];
       }
 
       const allContentTypes = await fetchAllContentTypes();
       const configuredUIDs = new Set(configuredTypes.map((ct: ConfigContentType) => ct.uid));
-      
+
       return allContentTypes.filter((ct: ContentType) => configuredUIDs.has(ct.uid));
     } catch (err) {
       console.error('Error fetching configured content types:', err);
@@ -36,10 +36,10 @@ export default function useApi() {
 
   const fetchAllEntities = async (): Promise<GroupedEntities[]> => {
     try {
-      
+
       const { data } = await get(`/${PLUGIN_ID}/config`)
       const contentTypes = data?.selectedContentTypes || []
-      
+
 
       if (!contentTypes || contentTypes.length === 0) {
         return [];
@@ -51,11 +51,11 @@ export default function useApi() {
         contentTypes.map(async (contentType: ConfigContentType) => {
           try {
             const { data } = await get(`/content-manager/collection-types/${contentType.uid}?pageSize=9999`);
- 
+
             if (!data || !data.results) {
               return null;
             }
-            
+
             return {
               entities: data.results,
               contentType
@@ -90,15 +90,6 @@ export default function useApi() {
 
   const getAllRoutes = async (): Promise<Route[]> => {
     const { data } = await get(`/${PLUGIN_ID}/route`);
-    return data
-  };
-  
-  const updateRoute = async (body: RouteSettings, documentId: string) => {
-    const { data } = await put(`/${PLUGIN_ID}/route?documentId=${documentId}`, {
-      data: {
-        ...body,
-      },
-    });
     return data
   };
 
@@ -143,14 +134,13 @@ export default function useApi() {
     return data
   };
 
-  return { 
+  return {
     fetchAllContentTypes,
     fetchConfiguredContentTypes,
     fetchAllEntities,
     getRelatedRoute,
-    getRoute, 
+    getRoute,
     getAllRoutes,
-    updateRoute,
     getRouteHierarchy,
     getNavigation,
     createNavigation,

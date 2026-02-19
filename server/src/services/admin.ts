@@ -1,7 +1,6 @@
-import type { NavigationInput, NestedNavigation, NestedNavItem, PluginConfig, StructuredNavigationVariant } from "../../../types";
-import duplicateCheck from "../utils/duplicateCheck";
-import { getPath, transformToUrl, waRoute, waNavigation, waNavItem, PLUGIN_ID } from "../../../utils";
-import { reduceDepthOfOrphanedItems, createExternalRoute, createNavItem, updateNavItem, deleteNavItem, buildStructuredNavigation, getExternalRouteIds, getRouteDescendants } from "../utils";
+import type { NavigationInput, NestedNavigation, NestedNavItem, PluginConfig, StructuredNavigationVariant, Route } from "../../../types";
+import { transformToUrl, waRoute, waNavigation, waNavItem, PLUGIN_ID } from "../../../utils";
+import { reduceDepthOfOrphanedItems, createExternalRoute, updateRoute, createNavItem, updateNavItem, deleteNavItem, buildStructuredNavigation, getExternalRouteIds, getRouteDescendants, duplicateCheck } from "../utils";
 
 export default ({strapi}) => ({
 
@@ -78,33 +77,6 @@ export default ({strapi}) => ({
     try {
       const entities = await strapi.documents(waRoute).findMany();
       return entities;
-    } catch (e) {
-      console.log(e)
-    }
-  },
-  // TODO: Types
-  async updateRoute(documentId: string, data: any) {
-    try {
-      let checkedPath = data.path
-
-      if (data.internal) {
-        const parent = data.parent ? await strapi.documents(waNavItem).findOne({
-          documentId: data.parent
-        }) : null;
-        
-        const path = data.isOverride ? data.slug : getPath(parent?.path, data.slug)
-        checkedPath = await duplicateCheck(path, documentId);
-      }
-
-      const entity = await strapi.documents(waRoute).update({
-        documentId: documentId,
-        data: {
-          ...data,
-          path: checkedPath,
-        }
-      });
-
-      return entity;
     } catch (e) {
       console.log(e)
     }
@@ -281,7 +253,7 @@ export default ({strapi}) => ({
       // Handle route updates for existing items
       if (item.update && !item.isNew) {
         try {
-          await this.updateRoute(item.route.documentId, {
+          await updateRoute(item.route.documentId, {
             title: item.update.title || item.route.title,
             slug: item.update.slug || item.route.slug,
             path: item.update.path || item.route.path,

@@ -34,18 +34,6 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async updateRoute (ctx) {
-    try {
-      const { documentId } = ctx.query;
-
-      if (!documentId) return ctx.throw(400, 'Route documentId is required');
-
-      const { data } = ctx.request.body;
-      return await getAdminService().updateRoute(documentId, data);
-    } catch (e) {
-      return ctx.throw(500, e)
-    }
-  },
   async getRelatedRoute (ctx) {
     try {
       const { documentId } = ctx.query;
@@ -80,9 +68,9 @@ const admin = () => ({
   async createNavigation (ctx) {
     try {
       const { data } = ctx.request.body;
-      
+
       if (!data || !data.name) return ctx.throw(400, 'Navigation name is required');
-      
+
       return await getAdminService().createNavigation(data.name, data.visible);
     } catch (e) {
       return ctx.throw(500, e)
@@ -127,7 +115,7 @@ const admin = () => ({
       const { path, targetRouteDocumentId } = ctx.query
 
       if (!path) return ctx.throw(400, 'Path is required')
-      
+
       const res = await getAdminService().checkUniquePath(path, targetRouteDocumentId || null);
       return ctx.send({ uniquePath: res });
     } catch (e) {
