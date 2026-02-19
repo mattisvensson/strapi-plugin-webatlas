@@ -1,23 +1,25 @@
 import type { Route } from '../../../../../types';
 import type { ModalItem_VariantCreate } from '../../../types';
-import { Box, Grid, Field } from '@strapi/design-system';
+import { Box, Grid, Field, Flex, Badge } from '@strapi/design-system';
 import PathInfo from '../../PathInfo';
 import { useEffect } from 'react';
 import { useModalSharedLogic } from '../useModalSharedLogic';
 import { useIntl } from 'react-intl';
 import { getTranslation } from '../../../utils';
 import Tooltip from '../../Tooltip';
+import { Typography } from '@strapi/design-system';
+import { WarningCircle } from '@strapi/icons';
 
-type ItemDetailsProps = Pick<ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>, 'navItemState' | 'dispatchNavItemState' | 'path' | 'dispatchPath' | 'validationState' | 'debouncedCheckUrl'> & 
+type ItemDetailsProps = Pick<ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>, 'navItemState' | 'dispatchNavItemState' | 'path' | 'dispatchPath' | 'validationState' | 'debouncedCheckUrl'> &
   { route: Route, parentRoute: Route | null }
 
-export default function ItemDetails({ 
-  navItemState, 
-  dispatchNavItemState, 
-  path, 
-  dispatchPath, 
-  validationState, 
-  route, 
+export default function ItemDetails({
+  navItemState,
+  dispatchNavItemState,
+  path,
+  dispatchPath,
+  validationState,
+  route,
   parentRoute,
   debouncedCheckUrl
 }: ItemDetailsProps) {
@@ -39,6 +41,19 @@ export default function ItemDetails({
 
   return (
     <Grid.Root gap={4}>
+      {path.canonicalPath !== path.value && <Grid.Item col={12} s={12} alignItems="baseline">
+        <Badge variant="warning" minWidth="100%">
+          <Flex alignItems="center" gap={2}>
+            <WarningCircle />
+            <Typography>
+              {formatMessage({
+                id: getTranslation('modal.item.canonicalPathMismatch'),
+                defaultMessage: 'Warning: Canonical Path does not match navigation path'
+              })}
+            </Typography>
+          </Flex>
+        </Badge>
+      </Grid.Item>}
       <Grid.Item col={12} s={12} alignItems="baseline">
         <Box width="100%">
           <Field.Root required>
@@ -74,8 +89,8 @@ export default function ItemDetails({
               name="canonicalPath"
               value={route.canonicalPath || ''}
               disabled
-            />  
-            <Field.Hint />  
+            />
+            <Field.Hint />
           </Field.Root>
         </Box>
       </Grid.Item>

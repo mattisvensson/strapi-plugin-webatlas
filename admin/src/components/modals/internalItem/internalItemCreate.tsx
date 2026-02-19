@@ -11,7 +11,7 @@ import { FullLoader } from '../../UI';
 import { useApi } from '../../../hooks';
 import ItemDetails from './ItemDetails';
 
-function ItemCreateComponent({ 
+function ItemCreateComponent({
   availableEntities,
   selectedContentType,
   setSelectedContentType,
@@ -37,7 +37,7 @@ function ItemCreateComponent({
   useEffect(() => {
     async function fetchParentRoute() {
       if (!parentNavItem?.documentId) return setParentRoute(null)
-      
+
       try {
         const relatedRoute = await getRoute(parentNavItem.route.documentId)
 
@@ -54,7 +54,7 @@ function ItemCreateComponent({
   useEffect(() => {
     async function fetchRoute() {
       if (!selectedContentType?.contentType || !entity?.documentId) return setLoadingRoute(false)
-      
+
       setLoadingRoute(true)
       try {
         const relatedRoute = await getRelatedRoute(entity.documentId)
@@ -66,6 +66,7 @@ function ItemCreateComponent({
         dispatchPath({ type: 'SET_SLUG', payload: relatedRoute.slug });
         dispatchPath({ type: 'SET_UIDPATH', payload: relatedRoute.uidPath });
         dispatchPath({ type: 'SET_INITIALPATH', payload: relatedRoute.path });
+        dispatchPath({ type: 'SET_CANONICALPATH', payload: relatedRoute.canonicalPath });
 
         dispatchNavItemState({ type: 'SET_TITLE', payload: relatedRoute.title })
         dispatchNavItemState({ type: 'SET_ACTIVE', payload: relatedRoute.active })
@@ -80,7 +81,7 @@ function ItemCreateComponent({
     }
     fetchRoute()
   }, [entity])
-  
+
   const addItem = async () => {
     try {
       setLoading(true)
@@ -217,7 +218,7 @@ function ItemCreateComponent({
           <Box paddingBottom={6} paddingTop={6}>
             <Divider/>
           </Box>
-          {(loadingRoute || !route) ? 
+          {(loadingRoute || !route) ?
             <FullLoader height={50}/>
            :
             <ItemDetails
