@@ -1,4 +1,4 @@
-import { Box, Typography, Flex, SimpleMenu, MenuItem, IconButton, Status } from '@strapi/design-system';
+import { Box, Typography, Flex, SimpleMenu, MenuItem, IconButton, Badge } from '@strapi/design-system';
 import { NestedNavItem, NestedNavigation } from '../../../../types';
 import { ModalContext } from '../../contexts';
 import { useContext, ReactElement, forwardRef } from 'react';
@@ -57,21 +57,21 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
         id: getTranslation('published'),
         defaultMessage: 'Published',
       }),
-      variant: 'primary',
+      textColor: 'success600',
     },
     draft: {
       status: formatMessage({
         id: getTranslation('draft'),
         defaultMessage: 'Draft',
       }),
-      variant: 'secondary',
+      textColor: 'secondary600',
     },
     modified: {
       status: formatMessage({
         id: getTranslation('modified'),
         defaultMessage: 'Modified',
       }),
-      variant: 'alternative',
+      textColor: 'alternative600',
     }
   }
 
@@ -86,7 +86,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
     let newModal = 'ItemEdit'
     if (item.route.type === 'external') newModal = 'ExternalEdit'
     if (item.route.type === 'wrapper') newModal = 'WrapperEdit'
-    
+
     setModalType(newModal)
   }
 
@@ -115,7 +115,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
 
   return (
     <Box
-      ref={wrapperRef} 
+      ref={wrapperRef}
       style={elStyle}
     >
       <Box
@@ -143,43 +143,43 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
               <Typography textColor="neutral400">{item.route.type === 'internal' && '/'}{item.update?.path ? item.update.path : item.route.path}</Typography>
             </Flex>
             {item.isNew && !item.deleted &&
-              <Status variant="alternative" size="S">
+              <Badge backgroundColor="neutral100" textColor="success600">
                 <Typography fontWeight="bold">
                   {formatMessage({
                     id: getTranslation('new'),
                     defaultMessage: 'New',
                   })}
                 </Typography>
-              </Status>
+              </Badge>
             }
             {item.update && !item.deleted &&
-              <Status variant="alternative" size="S">
+              <Badge backgroundColor="neutral100" textColor="warning600">
                 <Typography fontWeight="bold">
                   {formatMessage({
                     id: getTranslation('updated'),
                     defaultMessage: 'Updated',
                   })}
                 </Typography>
-              </Status>
+              </Badge>
             }
             {item.deleted &&
-              <Status size="S">
-                <Typography fontWeight="bold" textColor="danger500">
+              <Badge backgroundColor="neutral100" textColor="danger600">
+                <Typography fontWeight="bold">
                   {formatMessage({
                     id: getTranslation('deleted'),
                     defaultMessage: 'Deleted',
                   })}
                 </Typography>
-              </Status>
+              </Badge>
             }
           </Flex>
           <Flex direction="row" gap={4}>
             {item.route.type === 'internal' && item.status &&
-              <Status variant={itemStatusOptions[item.status].variant} size="S">
+              <Badge backgroundColor="neutral100" textColor={itemStatusOptions[item.status].textColor}>
                 <Typography fontWeight="bold">
                   {itemStatusOptions[item.status].status}
                 </Typography>
-              </Status>
+              </Badge>
             }
             <SimpleMenu label="Item actions" tag={IconButton} icon={<More />}>
             {!item.deleted && <>
