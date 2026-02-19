@@ -33,6 +33,7 @@ export type RouteSettings = {
   active?: boolean;
   navitem?: number;
   type?: RouteType;
+  parent?: string;
 };
 
 export type RouteType = 'internal' | 'external' | 'wrapper';

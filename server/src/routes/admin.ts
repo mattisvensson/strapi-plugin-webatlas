@@ -11,15 +11,15 @@ export default {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          { 
+          {
             name: `plugin::${PLUGIN_ID}.has-permissions`,
-            config: { 
+            config: {
               actions: [
                 `plugin::${PLUGIN_ID}.settings.general`,
                 `plugin::${PLUGIN_ID}.settings.navigation`,
                 `plugin::${PLUGIN_ID}.page.navigation`,
                 `plugin::${PLUGIN_ID}.cm.aside`,
-              ] 
+              ]
             }
           },
         ],
@@ -32,7 +32,7 @@ export default {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          { 
+          {
             name: `plugin::${PLUGIN_ID}.has-permissions`,
             config: {
                actions: [
@@ -53,31 +53,13 @@ export default {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          { 
+          {
             name: `plugin::${PLUGIN_ID}.has-permissions`,
-            config: { 
+            config: {
               actions: [
                 `plugin::${PLUGIN_ID}.page.routes`,
                 `plugin::${PLUGIN_ID}.cm.aside`,
-              ] 
-            }
-          }
-        ],
-      }
-    },
-    {
-      method: 'PUT',
-      path: '/route',
-      handler: 'admin.updateRoute',
-      config: {
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          { 
-            name: `plugin::${PLUGIN_ID}.has-permissions`,
-            config: { 
-              actions: [
-                `plugin::${PLUGIN_ID}.page.navigation`
-              ] 
+              ]
             }
           }
         ],
@@ -90,9 +72,9 @@ export default {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          { 
+          {
             name: `plugin::${PLUGIN_ID}.has-permissions`,
-            config: { 
+            config: {
               actions: [
                 `plugin::${PLUGIN_ID}.cm.aside`,
                 `plugin::${PLUGIN_ID}.page.navigation`
@@ -109,9 +91,9 @@ export default {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          { 
+          {
             name: `plugin::${PLUGIN_ID}.has-permissions`,
-            config: { 
+            config: {
               actions: [
                 `plugin::${PLUGIN_ID}.cm.aside`,
               ]
@@ -127,12 +109,12 @@ export default {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          { 
+          {
             name: `plugin::${PLUGIN_ID}.has-permissions`,
-            config: { 
+            config: {
               actions: [
                 `plugin::${PLUGIN_ID}.page.navigation`,
-              ] 
+              ]
             }
           }
         ],
@@ -147,7 +129,7 @@ export default {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          { 
+          {
             name: `plugin::${PLUGIN_ID}.has-permissions`,
             config: {
               actions: [
@@ -165,9 +147,9 @@ export default {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          { 
+          {
             name: `plugin::${PLUGIN_ID}.has-permissions`,
-            config: { 
+            config: {
               actions: [
                 `plugin::${PLUGIN_ID}.page.navigation`
               ]
@@ -183,9 +165,9 @@ export default {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          { 
+          {
             name: `plugin::${PLUGIN_ID}.has-permissions`,
-            config: { 
+            config: {
               actions: [
                 `plugin::${PLUGIN_ID}.page.navigation`
               ]
@@ -201,9 +183,9 @@ export default {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          { 
+          {
             name: `plugin::${PLUGIN_ID}.has-permissions`,
-            config: { 
+            config: {
               actions: [
                 `plugin::${PLUGIN_ID}.page.navigation`
               ]
@@ -219,9 +201,9 @@ export default {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          { 
+          {
             name: `plugin::${PLUGIN_ID}.has-permissions`,
-            config: { 
+            config: {
               actions: [
                 `plugin::${PLUGIN_ID}.page.navigation`
               ]
@@ -239,9 +221,9 @@ export default {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          { 
+          {
             name: `plugin::${PLUGIN_ID}.has-permissions`,
-            config: { 
+            config: {
               actions: [
                 `plugin::${PLUGIN_ID}.cm.aside`,
                 `plugin::${PLUGIN_ID}.page.navigation`

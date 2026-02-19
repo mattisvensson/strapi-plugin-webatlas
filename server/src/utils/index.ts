@@ -2,7 +2,7 @@ import duplicateCheck from "./duplicateCheck";
 import { createNavItem, updateNavItem, deleteNavItem } from "./navItemHandler";
 import { getAdminService, getClientService } from "./pluginHelpers";
 import reduceDepthOfOrphanedItems from "./reduceDepthOfOrphanedItems";
-import { createExternalRoute } from "./routeHandler";
+import { createExternalRoute, updateRoute } from "./routeHandler";
 import buildStructuredNavigation from './buildStructuredNavigation';
 import extractRouteAndItems from './extractRouteAndItems';
 import getFullPopulateObject from './populateDeep';
@@ -24,6 +24,7 @@ export {
   getClientService,
   reduceDepthOfOrphanedItems,
   createExternalRoute,
+  updateRoute,
   buildStructuredNavigation,
   extractRouteAndItems,
   getFullPopulateObject,
