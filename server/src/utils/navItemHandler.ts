@@ -1,38 +1,10 @@
 import type { UID } from '@strapi/strapi';
 import type { NavItemSettings, NestedNavItem, Route } from "../../../types";
-import { getPath, waRoute, waNavItem } from "../../../utils";
+import { waNavItem } from "../../../utils";
 
 async function createNavItem(data: NavItemSettings): Promise<null | NestedNavItem> {
   try {
     if (!data.route || !data.navigation) return null
-
-    const parent = data.parent ? await strapi.documents(waNavItem as UID.ContentType).findOne({
-      documentId: data.parent,
-      populate: ['route']
-    }) as NestedNavItem : null;
-
-    const route = data.route ? await strapi.documents(waRoute as UID.ContentType).findOne({
-      documentId: data.route
-    }) as Route : null;
-
-    let path = route.slug
-
-    if (route.type === "internal" && !route.isOverride && parent?.route.type === "internal") path = getPath(parent?.route?.path, route.slug)
-
-    await strapi.documents(waRoute as UID.ContentType).update({
-      documentId: data.route,
-      data: {
-        path,
-      }
-    });
-
-    // TODO: Update webatlas fields in related entity
-    // await strapi.documents(route.relatedContentType).update({
-    //   documentId: route.relatedDocumentId,
-    //   data: {
-    //     webatlas_path: path
-    //   }
-    // });
 
     const entity = await strapi.documents(waNavItem as UID.ContentType).create({
       data: {
@@ -47,7 +19,7 @@ async function createNavItem(data: NavItemSettings): Promise<null | NestedNavIte
   } catch (e) {
     console.log(e)
   }
-} 
+}
 
 async function updateNavItem(documentId: string, data: Pick<NavItemSettings, "parent" | "order">) {
   try {

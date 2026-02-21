@@ -14,6 +14,7 @@ import getRouteAncestors from "./getRouteAncestors";
 import getRouteDescendants from "./getRouteDescendants";
 import getExternalRouteIds from "./getExternalRouteIds";
 import validateRouteDependencies from "./validateRouteDependencies";
+import buildNavigationPath from "./buildNavigationPath";
 
 export {
   duplicateCheck,
@@ -36,4 +37,5 @@ export {
   getRouteDescendants,
   getExternalRouteIds,
   validateRouteDependencies,
+  buildNavigationPath,
 };
