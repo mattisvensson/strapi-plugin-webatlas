@@ -8,31 +8,25 @@ import pluginPermissions from './permissions';
 export default {
   register(app: StrapiApp) {
     app.addMenuLink({
-      to: `/plugins/${PLUGIN_ID}/paths`,
+      to: `plugins/${PLUGIN_ID}/paths`,
       icon: PathIcon,
       intlLabel: {
         id: `${PLUGIN_ID}.link.paths`,
         defaultMessage: 'Paths',
       },
-      Component: async () => {
-        const component = await import('./pages/Paths');
-        return { default: component.default };
-      },
+      Component: () => import('./pages/Paths'),
       permissions: [
           pluginPermissions['page.routes'][0],
       ],
     });
     app.addMenuLink({
-      to: `/plugins/${PLUGIN_ID}/navigation`,
+      to: `plugins/${PLUGIN_ID}/navigation`,
       icon: NavigationIcon,
       intlLabel: {
         id: `${PLUGIN_ID}.link.navigation`,
         defaultMessage: 'Navigation',
       },
-      Component: async () => {
-        const component = await import('./pages/Navigation');
-        return { default: component.default };
-      },
+      Component: () => import('./pages/Navigation'),
       permissions: [
         pluginPermissions['page.navigation'][0],
       ],
@@ -51,31 +45,23 @@ export default {
           defaultMessage: 'General',
         },
         id: `${PLUGIN_ID}-general`,
-        to: `/settings/${PLUGIN_ID}/general`,
-        Component: async () => {
-          return await import(
-            /* webpackChunkName: "webatlas-settings-general-page" */ './pages/Settings/General'
-          );
-        },
+        to: `${PLUGIN_ID}/general`,
+        Component: () => import('./pages/Settings/General'),
         permissions: [
           pluginPermissions['settings.general'][0],
         ],
       }
     )
     app.addSettingsLink(
-      PLUGIN_ID,      
+      PLUGIN_ID,
       {
         intlLabel: {
           id: `${PLUGIN_ID}.settings.navigation`,
           defaultMessage: 'Navigation',
         },
         id: `${PLUGIN_ID}-navigation`,
-        to: `/settings/${PLUGIN_ID}/navigation`,
-        Component: async () => {
-          return await import(
-            /* webpackChunkName: "webatlas-settings-navigation-page" */ './pages/Settings/Navigation'
-          );
-        },
+        to: `${PLUGIN_ID}/navigation`,
+        Component: () => import('./pages/Settings/Navigation'),
         permissions: [
           pluginPermissions['settings.navigation'][0],
         ],
