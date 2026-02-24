@@ -5,6 +5,7 @@ import getTranslation from "./getTranslation";
 import countChildren from "./countChildren";
 import createTempNavItemObject from "./createTempNavItemObject";
 import findParentNavItem from "./findParentNavItem";
+import buildBreadcrumbString from "./buildBreadcrumbString";
 
 export {
   debounce,
@@ -15,4 +16,5 @@ export {
   countChildren,
   createTempNavItemObject,
   findParentNavItem,
+  buildBreadcrumbString,
 };
