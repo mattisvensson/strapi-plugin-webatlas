@@ -2,12 +2,14 @@ import type { GroupedEntities, NestedNavItem, NestedNavigation, RouteSettings } 
 import type { PanelPathState, PanelAction } from '../types';
 
 export type ModalItem_VariantCreate = {
-  parentNavItem: NestedNavItem | null;
+  actionItemParent: NestedNavItem | null;
   onCreate: (newItem: NestedNavItem) => void;
 }
 
 export type ModalItem_VariantEdit = {
   item: NestedNavItem;
+  actionItemParent: NestedNavItem | null;
+  navigationItems?: NestedNavItem[] | null;
   onEdit: (editedItem: NestedNavItem) => void;
 }
 
@@ -34,12 +36,12 @@ export type ExtendedPanelPathState = PanelPathState & {
   slug: string,
 };
 
-export type ExtendedPanelAction = PanelAction 
+export type ExtendedPanelAction = PanelAction
   | { type: 'SET_INITIALPATH'; payload: string }
   | { type: 'SET_SLUG'; payload: string }
 
 
-export type navItemStateAction = 
+export type navItemStateAction =
   | { type: 'SET_TITLE'; payload: string }
   | { type: 'SET_ACTIVE'; payload: boolean }
   | { type: 'SET_OVERRIDE'; payload: boolean }

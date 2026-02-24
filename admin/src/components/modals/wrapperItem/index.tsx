@@ -9,7 +9,7 @@ import { getTranslation, createTempNavItemObject } from '../../../utils';
 
 type wrapperCreateProps = {
   variant: 'WrapperCreate';
-  parentNavItemId?: string;
+  actionItemParentId?: string;
   onCreate: (newItem: NestedNavItem) => void;
 }
 
@@ -42,13 +42,13 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
     selectedNavigation,
   } = props;
 
-  const parentNavItemId = isWrapperCreateProps(props) ? props.parentNavItemId : undefined;
+  const actionItemParentId = isWrapperCreateProps(props) ? props.actionItemParentId : undefined;
   const onCreate = isWrapperCreateProps(props) ? props.onCreate : undefined;
   const onSave = isWrapperEditProps(props) ? props.onSave : undefined;
   const item = isWrapperEditProps(props) ? props.item : undefined;
 
   const { formatMessage } = useIntl();
-  
+
   useEffect(() => {
     if (variant !== 'WrapperEdit' || !item) return
 
@@ -71,13 +71,13 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
       if (variant === 'WrapperEdit' && item && onSave) {
         onSave({
           ...item,
-          update: { 
+          update: {
             ...data
           }
         })
       } else if (onCreate) {
         const newItem = createTempNavItemObject({
-          parentNavItemId,
+          actionItemParentId,
           entityRoute: null,
           selectedNavigation,
           navItemState,
@@ -96,18 +96,18 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
 
   return (
     <NavModal
-      confirmText={variant === 'WrapperCreate' ? 
-        formatMessage({ id: getTranslation('add'), defaultMessage: 'Add' }) : 
+      confirmText={variant === 'WrapperCreate' ?
+        formatMessage({ id: getTranslation('add'), defaultMessage: 'Add' }) :
         formatMessage({ id: getTranslation('save'), defaultMessage: 'Save' })
-      } 
+      }
       closeText={formatMessage({ id: getTranslation('cancel'), defaultMessage: 'Cancel' })}
-      titleText={variant === 'WrapperCreate' ? 
+      titleText={variant === 'WrapperCreate' ?
         formatMessage({ id: getTranslation('modal.wrapperItem.titleText.create'), defaultMessage: 'Create new wrapper item' }) :
         formatMessage({ id: getTranslation('modal.wrapperItem.titleText.edit'), defaultMessage: 'Edit wrapper item:' }) + ` "${navItemState.title}"`
       }
-      loadingText={variant === 'WrapperCreate' ? 
-        formatMessage({ id: getTranslation('modal.wrapperItem.loadingText.create'), defaultMessage: 'Adding' }) : 
-        formatMessage({ id: getTranslation('modal.wrapperItem.loadingText.edit'), defaultMessage: 'Saving' })  
+      loadingText={variant === 'WrapperCreate' ?
+        formatMessage({ id: getTranslation('modal.wrapperItem.loadingText.create'), defaultMessage: 'Adding' }) :
+        formatMessage({ id: getTranslation('modal.wrapperItem.loadingText.edit'), defaultMessage: 'Saving' })
       }
       onConfirm={onConfirm}
       modalToOpen=''
@@ -122,7 +122,7 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
               <Field.Label>
                 {formatMessage({
                   id: getTranslation('modal.wrapperItem.titleField.label'),
-                  defaultMessage: 'Title' 
+                  defaultMessage: 'Title'
                 })}
               </Field.Label>
               <Field.Input
@@ -136,7 +136,7 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
                 required
               />
             </Field.Root>
-          </Box>        
+          </Box>
         </Grid.Item>
       </Grid.Root>
     </NavModal>

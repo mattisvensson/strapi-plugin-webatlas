@@ -23,7 +23,7 @@ function ItemCreateComponent({
   debouncedCheckUrl,
   setModalType,
   selectedNavigation,
-  parentNavItem,
+  actionItemParent,
   onCreate,
 }: ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>) {
   const [route, setRoute] = useState<Route | null>(null);
@@ -36,10 +36,10 @@ function ItemCreateComponent({
 
   useEffect(() => {
     async function fetchParentRoute() {
-      if (!parentNavItem?.documentId) return setParentRoute(null)
+      if (!actionItemParent?.documentId) return setParentRoute(null)
 
       try {
-        const relatedRoute = await getRoute(parentNavItem.route.documentId)
+        const relatedRoute = await getRoute(actionItemParent.route.documentId)
 
         if (!relatedRoute) throw new Error('No route found for the selected parent entity')
 
@@ -49,7 +49,7 @@ function ItemCreateComponent({
       }
     }
     fetchParentRoute()
-  }, [parentNavItem])
+  }, [actionItemParent])
 
   useEffect(() => {
     async function fetchRoute() {
@@ -64,7 +64,6 @@ function ItemCreateComponent({
 
         dispatchPath({ type: 'NO_URL_CHECK', payload: relatedRoute.path });
         dispatchPath({ type: 'SET_SLUG', payload: relatedRoute.slug });
-        dispatchPath({ type: 'SET_UIDPATH', payload: relatedRoute.uidPath });
         dispatchPath({ type: 'SET_INITIALPATH', payload: relatedRoute.path });
         dispatchPath({ type: 'SET_CANONICALPATH', payload: relatedRoute.canonicalPath });
 
@@ -98,7 +97,7 @@ function ItemCreateComponent({
       ) return
 
       const newItem = createTempNavItemObject({
-        parentNavItemId: parentNavItem?.documentId,
+        actionItemParentId: actionItemParent?.documentId,
         entityRoute: route,
         selectedNavigation,
         navItemState,

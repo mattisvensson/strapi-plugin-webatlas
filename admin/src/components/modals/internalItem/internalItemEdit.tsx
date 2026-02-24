@@ -1,15 +1,15 @@
-import type { GroupedEntities } from '../../../../../types';
+import type { GroupedEntities, NestedNavItem, Route } from '../../../../../types';
 import type { ModalItem_VariantEdit } from '../../../types';
 import { Box, Divider, Grid, Field } from '@strapi/design-system';
 import { withModalSharedLogic } from '../withModalSharedLogic';
-import PathInfo from '../../PathInfo';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useModalSharedLogic } from '../useModalSharedLogic';
 import { NavModal } from '../'
 import { isEqual } from 'lodash';
-import { debounce } from '../../../utils';
 import { useIntl } from 'react-intl';
-import { getTranslation } from '../../../utils';
+import { getTranslation, findParentNavItem } from '../../../utils';
+import ItemDetails from './ItemDetails';
+import { useApi } from '../../../hooks';
 
 function ItemEditComponent({
   item,
@@ -24,27 +24,58 @@ function ItemEditComponent({
   dispatchPath,
   debouncedCheckUrl,
   setModalType,
+  actionItemParent,
+  navigationItems,
   onEdit,
 }: ModalItem_VariantEdit & ReturnType<typeof useModalSharedLogic>) {
-
   const { formatMessage } = useIntl();
+  const { getRoute } = useApi();
+  const [parentRoute, setParentRoute] = useState<Route | null>(null);
+  const [parentNavItem, setParentNavItem] = useState<NestedNavItem | null>(null);
 
   useEffect(() => {
-    dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.path })
+    async function fetchParentRoute() {
+      if (!actionItemParent?.documentId) return setParentRoute(null)
+
+      try {
+        const relatedRoute = await getRoute(actionItemParent.route.documentId)
+
+        if (!relatedRoute) throw new Error('No route found for the selected parent entity')
+
+        setParentRoute(relatedRoute)
+      } catch (err) {
+        console.log(err)
+      }
+    }
+    fetchParentRoute()
+  }, [actionItemParent])
+
+  useEffect(() => {
+    const parentNavItem = findParentNavItem({navigationItems: navigationItems, targetItem: item})
+    setParentNavItem(parentNavItem)
+
+    const parentPath = parentNavItem?.update?.path || parentNavItem?.route.path || ''
+    const initialPath = `${parentPath}/${item.route.slug}`
+
+
+    dispatchPath({ type: 'DEFAULT', payload: initialPath });
+    dispatchPath({ type: 'SET_SLUG', payload: item.route.slug });
+    dispatchPath({ type: 'SET_INITIALPATH', payload: initialPath });
+    dispatchPath({ type: 'SET_CANONICALPATH', payload: item.route.canonicalPath });
+
     dispatchNavItemState({ type: 'SET_TITLE', payload: item.route.title })
     dispatchNavItemState({ type: 'SET_ACTIVE', payload: item.route.active })
-    
+    dispatchNavItemState({ type: 'SET_OVERRIDE', payload: item.route.isOverride })
+
     const initialValues = {
       title: item.route.title,
       active: item.route.active,
       isOverride: item.route.isOverride,
       slug: item.route.slug,
     };
-    
+
     initialState.current = initialValues;
-    
-    dispatchPath({ type: 'SET_INITIALPATH', payload: item.route.path });
-  }, [])
+  }, [navigationItems, item])
 
   useEffect(() => {
     if (!entities) return
@@ -61,27 +92,10 @@ function ItemEditComponent({
     }
   }, [path.needsUrlCheck, item.route.documentId]);
 
-    const debouncedValueEffect = useMemo(() => debounce((path: any) => {
-      dispatchPath({ type: 'DEFAULT', payload: path });
-    }, 500),
-    []
-  );
-
-  const handlePathChange = (newPath: string) => {
-    if (newPath === path.prevValue) return
-
-    dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: newPath });
-
-    if (newPath === '') return
-
-    debouncedValueEffect(newPath)
-  }
-
-
   const updateItem = async () => {
     try {
       if (isEqual(navItemState, initialState.current) && path.value === path.initialPath) return
-      
+
       const isOverride = path.value !== item.route.path ? true : navItemState.isOverride
 
       onEdit({
@@ -147,61 +161,24 @@ function ItemEditComponent({
           </Box>
         </Grid.Item>
       </Grid.Root>
-      <Box paddingBottom={6} paddingTop={6}>
-        <Divider/>
-      </Box>
-      <Box>
-        <Grid.Root gap={8}>
-          <Grid.Item col={6} s={12} alignItems="baseline">
-            <Box width="100%">
-              <Field.Root>
-                <Field.Label>
-                  {formatMessage({
-                    id: getTranslation('modal.item.titleField.label'),
-                    defaultMessage: 'Title'
-                  })}
-                </Field.Label>
-                <Field.Input
-                  placeholder={formatMessage({
-                    id: getTranslation('modal.item.titleField.placeholder'),
-                    defaultMessage: 'e.g. About us'
-                  })}
-                  name="title"
-                  value={navItemState.title || ''}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchNavItemState({ type: 'SET_TITLE', payload: e.target.value })}
-                  required
-                />
-              </Field.Root>
-            </Box>
-          </Grid.Item>
-          <Grid.Item col={6} s={12}>
-            <Box width="100%">
-              <Field.Root>
-                <Field.Label>
-                  {formatMessage({
-                    id: getTranslation('modal.item.pathField.label'),
-                    defaultMessage: 'Path'
-                  })}
-                </Field.Label>
-                <Field.Input
-                  placeholder={formatMessage({
-                    id: getTranslation('modal.item.pathField.placeholder'),
-                    defaultMessage: 'e.g. about/'
-                  })}
-                  value={path.value || ''}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handlePathChange(e.target.value)}
-                  onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    if (e.target.value === path.prevValue) return
-                    dispatchPath({ type: 'DEFAULT', payload: e.target.value })}
-                  }
-                  required
-                />
-              </Field.Root>
-              <PathInfo validationState={validationState} replacement={path.replacement} />
-            </Box>
-          </Grid.Item>
-        </Grid.Root>
-      </Box>
+      {item &&
+        <>
+          <Box paddingBottom={6} paddingTop={6}>
+            <Divider/>
+          </Box>
+          <ItemDetails
+            navItemState={navItemState}
+            dispatchNavItemState={dispatchNavItemState}
+            path={path}
+            dispatchPath={dispatchPath}
+            validationState={validationState}
+            route={item.route}
+            parentRoute={parentRoute}
+            parentNavItem={parentNavItem}
+            debouncedCheckUrl={debouncedCheckUrl}
+          />
+        </>
+      }
     </NavModal>)
 }
 export const ItemEdit = withModalSharedLogic<ModalItem_VariantEdit>(ItemEditComponent);

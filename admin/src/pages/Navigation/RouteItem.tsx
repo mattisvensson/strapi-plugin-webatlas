@@ -9,7 +9,7 @@ import { Link as RouterLink } from 'react-router-dom';
 
 export interface RouteItemProps {
   item: NestedNavItem;
-  setParentNavItem: (item: NestedNavItem | null) => void;
+  setActionItemParent: (item: NestedNavItem | null) => void;
   setActionItem: React.Dispatch<React.SetStateAction<NestedNavItem | NestedNavigation | undefined>>;
   setNavigationItems: React.Dispatch<React.SetStateAction<NestedNavItem[] | undefined>>;
   ghost?: boolean;
@@ -37,7 +37,7 @@ function RouteIcon ({ type, color = 'neutral800' }: { type: 'internal' | 'extern
 }
 export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
   item,
-  setParentNavItem,
+  setActionItemParent,
   setActionItem,
   setNavigationItems,
   ghost,
@@ -87,7 +87,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
   }
 
   const handleAddChildren = () => {
-    setParentNavItem(item)
+    setActionItemParent(item)
     setModalType('ItemCreate')
   }
 

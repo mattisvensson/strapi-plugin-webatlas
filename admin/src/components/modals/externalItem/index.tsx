@@ -9,7 +9,7 @@ import { getTranslation, createTempNavItemObject } from '../../../utils';
 
 type externalCreateProps = {
   variant: 'ExternalCreate';
-  parentNavItemId?: string;
+  actionItemParentId?: string;
   onCreate: (newItem: NestedNavItem) => void;
 }
 
@@ -43,13 +43,13 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
     selectedNavigation,
   } = props;
 
-  const parentNavItemId = isExternalCreateProps(props) ? props.parentNavItemId : undefined;
+  const actionItemParentId = isExternalCreateProps(props) ? props.actionItemParentId : undefined;
   const onCreate = isExternalCreateProps(props) ? props.onCreate : undefined;
   const onSave = isExternalEditProps(props) ? props.onSave : undefined;
   const item = isExternalEditProps(props) ? props.item : undefined;
 
   const { formatMessage } = useIntl();
-  
+
   useEffect(() => {
     if (variant !== 'ExternalEdit' || !item) return;
 
@@ -74,7 +74,7 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
         });
       } else if (onCreate) {
         const newItem = createTempNavItemObject({
-          parentNavItemId,
+          actionItemParentId,
           entityRoute: null,
           selectedNavigation,
           navItemState,
@@ -94,17 +94,17 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
 
   return (
     <NavModal
-      confirmText={variant === 'ExternalCreate' ? 
-        formatMessage({ id: getTranslation('add'), defaultMessage: 'Add' }) : 
+      confirmText={variant === 'ExternalCreate' ?
+        formatMessage({ id: getTranslation('add'), defaultMessage: 'Add' }) :
         formatMessage({ id: getTranslation('save'), defaultMessage: 'Save' })
       }
       closeText={formatMessage({ id: getTranslation('cancel'), defaultMessage: 'Cancel' })}
       titleText={variant ===  'ExternalCreate' ?
-        formatMessage({ id: getTranslation('modal.externalItem.titleText.create'), defaultMessage: 'Create new external item' }) : 
+        formatMessage({ id: getTranslation('modal.externalItem.titleText.create'), defaultMessage: 'Create new external item' }) :
         formatMessage({ id: getTranslation('modal.externalItem.titleText.edit'), defaultMessage: `Edit external path "${navItemState.title}"` })
       }
-      loadingText={variant === 'ExternalCreate' ? 
-        formatMessage({ id: getTranslation('modal.externalItem.loadingText.create'), defaultMessage: 'Adding' }) : 
+      loadingText={variant === 'ExternalCreate' ?
+        formatMessage({ id: getTranslation('modal.externalItem.loadingText.create'), defaultMessage: 'Adding' }) :
         formatMessage({ id: getTranslation('modal.externalItem.loadingText.edit'), defaultMessage: 'Saving' })
       }
       onConfirm={handleConfirm}
@@ -134,7 +134,7 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
                 required
               />
             </Field.Root>
-          </Box>        
+          </Box>
         </Grid.Item>
         <Grid.Item col={6} s={12}>
           <Box width="100%">

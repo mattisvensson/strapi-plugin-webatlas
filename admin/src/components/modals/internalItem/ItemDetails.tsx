@@ -1,4 +1,4 @@
-import type { Route } from '../../../../../types';
+import type { Route, NestedNavItem } from '../../../../../types';
 import type { ModalItem_VariantCreate } from '../../../types';
 import { Box, Grid, Field, Flex, Badge } from '@strapi/design-system';
 import PathInfo from '../../PathInfo';
@@ -11,7 +11,9 @@ import { Typography } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 
 type ItemDetailsProps = Pick<ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>, 'navItemState' | 'dispatchNavItemState' | 'path' | 'dispatchPath' | 'validationState' | 'debouncedCheckUrl'> &
-  { route: Route, parentRoute: Route | null }
+  { route: Route,
+    parentRoute?: Route | null,
+    parentNavItem?: NestedNavItem | null}
 
 export default function ItemDetails({
   navItemState,
@@ -21,6 +23,7 @@ export default function ItemDetails({
   validationState,
   route,
   parentRoute,
+  parentNavItem,
   debouncedCheckUrl
 }: ItemDetailsProps) {
   const { formatMessage } = useIntl();
@@ -35,9 +38,12 @@ export default function ItemDetails({
 
   useEffect(() => {
     if (!path.slug) return
-    const newPath = parentRoute ? `${parentRoute.canonicalPath}/${path.slug}` : path.slug
+
+    const parentPath = parentNavItem?.update?.path || parentNavItem?.route.path || ''
+    const newPath = parentPath ? `${parentPath}/${path.slug}` : path.slug
+
     dispatchPath({ type: 'DEFAULT', payload: newPath })
-  }, [path.slug, parentRoute])
+  }, [path.slug, parentNavItem])
 
   return (
     <Grid.Root gap={4}>

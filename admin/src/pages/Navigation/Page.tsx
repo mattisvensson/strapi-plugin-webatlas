@@ -54,7 +54,7 @@ const Navigation = () => {
   const [navigationItems, setNavigationItems] = useState<NestedNavItem[]>();
   const initialNavigationItemsRef = useRef<NestedNavItem[] | null>(null);
   const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>();
-  const [parentNavItem, setParentNavItem] = useState<NestedNavItem | null>(null);
+  const [actionItemParent, setActionItemParent] = useState<NestedNavItem | null>(null);
   const { getNavigation, updateNavigationItemStructure } = useApi();
   const [isSavingNavigation, setIsSavingNavigation] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -71,7 +71,7 @@ const Navigation = () => {
   const { toggleNotification } = useNotification();
   const { get } = useFetchClient();
   const { navigationId } = useParams();
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
 
   async function loadNavigations() {
     try {
@@ -95,9 +95,9 @@ const Navigation = () => {
           return { ...nav, items: updatedItems };
         })
       );
-      
+
       let selectedNav = updatedNavigations.find(nav => nav.documentId === navigationId);
-      
+
       if (!selectedNav && navigationId) {
         selectedNav = updatedNavigations[0];
 
@@ -110,7 +110,7 @@ const Navigation = () => {
         });
         navigate(`/plugins/${PLUGIN_ID}/navigation/${updatedNavigations[0]?.documentId}`);
         return
-      } 
+      }
 
       cachedNavigations.current = updatedNavigations;
       switchNavigation(selectedNav, updatedNavigations);
@@ -164,7 +164,7 @@ const Navigation = () => {
   useEffect(() => {
     if (modalType === 'NavOverview' || modalType === '') {
       setActionItem(undefined)
-      setParentNavItem(null)
+      setActionItemParent(null)
     }
   }, [modalType]);
 
@@ -195,9 +195,9 @@ const Navigation = () => {
 
   async function saveNavigation() {
     if (!navigationItems || !selectedNavigation) return
-    
+
     setIsSavingNavigation(true);
-    
+
     try {
       await updateNavigationItemStructure(selectedNavigation.documentId, navigationItems);
       toggleNotification({
@@ -244,7 +244,7 @@ const Navigation = () => {
   function handleDragCancel() {
     resetState();
   }
-  
+
   function handleDragEnd(event: DragEndEvent) {
     const {active, over} = event;
     resetState();
@@ -344,10 +344,10 @@ const Navigation = () => {
                 <SortableContext items={navigationItems} strategy={verticalListSortingStrategy}>
                   {navigationItems.map((item, index) => (
                     config?.navigation.maxDepth && <SortableRouteItem
-                      key={item.documentId || index} 
-                      item={item} 
-                      setParentNavItem={setParentNavItem} 
-                      setActionItem={setActionItem} 
+                      key={item.documentId || index}
+                      item={item}
+                      setActionItemParent={setActionItemParent}
+                      setActionItem={setActionItem}
                       setNavigationItems={setNavigationItems}
                       indentationWidth={indentationWidth}
                       depth={item.id === activeId && projected ? projected.depth : item.depth}
@@ -358,8 +358,8 @@ const Navigation = () => {
                     <DragOverlay>
                       {activeId && activeItem ? (
                         config?.navigation.maxDepth && <SortableRouteItem
-                          item={activeItem} 
-                          setParentNavItem={setParentNavItem} 
+                          item={activeItem}
+                          setActionItemParent={setActionItemParent}
                           setActionItem={setActionItem}
                           setNavigationItems={setNavigationItems}
                           maxDepth={config.navigation.maxDepth}
@@ -423,9 +423,9 @@ const Navigation = () => {
             }}
           />
         }
-        {modalType === 'ItemCreate' && 
+        {modalType === 'ItemCreate' &&
           <ItemCreate
-            parentNavItem={parentNavItem}
+            actionItemParent={actionItemParent}
             onCreate={(newItem) => {
               handleSoftAddedItem(newItem)
             }}
@@ -433,8 +433,8 @@ const Navigation = () => {
         }
         {modalType === "ItemDelete" &&
           <Delete
-            variant="ItemDelete" 
-            item={actionItem as NestedNavItem} 
+            variant="ItemDelete"
+            item={actionItem as NestedNavItem}
             onDelete={(deletedItem) => {
               setNavigationItems(items =>
                 items?.map(item => item.id === deletedItem.id ? deletedItem : item)
@@ -445,6 +445,8 @@ const Navigation = () => {
         {modalType === 'ItemEdit' &&
           <ItemEdit
             item={actionItem as NestedNavItem}
+            actionItemParent={actionItemParent}
+            navigationItems={navigationItems || []}
             onEdit={(editedItem) => {
               setNavigationItems(items =>
                 items?.map(item => item.id === editedItem.id ? editedItem : item)
@@ -455,7 +457,7 @@ const Navigation = () => {
         {modalType === 'ExternalCreate' &&
           <ExternalItem
             variant={modalType}
-            parentNavItemId={parentNavItem?.documentId}
+            actionItemParentId={actionItemParent?.documentId}
             onCreate={(newItem) => {
               handleSoftAddedItem(newItem)
             }}
@@ -475,14 +477,14 @@ const Navigation = () => {
         {modalType === 'WrapperCreate' &&
           <WrapperItem
             variant={modalType}
-            parentNavItemId={parentNavItem?.documentId}
+            actionItemParentId={actionItemParent?.documentId}
             onCreate={(newItem) => {
               handleSoftAddedItem(newItem)
             }}
           />
         }
-        {modalType === 'WrapperEdit' && 
-          <WrapperItem 
+        {modalType === 'WrapperEdit' &&
+          <WrapperItem
             variant={modalType}
             item={actionItem as NestedNavItem}
             onSave={(editedItem) => {
