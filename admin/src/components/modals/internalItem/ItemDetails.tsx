@@ -2,18 +2,22 @@ import type { Route, NestedNavItem } from '../../../../../types';
 import type { ModalItem_VariantCreate } from '../../../types';
 import { Box, Grid, Field, Flex, Badge } from '@strapi/design-system';
 import PathInfo from '../../PathInfo';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useModalSharedLogic } from '../useModalSharedLogic';
 import { useIntl } from 'react-intl';
-import { getTranslation } from '../../../utils';
+import { buildBreadcrumbString, getTranslation } from '../../../utils';
 import Tooltip from '../../Tooltip';
 import { Typography } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 
 type ItemDetailsProps = Pick<ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>, 'navItemState' | 'dispatchNavItemState' | 'path' | 'dispatchPath' | 'validationState' | 'debouncedCheckUrl'> &
-  { route: Route,
-    parentRoute?: Route | null,
-    parentNavItem?: NestedNavItem | null}
+  {
+    route: Route,
+    parentNavItem?: NestedNavItem | null,
+    navigationItems?: NestedNavItem[] | null,
+    item?: NestedNavItem,
+    modalVariant: 'create' | 'edit',
+  }
 
 export default function ItemDetails({
   navItemState,
@@ -21,12 +25,21 @@ export default function ItemDetails({
   path,
   dispatchPath,
   validationState,
-  route,
-  parentRoute,
   parentNavItem,
-  debouncedCheckUrl
+  navigationItems,
+  debouncedCheckUrl,
+  item,
+  route,
+  modalVariant,
 }: ItemDetailsProps) {
   const { formatMessage } = useIntl();
+
+  const breadcrumbString = useMemo(() => {
+    if (!navigationItems) return null;
+    const targetItem = item || parentNavItem;
+    if (!targetItem || typeof targetItem.depth !== 'number' || targetItem.depth <= 0) return null;
+    return buildBreadcrumbString({ navigationItems: navigationItems, targetItem: targetItem, includeTarget: modalVariant === 'create' });
+  }, [parentNavItem, navigationItems, item, modalVariant]);
 
   useEffect(() => {
     if (path.needsUrlCheck && path.value) {
@@ -131,7 +144,7 @@ export default function ItemDetails({
             </Field.Label>
             <Field.Input
               name="navigationPosition"
-              value={parentRoute?.title || 'Root'}
+              value={breadcrumbString || 'Root'}
               disabled
             />
           </Field.Root>

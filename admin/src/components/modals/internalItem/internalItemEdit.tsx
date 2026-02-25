@@ -1,15 +1,14 @@
-import type { GroupedEntities, NestedNavItem, Route } from '../../../../../types';
+import type { GroupedEntities } from '../../../../../types';
 import type { ModalItem_VariantEdit } from '../../../types';
 import { Box, Divider, Grid, Field } from '@strapi/design-system';
 import { withModalSharedLogic } from '../withModalSharedLogic';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useModalSharedLogic } from '../useModalSharedLogic';
 import { NavModal } from '../'
 import { isEqual } from 'lodash';
 import { useIntl } from 'react-intl';
 import { getTranslation, findParentNavItem } from '../../../utils';
 import ItemDetails from './ItemDetails';
-import { useApi } from '../../../hooks';
 
 function ItemEditComponent({
   item,
@@ -24,39 +23,18 @@ function ItemEditComponent({
   dispatchPath,
   debouncedCheckUrl,
   setModalType,
-  actionItemParent,
   navigationItems,
   onEdit,
 }: ModalItem_VariantEdit & ReturnType<typeof useModalSharedLogic>) {
   const { formatMessage } = useIntl();
-  const { getRoute } = useApi();
-  const [parentRoute, setParentRoute] = useState<Route | null>(null);
-  const [parentNavItem, setParentNavItem] = useState<NestedNavItem | null>(null);
+
+  const parentNavItem = useMemo(() => {
+    return findParentNavItem({navigationItems: navigationItems, targetItem: item});
+  }, [navigationItems, item])
 
   useEffect(() => {
-    async function fetchParentRoute() {
-      if (!actionItemParent?.documentId) return setParentRoute(null)
-
-      try {
-        const relatedRoute = await getRoute(actionItemParent.route.documentId)
-
-        if (!relatedRoute) throw new Error('No route found for the selected parent entity')
-
-        setParentRoute(relatedRoute)
-      } catch (err) {
-        console.log(err)
-      }
-    }
-    fetchParentRoute()
-  }, [actionItemParent])
-
-  useEffect(() => {
-    const parentNavItem = findParentNavItem({navigationItems: navigationItems, targetItem: item})
-    setParentNavItem(parentNavItem)
-
     const parentPath = parentNavItem?.update?.path || parentNavItem?.route.path || ''
     const initialPath = `${parentPath}/${item.route.slug}`
-
 
     dispatchPath({ type: 'DEFAULT', payload: initialPath });
     dispatchPath({ type: 'SET_SLUG', payload: item.route.slug });
@@ -75,7 +53,7 @@ function ItemEditComponent({
     };
 
     initialState.current = initialValues;
-  }, [navigationItems, item])
+  }, [navigationItems, item, parentNavItem])
 
   useEffect(() => {
     if (!entities) return
@@ -172,10 +150,12 @@ function ItemEditComponent({
             path={path}
             dispatchPath={dispatchPath}
             validationState={validationState}
-            route={item.route}
-            parentRoute={parentRoute}
             parentNavItem={parentNavItem}
+            navigationItems={navigationItems}
             debouncedCheckUrl={debouncedCheckUrl}
+            item={item}
+            route={item.route}
+            modalVariant='edit'
           />
         </>
       }

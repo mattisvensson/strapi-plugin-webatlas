@@ -12,10 +12,12 @@ import type { NestedNavItem } from '../../../types';
  */
 export default function buildBreadcrumbString({
   navigationItems,
-  targetItem
+  targetItem,
+  includeTarget = true,
 }: {
   navigationItems?: NestedNavItem[] | null,
   targetItem: NestedNavItem,
+  includeTarget?: boolean,
 }): string | null {
   if (!navigationItems || !Array.isArray(navigationItems)) return null;
   if (!targetItem || typeof targetItem.depth !== 'number' || targetItem.depth <= 0) return null;
@@ -31,6 +33,10 @@ export default function buildBreadcrumbString({
     const candidate = navigationItems[i];
     parts.unshift(candidate.route.title);
     if (typeof candidate.depth === 'number' && candidate.depth === 0) break;
+  }
+
+  if (includeTarget) {
+    parts.push(targetItem.route.title);
   }
 
   return parts.join(' > ');

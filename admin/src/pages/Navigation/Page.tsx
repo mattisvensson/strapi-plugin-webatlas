@@ -426,6 +426,7 @@ const Navigation = () => {
         {modalType === 'ItemCreate' &&
           <ItemCreate
             actionItemParent={actionItemParent}
+            navigationItems={navigationItems || []}
             onCreate={(newItem) => {
               handleSoftAddedItem(newItem)
             }}
@@ -445,7 +446,6 @@ const Navigation = () => {
         {modalType === 'ItemEdit' &&
           <ItemEdit
             item={actionItem as NestedNavItem}
-            actionItemParent={actionItemParent}
             navigationItems={navigationItems || []}
             onEdit={(editedItem) => {
               setNavigationItems(items =>

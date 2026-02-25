@@ -3,12 +3,12 @@ import type { PanelPathState, PanelAction } from '../types';
 
 export type ModalItem_VariantCreate = {
   actionItemParent: NestedNavItem | null;
+  navigationItems?: NestedNavItem[] | null;
   onCreate: (newItem: NestedNavItem) => void;
 }
 
 export type ModalItem_VariantEdit = {
   item: NestedNavItem;
-  actionItemParent: NestedNavItem | null;
   navigationItems?: NestedNavItem[] | null;
   onEdit: (editedItem: NestedNavItem) => void;
 }

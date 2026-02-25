@@ -25,31 +25,14 @@ function ItemCreateComponent({
   selectedNavigation,
   actionItemParent,
   onCreate,
+  navigationItems,
 }: ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>) {
   const [route, setRoute] = useState<Route | null>(null);
-  const [parentRoute, setParentRoute] = useState<Route | null>(null);
   const [entity, setEntity] = useState<Entity | null>(null);
   const [loading, setLoading] = useState(false)
   const [loadingRoute, setLoadingRoute] = useState(true)
   const { formatMessage } = useIntl();
-  const { getRelatedRoute, getRoute } = useApi();
-
-  useEffect(() => {
-    async function fetchParentRoute() {
-      if (!actionItemParent?.documentId) return setParentRoute(null)
-
-      try {
-        const relatedRoute = await getRoute(actionItemParent.route.documentId)
-
-        if (!relatedRoute) throw new Error('No route found for the selected parent entity')
-
-        setParentRoute(relatedRoute)
-      } catch (err) {
-        console.log(err)
-      }
-    }
-    fetchParentRoute()
-  }, [actionItemParent])
+  const { getRelatedRoute } = useApi();
 
   useEffect(() => {
     async function fetchRoute() {
@@ -226,9 +209,11 @@ function ItemCreateComponent({
               path={path}
               dispatchPath={dispatchPath}
               validationState={validationState}
-              route={route}
-              parentRoute={parentRoute}
+              parentNavItem={actionItemParent}
+              navigationItems={navigationItems}
               debouncedCheckUrl={debouncedCheckUrl}
+              route={route}
+              modalVariant='create'
             />
           }
         </>
