@@ -2,18 +2,18 @@ import { CSSProperties } from 'react';
 import { CSS } from '@dnd-kit/utilities';
 import { useSortable } from '@dnd-kit/sortable';
 import { RouteItem } from './RouteItem';
-import { RouteItemProps } from './RouteItem';
+import { RouteItemProps } from '../../types';
 
 export default function SortableRouteItem({item, depth, setNavigationItems, ...props}: RouteItemProps) {
   if (!item) return null
 
-  const { 
-    isDragging, 
-    isSorting, 
-    setDraggableNodeRef, 
-    setDroppableNodeRef, 
-    transform, 
-    attributes, 
+  const {
+    isDragging,
+    isSorting,
+    setDraggableNodeRef,
+    setDroppableNodeRef,
+    transform,
+    attributes,
     listeners
   } = useSortable({id: item.id});
 
@@ -22,12 +22,12 @@ export default function SortableRouteItem({item, depth, setNavigationItems, ...p
   };
 
   return (
-    <RouteItem 
+    <RouteItem
       ref={setDraggableNodeRef}
       wrapperRef={setDroppableNodeRef}
       setNavigationItems={setNavigationItems}
       style={style}
-      item={item} 
+      item={item}
       disableInteraction={isSorting}
       ghost={isDragging}
       depth={depth}
