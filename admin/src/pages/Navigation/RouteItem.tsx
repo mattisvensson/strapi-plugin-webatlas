@@ -1,42 +1,16 @@
-import { Box, Typography, Flex, SimpleMenu, MenuItem, IconButton, Status } from '@strapi/design-system';
-import { NestedNavItem, NestedNavigation } from '../../../../types';
+import { Box, Typography, Flex } from '@strapi/design-system';
+import { RouteItemProps } from '../../types';
 import { ModalContext } from '../../contexts';
-import { useContext, useEffect, useState, ReactElement, forwardRef } from 'react';
-import { Link as LinkIcon, ExternalLink, OneToMany, More, Drag } from '@strapi/icons';
-import { getTranslation } from '../../utils';
-import { useIntl } from 'react-intl';
+import { useContext, forwardRef } from 'react';
+import { Drag } from '@strapi/icons';
+import RouteItemMenu from './RouteItemMenu';
+import RouteItemStatus from './RouteItemStatus';
+import RouteItemIcon from './RouteItemIcon';
+import RouteItemBadge from './RouteItemBadge';
 
-export interface RouteItemProps {
-  item: NestedNavItem;
-  setParentId: (id: string) => void;
-  setActionItem: React.Dispatch<React.SetStateAction<NestedNavItem | NestedNavigation | undefined>>;
-  setNavigationItems: React.Dispatch<React.SetStateAction<NestedNavItem[] | undefined>>;
-  ghost?: boolean;
-  depth?: number;
-  maxDepth: number;
-  style?: React.CSSProperties;
-  wrapperRef?(node: HTMLLIElement): void;
-  handleProps?: any;
-  disableInteraction?: boolean;
-  indentationWidth?: number;
-}
-
-
-function RouteIcon ({ type, color = 'neutral800' }: { type: 'internal' | 'external' | 'wrapper' | undefined, color?: string }): ReactElement {
-  switch (type) {
-    case "external":
-      return <ExternalLink color={color}/>
-    case "wrapper":
-      return <OneToMany color={color}/>
-    case "internal":
-      return <LinkIcon color={color}/>
-    default:
-      return <Box width="16px" height="16px"/>
-  }
-}
 export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
   item,
-  setParentId,
+  setActionItemParent,
   setActionItem,
   setNavigationItems,
   ghost,
@@ -49,34 +23,9 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
   if (!item || !item.route) return null
 
   const { setModalType } = useContext(ModalContext);
-  const { formatMessage } = useIntl();
-
-  const itemStatusOptions = {
-    published: {
-      status: formatMessage({
-        id: getTranslation('published'),
-        defaultMessage: 'Published',
-      }),
-      variant: 'primary',
-    },
-    draft: {
-      status: formatMessage({
-        id: getTranslation('draft'),
-        defaultMessage: 'Draft',
-      }),
-      variant: 'secondary',
-    },
-    modified: {
-      status: formatMessage({
-        id: getTranslation('modified'),
-        defaultMessage: 'Modified',
-      }),
-      variant: 'alternative',
-    }
-  }
 
   const handleAddChildren = () => {
-    setParentId(item.documentId)
+    setActionItemParent(item)
     setModalType('ItemCreate')
   }
 
@@ -86,7 +35,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
     let newModal = 'ItemEdit'
     if (item.route.type === 'external') newModal = 'ExternalEdit'
     if (item.route.type === 'wrapper') newModal = 'WrapperEdit'
-    
+
     setModalType(newModal)
   }
 
@@ -115,7 +64,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
 
   return (
     <Box
-      ref={wrapperRef} 
+      ref={wrapperRef}
       style={elStyle}
     >
       <Box
@@ -137,82 +86,24 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
               height="32px"
               background="neutral150"
             />
-            <RouteIcon type={item.route.type}/>
+            <RouteItemIcon type={item.route.type}/>
             <Flex gap={2}>
               <Typography fontWeight="bold">{item.update?.title ? item.update.title : item.route.title}</Typography>
               <Typography textColor="neutral400">{item.route.type === 'internal' && '/'}{item.update?.path ? item.update.path : item.route.path}</Typography>
             </Flex>
-            {item.isNew && !item.deleted &&
-              <Status variant="alternative" size="S">
-                <Typography fontWeight="bold">
-                  {formatMessage({
-                    id: getTranslation('new'),
-                    defaultMessage: 'New',
-                  })}
-                </Typography>
-              </Status>
-            }
-            {item.update && !item.deleted &&
-              <Status variant="alternative" size="S">
-                <Typography fontWeight="bold">
-                  {formatMessage({
-                    id: getTranslation('updated'),
-                    defaultMessage: 'Updated',
-                  })}
-                </Typography>
-              </Status>
-            }
-            {item.deleted &&
-              <Status size="S">
-                <Typography fontWeight="bold" textColor="danger500">
-                  {formatMessage({
-                    id: getTranslation('deleted'),
-                    defaultMessage: 'Deleted',
-                  })}
-                </Typography>
-              </Status>
-            }
+            <RouteItemStatus item={item} />
           </Flex>
           <Flex direction="row" gap={4}>
-            {item.route.type === 'internal' && item.status &&
-              <Status variant={itemStatusOptions[item.status].variant} size="S">
-                <Typography fontWeight="bold">
-                  {itemStatusOptions[item.status].status}
-                </Typography>
-              </Status>
-            }
-            <SimpleMenu label="Item actions" tag={IconButton} icon={<More />}>
-            {!item.deleted && <>
-              <MenuItem onClick={() => handleEdit()}>
-                {formatMessage({
-                  id: getTranslation('edit'),
-                  defaultMessage: 'Edit',
-                })}
-              </MenuItem>
-              {depth !== undefined && depth < maxDepth && <MenuItem onClick={() => handleAddChildren()}>
-                {formatMessage({
-                  id: getTranslation('navigation.page.navItem.addChildren'),
-                  defaultMessage: 'Add children',
-                })}
-              </MenuItem>}
-              <MenuItem onClick={() => handleDelete()}>
-                <Typography textColor="danger600">
-                  {formatMessage({
-                    id: getTranslation('delete'),
-                    defaultMessage: 'Delete',
-                  })}
-                </Typography>
-              </MenuItem>
-            </>}
-            {(item.deleted || item.update) && <>
-              <MenuItem onClick={() => handleRestore()}>
-                {formatMessage({
-                  id: getTranslation('restore'),
-                  defaultMessage: 'Restore',
-                })}
-              </MenuItem>
-            </>}
-            </SimpleMenu>
+            <RouteItemBadge item={item} />
+            <RouteItemMenu
+              item={item}
+              depth={depth}
+              maxDepth={maxDepth}
+              handleEdit={handleEdit}
+              handleAddChildren={handleAddChildren}
+              handleDelete={handleDelete}
+              handleRestore={handleRestore}
+            />
           </Flex>
         </Flex>
       </Box>

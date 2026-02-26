@@ -7,6 +7,7 @@
   "webatlas.navigation.page.newItemButton": "New Item",
   "webatlas.navigation.page.selectNavigation": "Select Navigation",
   "webatlas.navigation.page.navItem.addChildren": "Add children",
+  "webatlas.navigation.page.navItem.viewEntity": "View entity",
 
   "webatlas.paths.page.title": "Paths",
   "webatlas.paths.page.subtitle": "Overview of all existing paths",
@@ -72,9 +73,12 @@
   "webatlas.modal.externalItem.loadingText.edit": "Saving",
   "webatlas.modal.externalItem.pathField.placeholder": "e.g. https://example.com",
   "webatlas.modal.item.titleField.label": "Title",
-  "webatlas.modal.item.titleField.placeholder": "e.g. About Us",
+  "webatlas.modal.item.canonicalPathField.label": "Canonical Path",
+  "webatlas.modal.item.canonicalPathField.tooltip": "Based on content hierarchy",
+  "webatlas.modal.item.slugField.label": "Slug",
+  "webatlas.modal.item.navigationPosition.label": "Navigation Position",
   "webatlas.modal.item.pathField.label": "Path",
-  "webatlas.modal.item.pathField.placeholder": "e.g. about/",
+  "webatlas.modal.item.canonicalPathMismatch": "Warning: Canonical Path does not match navigation path",
 
   "webatlas.components.pathInfo.checking": "Checking if path is available...",
   "webatlas.components.pathInfo.available": "Path is available",
@@ -88,6 +92,10 @@
   "webatlas.components.CMEditViewAside.path.uidPath.hint": "Permanent UID path, cannot be changed",
   "webatlas.components.CMEditViewAside.path.newPathInfo": "A new path will be created upon saving this entry.",
   "webatlas.components.CMEditViewAside.path.input.noSourceField": "Use the override option to set a custom Path.",
+  "webatlas.components.CMEditViewAside.path.input.parentSelect.label": "Place under",
+  "webatlas.components.CMEditViewAside.path.input.parentSelect.rootPath": "None (root path)",
+  "webatlas.components.CMEditViewAside.canonicalPath.input.label": "Canonical Path",
+  "webatlas.components.CMEditViewAside.canonicalPath.input.tooltip": "Path that shows how your content is organized, regardless of navigation",
 
   "webatlas.path.type.internal": "Internal",
   "webatlas.path.type.external": "External",

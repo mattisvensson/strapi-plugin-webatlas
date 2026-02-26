@@ -4,13 +4,17 @@ import { isNestedNavigation, isNestedNavItem } from "./typeChecks";
 import getTranslation from "./getTranslation";
 import countChildren from "./countChildren";
 import createTempNavItemObject from "./createTempNavItemObject";
+import findParentNavItem from "./findParentNavItem";
+import buildBreadcrumbString from "./buildBreadcrumbString";
 
-export { 
+export {
   debounce,
   duplicateCheck,
   isNestedNavigation,
   isNestedNavItem,
   getTranslation,
   countChildren,
-  createTempNavItemObject
+  createTempNavItemObject,
+  findParentNavItem,
+  buildBreadcrumbString,
 };

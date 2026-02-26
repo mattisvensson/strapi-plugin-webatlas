@@ -1,51 +1,59 @@
+import type { GroupedEntities } from '../../../../../types';
+import type { ModalItem_VariantEdit } from '../../../types';
 import { Box, Divider, Grid, Field } from '@strapi/design-system';
 import { withModalSharedLogic } from '../withModalSharedLogic';
-import { GroupedEntities, ModalItem_VariantEdit } from '../../../../../types';
-import PathInfo from '../../PathInfo';
 import { useEffect, useMemo } from 'react';
 import { useModalSharedLogic } from '../useModalSharedLogic';
 import { NavModal } from '../'
 import { isEqual } from 'lodash';
-import { debounce } from '../../../utils';
 import { useIntl } from 'react-intl';
-import { getTranslation } from '../../../utils';
+import { getTranslation, findParentNavItem } from '../../../utils';
+import ItemDetails from './ItemDetails';
 
 function ItemEditComponent({
   item,
   selectedContentType,
   setSelectedContentType,
   entities,
-  replacement,
   validationState,
   initialState,
   navItemState,
-  dispatchItemState,
+  dispatchNavItemState,
   path,
   dispatchPath,
   debouncedCheckUrl,
   setModalType,
+  navigationItems,
   onEdit,
 }: ModalItem_VariantEdit & ReturnType<typeof useModalSharedLogic>) {
-
   const { formatMessage } = useIntl();
 
+  const parentNavItem = useMemo(() => {
+    return findParentNavItem({navigationItems: navigationItems, targetItem: item});
+  }, [navigationItems, item])
+
   useEffect(() => {
-    dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.path })
-    dispatchItemState({ type: 'SET_TITLE', payload: item.route.title })
-    dispatchItemState({ type: 'SET_SLUG', payload: item.route.slug })
-    dispatchItemState({ type: 'SET_ACTIVE', payload: item.route.active })
-    
-  const initialValues = {
-    title: item.route.title,
-    active: item.route.active,
-    isOverride: item.route.isOverride,
-    slug: item.route.slug,
-  };
-  
-  initialState.current = initialValues;
-  
-  dispatchPath({ type: 'SET_INITIALPATH', payload: item.route.path });
-  }, [])
+    const parentPath = parentNavItem?.update?.path || parentNavItem?.route.path || ''
+    const initialPath = `${parentPath}/${item.route.slug}`
+
+    dispatchPath({ type: 'DEFAULT', payload: initialPath });
+    dispatchPath({ type: 'SET_SLUG', payload: item.route.slug });
+    dispatchPath({ type: 'SET_INITIALPATH', payload: initialPath });
+    dispatchPath({ type: 'SET_CANONICALPATH', payload: item.route.canonicalPath });
+
+    dispatchNavItemState({ type: 'SET_TITLE', payload: item.route.title })
+    dispatchNavItemState({ type: 'SET_ACTIVE', payload: item.route.active })
+    dispatchNavItemState({ type: 'SET_OVERRIDE', payload: item.route.isOverride })
+
+    const initialValues = {
+      title: item.route.title,
+      active: item.route.active,
+      isOverride: item.route.isOverride,
+      slug: item.route.slug,
+    };
+
+    initialState.current = initialValues;
+  }, [navigationItems, item, parentNavItem])
 
   useEffect(() => {
     if (!entities) return
@@ -57,39 +65,22 @@ function ItemEditComponent({
   useEffect(() => {
     if (path.needsUrlCheck && path.value) {
       if (path.uidPath === path.value || path.initialPath === path.value) return
-      debouncedCheckUrl(path.value, item.route.documentId);
+      debouncedCheckUrl({url: path.value, routeDocumentId: item.route.documentId});
       dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
     }
   }, [path.needsUrlCheck, item.route.documentId]);
 
-    const debouncedValueEffect = useMemo(() => debounce((path: any) => {
-      dispatchPath({ type: 'DEFAULT', payload: path });
-    }, 500),
-    []
-  );
-
-  const handlePathChange = (newPath: string) => {
-    if (newPath === path.prevValue) return
-
-    dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: newPath });
-
-    if (newPath === '') return
-
-    debouncedValueEffect(newPath)
-  }
-
-
   const updateItem = async () => {
     try {
       if (isEqual(navItemState, initialState.current) && path.value === path.initialPath) return
-      
+
       const isOverride = path.value !== item.route.path ? true : navItemState.isOverride
 
       onEdit({
         ...item,
         update: {
           title: navItemState.title,
-          slug: navItemState.slug,
+          slug: path.slug,
           path: path.value,
           isOverride,
         },
@@ -148,76 +139,26 @@ function ItemEditComponent({
           </Box>
         </Grid.Item>
       </Grid.Root>
-      <Box paddingBottom={6} paddingTop={6}>
-        <Divider/>
-      </Box>
-      <Box>
-        <Grid.Root gap={8}>
-          <Grid.Item col={6} s={12} alignItems="baseline">
-            <Box width="100%">
-              <Field.Root>
-                <Field.Label>
-                  {formatMessage({
-                    id: getTranslation('modal.item.titleField.label'),
-                    defaultMessage: 'Title'
-                  })}
-                </Field.Label>
-                <Field.Input
-                  placeholder={formatMessage({
-                    id: getTranslation('modal.item.titleField.placeholder'),
-                    defaultMessage: 'e.g. About us'
-                  })}
-                  name="title"
-                  value={navItemState.title || ''}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchItemState({ type: 'SET_TITLE', payload: e.target.value })}
-                  required
-                />
-              </Field.Root>
-            </Box>
-          </Grid.Item>
-          <Grid.Item col={6} s={12}>
-            <Box width="100%">
-              <Field.Root>
-                <Field.Label>
-                  {formatMessage({
-                    id: getTranslation('modal.item.pathField.label'),
-                    defaultMessage: 'Path'
-                  })}
-                </Field.Label>
-                <Field.Input
-                  placeholder={formatMessage({
-                    id: getTranslation('modal.item.pathField.placeholder'),
-                    defaultMessage: 'e.g. about/'
-                  })}
-                  value={path.value || ''}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => handlePathChange(e.target.value)}
-                  onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    if (e.target.value === path.prevValue) return
-                    dispatchPath({ type: 'DEFAULT', payload: e.target.value })}
-                  }
-                  required
-                />
-              </Field.Root>
-              <PathInfo validationState={validationState} replacement={replacement} />
-            </Box>
-          </Grid.Item>
-        </Grid.Root>
-        {/* TODO: Add visibility toggle to navitem schema */}
-        {/* <Grid.Root gap={8}>
-          <Grid.Item col={6} s={12}>
-            <Box width="100%">
-              <Toggle
-                label="Is visible?"
-                onLabel="Yes"
-                offLabel="No"
-                hint='This menu item does not show on your site, if set to "no".'
-                checked={navItemState.active}
-                onClick={() => dispatchItemState({ type: 'SET_ACTIVE', payload: !navItemState.active })}
-              />
-            </Box>
-          </Grid.Item>
-        </Grid.Root> */}
-      </Box>
+      {item &&
+        <>
+          <Box paddingBottom={6} paddingTop={6}>
+            <Divider/>
+          </Box>
+          <ItemDetails
+            navItemState={navItemState}
+            dispatchNavItemState={dispatchNavItemState}
+            path={path}
+            dispatchPath={dispatchPath}
+            validationState={validationState}
+            parentNavItem={parentNavItem}
+            navigationItems={navigationItems}
+            debouncedCheckUrl={debouncedCheckUrl}
+            item={item}
+            route={item.route}
+            modalVariant='edit'
+          />
+        </>
+      }
     </NavModal>)
 }
 export const ItemEdit = withModalSharedLogic<ModalItem_VariantEdit>(ItemEditComponent);

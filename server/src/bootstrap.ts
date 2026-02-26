@@ -1,11 +1,15 @@
 import type { Core, UID } from '@strapi/strapi';
-import { PluginConfig, ConfigContentType, ContentType } from "../../types";
+import { PluginConfig, ConfigContentType, ContentType, Route } from "../../types";
 import { transformToUrl, waRoute, waNavItem, PLUGIN_ID } from "../../utils";
-import { duplicateCheck } from "./utils";
+import { duplicateCheck, buildCanonicalPath, cascadeCanonicalPathUpdates, validateRouteDependencies } from "./utils"; 
+import runMigrations from './migrations';
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
   try {
+    // Run migrations first
+    await runMigrations(strapi)
+    
     // Register permission actions.
     const actions = [
       {
@@ -67,7 +71,8 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     navigation: {
       maxDepth: config?.navigation?.maxDepth || 1,
       ...config?.navigation
-    }
+    },
+    migrationVersion: config?.migrationVersion || '0'
   };
 
   enabledContentTypes.forEach((type: ContentType) => {
@@ -148,7 +153,8 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
       const {
         webatlas_path, 
-        webatlas_override
+        webatlas_override,
+        webatlas_parent,
       } = event.params.data;
 
       if (!webatlas_path) return;
@@ -161,9 +167,22 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
       if (relatedRoute) return;
 
-      const title = ctSettings?.default ? event.params.data[ctSettings.default] : '';
+      let parent = null
+      if (webatlas_parent) {
+        try {
+          const isValid = await validateRouteDependencies({
+            newParentId: webatlas_parent
+          });
+          if (isValid) parent = webatlas_parent
+        } catch (err) {
+          console.error(`Route dependency validation failed: ${err.message}`)
+        }
+      }
 
+      const title = ctSettings?.default ? event.params.data[ctSettings.default] : '';
       const path = await duplicateCheck(transformToUrl(webatlas_path));
+      const canonicalPath = await buildCanonicalPath(path, parent);
+
       await strapi.documents(waRoute as UID.ContentType).create({
         data: {
           relatedContentType: event.model.uid,
@@ -173,7 +192,9 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           path: path,
           uidPath: `${event.model.singularName}/${event.result.id}`,
           isOverride: webatlas_override || false,
-          title: title
+          title: title,
+          parent: parent,
+          canonicalPath: canonicalPath,
         },
       });
     },
@@ -184,44 +205,70 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       const {
         webatlas_path, 
         webatlas_override,
+        webatlas_parent,
         documentId,
       } = event.params.data;
 
       if (!webatlas_path) return
 
-      const relatedRoute = await strapi.db?.query(waRoute).findOne({
-        where: {
+      const relatedRoute = await strapi.documents(waRoute as UID.ContentType).findFirst({
+        filters: {
           relatedDocumentId: documentId
         },
-      });
+      }) as Route | null;
+
+      let parent = null
+      if (webatlas_parent) {
+        try {
+          const isValid = await validateRouteDependencies({
+            routeId: relatedRoute ? relatedRoute.documentId : null,
+            newParentId: webatlas_parent
+          });
+          if (isValid) parent = webatlas_parent
+        } catch (err) {
+          console.error(`Route dependency validation failed: ${err.message}`)
+        }
+      }
 
       const title = ctSettings?.default ? event.params.data[ctSettings.default] : ''
       const path = await duplicateCheck(transformToUrl(webatlas_path), relatedRoute ? relatedRoute.documentId : null);
+      const canonicalPath = await buildCanonicalPath(path, parent);
 
       const routeData: any = {
         title,
         path: path,
         slug: path,
         isOverride: webatlas_override || false,
+        parent: parent,
       }
+
+      let routeDocumentId: string | undefined = relatedRoute?.documentId
       
       if (!relatedRoute) {
-        await strapi.documents(waRoute as UID.ContentType).create({
+        const createdRoute = await strapi.documents(waRoute as UID.ContentType).create({
           data: {
             relatedContentType: event.model.uid,
             relatedId: event.result.id,
             relatedDocumentId: event.result.documentId,
             uidPath: `${event.model.singularName}/${event.result.id}`,
+            canonicalPath: canonicalPath,
             ...routeData
           }
         })
+
+        routeDocumentId = (createdRoute as any)?.documentId as string | undefined
       } else {
         await strapi.documents(waRoute as UID.ContentType).update({ 
           documentId: relatedRoute.documentId,
           data: {
-            ...routeData
+            ...routeData,
+            canonicalPath: canonicalPath
           }
         })
+      }
+
+      if (routeDocumentId) {
+        await cascadeCanonicalPathUpdates(routeDocumentId, canonicalPath);
       }
     },
 

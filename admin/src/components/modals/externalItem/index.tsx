@@ -9,7 +9,7 @@ import { getTranslation, createTempNavItemObject } from '../../../utils';
 
 type externalCreateProps = {
   variant: 'ExternalCreate';
-  parentId?: string;
+  actionItemParentId?: string;
   onCreate: (newItem: NestedNavItem) => void;
 }
 
@@ -36,27 +36,27 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
   const {
     variant,
     navItemState,
-    dispatchItemState,
+    dispatchNavItemState,
     path,
     dispatchPath,
     setModalType,
     selectedNavigation,
   } = props;
 
-  const parentId = isExternalCreateProps(props) ? props.parentId : undefined;
+  const actionItemParentId = isExternalCreateProps(props) ? props.actionItemParentId : undefined;
   const onCreate = isExternalCreateProps(props) ? props.onCreate : undefined;
   const onSave = isExternalEditProps(props) ? props.onSave : undefined;
   const item = isExternalEditProps(props) ? props.item : undefined;
 
   const { formatMessage } = useIntl();
-  
+
   useEffect(() => {
     if (variant !== 'ExternalEdit' || !item) return;
 
-    dispatchItemState({ type: 'SET_TITLE', payload: item.route.title });
-    dispatchItemState({ type: 'SET_ACTIVE', payload: item.route.active });
+    dispatchNavItemState({ type: 'SET_TITLE', payload: item.route.title });
+    dispatchNavItemState({ type: 'SET_ACTIVE', payload: item.route.active });
     dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.path });
-  }, [variant, item, dispatchItemState, dispatchPath]);
+  }, [variant, item, dispatchNavItemState, dispatchPath]);
 
   const handleConfirm = async () => {
     try {
@@ -74,7 +74,7 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
         });
       } else if (onCreate) {
         const newItem = createTempNavItemObject({
-          parentId,
+          actionItemParentId,
           entityRoute: null,
           selectedNavigation,
           navItemState,
@@ -94,17 +94,17 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
 
   return (
     <NavModal
-      confirmText={variant === 'ExternalCreate' ? 
-        formatMessage({ id: getTranslation('add'), defaultMessage: 'Add' }) : 
+      confirmText={variant === 'ExternalCreate' ?
+        formatMessage({ id: getTranslation('add'), defaultMessage: 'Add' }) :
         formatMessage({ id: getTranslation('save'), defaultMessage: 'Save' })
       }
       closeText={formatMessage({ id: getTranslation('cancel'), defaultMessage: 'Cancel' })}
       titleText={variant ===  'ExternalCreate' ?
-        formatMessage({ id: getTranslation('modal.externalItem.titleText.create'), defaultMessage: 'Create new external item' }) : 
+        formatMessage({ id: getTranslation('modal.externalItem.titleText.create'), defaultMessage: 'Create new external item' }) :
         formatMessage({ id: getTranslation('modal.externalItem.titleText.edit'), defaultMessage: `Edit external path "${navItemState.title}"` })
       }
-      loadingText={variant === 'ExternalCreate' ? 
-        formatMessage({ id: getTranslation('modal.externalItem.loadingText.create'), defaultMessage: 'Adding' }) : 
+      loadingText={variant === 'ExternalCreate' ?
+        formatMessage({ id: getTranslation('modal.externalItem.loadingText.create'), defaultMessage: 'Adding' }) :
         formatMessage({ id: getTranslation('modal.externalItem.loadingText.edit'), defaultMessage: 'Saving' })
       }
       onConfirm={handleConfirm}
@@ -130,11 +130,11 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
                 })}
                 name="title"
                 value={navItemState.title || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchItemState({ type: 'SET_TITLE', payload: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchNavItemState({ type: 'SET_TITLE', payload: e.target.value })}
                 required
               />
             </Field.Root>
-          </Box>        
+          </Box>
         </Grid.Item>
         <Grid.Item col={6} s={12}>
           <Box width="100%">
@@ -159,22 +159,6 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
           </Box>
         </Grid.Item>
       </Grid.Root>
-      {/* TODO: Add visibility toggle to navitem schema */}
-      {/* <Box paddingBottom={6} paddingTop={6}>
-        <Divider/>
-      </Box>
-      <Grid.Root gap={8} paddingBottom={6} >
-        <Grid.Item col={6}>
-          <Toggle
-            label="Is visible?"
-            onLabel="Yes"
-            offLabel="No"
-            hint='This menu item does not show on your site, if set to "no".'
-            checked={navItemState.active}
-            onClick={() => dispatchItemState({ type: 'SET_ACTIVE', payload: !navItemState.active })}
-          />
-        </Grid.Item>
-      </Grid.Root> */}
     </NavModal>
   );
 }

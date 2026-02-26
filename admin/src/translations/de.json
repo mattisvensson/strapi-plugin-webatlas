@@ -7,6 +7,7 @@
   "webatlas.navigation.page.newItemButton": "Neues Element",
   "webatlas.navigation.page.selectNavigation": "Navigation auswählen",
   "webatlas.navigation.page.navItem.addChildren": "Unterelement hinzufügen",
+  "webatlas.navigation.page.navItem.viewEntity": "Entität anzeigen",
 
   "webatlas.paths.page.title": "Pfad",
   "webatlas.paths.page.subtitle": "Übersicht aller vorhandenen Pfade",
@@ -72,9 +73,12 @@
   "webatlas.modal.externalItem.loadingText.edit": "Wird gespeichert",
   "webatlas.modal.externalItem.pathField.placeholder": "z.B. https://example.com",
   "webatlas.modal.item.titleField.label": "Titel",
-  "webatlas.modal.item.titleField.placeholder": "z.B. Über uns",
+  "webatlas.modal.item.canonicalPathField.label": "Kanonischer Pfad",
+  "webatlas.modal.item.canonicalPathField.tooltip": "Basierend auf der Inhaltsstruktur",
+  "webatlas.modal.item.slugField.label": "Slug",
+  "webatlas.modal.item.navigationPosition.label": "Navigationsposition",
   "webatlas.modal.item.pathField.label": "Pfad",
-  "webatlas.modal.item.pathField.placeholder": "z.B. ueber/",
+  "webatlas.modal.item.canonicalPathMismatch": "Warnung: Der kanonische Pfad stimmt nicht mit dem Navigationspfad überein",
 
   "webatlas.components.pathInfo.checking": "Überprüfe, ob der Pfad verfügbar ist...",
   "webatlas.components.pathInfo.available": "Pfad ist verfügbar",
@@ -88,6 +92,10 @@
   "webatlas.components.CMEditViewAside.path.uidPath.hint": "Permanenter UID-Pfad, kann nicht geändert werden",
   "webatlas.components.CMEditViewAside.path.newPathInfo": "Ein neuer Pfad wird beim Speichern dieses Eintrags erstellt.",
   "webatlas.components.CMEditViewAside.path.input.noSourceField": "Verwenden Sie die Überschreibungsoption, um einen benutzerdefinierten Pfad festzulegen.",
+  "webatlas.components.CMEditViewAside.path.input.parentSelect.label": "Platzieren unter",
+  "webatlas.components.CMEditViewAside.path.input.parentSelect.rootPath": "Keine (Stammverzeichnis)",
+  "webatlas.components.CMEditViewAside.canonicalPath.input.label": "Kanonischer Pfad",
+  "webatlas.components.CMEditViewAside.canonicalPath.input.tooltip": "Pfad, der zeigt, wie Ihre Inhalte organisiert sind, unabhängig von der Navigation",
 
   "webatlas.path.type.internal": "Intern",
   "webatlas.path.type.external": "Extern",
@@ -114,7 +122,7 @@
   "webatlas.restore": "Wiederherstellen",
   "webatlas.loading": "Laden...",
   "webatlas.version": "Version",
-  
+
   "webatlas.notification.error": "Ein Fehler ist aufgetreten",
   "webatlas.notification.settings.saved": "Einstellungen erfolgreich gespeichert",
   "webatlas.notification.paths.fetchFailed": "Pfade konnten nicht abgerufen werden",

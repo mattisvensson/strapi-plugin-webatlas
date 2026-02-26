@@ -16,21 +16,20 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async getRoutes(ctx) {
+  async getRoute(ctx) {
     try {
-      return await getAdminService().getRoutes();
+      const { documentId } = ctx.params;
+
+      if (!documentId) return ctx.throw(400, 'Route documentId is required');
+
+      return await getAdminService().getRoute(documentId);
     } catch (e) {
       return ctx.throw(500, e)
     }
   },
-  async updateRoute (ctx) {
+  async getAllRoutes(ctx) {
     try {
-      const { documentId } = ctx.query;
-
-      if (!documentId) return ctx.throw(400, 'Route documentId is required');
-
-      const { data } = ctx.request.body;
-      return await getAdminService().updateRoute(documentId, data);
+      return await getAdminService().getAllRoutes();
     } catch (e) {
       return ctx.throw(500, e)
     }
@@ -42,6 +41,17 @@ const admin = () => ({
       if (!documentId) return ctx.throw(400, 'Route documentId is required');
 
       return await getAdminService().getRelatedRoute(documentId);
+    } catch (e) {
+      return ctx.throw(500, e)
+    }
+  },
+  async getRouteHierarchy (ctx) {
+    try {
+      const { documentId } = ctx.params;
+
+      if (!documentId) return ctx.throw(400, 'Route documentId is required');
+
+      return await getAdminService().getRouteHierarchy(documentId);
     } catch (e) {
       return ctx.throw(500, e)
     }
@@ -58,9 +68,9 @@ const admin = () => ({
   async createNavigation (ctx) {
     try {
       const { data } = ctx.request.body;
-      
+
       if (!data || !data.name) return ctx.throw(400, 'Navigation name is required');
-      
+
       return await getAdminService().createNavigation(data.name, data.visible);
     } catch (e) {
       return ctx.throw(500, e)
@@ -105,7 +115,7 @@ const admin = () => ({
       const { path, targetRouteDocumentId } = ctx.query
 
       if (!path) return ctx.throw(400, 'Path is required')
-      
+
       const res = await getAdminService().checkUniquePath(path, targetRouteDocumentId || null);
       return ctx.send({ uniquePath: res });
     } catch (e) {

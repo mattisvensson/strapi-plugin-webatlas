@@ -1,165 +1,60 @@
+import type { Entity, GroupedEntities, Route } from '../../../../../types';
+import type { ModalItem_VariantCreate } from '../../../types';
 import { SingleSelect, SingleSelectOption, Box, Divider, Grid, Field } from '@strapi/design-system';
 import { withModalSharedLogic } from '../withModalSharedLogic';
-import type { Entity, GroupedEntities, ModalItem_VariantCreate } from '../../../../../types';
-import PathInfo from '../../PathInfo';
 import { useEffect, useState } from 'react';
 import { useModalSharedLogic } from '../useModalSharedLogic';
 import { NavModal } from '../'
 import { useIntl } from 'react-intl';
 import { getTranslation, createTempNavItemObject } from '../../../utils';
 import { FullLoader } from '../../UI';
+import { useApi } from '../../../hooks';
+import ItemDetails from './ItemDetails';
 
-// TODO: Let the user select if the parent slug should be inherited or not
-// TODO: Add hint if a route is added that already exists in a navigation (because there is only one path per route)
-
-type ItemDetailsProps = Pick<ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>, 'navItemState' | 'dispatchItemState' | 'path' | 'dispatchPath' | 'validationState' | 'replacement'>;
-
-function ItemDetails({ navItemState, dispatchItemState, path, dispatchPath, validationState, replacement }: ItemDetailsProps) {
-  const { formatMessage } = useIntl();
-  
-  return (
-    <>
-      <Grid.Root gap={4}>
-        <Grid.Item col={6} s={12} alignItems="baseline">
-          <Box width="100%">
-            <Field.Root>
-              <Field.Label>
-                {formatMessage({
-                  id: getTranslation('modal.item.titleField.label'),
-                  defaultMessage: 'Title'
-                })}
-              </Field.Label>
-              <Field.Input
-                placeholder={formatMessage({
-                  id: getTranslation('modal.item.titleField.placeholder'),
-                  defaultMessage: 'e.g. About us'
-                })}
-                name="title"
-                value={navItemState?.title || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchItemState({ type: 'SET_TITLE', payload: e.target.value })}
-                required
-              />
-            </Field.Root>
-          </Box>
-        </Grid.Item>
-        <Grid.Item col={6} s={12}>
-          <Box width="100%">
-            <Field.Root>
-              <Field.Label>
-                {formatMessage({
-                  id: getTranslation('modal.item.pathField.label'),
-                  defaultMessage: 'Path'
-                })}
-              </Field.Label>
-              <Field.Input
-                required
-                placeholder={formatMessage({
-                  id: getTranslation('modal.item.pathField.placeholder'),
-                  defaultMessage: 'e.g. about/'
-                })}
-                name="slug"
-                value={path?.value || ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}
-                onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-                  if (e.target.value === path.prevValue) return
-                  dispatchPath({ type: 'DEFAULT', payload: e.target.value })}
-                }
-
-              />
-            </Field.Root>
-            <PathInfo validationState={validationState} replacement={replacement} />
-          </Box>
-        </Grid.Item>
-      </Grid.Root>
-      {/* TODO: Add visibility toggle to navitem schema */}
-      {/* <Grid.Root gap={8}>
-        <Grid.Item col={6} s={12}>
-          <Box width="100%">
-            <Field.Root hint="This menu item does not show on your site, if set to 'Hidden'">
-              <Field.Label>Visibility</Field.Label>
-              <Toggle
-                onLabel="Visible"
-                offLabel="Hidden"
-                checked={navItemState.active}
-                onClick={() => dispatchItemState({ type: 'SET_ACTIVE', payload: !navItemState.active })}
-              />
-              <Field.Hint/>
-            </Field.Root>
-          </Box>
-        </Grid.Item>
-      </Grid.Root> */}
-    </>
-  )
-}
-
-function ItemCreateComponent({ 
+function ItemCreateComponent({
   availableEntities,
-  setAvailableEntities,
-  selectedEntity,
-  setSelectedEntity,
   selectedContentType,
   setSelectedContentType,
-  entityRoute,
-  setEntityRoute,
-  entities,
-  getRelatedRoute,
-  replacement,
   validationState,
-  initialState,
   navItemState,
-  dispatchItemState,
+  dispatchNavItemState,
   path,
   dispatchPath,
   debouncedCheckUrl,
   setModalType,
   selectedNavigation,
-  parentId,
+  actionItemParent,
   onCreate,
+  navigationItems,
 }: ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>) {
+  const [route, setRoute] = useState<Route | null>(null);
+  const [entity, setEntity] = useState<Entity | null>(null);
   const [loading, setLoading] = useState(false)
   const [loadingRoute, setLoadingRoute] = useState(true)
   const { formatMessage } = useIntl();
-
-  useEffect(() => {
-    if (!entities) return
-    setAvailableEntities(entities)
-  }, [entities])
-
-  useEffect(() => {
-    if (path.needsUrlCheck && path.value) {
-      if (path.uidPath === path.value || path.initialPath === path.value) return
-			debouncedCheckUrl(path.value, entityRoute?.documentId);
-			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
-    }
-  }, [path.needsUrlCheck, entityRoute?.documentId]);
+  const { getRelatedRoute } = useApi();
 
   useEffect(() => {
     async function fetchRoute() {
-      if (!selectedContentType?.contentType || !selectedEntity?.documentId) return setLoadingRoute(false)
-      
+      if (!selectedContentType?.contentType || !entity?.documentId) return setLoadingRoute(false)
+
       setLoadingRoute(true)
       try {
-        const route = await getRelatedRoute(selectedEntity.documentId)
+        const relatedRoute = await getRelatedRoute(entity.documentId)
 
         // TODO: Create a route if not existing or show error
-        if (!route) throw new Error('No route found for the selected entity')
+        if (!relatedRoute) throw new Error('No route found for the selected entity')
 
-        dispatchPath({ type: 'NO_URL_CHECK', payload: route.path });
-        dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath });
-        dispatchPath({ type: 'SET_INITIALPATH', payload: route.path });
+        dispatchPath({ type: 'NO_URL_CHECK', payload: relatedRoute.path });
+        dispatchPath({ type: 'SET_SLUG', payload: relatedRoute.slug });
+        dispatchPath({ type: 'SET_INITIALPATH', payload: relatedRoute.path });
+        dispatchPath({ type: 'SET_CANONICALPATH', payload: relatedRoute.canonicalPath });
 
-        dispatchItemState({ type: 'SET_TITLE', payload: route.title })
-        dispatchItemState({ type: 'SET_ACTIVE', payload: route.active })
-        dispatchItemState({ type: 'SET_OVERRIDE', payload: route.isOverride })
-        
-        initialState.current = {
-          title: route.title,
-          slug: route.path,
-          active: route.active,
-          isOverride: route.isOverride,
-        }
+        dispatchNavItemState({ type: 'SET_TITLE', payload: relatedRoute.title })
+        dispatchNavItemState({ type: 'SET_ACTIVE', payload: relatedRoute.active })
+        dispatchNavItemState({ type: 'SET_OVERRIDE', payload: relatedRoute.isOverride })
 
-        setEntityRoute(route)
+        setRoute(relatedRoute)
       } catch (err) {
         console.log(err)
       } finally {
@@ -167,27 +62,29 @@ function ItemCreateComponent({
       }
     }
     fetchRoute()
-  }, [selectedEntity])
-  
+  }, [entity])
+
   const addItem = async () => {
     try {
       setLoading(true)
 
-      if (!selectedContentType?.contentType || !selectedEntity?.documentId || !path || !path.value?.trim() || !navItemState.title || !navItemState.title?.trim() || !selectedNavigation || !entityRoute) return
-
-      // TODO: Handle route update if path changed
-      // if (path.value !== path.initialPath) {
-      //   if (navItemState.slug !== entityRoute.path) navItemState.isOverride = true
-      //   await updateRoute({path: path.value}, entityRoute.documentId)
-      //   settings.routeUpdate = { path: path.value }
-      // }
+      if (
+        !selectedContentType?.contentType
+        || !entity?.documentId
+        || !path
+        || !path.value?.trim()
+        || !navItemState.title
+        || !navItemState.title?.trim()
+        || !selectedNavigation
+        || !route
+      ) return
 
       const newItem = createTempNavItemObject({
-        parentId,
-        entityRoute,
+        actionItemParentId: actionItemParent?.documentId,
+        entityRoute: route,
         selectedNavigation,
         navItemState,
-        selectedEntity,
+        selectedEntity: entity,
         selectedContentType,
         path
       })
@@ -223,7 +120,15 @@ function ItemCreateComponent({
       modalToOpen=''
       currentModalType="ItemCreate"
       currentModalMode={'create'}
-      disabled={!selectedContentType?.contentType || !selectedEntity?.documentId || !path || !path.value?.trim() || !navItemState.title || !navItemState.title?.trim()}
+      disabled={
+        !selectedContentType?.contentType
+        || !entity?.documentId
+        || !path
+        || !path.value?.trim()
+        || !path.slug?.trim()
+        || !navItemState.title
+        || !navItemState.title?.trim()
+      }
     >
       <Grid.Root gap={4}>
         <Grid.Item col={6} s={12}>
@@ -245,7 +150,7 @@ function ItemCreateComponent({
                   const [contentType] = availableEntities.filter((group: GroupedEntities) => group.contentType.label === value)
                   if (contentType) {
                     setSelectedContentType(contentType)
-                    setSelectedEntity(null)
+                    setEntity(null)
                   }
                 }}
                 disabled={availableEntities && availableEntities.length === 0}
@@ -268,21 +173,21 @@ function ItemCreateComponent({
                 })}
               </Field.Label>
               <SingleSelect
-                value={selectedEntity ? selectedEntity.id : ''}
+                value={entity ? entity.documentId : ''}
                 placeholder={formatMessage({
                   id: getTranslation('modal.internalItem.entity.placeholder'),
                   defaultMessage: 'Select an entity'
                 })}
-                onChange={(value: number) => {
+                onChange={(value: string) => {
                   const flatEntities = availableEntities.flatMap((group: GroupedEntities) => group.entities);
-                  const route = flatEntities.find((route: Entity) => route.id === Number(value));
-                  if (route) setSelectedEntity(route);
+                  const route = flatEntities.find((route: Entity) => route.documentId === value);
+                  if (route) setEntity(route);
                 }}
                 disabled={!selectedContentType || (selectedContentType?.entities && selectedContentType?.entities.length === 0)}
               >
                 {selectedContentType &&
                   selectedContentType.entities?.map((entity: Entity) =>
-                    <SingleSelectOption key={entity.id} value={entity.id}>{entity.id} - {entity[selectedContentType.contentType.default]}</SingleSelectOption>
+                    <SingleSelectOption key={entity.id} value={entity.documentId}>{entity[selectedContentType.contentType.default]}</SingleSelectOption>
                   )
                 }
               </SingleSelect>
@@ -290,21 +195,25 @@ function ItemCreateComponent({
           </Box>
         </Grid.Item>
       </Grid.Root>
-      {selectedEntity && selectedContentType &&
+      {entity && selectedContentType &&
         <>
           <Box paddingBottom={6} paddingTop={6}>
             <Divider/>
           </Box>
-          {loadingRoute ? 
+          {(loadingRoute || !route) ?
             <FullLoader height={50}/>
            :
             <ItemDetails
               navItemState={navItemState}
-              dispatchItemState={dispatchItemState}
+              dispatchNavItemState={dispatchNavItemState}
               path={path}
               dispatchPath={dispatchPath}
               validationState={validationState}
-              replacement={replacement}
+              parentNavItem={actionItemParent}
+              navigationItems={navigationItems}
+              debouncedCheckUrl={debouncedCheckUrl}
+              route={route}
+              modalVariant='create'
             />
           }
         </>

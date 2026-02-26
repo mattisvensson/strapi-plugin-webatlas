@@ -5,15 +5,18 @@ export type Route = {
   slug: string;
   path: string;
   uidPath: string;
+  canonicalPath: string;
   relatedContentType: string;
   relatedId: number;
   relatedDocumentId: string,
-  type: 'internal' | 'external' | 'wrapper';
+  type: RouteType;
   active: boolean;
   isOverride: boolean;
   navitem: {
     id: number;
   } | null;
+  parent?: Route;
+  children?: Route[];
   createdAt: string;
   updatedAt: string;
 };
@@ -29,5 +32,8 @@ export type RouteSettings = {
   isOverride?: boolean;
   active?: boolean;
   navitem?: number;
-  type?: 'internal' | 'external' | 'wrapper';
+  type?: RouteType;
+  parent?: string;
 };
+
+export type RouteType = 'internal' | 'external' | 'wrapper';
