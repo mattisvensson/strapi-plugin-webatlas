@@ -24,7 +24,7 @@ export default function findParentNavItem({
 
   for (let i = targetIndex - 1; i >= 0; i--) {
     const candidate = navigationItems[i];
-    if (typeof candidate.depth === 'number' && candidate.depth === targetItem.depth - 1) {
+    if (typeof candidate.depth === 'number' && candidate.depth === targetItem.depth - 1 && !candidate.deleted) {
       return candidate;
     }
   }

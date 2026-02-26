@@ -31,6 +31,7 @@ export default function buildBreadcrumbString({
 
   for (let i = targetIndex - 1; i >= 0; i--) {
     const candidate = navigationItems[i];
+    if (candidate.deleted) continue;
     parts.unshift(candidate.route.title);
     if (typeof candidate.depth === 'number' && candidate.depth === 0) break;
   }
