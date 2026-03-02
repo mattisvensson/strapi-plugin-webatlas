@@ -1,6 +1,6 @@
-import type { NavigationInput, NestedNavigation, NestedNavItem, PluginConfig, StructuredNavigationVariant, Route, RouteSettings, NavItem } from "../../../types";
+import type { NavigationInput, NestedNavigation, NestedNavItem, PluginConfig, StructuredNavigationVariant } from "../../../types";
 import { transformToUrl, waRoute, waNavigation, waNavItem, PLUGIN_ID } from "../../../utils";
-import { reduceDepthOfOrphanedItems, createExternalRoute, updateRoute, createNavItem, updateNavItem, deleteNavItem, buildStructuredNavigation, getExternalRouteIds, getRouteDescendants, duplicateCheck, buildNavigationPath } from "../utils";
+import { handleItemDeletion, handleItemUpdate, buildStructuredNavigation, getExternalRouteIds, getRouteDescendants, duplicateCheck } from "../utils";
 
 export default ({strapi}) => ({
 
@@ -214,42 +214,15 @@ export default ({strapi}) => ({
     if (!navigationId || !navigationItems) return
 
     let error = false;
-    const newNavItemsMap = new Map<string, NestedNavItem>();
+    let newNavItemsMap = new Map<string, NestedNavItem>();
 
     // First pass: Validate and prepare items
-    for (const [index, item] of navigationItems.entries()) {
-      // Handle deletions
-      if (item.deleted) {
-        try {
-          item.documentId && await deleteNavItem(item.documentId);
-
-          const newItems = reduceDepthOfOrphanedItems(navigationItems, item.documentId);
-
-          if (!newItems) throw new Error("Failed to reduce depth of orphaned items");
-
-          navigationItems = newItems;
-
-        } catch (error) {
-          error = true;
-          console.error('Error deleting navigation item ', error);
-        }
-        continue;
-      }
-
-      // Handle items without routes (cleanup)
-      // This is a quick fix to remove nav items without route
-      // Ideally, nav items without route shouldn't be created at all
-      // TODO: Find out why nav items without route can exist
-      if (!item.route && item.documentId) {
-        try {
-          console.warn('Navigation item without route found. Deleting it. ', item);
-          await deleteNavItem(item.documentId);
-        } catch (error) {
-          console.error('Error deleting navigation item without route ', error);
-        }
-        continue;
-      }
+    const deletionResult = await handleItemDeletion(navigationItems);
+    if (!deletionResult.success) {
+      console.error('Deletion errors:', deletionResult.errors);
     }
+
+    navigationItems = deletionResult.items;
 
     // Second pass: Process items sequentially and maintain parent/depth tracking
     let parentIds: string[] = [];
@@ -302,83 +275,18 @@ export default ({strapi}) => ({
       }) : null;
 
       try {
-        // Create or update the item
-        if (item.isNew) {
-          if (item.isNew.route) {
-            const route: Route = await strapi.documents(waRoute).findOne({
-              documentId: item.isNew.route
-            })
-
-            if (!route) throw new Error("Related route not found for new navigation item")
-
-            const routeData: RouteSettings = {}
-
-            if (item.route.title) routeData.title = item.route.title
-            if (item.route.slug) routeData.slug = item.route.slug
-            if (item.route.path) routeData.path = await buildNavigationPath({
-              parent: parent?.route,
-              slug: item.route.slug,
-              routeDocumentId: route.documentId
-            })
-            if (item.route.path !== route.canonicalPath) routeData.isOverride = true
-
-            await updateRoute(route.documentId, routeData)
-
-            await createNavItem({
-              route: item.isNew.route,
-              parent: calculatedParent,
-              navigation: item.isNew.navigation,
-              order: calculatedOrder,
-            });
-          } else {
-            const newRoute = await createExternalRoute({
-                title: item.route.title,
-                slug: item.route.slug,
-                path: item.route.path,
-                type: item.route.type,
-            })
-
-            const newNavItem = await createNavItem({
-              route: newRoute.documentId,
-              navigation: navigationId,
-              parent: calculatedParent,
-              order: calculatedOrder,
-            })
-            if (newNavItem) newNavItemsMap.set(item.documentId, newNavItem);
-          }
-        } else {
-          // Handle route updates for existing items
-          if (item.update) {
-            try {
-              const route: Route = await strapi.documents(waRoute).findOne({
-                documentId: item.route.documentId
-              })
-
-              if (!route) throw new Error("Related route not found for new navigation item")
-
-              const path = await buildNavigationPath({
-                parent: parent?.route,
-                slug: item.update.slug || item.route.slug,
-                routeDocumentId: route.documentId
-              })
-
-              await updateRoute(route.documentId, {
-                title: item.update.title || item.route.title,
-                slug: item.update.slug || item.route.slug,
-                path: path,
-                isOverride: item.route.path !== route.canonicalPath,
-              })
-            } catch (error) {
-              error = true;
-              console.error('Error updating route ', error);
-            }
-          }
-
-          await updateNavItem(item.documentId, {
-            order: calculatedOrder,
-            parent: calculatedParent,
-          });
+        const result = await handleItemUpdate({
+          item,
+          parent,
+          calculatedParent,
+          calculatedOrder,
+          navigationId,
+          newNavItemsMap
+        });
+        if (!result.success) {
+          console.error('Error updating item: ', item);
         }
+        newNavItemsMap = result.newNavItemsMap;
       } catch (errorMsg) {
         error = true;
         console.error('Error updating navigation item ', errorMsg);

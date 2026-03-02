@@ -67,9 +67,7 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
           ...item,
           update: {
             title: navItemState.title,
-            path: path.value,
-            // internal: false,
-            // active: navItemState.active,
+            slug: path.value,
           }
         });
       } else if (onCreate) {
