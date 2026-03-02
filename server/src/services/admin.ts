@@ -259,7 +259,6 @@ export default ({strapi}) => ({
         if (!result.success) {
           console.error('Error updating item: ', item);
         }
-        newNavItemsMap = result.newNavItemsMap;
       } catch (errorMsg) {
         error = true;
         console.error('Error updating navigation item ', errorMsg);

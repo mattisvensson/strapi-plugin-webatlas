@@ -97,7 +97,7 @@ export async function handleItemDeletion(navigationItems: NestedNavItem[]): Prom
  * - **Existing item** (`!item.isNew`): updates the nav item order/parent and optionally updates
  *   the related route when `item.update` is present.
  *
- * Note: `newNavItemsMap` is mutated and also returned for convenience.
+ * Note: `newNavItemsMap` is mutated.
  *
  * @param {object} params
  * @param {NestedNavItem} params.item - The navigation item being processed.
@@ -208,7 +208,6 @@ export async function handleItemUpdate({
 
   return {
     success: errors.length === 0,
-    newNavItemsMap,
     errors
   };
 }
