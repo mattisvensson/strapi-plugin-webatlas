@@ -15,7 +15,7 @@ import getRouteDescendants from "./getRouteDescendants";
 import getExternalRouteIds from "./getExternalRouteIds";
 import validateRouteDependencies from "./validateRouteDependencies";
 import buildNavigationPath from "./buildNavigationPath";
-import { handleItemDeletion, handleItemUpdate } from "./navigationItemStructure";
+import { handleItemDeletion, handleItemUpdate, calculateParentAndOrder } from "./navigationItemStructure";
 
 export {
   duplicateCheck,
@@ -41,4 +41,5 @@ export {
   buildNavigationPath,
   handleItemDeletion,
   handleItemUpdate,
+  calculateParentAndOrder,
 };

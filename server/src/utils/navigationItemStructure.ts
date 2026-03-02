@@ -213,4 +213,88 @@ export async function handleItemUpdate({
   };
 }
 
+/**
+ * Computes the persisted parent id and sibling order for a single item in a *flattened* navigation tree.
+ *
+ * This helper is intended to be called sequentially while iterating over `navigationItems`.
+ * It maintains two pieces of caller-owned state across iterations:
+ * - `parentIds`: a stack of parent nav-item documentIds for the current depth
+ * - `groupIndices`: the current sibling index (order) per depth
+ *
+ * Both arrays are mutated in place so the caller can keep state without needing to replace the arrays.
+ *
+ * Behavior summary:
+ * - If `item.depth === 0`, the parent stack is cleared and the root order counter is incremented/reset.
+ * - If the depth increases by 1 relative to the previous item, the previous item becomes the new parent
+ *   and the order counter for the new depth is reset.
+ * - If the depth decreases (or stays the same), the parent stack is popped to the correct depth and the
+ *   order counter for the current depth is incremented.
+ * - When the previous item has a temporary id (`temp-*`), it is resolved via `newNavItemsMap`.
+ *
+ * @param {object} params
+ * @param {NestedNavItem[]} params.navigationItems - Flat list of items in display order.
+ * @param {NestedNavItem} params.item - Current item being processed.
+ * @param {number} params.index - Index of `item` in `navigationItems`.
+ * @param {string[]} params.parentIds - Mutable stack of parent documentIds (mutated in place).
+ * @param {number[]} params.groupIndices - Mutable per-depth sibling counters (mutated in place).
+ * @param {Map<string, NestedNavItem>} params.newNavItemsMap - Map of temporary ids to created nav items.
+ *
+ * @returns {{ calculatedParent: string | null; calculatedOrder: number }}
+ * The parent documentId (or `null` for root) and the computed sibling order for persistence.
+ */
+export function calculateParentAndOrder({
+  navigationItems,
+  item,
+  index,
+  parentIds,
+  groupIndices,
+  newNavItemsMap
+}: {
+  navigationItems: NestedNavItem[];
+  item: NestedNavItem;
+  index: number;
+  parentIds: string[];
+  groupIndices: number[];
+  newNavItemsMap: Map<string, NestedNavItem>;
+}) {
+  // Handle depth changes and maintain parent stack
+  if (item.depth === 0) {
+    if (groupIndices[0] !== undefined) {
+      groupIndices[0] = groupIndices[0] + 1;
+    } else {
+      groupIndices[0] = 0;
+    }
+    parentIds.length = 0;
+  } else {
+    const previousItem = navigationItems[index - 1];
 
+    if (previousItem && typeof previousItem.depth === 'number') {
+      if (item.depth === previousItem.depth + 1) {
+        // Going deeper - previous item becomes parent
+        parentIds.push(previousItem.documentId.startsWith("temp-")
+          ? newNavItemsMap.get(previousItem.documentId)?.documentId || previousItem.documentId
+          : previousItem.documentId);
+        groupIndices[item.depth] = 0;
+      } else if (item.depth <= previousItem.depth) {
+        // Going back up - adjust parent stack
+        const diff = previousItem.depth - item.depth;
+        for (let i = 0; i < diff; i++) {
+          parentIds.pop();
+          groupIndices.pop();
+        }
+        groupIndices[item.depth] = (groupIndices[item.depth] || 0) + 1;
+      } else {
+        // Same level or other case
+        groupIndices[item.depth] = (groupIndices[item.depth] || 0) + 1;
+      }
+    }
+  }
+
+  const calculatedParent = parentIds.at(-1) || null;
+  const calculatedOrder = groupIndices[item.depth] || 0;
+
+  return {
+    calculatedParent,
+    calculatedOrder,
+  };
+}

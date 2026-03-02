@@ -1,6 +1,6 @@
 import type { NavigationInput, NestedNavigation, NestedNavItem, PluginConfig, StructuredNavigationVariant } from "../../../types";
 import { transformToUrl, waRoute, waNavigation, waNavItem, PLUGIN_ID } from "../../../utils";
-import { handleItemDeletion, handleItemUpdate, buildStructuredNavigation, getExternalRouteIds, getRouteDescendants, duplicateCheck } from "../utils";
+import { handleItemDeletion, handleItemUpdate, calculateParentAndOrder, buildStructuredNavigation, getExternalRouteIds, getRouteDescendants, duplicateCheck } from "../utils";
 
 export default ({strapi}) => ({
 
@@ -233,41 +233,14 @@ export default ({strapi}) => ({
         continue;
       }
 
-      // Handle depth changes and maintain parent stack
-      if (item.depth === 0) {
-        if (groupIndices[0] !== undefined) {
-          groupIndices[0] = groupIndices[0] + 1;
-        } else {
-          groupIndices[0] = 0;
-        }
-        parentIds = [];
-      } else {
-        const previousItem = navigationItems[index - 1];
-
-        if (previousItem && typeof previousItem.depth === 'number') {
-          if (item.depth === previousItem.depth + 1) {
-            // Going deeper - previous item becomes parent
-            parentIds.push(previousItem.documentId.startsWith("temp-")
-              ? newNavItemsMap.get(previousItem.documentId)?.documentId || previousItem.documentId
-              : previousItem.documentId);
-            groupIndices[item.depth] = 0;
-          } else if (item.depth <= previousItem.depth) {
-            // Going back up - adjust parent stack
-            const diff = previousItem.depth - item.depth;
-            for (let i = 0; i < diff; i++) {
-              parentIds.pop();
-              groupIndices.pop();
-            }
-            groupIndices[item.depth] = (groupIndices[item.depth] || 0) + 1;
-          } else {
-            // Same level or other case
-            groupIndices[item.depth] = (groupIndices[item.depth] || 0) + 1;
-          }
-        }
-      }
-
-      const calculatedParent = parentIds.at(-1) || null;
-      const calculatedOrder = groupIndices[item.depth] || 0;
+      const { calculatedParent, calculatedOrder } = calculateParentAndOrder({
+        navigationItems,
+        item,
+        index,
+        parentIds,
+        groupIndices,
+        newNavItemsMap
+      });
 
       const parent: NestedNavItem | null = calculatedParent ? await strapi.documents(waNavItem).findOne({
         documentId: calculatedParent,
