@@ -98,12 +98,14 @@ export async function handleItemUpdate({
 
       await updateRoute(route.documentId, routeData)
 
-      await createNavItem({
+      const newNavItem = await createNavItem({
         route: item.clientModifications.route,
         navigation: item.clientModifications.navigation,
         parent: calculatedParent,
         order: calculatedOrder,
       });
+
+      if (newNavItem) newNavItemsMap.set(item.documentId, newNavItem);
 
       return {
         success: true,
