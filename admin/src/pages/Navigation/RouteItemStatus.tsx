@@ -8,7 +8,7 @@ export default function RouteItemStatus({ item }: { item: NestedNavItem }) {
 
   const { formatMessage } = useIntl();
 
-  if (item.isNew && !item.deleted)
+  if (item.clientModifications?.type === 'create')
     return <Badge
         backgroundColor="success100"
         textColor="success600"
@@ -22,7 +22,7 @@ export default function RouteItemStatus({ item }: { item: NestedNavItem }) {
         </Typography>
       </Badge>
 
-  if (item.update && !item.deleted)
+  if (item.clientModifications?.type === 'update')
       return <Badge
         backgroundColor="warning100"
         textColor="warning600"
@@ -36,7 +36,7 @@ export default function RouteItemStatus({ item }: { item: NestedNavItem }) {
         </Typography>
       </Badge>
 
-  if (item.deleted)
+  if (item.clientModifications?.type === 'delete')
       return <Badge
         backgroundColor="danger100"
         textColor="danger600"

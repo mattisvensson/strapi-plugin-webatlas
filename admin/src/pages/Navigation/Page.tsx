@@ -176,8 +176,8 @@ const Navigation = () => {
   }, [navigationItems, activeId])
 
   function handleSoftAddedItem(newItem: NestedNavItem) {
-    if (newItem.isNew?.parent) {
-      const parentIndex = navigationItems?.findIndex(item => item.documentId === newItem.isNew?.parent);
+    if (newItem.clientModifications?.parent) {
+      const parentIndex = navigationItems?.findIndex(item => item.documentId === newItem.clientModifications?.parent);
       if (parentIndex !== undefined && parentIndex >= 0) {
         const parentDepth = navigationItems ? navigationItems[parentIndex].depth || 0 : 0;
         newItem.depth = parentDepth + 1;
@@ -437,6 +437,7 @@ const Navigation = () => {
             variant="ItemDelete"
             item={actionItem as NestedNavItem}
             onDelete={(deletedItem) => {
+              console.log(deletedItem)
               setNavigationItems(items =>
                 items?.map(item => item.id === deletedItem.id ? deletedItem : item)
               )

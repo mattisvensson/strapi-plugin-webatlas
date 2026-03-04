@@ -56,18 +56,29 @@ export type NestedNavItem = {
   status: 'published' | 'draft' | 'modified' | null;
   depth?: number;
   order: number;
-  deleted?: boolean;
-  update?: {
-    title?: string;
-    slug?: string;
-    path?: string;
-    isOverride?: boolean;
-  }
-  isNew?: {
-    route: string | null;
-    parent: string | null;
-    navigation: string | null;
-  };
+  clientModifications?: ClientModifications;
 }
+
+export type ClientModifications =
+  | {
+      type: 'delete';
+      title?: never;
+      slug?: never;
+      path?: never;
+      isOverride?: never;
+      route?: never;
+      parent?: never;
+      navigation?: never;
+    }
+  | {
+      type: 'create' | 'update';
+      title?: string;
+      slug?: string;
+      path?: string;
+      isOverride?: boolean;
+      route?: string | null;
+      parent?: string | null;
+      navigation?: string | null;
+    };
 
 export type StructuredNavigationVariant = 'nested' | 'flat';

@@ -52,7 +52,7 @@ export default function ItemDetails({
   useEffect(() => {
     if (!path.slug) return
 
-    const parentPath = parentNavItem?.update?.path || parentNavItem?.route.path || ''
+    const parentPath = parentNavItem?.clientModifications?.path || parentNavItem?.route.path || ''
     const newPath = parentPath ? `${parentPath}/${path.slug}` : path.slug
 
     dispatchPath({ type: 'DEFAULT', payload: newPath })

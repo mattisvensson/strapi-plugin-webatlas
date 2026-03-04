@@ -65,7 +65,8 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
       if (variant === 'ExternalEdit' && item && onSave) {
         onSave({
           ...item,
-          update: {
+          clientModifications: {
+            type: 'update',
             title: navItemState.title,
             slug: path.value,
           }

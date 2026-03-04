@@ -48,8 +48,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
     setNavigationItems(navItems =>
       navItems?.map(navItem => {
         if (navItem.documentId === item.documentId) {
-          delete navItem.update
-          delete navItem.deleted
+          delete navItem.clientModifications
         }
         return navItem;
       })
@@ -58,7 +57,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
 
   const elStyle = {
     marginLeft: depth !== undefined ? depth * 48 : 0,
-    opacity: (ghost || item.deleted) ? 0.5 : 1,
+    opacity: (ghost || item.clientModifications?.type === 'delete') ? 0.5 : 1,
     ...style,
   };
 
@@ -89,10 +88,10 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
             <RouteItemIcon type={item.route.type}/>
             <Flex gap={2}>
               <Typography fontWeight="bold">
-                {item.update?.title ? item.update.title : item.route.title}
+                {item.clientModifications?.title ? item.clientModifications.title : item.route.title}
               </Typography>
               <Typography textColor="neutral400">
-                {item.route.type === 'internal' && '/'}{item.update?.path ? item.update.path : item.route.path}
+                {item.route.type === 'internal' && '/'}{item.clientModifications?.path ? item.clientModifications.path : item.route.path}
               </Typography>
             </Flex>
             <RouteItemStatus item={item} />

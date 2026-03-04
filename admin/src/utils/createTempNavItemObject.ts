@@ -40,7 +40,8 @@ export default function createTempNavItemObject({
     order: 0,
     parent: actionItemParentId ? { documentId: actionItemParentId } : null,
     items: [],
-    isNew: {
+    clientModifications: {
+      type: 'create',
       route: entityRoute?.documentId ?? null,
       parent: actionItemParentId ?? null,
       navigation: selectedNavigation?.documentId ?? null,

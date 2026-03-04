@@ -256,6 +256,7 @@ export default ({strapi}) => ({
           navigationId,
           newNavItemsMap
         });
+
         if (!result.success) {
           console.error('Error updating item: ', item);
         }

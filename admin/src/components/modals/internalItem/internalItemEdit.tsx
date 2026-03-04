@@ -33,7 +33,7 @@ function ItemEditComponent({
   }, [navigationItems, item])
 
   useEffect(() => {
-    const parentPath = parentNavItem?.update?.path || parentNavItem?.route.path || ''
+    const parentPath = parentNavItem?.clientModifications?.path || parentNavItem?.route.path || ''
     const initialPath = `${parentPath}/${item.route.slug}`
 
     dispatchPath({ type: 'DEFAULT', payload: initialPath });
@@ -78,7 +78,8 @@ function ItemEditComponent({
 
       onEdit({
         ...item,
-        update: {
+        clientModifications: {
+          type: 'update',
           title: navItemState.title,
           slug: path.slug,
           path: path.value,
