@@ -233,16 +233,16 @@ export default ({strapi}) => ({
         continue;
       }
 
-      const { calculatedParent, calculatedOrder } = calculateParentAndOrder({
-        navigationItems,
-        item,
-        index,
-        parentIds,
-        groupIndices,
-        newNavItemsMap
-      });
-
       try {
+        const { calculatedParent, calculatedOrder } = calculateParentAndOrder({
+          navigationItems,
+          item,
+          index,
+          parentIds,
+          groupIndices,
+          newNavItemsMap
+        });
+
         const result = await handleItemUpdate({
           item,
           calculatedParent,
