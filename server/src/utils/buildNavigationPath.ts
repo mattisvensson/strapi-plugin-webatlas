@@ -23,7 +23,6 @@ export default async function buildNavigationPath({
       }) as NestedNavItem | null;
       parent = navItem
       parentDocumentId = navItem?.parent?.documentId || null
-      console.log('New found parent: ', parent);
       if (parent?.route?.type === 'internal') break;
     } while (parentDocumentId);
   }
