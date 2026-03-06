@@ -242,15 +242,9 @@ export default ({strapi}) => ({
         newNavItemsMap
       });
 
-      const parent: NestedNavItem | null = calculatedParent ? await strapi.documents(waNavItem).findOne({
-        documentId: calculatedParent,
-        populate: ['route']
-      }) : null;
-
       try {
         const result = await handleItemUpdate({
           item,
-          parent,
           calculatedParent,
           calculatedOrder,
           navigationId,

@@ -62,14 +62,12 @@ export async function handleItemDeletion(navigationItems: NestedNavItem[]) {
 
 export async function handleItemUpdate({
   item,
-  parent,
   calculatedParent,
   calculatedOrder,
   navigationId,
   newNavItemsMap,
 }: {
   item: NestedNavItem;
-  parent?: NestedNavItem;
   calculatedParent: string | null;
   calculatedOrder: number;
   navigationId: string;
@@ -83,16 +81,16 @@ export async function handleItemUpdate({
         documentId: item.clientModifications.route
       }) as Route
 
-      if (!route) throw new Error("Related route not found for new navigation item")
+      if (!route) throw new Error(`Related route not found for new navigation item '${item.route.title}'`)
 
       const routeData: RouteSettings = {}
 
       if (item.route.title) routeData.title = item.route.title
       if (item.route.slug) routeData.slug = item.route.slug
       if (item.route.path) routeData.path = await buildNavigationPath({
-        parent: parent?.route,
         slug: item.route.slug,
-        routeDocumentId: route.documentId
+        routeDocumentId: route.documentId,
+        calculatedParent,
       })
       if (item.route.path !== route.canonicalPath) routeData.isOverride = true
 
@@ -113,7 +111,7 @@ export async function handleItemUpdate({
       }
     } catch (errorMsg) {
       errors.push(errorMsg instanceof Error ? errorMsg.message : String(errorMsg));
-      console.error('Error creating navigation item with existing route ', errorMsg);
+      console.error('Error creating navigation item with existing route: ', errorMsg);
     }
   }
 
@@ -140,7 +138,7 @@ export async function handleItemUpdate({
       }
     } catch (errorMsg) {
       errors.push(errorMsg instanceof Error ? errorMsg.message : String(errorMsg));
-      console.error('Error creating route for new navigation item ', errorMsg);
+      console.error(`Error creating new navigation item '${item.route.title}': `, errorMsg);
     }
   }
 
@@ -150,14 +148,14 @@ export async function handleItemUpdate({
         documentId: item.route.documentId
       }) as Route
 
-      if (!route) throw new Error("Related route not found for new navigation item")
+      if (!route) throw new Error(`Related route not found for navigation item '${item.route.title}' during update`)
 
       let path = item.clientModifications?.slug;
       if (item.route.type === 'internal') {
         path = await buildNavigationPath({
-          parent: parent?.route,
           slug: item.clientModifications?.slug || item.route.slug,
-          routeDocumentId: route.documentId
+          routeDocumentId: route.documentId,
+          calculatedParent,
         });
       }
 
@@ -169,7 +167,30 @@ export async function handleItemUpdate({
       })
     } catch (errorMsg) {
       errors.push(errorMsg instanceof Error ? errorMsg.message : String(errorMsg));
-      console.error('Error updating route ', errorMsg);
+      console.error(`Error updating route for navigation item '${item.route.title}': `, errorMsg);
+    }
+  }
+
+  if (!item.clientModifications && item.route.type === 'internal' && item.depth !== 0) {
+    try {
+      const route = await strapi.documents(waRoute as UID.ContentType).findOne({
+        documentId: item.route.documentId
+      }) as Route
+
+      const path = await buildNavigationPath({
+        slug: item.route.slug,
+        routeDocumentId: route.documentId,
+        calculatedParent,
+      });
+
+      await updateRoute(route.documentId, {
+        slug: item.route.slug,
+        path: path,
+        isOverride: item.route.path !== route.canonicalPath,
+      })
+    } catch (errorMsg) {
+      errors.push(errorMsg instanceof Error ? errorMsg.message : String(errorMsg));
+      console.error(`Error validating existing route for navigation item '${item.route.title}': `, errorMsg);
     }
   }
 
