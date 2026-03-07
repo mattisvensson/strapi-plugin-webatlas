@@ -1,7 +1,7 @@
 import type { UID } from "@strapi/strapi";
 import type { NestedNavItem, Route, RouteSettings } from "../../../types";
 import { waRoute } from "../../../utils";
-import { buildNavigationPath, createExternalRoute, createNavItem, deleteNavItem, reduceDepthOfOrphanedItems, updateNavItem, updateRoute } from "./";
+import { buildNavigationPath, createExternalRoute, deleteRoute, createNavItem, deleteNavItem, reduceDepthOfOrphanedItems, updateNavItem, updateRoute } from "./";
 
 export async function handleItemDeletion(navigationItems: NestedNavItem[]) {
   const errors: string[] = [];
@@ -17,6 +17,10 @@ export async function handleItemDeletion(navigationItems: NestedNavItem[]) {
           await deleteNavItem(item.documentId);
         }
 
+        if (item.route.type !== 'internal') {
+          await deleteRoute(item.route.documentId);
+        }
+
         const newItems = reduceDepthOfOrphanedItems(items, item.documentId);
 
         if (!newItems) {
@@ -24,7 +28,7 @@ export async function handleItemDeletion(navigationItems: NestedNavItem[]) {
         }
 
         items = newItems;
-        i--; // Adjust index since array was modified
+        i--;
 
       } catch (err) {
         const errorMsg = `Error deleting navigation item: ${err instanceof Error ? err.message : String(err)}`;

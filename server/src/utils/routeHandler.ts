@@ -36,7 +36,21 @@ async function updateRoute(documentId: string, data: RouteSettings): Promise<Rou
   }
 }
 
+async function deleteRoute(documentId: string) {
+  try {
+    await strapi.documents(waRoute as UID.ContentType).delete({
+      documentId: documentId,
+    });
+
+    return true;
+  } catch (e) {
+    console.log(e)
+    return false;
+  }
+}
+
 export {
   createExternalRoute,
   updateRoute,
+  deleteRoute,
 }
