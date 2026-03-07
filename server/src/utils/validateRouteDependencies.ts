@@ -1,5 +1,5 @@
 import type { UID } from "@strapi/strapi";
-import { getRouteDescendants, getExternalRouteIds } from '.';
+import { getRouteDescendants, getNonInternalRouteIds } from '.';
 import { waRoute } from '../../../utils';
 
 export default async function validateRouteDependencies({
@@ -29,12 +29,12 @@ export default async function validateRouteDependencies({
   if (!normalizedRouteId) return true
 
   const descendants = await getRouteDescendants(normalizedRouteId);
-  const externalRouteIds = await getExternalRouteIds();
+  const nonInternalRouteIds = await getNonInternalRouteIds();
 
   if (
     normalizedRouteId === newParentId
     || descendants.includes(newParentId)
-    || externalRouteIds.includes(newParentId)
+    || nonInternalRouteIds.includes(newParentId)
   ) {
     throw new Error(`Circular dependency detected: Cannot set route ${newParentId} as parent of ${normalizedRouteId}`);
   }

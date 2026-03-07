@@ -12,7 +12,7 @@ import buildCanonicalPath from './buildCanonicalPath';
 import cascadeCanonicalPathUpdates from "./cascadeCanonicalPathUpdates";
 import getRouteAncestors from "./getRouteAncestors";
 import getRouteDescendants from "./getRouteDescendants";
-import getExternalRouteIds from "./getExternalRouteIds";
+import getNonInternalRouteIds from "./getNonInternalRouteIds";
 import validateRouteDependencies from "./validateRouteDependencies";
 import buildNavigationPath from "./buildNavigationPath";
 import { handleItemDeletion, handleItemUpdate, calculateParentAndOrder } from "./navigationItemStructure";
@@ -37,7 +37,7 @@ export {
   cascadeCanonicalPathUpdates,
   getRouteAncestors,
   getRouteDescendants,
-  getExternalRouteIds,
+  getNonInternalRouteIds,
   validateRouteDependencies,
   buildNavigationPath,
   handleItemDeletion,

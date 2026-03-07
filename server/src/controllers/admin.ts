@@ -45,13 +45,13 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async getRouteHierarchy (ctx) {
+  async getProhibitedParentRouteIds (ctx) {
     try {
       const { documentId } = ctx.params;
 
       if (!documentId) return ctx.throw(400, 'Route documentId is required');
 
-      return await getAdminService().getRouteHierarchy(documentId);
+      return await getAdminService().getProhibitedParentRouteIds(documentId);
     } catch (e) {
       return ctx.throw(500, e)
     }
