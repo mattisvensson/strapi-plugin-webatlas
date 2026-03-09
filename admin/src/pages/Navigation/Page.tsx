@@ -437,7 +437,6 @@ const Navigation = () => {
             variant="ItemDelete"
             item={actionItem as NestedNavItem}
             onDelete={(deletedItem) => {
-              console.log(deletedItem)
               setNavigationItems(items =>
                 items?.map(item => item.id === deletedItem.id ? deletedItem : item)
               )

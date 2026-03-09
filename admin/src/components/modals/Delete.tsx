@@ -39,6 +39,7 @@ export default function Delete({ variant, item, onDelete }: DeleteProps) {
         const editedItem = {
           ...item,
           clientModifications: {
+            ...item.clientModifications,
             type: "delete" as const
           }
         };

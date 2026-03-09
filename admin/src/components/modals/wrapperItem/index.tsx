@@ -62,17 +62,13 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
 
       if (!navItemState.title || !selectedNavigation) return
 
-      const data = {
-        title: navItemState.title,
-        active: navItemState.active,
-      }
-
       if (variant === 'WrapperEdit' && item && onSave) {
         onSave({
           ...item,
           clientModifications: {
+            ...item.clientModifications,
             type: 'update',
-            ...data
+            title: navItemState.title,
           }
         })
       } else if (onCreate) {
