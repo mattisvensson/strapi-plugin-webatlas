@@ -29,7 +29,11 @@ function ItemEditComponent({
   const { formatMessage } = useIntl();
 
   const parentNavItem = useMemo(() => {
-    return findParentNavItem({navigationItems: navigationItems, targetItem: item});
+    return findParentNavItem({
+      navigationItems: navigationItems,
+      targetItem: item,
+      onlyInternalItems: true,
+    });
   }, [navigationItems, item])
 
   useEffect(() => {

@@ -352,6 +352,7 @@ const Navigation = () => {
                       indentationWidth={indentationWidth}
                       depth={item.id === activeId && projected ? projected.depth : item.depth}
                       maxDepth={config.navigation.maxDepth}
+                      navigationItems={navigationItems}
                     />
                   ))}
                   {createPortal(
@@ -363,6 +364,7 @@ const Navigation = () => {
                           setActionItem={setActionItem}
                           setNavigationItems={setNavigationItems}
                           maxDepth={config.navigation.maxDepth}
+                          navigationItems={navigationItems}
                         />
                       ) : null}
                     </DragOverlay>,

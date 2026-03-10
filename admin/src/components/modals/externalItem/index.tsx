@@ -66,6 +66,7 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
         onSave({
           ...item,
           clientModifications: {
+            ...item.clientModifications,
             type: 'update',
             title: navItemState.title,
             slug: path.value,

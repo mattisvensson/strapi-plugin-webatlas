@@ -13,4 +13,5 @@ export type RouteItemProps = {
   handleProps?: any;
   disableInteraction?: boolean;
   indentationWidth?: number;
+  navigationItems?: NestedNavItem[] | null;
 }
