@@ -9,10 +9,12 @@ import type { NestedNavItem } from '../../../types';
  */
 export default function findParentNavItem({
   navigationItems,
-  targetItem
+  targetItem,
+  onlyInternalItems = false,
 }: {
   navigationItems?: NestedNavItem[] | null,
   targetItem: NestedNavItem,
+  onlyInternalItems?: boolean,
 }): NestedNavItem | null {
   if (!navigationItems || !Array.isArray(navigationItems)) return null;
   if (!targetItem || typeof targetItem.depth !== 'number' || targetItem.depth <= 0) return null;
@@ -24,9 +26,22 @@ export default function findParentNavItem({
 
   for (let i = targetIndex - 1; i >= 0; i--) {
     const candidate = navigationItems[i];
-    if (typeof candidate.depth === 'number' && candidate.depth === targetItem.depth - 1 && candidate.clientModifications?.type !== 'delete') {
+
+    if (candidate.depth === 0) {
+      if (onlyInternalItems && candidate.route.type !== 'internal') {
+        return null;
+      }
       return candidate;
     }
+
+    if (
+      candidate.clientModifications?.type === 'delete' ||
+      (typeof candidate.depth === 'number' && candidate.depth >= targetItem.depth) ||
+      (onlyInternalItems && candidate.route.type !== 'internal')
+    ) {
+      continue;
+    }
+    return candidate;
   }
 
   return null;
