@@ -125,7 +125,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
     marginLeft: depth !== undefined ? depth * 48 : 0,
     opacity: (ghost || item.clientModifications?.type === 'delete') ? 0.5 : 1,
     ...style,
-  };
+  }
 
   if (!item || !item.route) return null
 
@@ -133,10 +133,10 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
     <Box
       ref={wrapperRef}
       style={elStyle}
-    >
+      >
       <Box
-        background={item.route?.active ? 'neutral0' : 'neutral100'}
-        borderColor="neutral150"
+        background="neutral0"
+        borderColor={item.clientModifications?.type === 'delete' ? 'danger500' : 'neutral150'}
         hasRadius
         paddingBottom={4}
         paddingLeft={4}
