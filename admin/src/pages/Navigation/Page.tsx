@@ -429,6 +429,7 @@ const Navigation = () => {
           <ItemCreate
             actionItemParent={actionItemParent}
             navigationItems={navigationItems || []}
+            navigations={navigations}
             onCreate={(newItem) => {
               handleSoftAddedItem(newItem)
             }}

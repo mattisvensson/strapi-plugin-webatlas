@@ -79,6 +79,8 @@
   "webatlas.modal.item.navigationPosition.label": "Navigation Position",
   "webatlas.modal.item.pathField.label": "Path",
   "webatlas.modal.item.canonicalPathMismatch": "Warning: Canonical Path does not match navigation path",
+  "webatlas.modal.item.routeAlreadyUsed": "Warning: This route is already used in the navigation \"{navigationName}\"",
+  "webatlas.modal.item.routeAlreadyUsed.info": "Changing the path for this item will also update the path in the existing item.",
 
   "webatlas.components.pathInfo.checking": "Checking if path is available...",
   "webatlas.components.pathInfo.available": "Path is available",

@@ -26,6 +26,7 @@ function ItemCreateComponent({
   actionItemParent,
   onCreate,
   navigationItems,
+  navigations
 }: ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>) {
   const [route, setRoute] = useState<Route | null>(null);
   const [entity, setEntity] = useState<Entity | null>(null);
@@ -211,6 +212,7 @@ function ItemCreateComponent({
               validationState={validationState}
               parentNavItem={actionItemParent}
               navigationItems={navigationItems}
+              navigations={navigations}
               debouncedCheckUrl={debouncedCheckUrl}
               route={route}
               modalVariant='create'

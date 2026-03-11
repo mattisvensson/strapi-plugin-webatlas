@@ -4,6 +4,7 @@ import type { PanelPathState, PanelAction } from '../types';
 export type ModalItem_VariantCreate = {
   actionItemParent: NestedNavItem | null;
   navigationItems?: NestedNavItem[] | null;
+  navigations: NestedNavigation[] | null;
   onCreate: (newItem: NestedNavItem) => void;
 }
 
