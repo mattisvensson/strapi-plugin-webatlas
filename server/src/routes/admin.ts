@@ -86,8 +86,8 @@ export default {
     },
     {
       method: 'GET',
-      path: '/route/hierarchy/:documentId',
-      handler: 'admin.getProhibitedParentRouteIds',
+      path: '/route/prohibitedIds/:documentId?',
+      handler: 'admin.getProhibitedRouteIds',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',

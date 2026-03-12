@@ -34,7 +34,7 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async getRelatedRoute (ctx) {
+  async getRelatedRoute(ctx) {
     try {
       const { documentId } = ctx.query;
 
@@ -45,18 +45,16 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async getProhibitedParentRouteIds (ctx) {
+  async getProhibitedRouteIds(ctx) {
     try {
       const { documentId } = ctx.params;
 
-      if (!documentId) return ctx.throw(400, 'Route documentId is required');
-
-      return await getAdminService().getProhibitedParentRouteIds(documentId);
+      return await getAdminService().getProhibitedRouteIds(documentId);
     } catch (e) {
       return ctx.throw(500, e)
     }
   },
-  async getNavigation (ctx) {
+  async getNavigation(ctx) {
     try {
       const { documentId, variant } = ctx.query;
 
@@ -65,7 +63,7 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async createNavigation (ctx) {
+  async createNavigation(ctx) {
     try {
       const { data } = ctx.request.body;
 
@@ -76,7 +74,7 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async updateNavigation (ctx) {
+  async updateNavigation(ctx) {
     try {
       const { documentId } = ctx.query;
 
@@ -88,7 +86,7 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async updateNavigationItemStructure (ctx) {
+  async updateNavigationItemStructure(ctx) {
     try {
       const { navigationId, navigationItems } = ctx.request.body;
 
@@ -99,7 +97,7 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async deleteNavigation (ctx) {
+  async deleteNavigation(ctx) {
     try {
       const { documentId } = ctx.query;
 
@@ -110,7 +108,7 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async checkUniquePath (ctx) {
+  async checkUniquePath(ctx) {
     try {
       const { path, targetRouteDocumentId } = ctx.query
 

@@ -7,22 +7,22 @@ export default async function getRouteDescendants(routeId: string): Promise<stri
 
   while (stack.length > 0) {
     const currentId = stack.pop();
-    
+
     if (!currentId) continue;
-    
+
     const children = await strapi.documents(waRoute as UID.ContentType).findMany({
-      filters: { 
+      filters: {
         parent: {
-          documentId: currentId 
+          documentId: currentId
         }
       }
     });
-    
+
     for (const child of children) {
       descendants.push(child.documentId);
       stack.push(child.documentId);
     }
   }
-  
+
   return descendants;
 }

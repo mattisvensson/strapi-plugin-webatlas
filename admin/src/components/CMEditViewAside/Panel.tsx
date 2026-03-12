@@ -22,25 +22,25 @@ function getCanonicalPath(selectedParent: Route | null, sourceFieldValue: string
 function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 	switch (action.type) {
 		case 'DEFAULT':
-      return { 
+      return {
 				...state,
-				value: action.payload, 
+				value: action.payload,
 				prevValue: state.value,
-				needsUrlCheck: true 
+				needsUrlCheck: true
 			};
 		case 'NO_URL_CHECK':
 			return {
 				...state,
-				value: action.payload, 
+				value: action.payload,
 				prevValue: state.value,
-				needsUrlCheck: false 
+				needsUrlCheck: false
 			};
 		case 'NO_TRANSFORM_AND_CHECK':
-			return { 
+			return {
 				...state,
-				value: action.payload, 
+				value: action.payload,
 				prevValue: state.value,
-				needsUrlCheck: false 
+				needsUrlCheck: false
 			};
 		case 'RESET_URL_CHECK_FLAG':
 			return { ...state, needsUrlCheck: false };
@@ -58,7 +58,7 @@ function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 const Panel = ({ config }: { config: ConfigContentType }) => {
 	const { form, model } = useContentManagerContext()
 	const { initialValues, values, onChange } = form;
-	const { getRelatedRoute, getAllRoutes, getRouteHierarchy } = useApi()
+	const { getRelatedRoute, getAllRoutes, getProhibitedRouteIds } = useApi()
 	const { formatMessage } = useIntl();
 	const { get } = useFetchClient();
 	const { allowedActions: {
@@ -81,7 +81,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 
 	const [route, setRoute] = useState<Route | null>(null);
 	const [routes, setRoutes] = useState<Route[]>([]);
-	const [excludedRouteIds, setExcludedRouteIds] = useState<string[]>([]);
+	const [prohibitedRouteIds, setProhibitedRouteIds] = useState<string[]>([]);
 	const [selectedParent, setSelectedParent] = useState<Route | null>(null);
 	const [isOverride, setIsOverride] = useState(false);
 	const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
@@ -121,7 +121,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		if (!key) return;
 
 		const currentValue = currentValues[key];
-		
+
 		if (!currentValue) {
 			dispatchPath({ type: 'NO_URL_CHECK', payload: '' });
 			return;
@@ -131,11 +131,11 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		// 1. Initial load is complete
 		// 2. User has manually changed the field OR no route exists
 		// 3. Not in override mode
-		if (initialLoadComplete && 
-				(hasUserChangedField.current || !route) && 
-				prevSourceValueRef.current !== currentValue && 
+		if (initialLoadComplete &&
+				(hasUserChangedField.current || !route) &&
+				prevSourceValueRef.current !== currentValue &&
 				!isOverride) {
-			
+
 			const path = getCanonicalPath(selectedParent, currentValue);
 			if (currentValue === initialValues[key]) {
 				dispatchPath({ type: 'NO_URL_CHECK', payload: path });
@@ -159,7 +159,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		}
 
     if (!initialLoadComplete) return;
-        
+
     // Mark as user-changed if current value differs from initial value
     if (currentValue !== initialValue) {
       hasUserChangedField.current = true;
@@ -181,8 +181,8 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 			if (!initialValues.documentId) {
         setInitialLoadComplete(true); // Mark as complete even if no route
         return;
-      }			
-			
+      }
+
 			try {
 				const route = await getRelatedRoute(initialValues.documentId)
 
@@ -191,10 +191,10 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 				initialPath.current = initialValues.webatlas_path || route.uidPath
 				setRoute(route)
 				setIsOverride(route.isOverride || false)
-				
+
 				dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: route.path || '' });
 				dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath || '' });
-			
+
 				// Set the prevSourceValueRef to prevent immediate override
 				const key = config?.default;
         if (key) {
@@ -223,7 +223,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	useEffect(() => {
 		if (initialValues.webatlas_path) dispatchPath({ type: 'NO_URL_CHECK', payload: initialValues.webatlas_path });
 		if (initialValues.webatlas_override) setIsOverride(initialValues.webatlas_override);
-	
+
 		async function fetchAllRoutes() {
 			const allRoutes = await getAllRoutes();
 			setRoutes(allRoutes);
@@ -232,15 +232,11 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	}, [])
 
 	useEffect(() => {
-		if (!route || !route.documentId) return;
-
-		const documentId = route.documentId;
-
-		async function fetchRouteHierarchy() {
-			const routeHierarchyIds = await getRouteHierarchy(documentId);
-			setExcludedRouteIds(routeHierarchyIds);
+		async function fetchProhibitedRouteIds() {
+			const prohibitedIds = await getProhibitedRouteIds(route?.documentId);
+			setProhibitedRouteIds(prohibitedIds);
 		}
-		fetchRouteHierarchy();
+		fetchProhibitedRouteIds();
 	}, [route])
 
 	useEffect(() => {
@@ -256,7 +252,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 
 	async function checkCanonicalPath(path: string, documentId: string | null) {
 		if (!path) return
-		
+
 		try {
 			const result = await duplicateCheck({fetchFunction: get, path, routeDocumentId: documentId, withoutTransform: true});
 
@@ -270,12 +266,12 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		if (!path) return
 		setValidationState('checking')
 		dispatchPath({ type: 'SET_REPLACEMENT', payload: '' });
-		
+
 		try {
 			const data = await duplicateCheck({fetchFunction: get, path, routeDocumentId: route, withoutTransform: true});
 
-			if (!data || data === path) return 
-			
+			if (!data || data === path) return
+
 			dispatchPath({ type: 'NO_URL_CHECK', payload: data });
 			dispatchPath({ type: 'SET_REPLACEMENT', payload: data });
 		} catch (err) {
@@ -311,11 +307,10 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 				</>}
 				<RouteStructure
 					canonicalPath={path.canonicalPath}
-					routeId={route?.documentId || ''}
 					routes={routes}
 					selectedParent={selectedParent}
 					setSelectedParent={setSelectedParent}
-					excludedRouteIds={excludedRouteIds}
+					prohibitedRouteIds={prohibitedRouteIds}
 				/>
 				<Divider marginTop={2} marginBottom={2} />
 				<Box>

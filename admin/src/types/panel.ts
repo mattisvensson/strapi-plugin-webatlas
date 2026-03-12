@@ -1,6 +1,6 @@
 import { Route } from "../../../types";
 
-export type PanelAction = 
+export type PanelAction =
   | { type: 'DEFAULT'; payload: string }
   | { type: 'NO_URL_CHECK'; payload: string }
   | { type: 'NO_TRANSFORM_AND_CHECK'; payload: string }
@@ -20,9 +20,8 @@ export type PanelPathState = {
 
 export type RouteStructureProps = {
   canonicalPath?: string;
-  routeId: string | null;
   routes: Route[];
   selectedParent: Route | null;
   setSelectedParent: (value: Route | null) => void;
-  excludedRouteIds?: string[];
+  prohibitedRouteIds?: string[];
 }

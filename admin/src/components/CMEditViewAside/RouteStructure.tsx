@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import { useMemo } from "react";
 import Tooltip from '../Tooltip'
 
-function RouteStructure({ routeId, routes, selectedParent, setSelectedParent, canonicalPath, excludedRouteIds }: RouteStructureProps) {
+function RouteStructure({ routes, selectedParent, setSelectedParent, canonicalPath, prohibitedRouteIds }: RouteStructureProps) {
   const { formatMessage } = useIntl();
 
   const sortedRoutes = useMemo(() => {
@@ -21,25 +21,25 @@ function RouteStructure({ routeId, routes, selectedParent, setSelectedParent, ca
     <Box paddingBottom={2}>
       <Field.Root>
         <Field.Label>
-          {formatMessage({ 
-            id: getTranslation('components.CMEditViewAside.path.input.parentSelect.label'), 
+          {formatMessage({
+            id: getTranslation('components.CMEditViewAside.path.input.parentSelect.label'),
             defaultMessage: 'Place under'
           })}
         </Field.Label>
-        <SingleSelect 
+        <SingleSelect
           value={selectedParent?.documentId || ""}
           onValueChange={handleSelectParent}
         >
           <SingleSelectOption value="">
-            {formatMessage({ 
-              id: getTranslation('components.CMEditViewAside.path.input.parentSelect.rootPath'), 
+            {formatMessage({
+              id: getTranslation('components.CMEditViewAside.path.input.parentSelect.rootPath'),
               defaultMessage: 'None (root path)'
             })}
           </SingleSelectOption>
           {sortedRoutes
-            .filter((route) => !excludedRouteIds?.includes(route.documentId) || route.documentId === selectedParent?.documentId)
+            .filter((route) => !prohibitedRouteIds?.includes(route.documentId) || route.documentId === selectedParent?.documentId)
             .map((route) =>
-              <SingleSelectOption 
+              <SingleSelectOption
                 key={route.documentId}
                 value={route.documentId}
               >

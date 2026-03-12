@@ -1,4 +1,4 @@
-import type { NavigationInput, NestedNavigation, NestedNavItem, PluginConfig, StructuredNavigationVariant } from "../../../types";
+import type { NavigationInput, NestedNavigation, NestedNavItem, Route, PluginConfig, StructuredNavigationVariant } from "../../../types";
 import { transformToUrl, waRoute, waNavigation, waNavItem, PLUGIN_ID } from "../../../utils";
 import { handleItemDeletion, handleItemUpdate, calculateParentAndOrder, buildStructuredNavigation, getNonInternalRouteIds, getRouteDescendants, duplicateCheck } from "../utils";
 
@@ -95,18 +95,22 @@ export default ({strapi}) => ({
     }
   },
 
-  async getProhibitedParentRouteIds(documentId: string) {
+  async getProhibitedRouteIds(documentId: string | undefined) {
     try {
-      const route = await strapi.documents(waRoute).findOne({
-        documentId: documentId,
-      });
+      let route: Route | null = null;
+      if (documentId) {
+        route = await strapi.documents(waRoute).findOne({
+          documentId: documentId,
+        }) as Route | null;
+      }
 
-      if (!route) throw new Error("Route not found");
-
-      const descendants = await getRouteDescendants(route.documentId)
+      const descendants = route?.documentId ? await getRouteDescendants(route.documentId) : [];
       const nonInternalRouteIds = await getNonInternalRouteIds()
 
-      return [route.documentId, ...descendants, ...nonInternalRouteIds]
+      const prohibitedRouteIds = [...descendants, ...nonInternalRouteIds]
+      route?.documentId && prohibitedRouteIds.push(route.documentId)
+
+      return prohibitedRouteIds
 
     } catch (e) {
       console.log(e)
