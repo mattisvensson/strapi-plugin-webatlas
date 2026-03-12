@@ -1,5 +1,4 @@
 import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
-import Tooltip from '../../../components/Tooltip'
 import { Box, Accordion, Field } from '@strapi/design-system';
 import { getTranslation } from '../../../utils';
 import { useIntl } from 'react-intl';
@@ -65,7 +64,8 @@ export default function ContentTypeAccordion({
                     key === 'createdBy' ||
                     key === 'updatedBy' ||
                     key === 'webatlas_path' ||
-                    key === 'webatlas_override'
+                    key === 'webatlas_override' ||
+                    key === 'webatlas_parent'
                   ) return null
                   return <SingleSelectOption key={index} value={key}>{key}</SingleSelectOption>
                 })}
