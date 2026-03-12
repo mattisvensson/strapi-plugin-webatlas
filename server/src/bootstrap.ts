@@ -1,7 +1,7 @@
 import type { Core, UID } from '@strapi/strapi';
 import { PluginConfig, ConfigContentType, ContentType, Route } from "../../types";
 import { transformToUrl, waRoute, waNavItem, PLUGIN_ID } from "../../utils";
-import { duplicateCheck, buildCanonicalPath, cascadeCanonicalPathUpdates, validateRouteDependencies } from "./utils"; 
+import { duplicateCheck, buildCanonicalPath, cascadeCanonicalPathUpdates, validateRouteDependencies } from "./utils";
 import runMigrations from './migrations';
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
@@ -9,7 +9,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   try {
     // Run migrations first
     await runMigrations(strapi)
-    
+
     // Register permission actions.
     const actions = [
       {
@@ -56,7 +56,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   const contentTypes = strapi.contentTypes;
-  const enabledContentTypes = Object.values(contentTypes).filter((type) => 
+  const enabledContentTypes = Object.values(contentTypes).filter((type) =>
     type.pluginOptions?.webatlas?.enabled === true
   );
 
@@ -65,8 +65,8 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     key: "config",
   }) as PluginConfig;
 
-  let newConfig: PluginConfig = { 
-    ...config, 
+  let newConfig: PluginConfig = {
+    ...config,
     selectedContentTypes: [],
     navigation: {
       maxDepth: config?.navigation?.maxDepth || 1,
@@ -77,13 +77,12 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
   enabledContentTypes.forEach((type: ContentType) => {
     const existingConfig = config?.selectedContentTypes?.find((ct) => ct.uid === type.uid);
-    
-    // Normalize to only include the required keys: uid, label, default, pattern
+
+    // Normalize to only include the required keys: uid, label, default
     newConfig.selectedContentTypes.push({
       uid: type.uid,
       label: type.info.displayName,
       default: existingConfig?.default || null,
-      pattern: existingConfig?.pattern || null
     });
   })
 
@@ -111,7 +110,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
         });
 
         if (!navItem || !navItem.route) return
-  
+
         event.state = navItem.route.id && navItem.route.type === 'external' ? { id: navItem.route.id } : null
       } catch (err) {
         console.log(err)
@@ -138,21 +137,21 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
   strapi.db?.lifecycles.subscribe({
     models: enabledContentTypes.map((type: ContentType) => type.uid),
-    
+
     async beforeCreate(event: any) {
       const validContentTypes = config.selectedContentTypes.filter((type: ConfigContentType) => strapi.contentTypes[type.uid]);
       await pluginStore.set({ key: "config", value: {selectedContentTypes: validContentTypes} });
-      
+
       // Transform path to URL format
-      if (!event.params.data.webatlas_path) return;    
+      if (!event.params.data.webatlas_path) return;
       event.params.data.webatlas_path = transformToUrl(event.params.data.webatlas_path)
     },
-    
+
     async afterCreate(event: any) {
       const ctSettings: ConfigContentType | undefined = config.selectedContentTypes.find((type: ConfigContentType) => type.uid === event.model.uid);
 
       const {
-        webatlas_path, 
+        webatlas_path,
         webatlas_override,
         webatlas_parent,
       } = event.params.data;
@@ -203,7 +202,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       const ctSettings = config.selectedContentTypes.find((type: ConfigContentType) => type.uid === event.model.uid);
 
       const {
-        webatlas_path, 
+        webatlas_path,
         webatlas_override,
         webatlas_parent,
         documentId,
@@ -243,7 +242,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       let routeDocumentId: string | undefined = relatedRoute?.documentId
-      
+
       if (!relatedRoute) {
         const createdRoute = await strapi.documents(waRoute as UID.ContentType).create({
           data: {
@@ -258,7 +257,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
         routeDocumentId = (createdRoute as any)?.documentId as string | undefined
       } else {
-        await strapi.documents(waRoute as UID.ContentType).update({ 
+        await strapi.documents(waRoute as UID.ContentType).update({
           documentId: relatedRoute.documentId,
           data: {
             ...routeData,
@@ -306,9 +305,9 @@ async function findAndDeleteNavItem (relatedId: number, relatedContentType: stri
         relatedContentType: relatedContentType
       },
     });
-  
+
     if (!route?.documentId) return
-  
+
     const navItem = await strapi.db?.query(waNavItem).findOne({
       where: {
         route: {
@@ -316,10 +315,10 @@ async function findAndDeleteNavItem (relatedId: number, relatedContentType: stri
         }
       },
     });
-    
+
     await strapi.documents(waRoute as UID.ContentType).delete({ documentId: route.documentId })
     if (navItem?.documentId) await strapi.documents(waNavItem as UID.ContentType).delete({ documentId: navItem.documentId })
-    
+
   } catch (err) {
     console.log(err)
   }
