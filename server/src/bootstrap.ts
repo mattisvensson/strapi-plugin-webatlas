@@ -216,29 +216,35 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
         },
       }) as Route | null;
 
-      let parent = null
+      let parent: Route | null = null
       if (webatlas_parent) {
         try {
           const isValid = await validateRouteDependencies({
             routeId: relatedRoute ? relatedRoute.documentId : null,
             newParentId: webatlas_parent
           });
-          if (isValid) parent = webatlas_parent
+          if (isValid) {
+            parent = await strapi.documents(waRoute as UID.ContentType).findOne({
+              documentId: webatlas_parent
+            }) as Route
+          }
         } catch (err) {
           console.error(`Route dependency validation failed: ${err.message}`)
         }
       }
 
       const title = ctSettings?.default ? event.params.data[ctSettings.default] : ''
-      const path = await duplicateCheck(transformToUrl(webatlas_path), relatedRoute ? relatedRoute.documentId : null);
-      const canonicalPath = await buildCanonicalPath(path, parent);
+      const transformedPath = transformToUrl(webatlas_path)
+      const rawPath = parent ? `${parent.path}/${transformedPath}` : transformedPath
+      const path = await duplicateCheck(rawPath, relatedRoute ? relatedRoute.documentId : null);
+      const canonicalPath = await buildCanonicalPath(transformedPath, parent?.documentId);
 
       const routeData: any = {
         title,
         path: path,
-        slug: path,
+        slug: transformedPath,
         isOverride: webatlas_override || false,
-        parent: parent,
+        parent: parent?.documentId || null,
       }
 
       let routeDocumentId: string | undefined = relatedRoute?.documentId

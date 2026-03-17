@@ -50,6 +50,8 @@ function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 			return { ...state, uidPath: action.payload };
 		case 'SET_CANONICALPATH':
 			return { ...state, canonicalPath: action.payload };
+		case 'SET_OVERRIDEPATH':
+			return { ...state, overridePath: action.payload };
 		default:
 			throw new Error();
 	}
@@ -93,6 +95,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		replacement: null,
 		uidPath: '',
 		canonicalPath: '',
+		overridePath: '',
 	});
   const hasUserChangedField = useRef(false);
 	const initialPath = useRef('')
@@ -111,10 +114,10 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	const debouncedCheckCanonicalPath = useCallback(debounce(checkCanonicalPath, 250), []);
 
 	useEffect(() => {
-		onChange('webatlas_path', path.value);
+    if (isOverride) onChange('webatlas_path', path.overridePath);
 		onChange('webatlas_override', isOverride);
 		onChange('webatlas_parent', selectedParent?.documentId || null);
-	}, [path.value, isOverride, selectedParent])
+	}, [path.value, path.overridePath, isOverride, selectedParent])
 
 	const debouncedValueEffect = useMemo(() => debounce((currentValues: any) => {
 		const key = config?.default;
@@ -154,7 +157,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		const currentValue = values[key];
     const initialValue = initialValues[key];
 
-		if (currentValue && !isOverride) {
+    if (currentValue !== initialValue && currentValue && !isOverride) {
 			onChange('webatlas_path', transformToUrl(currentValue));
 		}
 
@@ -189,10 +192,16 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 				if (!route) return
 
 				initialPath.current = initialValues.webatlas_path || route.uidPath
-				setRoute(route)
+
+        setRoute(route)
 				setIsOverride(route.isOverride || false)
 
-				dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: route.path || '' });
+        if (route.isOverride) {
+          dispatchPath({ type: 'SET_OVERRIDEPATH', payload: route.path || '' });
+        } else {
+          dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: route.path || '' });
+        }
+
 				dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath || '' });
 
 				// Set the prevSourceValueRef to prevent immediate override

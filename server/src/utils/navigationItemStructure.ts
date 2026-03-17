@@ -79,6 +79,7 @@ export async function handleItemUpdate({
 }) {
   const errors: string[] = [];
 
+  // Handle newly created nav items with existing routes (internal item)
   if (item.clientModifications?.type === 'create' && item.clientModifications?.route) {
     try {
       const route = await strapi.documents(waRoute as UID.ContentType).findOne({
@@ -96,7 +97,8 @@ export async function handleItemUpdate({
         routeDocumentId: route.documentId,
         calculatedParent,
       })
-      if (item.route.path !== route.canonicalPath) routeData.isOverride = true
+      // if (item.route.path !== route.canonicalPath) routeData.isOverride = true
+      routeData.isOverride = item.route.path !== route.canonicalPath
 
       await updateRoute(route.documentId, routeData)
 
@@ -119,6 +121,7 @@ export async function handleItemUpdate({
     }
   }
 
+  // Handle newly created nav items without routes (external item or wrapper)
   if (item.clientModifications?.type === 'create' && !item.clientModifications.route) {
     try {
       const newRoute = await createExternalRoute({
@@ -146,6 +149,7 @@ export async function handleItemUpdate({
     }
   }
 
+  // Handle updates to existing items - update route if needed
   if (item.clientModifications?.type === 'update') {
     try {
       const route = await strapi.documents(waRoute as UID.ContentType).findOne({
@@ -167,7 +171,7 @@ export async function handleItemUpdate({
         title: item.clientModifications?.title || item.route.title,
         slug: item.clientModifications?.slug || item.route.slug,
         path: path,
-        isOverride: item.route.path !== route.canonicalPath,
+        isOverride: path !== route.canonicalPath,
       })
     } catch (errorMsg) {
       errors.push(errorMsg instanceof Error ? errorMsg.message : String(errorMsg));
@@ -175,6 +179,7 @@ export async function handleItemUpdate({
     }
   }
 
+  // Handle updates to existing route items without changes - still need to check if path needs to be updated due to parent/order changes
   if (!item.clientModifications && item.route.type === 'internal' && item.depth !== 0) {
     try {
       const route = await strapi.documents(waRoute as UID.ContentType).findOne({
@@ -190,11 +195,43 @@ export async function handleItemUpdate({
       await updateRoute(route.documentId, {
         slug: item.route.slug,
         path: path,
-        isOverride: item.route.path !== route.canonicalPath,
+        isOverride: path !== route.canonicalPath,
       })
     } catch (errorMsg) {
       errors.push(errorMsg instanceof Error ? errorMsg.message : String(errorMsg));
       console.error(`Error validating existing route for navigation item '${item.route.title}': `, errorMsg);
+    }
+  }
+
+  // Handle updates to related entities for internal items if slug or parent has changed
+  if (item.clientModifications && item.route.type === 'internal') {
+    const relatedContentType = item.route.relatedContentType;
+    const relatedDocumentId = item.route.relatedDocumentId;
+
+    try {
+      const path = await buildNavigationPath({
+        slug: item.clientModifications?.slug || item.route.slug,
+        routeDocumentId: item.route.documentId,
+        calculatedParent,
+      });
+
+      const route = await strapi.documents(waRoute as UID.ContentType).findOne({
+        documentId: item.route.documentId
+      }) as Route
+
+      // For some reason, strapi.documents().update() doesn't allow updating only partial data.
+      // It throws an error if required fields are missing in the update payload, even if they are not being changed.
+      // As a workaround, we can use the entityService API which allows partial updates without requiring all fields.
+      // TODO: Since the API is marked as deprecated, consider migrating to the new recommended approach in future Strapi versions.
+      await strapi.entityService.update(relatedContentType as UID.ContentType, relatedDocumentId, {
+        data: {
+          webatlas_path: path,
+          webatlas_override: path !== route.canonicalPath,
+        },
+      });
+    } catch (errorMsg) {
+      errors.push(errorMsg instanceof Error ? errorMsg.message : String(errorMsg));
+      console.error(`Error updating related entity for navigation item '${item.route.title}': `, errorMsg);
     }
   }
 

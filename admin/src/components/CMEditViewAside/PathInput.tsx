@@ -1,9 +1,8 @@
-import type { ConfigContentType, Route } from '../../../../types';
+import type { ConfigContentType } from '../../../../types';
 import type { PanelAction, PanelPathState } from '../../types';
 import { Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { getTranslation } from '../../utils';
-import { useMemo } from 'react';
 import Tooltip from '../Tooltip'
 
 type PathInputProps = {
@@ -16,11 +15,15 @@ type PathInputProps = {
 function PathInput({ path, dispatchPath, isOverride, config }: PathInputProps) {
   const { formatMessage } = useIntl();
 
-  const inputBorder = useMemo(() => {
-    if (path.replacement === null) return "";
-    if (path.replacement) return "1px solid #ee5e52";
-    return "1px solid #5cb176";
-  }, [path.replacement]);
+  const displayedPath = isOverride && path.overridePath !== undefined
+    ? path.overridePath
+    : path.value ?? "";
+
+  const inputBorder = path.replacement === null
+    ? ""
+    : path.replacement
+      ? "1px solid #ee5e52"
+      : "1px solid #5cb176";
 
   return (
     <Field.Root
@@ -54,8 +57,8 @@ function PathInput({ path, dispatchPath, isOverride, config }: PathInputProps) {
       </Field.Label>
       <Field.Input
         id="path-input"
-        value={path.value}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: e.target.value })}
+        value={displayedPath}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'SET_OVERRIDEPATH', payload: e.target.value })}
         disabled={!isOverride}
         onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
           if (e.target.value === path.prevValue) return

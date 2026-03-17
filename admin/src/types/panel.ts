@@ -8,6 +8,7 @@ export type PanelAction =
   | { type: 'SET_REPLACEMENT'; payload: string }
   | { type: 'SET_UIDPATH'; payload: string }
   | { type: 'SET_CANONICALPATH'; payload: string }
+  | { type: 'SET_OVERRIDEPATH'; payload: string }
 
 export type PanelPathState = {
   value?: string;
@@ -16,6 +17,7 @@ export type PanelPathState = {
   needsUrlCheck: boolean;
   replacement: string | null;
   canonicalPath?: string;
+  overridePath?: string;
 };
 
 export type RouteStructureProps = {
