@@ -3,7 +3,13 @@ import { Typography, Badge } from '@strapi/design-system';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
 
-export default function RouteItemStatus({ item }: { item: NestedNavItem }) {
+export default function RouteItemStatus({
+  item,
+  isUpdated = false,
+}: {
+  item: NestedNavItem;
+  isUpdated?: boolean;
+}) {
   if (!item) return null;
 
   const { formatMessage } = useIntl();
@@ -22,7 +28,7 @@ export default function RouteItemStatus({ item }: { item: NestedNavItem }) {
         </Typography>
       </Badge>
 
-  if (item.clientModifications?.type === 'update')
+  if (item.clientModifications?.type === 'update' || isUpdated)
       return <Badge
         backgroundColor="warning100"
         textColor="warning600"

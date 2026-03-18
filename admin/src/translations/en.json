@@ -117,7 +117,7 @@
   "webatlas.draft": "Draft",
   "webatlas.modified": "Modified",
   "webatlas.deleted": "Deleted",
-  "webatlas.restore": "Restore",
+  "webatlas.restore.metadata": "Restore Metadata",
   "webatlas.loading": "Loading...",
   "webatlas.version": "Version",
 

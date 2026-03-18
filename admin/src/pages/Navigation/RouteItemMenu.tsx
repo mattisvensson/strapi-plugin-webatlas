@@ -30,6 +30,14 @@ export default function RouteItemMenu({
 
   return (
     <SimpleMenu label="Item actions" tag={IconButton} icon={<More />}>
+      {(item.clientModifications?.type === 'delete' || item.clientModifications?.type === 'update') && <>
+        <MenuItem onClick={() => handleRestore()}>
+          {formatMessage({
+            id: getTranslation('restore.metadata'),
+            defaultMessage: 'Restore Metadata',
+          })}
+        </MenuItem>
+      </>}
       {item.clientModifications?.type !== 'delete' && <>
         <MenuItem onClick={() => handleEdit()}>
           {formatMessage({
@@ -62,14 +70,6 @@ export default function RouteItemMenu({
               defaultMessage: 'Delete',
             })}
           </Typography>
-        </MenuItem>
-      </>}
-      {(item.clientModifications?.type === 'delete' || item.clientModifications?.type === 'update') && <>
-        <MenuItem onClick={() => handleRestore()}>
-          {formatMessage({
-            id: getTranslation('restore'),
-            defaultMessage: 'Restore',
-          })}
         </MenuItem>
       </>}
       </SimpleMenu>
