@@ -30,7 +30,6 @@ function ItemCreateComponent({
 }: ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>) {
   const [route, setRoute] = useState<Route | null>(null);
   const [entity, setEntity] = useState<Entity | null>(null);
-  const [loading, setLoading] = useState(false)
   const [loadingRoute, setLoadingRoute] = useState(true)
   const { formatMessage } = useIntl();
   const { getRelatedRoute } = useApi();
@@ -67,8 +66,6 @@ function ItemCreateComponent({
 
   const addItem = async () => {
     try {
-      setLoading(true)
-
       if (
         !selectedContentType?.contentType
         || !entity?.documentId
@@ -94,8 +91,6 @@ function ItemCreateComponent({
       setModalType('')
     } catch (err) {
       console.log(err)
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -117,7 +112,6 @@ function ItemCreateComponent({
       titleText={formatMessage({ id: getTranslation('modal.internalItem.titleText.create'), defaultMessage: 'Add new navigation item' })}
       loadingText={formatMessage({ id: getTranslation('modal.internalItem.loadingText.create'), defaultMessage: 'Creating' })}
       onConfirm={addItem}
-      loading={loading}
       modalToOpen=''
       currentModalType="ItemCreate"
       currentModalMode={'create'}
