@@ -169,6 +169,18 @@ const Navigation = () => {
   }, [modalType]);
 
   useEffect(() => {
+    if (!selectedNavigation || !navigationItems) return
+
+    setNavigations(navigations.map(nav => {
+      if (nav.documentId !== selectedNavigation.documentId) return nav
+      return {
+        ...nav,
+        items: navigationItems,
+      }
+    }))
+  }, [setNavigations, navigationItems, selectedNavigation])
+
+  useEffect(() => {
     if (!activeId || !navigationItems) return
 
     const item = navigationItems.find(({ id }) => id === activeId);

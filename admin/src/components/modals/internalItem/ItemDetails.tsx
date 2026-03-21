@@ -67,8 +67,8 @@ export default function ItemDetails({
 
   const navigationWhereRouteExists = useMemo(() => {
     if (!navigations || !route) return false;
-    return navigations.find(nav => nav.items.some(r => r.route.documentId === route.documentId));
-  }, [navigations, route]);
+    return navigations.find(nav => nav.items.some(r => r.route.documentId === route.documentId || (r.route.relatedContentType === route.relatedContentType && r.route.relatedDocumentId === route.relatedDocumentId)))
+  }, [navigations, route, navigationItems]);
 
   useEffect(() => {
     if (path.needsUrlCheck && path.value) {
