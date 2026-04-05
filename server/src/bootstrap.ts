@@ -139,9 +139,6 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     models: enabledContentTypes.map((type: ContentType) => type.uid),
 
     async beforeCreate(event: any) {
-      const validContentTypes = config.selectedContentTypes.filter((type: ConfigContentType) => strapi.contentTypes[type.uid]);
-      await pluginStore.set({ key: "config", value: {selectedContentTypes: validContentTypes} });
-
       // Transform path to URL format
       if (!event.params.data.webatlas_path) return;
       event.params.data.webatlas_path = transformToUrl(event.params.data.webatlas_path)
