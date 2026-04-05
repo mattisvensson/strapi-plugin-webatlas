@@ -175,9 +175,9 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
         }
       }
 
-      const title = ctSettings?.default ? event.params.data[ctSettings.default] : '';
       const path = await duplicateCheck(transformToUrl(webatlas_path));
       const canonicalPath = await buildCanonicalPath(path, parent);
+      const title = event.params.data[ctSettings?.default]?.trim() || path;
 
       await strapi.documents(waRoute as UID.ContentType).create({
         data: {
@@ -230,11 +230,11 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
         }
       }
 
-      const title = ctSettings?.default ? event.params.data[ctSettings.default] : ''
       const transformedPath = transformToUrl(webatlas_path)
       const rawPath = parent ? `${parent.path}/${transformedPath}` : transformedPath
       const path = await duplicateCheck(rawPath, relatedRoute ? relatedRoute.documentId : null);
       const canonicalPath = await buildCanonicalPath(transformedPath, parent?.documentId);
+      const title = event.params.data[ctSettings?.default]?.trim() || path;
 
       const routeData: any = {
         title,
