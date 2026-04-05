@@ -2,6 +2,7 @@ import type { NestedNavItem, NestedNavigation } from '../../../types';
 
 export type RouteItemProps = {
   item: NestedNavItem;
+  initialItem?: NestedNavItem;
   setActionItemParent: (item: NestedNavItem | null) => void;
   setActionItem: React.Dispatch<React.SetStateAction<NestedNavItem | NestedNavigation | undefined>>;
   setNavigationItems: React.Dispatch<React.SetStateAction<NestedNavItem[] | undefined>>;

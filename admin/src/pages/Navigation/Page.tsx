@@ -354,10 +354,12 @@ const Navigation = () => {
                 measuring={measuring}
               >
                 <SortableContext items={navigationItems} strategy={verticalListSortingStrategy}>
-                  {navigationItems.map((item, index) => (
-                    config?.navigation.maxDepth && <SortableRouteItem
+                  {navigationItems.map((item, index) => {
+                    const initialItem = initialNavigationItemsRef.current?.find(i => i.documentId === item.documentId);
+                    return config?.navigation.maxDepth && <SortableRouteItem
                       key={item.documentId || index}
                       item={item}
+                      initialItem={initialItem}
                       setActionItemParent={setActionItemParent}
                       setActionItem={setActionItem}
                       setNavigationItems={setNavigationItems}
@@ -366,7 +368,7 @@ const Navigation = () => {
                       maxDepth={config.navigation.maxDepth}
                       navigationItems={navigationItems}
                     />
-                  ))}
+                  })}
                   {createPortal(
                     <DragOverlay>
                       {activeId && activeItem ? (

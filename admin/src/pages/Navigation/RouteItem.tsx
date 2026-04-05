@@ -1,7 +1,7 @@
 import { Box, Typography, Flex } from '@strapi/design-system';
 import { RouteItemProps } from '../../types';
 import { ModalContext } from '../../contexts';
-import { useContext, forwardRef, useEffect, useMemo, useRef } from 'react';
+import { useContext, forwardRef, useEffect, useMemo } from 'react';
 import { Drag } from '@strapi/icons';
 import RouteItemMenu from './RouteItemMenu';
 import RouteItemStatus from './RouteItemStatus';
@@ -12,6 +12,7 @@ import { NestedNavItem } from '../../../../types';
 
 export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
   item,
+  initialItem,
   setActionItemParent,
   setActionItem,
   setNavigationItems,
@@ -24,7 +25,6 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
   navigationItems,
 }: RouteItemProps, ref) => {
   const { setModalType } = useContext(ModalContext);
-  const initialItemRef = useRef<NestedNavItem | null>(null);
 
   const parentNavItem = useMemo(() => findParentNavItem({
     navigationItems,
@@ -33,11 +33,11 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
   }), [navigationItems, item]);
 
   const hasStructureChanges = useMemo(() => {
-    if (!initialItemRef.current) return false;
+    if (!initialItem) return false;
 
-    return initialItemRef.current.order !== item.order
-      || initialItemRef.current.depth !== item.depth;
-  }, [item.documentId, item.order, item.depth]);
+    return initialItem.order !== item.order
+      || initialItem.depth !== item.depth;
+  }, [initialItem, item.order, item.depth]);
 
   const isUpdated = item.clientModifications?.type === 'update' || hasStructureChanges;
 
@@ -49,17 +49,6 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
     const itemSlug = item.clientModifications?.slug || item.route.slug;
     return `${parentPath}${itemSlug}`;
   }, [item, parentNavItem, isUpdated]);
-
-  useEffect(() => {
-    if (!item) return;
-
-    if (
-      initialItemRef.current === null ||
-      initialItemRef.current.documentId !== item.documentId
-    ) {
-      initialItemRef.current = structuredClone(item);
-    }
-  }, [item]);
 
   const updateNavItem = (navItems: NestedNavItem[] | undefined): NestedNavItem[] | undefined => {
     if (!navItems) return navItems;
