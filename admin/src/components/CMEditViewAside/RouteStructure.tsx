@@ -56,7 +56,7 @@ function RouteStructure({ routes, selectedParent, setSelectedParent, canonicalPa
           })}
           <Tooltip description={formatMessage({
             id: getTranslation('components.CMEditViewAside.canonicalPath.input.tooltip'),
-            defaultMessage: 'Path that shows how your content is organized, regardless of navigation',
+            defaultMessage: 'The path determined by your content\'s natural hierarchy, independent of where it appears in navigation menus.',
           })} />
         </Field.Label>
         <Field.Input

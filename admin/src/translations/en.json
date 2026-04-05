@@ -93,7 +93,7 @@
   "webatlas.components.CMEditViewAside.path.input.parentSelect.label": "Place under",
   "webatlas.components.CMEditViewAside.path.input.parentSelect.rootPath": "None (root path)",
   "webatlas.components.CMEditViewAside.canonicalPath.input.label": "Canonical Path",
-  "webatlas.components.CMEditViewAside.canonicalPath.input.tooltip": "Path that shows how your content is organized, regardless of navigation",
+  "webatlas.components.CMEditViewAside.canonicalPath.input.tooltip": "The path determined by your content's natural hierarchy, independent of where it appears in navigation menus.",
 
   "webatlas.path.type.internal": "Internal",
   "webatlas.path.type.external": "External",
