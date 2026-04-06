@@ -20,13 +20,14 @@ export default function buildBreadcrumbString({
   includeTarget?: boolean,
 }): string | null {
   if (!navigationItems || !Array.isArray(navigationItems)) return null;
-  if (!targetItem || typeof targetItem.depth !== 'number' || targetItem.depth <= 0) return null;
+  if (!targetItem || typeof targetItem.depth !== 'number') return null;
+  if (targetItem.depth <= 0) return targetItem.route.title;
 
   const targetIndex = navigationItems.findIndex(
     navItem => navItem.documentId === targetItem.documentId
   );
-  if (targetIndex === -1) return null;
 
+  if (targetIndex === -1) return null;
   const parts: string[] = [];
 
   for (let i = targetIndex - 1; i >= 0; i--) {

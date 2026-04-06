@@ -61,7 +61,7 @@ export default function ItemDetails({
   const breadcrumbString = useMemo(() => {
     if (!navigationItems) return null;
     const targetItem = item || parentNavItem;
-    if (!targetItem || typeof targetItem.depth !== 'number' || targetItem.depth <= 0) return null;
+    if (!targetItem || typeof targetItem.depth !== 'number') return null;
     return buildBreadcrumbString({ navigationItems: navigationItems, targetItem: targetItem, includeTarget: modalVariant === 'create' });
   }, [parentNavItem, navigationItems, item, modalVariant]);
 
