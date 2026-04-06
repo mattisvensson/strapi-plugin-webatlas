@@ -134,7 +134,10 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
     setNavigationItems(navItems =>
       navItems?.map(navItem => {
         if (navItem.documentId === item.documentId) {
-          delete navItem.clientModifications
+          const { clientModifications: _, ...rest } = navItem;
+          return navItem.initialClientModifications
+            ? { ...rest, clientModifications: navItem.initialClientModifications }
+            : rest;
         }
         return navItem;
       })

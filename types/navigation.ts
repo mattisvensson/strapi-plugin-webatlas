@@ -57,6 +57,7 @@ export type NestedNavItem = {
   depth?: number;
   order: number;
   clientModifications?: ClientModifications;
+  initialClientModifications?: ClientModifications;
 }
 
 export type ClientModifications = {

@@ -1,4 +1,4 @@
-import type { NestedNavItem, Entity, GroupedEntities, RouteType } from '../../../types';
+import type { NestedNavItem, Entity, GroupedEntities, RouteType, ClientModifications } from '../../../types';
 import type { ExtendedPanelPathState } from '../types';
 
 type CreateTempNavItemObjectParams = {
@@ -30,6 +30,14 @@ export default function createTempNavItemObject({
   path,
   type = 'internal',
 }: CreateTempNavItemObjectParams): NestedNavItem {
+
+  const clientModifications: ClientModifications = {
+    type: 'create',
+    route: entityRoute?.documentId ?? null,
+    parent: actionItemParentId ?? null,
+    navigation: selectedNavigation?.documentId ?? null,
+  };
+
   const tempNavItem: NestedNavItem = {
     id: Math.floor(Math.random() * -1000000), // Temporary negative ID
     documentId: `temp-${Date.now()}`,
@@ -40,12 +48,8 @@ export default function createTempNavItemObject({
     order: 0,
     parent: actionItemParentId ? { documentId: actionItemParentId } : null,
     items: [],
-    clientModifications: {
-      type: 'create',
-      route: entityRoute?.documentId ?? null,
-      parent: actionItemParentId ?? null,
-      navigation: selectedNavigation?.documentId ?? null,
-    },
+    clientModifications: { ...clientModifications },
+    initialClientModifications: { ...clientModifications },
     route: {
       active: navItemState.active || false,
       createdAt: new Date().toISOString(),
