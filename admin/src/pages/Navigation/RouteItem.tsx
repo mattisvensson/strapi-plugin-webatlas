@@ -43,7 +43,7 @@ export const RouteItem = forwardRef<HTMLDivElement, RouteItemProps>(({
 
   const itemPath = useMemo(() => {
     if (!item.route) return ''
-    if (item.route.type !== 'internal' || !isUpdated) return item.route.path
+    if (item.route.type !== 'internal') return item.route.path
 
     const parentPath = parentNavItem ? `${(parentNavItem.clientModifications?.path || parentNavItem.route.path)}/` : '';
     const itemSlug = item.clientModifications?.slug || item.route.slug;
