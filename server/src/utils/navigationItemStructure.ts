@@ -33,7 +33,7 @@ export async function handleItemDeletion(navigationItems: NestedNavItem[]) {
       } catch (err) {
         const errorMsg = `Error deleting navigation item: ${err instanceof Error ? err.message : String(err)}`;
         errors.push(errorMsg);
-        console.error(errorMsg, err);
+        strapi.log.error(errorMsg, err);
       }
       continue;
     }
@@ -44,14 +44,14 @@ export async function handleItemDeletion(navigationItems: NestedNavItem[]) {
     // TODO: Find out why nav items without route can exist
     if (!item.route && item.documentId) {
       try {
-        console.warn('Navigation item without route found. Deleting it.', item);
+        strapi.log.warn('Navigation item without route found. Deleting it.', item);
         await deleteNavItem(item.documentId);
         items.splice(i, 1);
         i--; // Adjust index after removal
       } catch (err) {
         const errorMsg = `Error deleting navigation item without route: ${err instanceof Error ? err.message : String(err)}`;
         errors.push(errorMsg);
-        console.error(errorMsg, err);
+        strapi.log.error(errorMsg, err);
       }
       continue;
     }
@@ -100,7 +100,7 @@ export async function handleItemUpdate({
       if (newNavItem) newNavItemsMap.set(item.documentId, newNavItem);
     } catch (err) {
       errors.push(err instanceof Error ? err.message : String(err));
-      console.error(`Error creating navigation item '${item.route.title}': `, err);
+      strapi.log.error(`Error creating navigation item '${item.route.title}': `, err);
     }
     return { success: errors.length === 0, errors };
   }
@@ -135,7 +135,7 @@ export async function handleItemUpdate({
       if (newNavItem) newNavItemsMap.set(item.documentId, newNavItem);
     } catch (err) {
       errors.push(err instanceof Error ? err.message : String(err));
-      console.error(`Error creating navigation item with existing route '${item.route.title}': `, err);
+      strapi.log.error(`Error creating navigation item with existing route '${item.route.title}': `, err);
     }
     return { success: errors.length === 0, errors };
   }
@@ -179,7 +179,7 @@ export async function handleItemUpdate({
       }
     } catch (err) {
       errors.push(err instanceof Error ? err.message : String(err));
-      console.error(`Error processing route for navigation item '${item.route.title}': `, err);
+      strapi.log.error(`Error processing route for navigation item '${item.route.title}': `, err);
     }
   }
 

@@ -113,7 +113,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
         event.state = navItem.route.id && navItem.route.type === 'external' ? { id: navItem.route.id } : null
       } catch (err) {
-        console.log(err)
+        strapi.log.error(err)
       }
     },
 
@@ -129,7 +129,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           },
         });
       } catch (err) {
-        console.log(err)
+        strapi.log.error(err)
       }
 
     },
@@ -171,7 +171,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           });
           if (isValid) parent = webatlas_parent
         } catch (err) {
-          console.error(`Route dependency validation failed: ${err.message}`)
+          strapi.log.error(`Route dependency validation failed: ${err.message}`)
         }
       }
 
@@ -226,7 +226,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
             }) as Route
           }
         } catch (err) {
-          console.error(`Route dependency validation failed: ${err.message}`)
+          strapi.log.error(`Route dependency validation failed: ${err.message}`)
         }
       }
 
@@ -278,7 +278,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       try {
         await findAndDeleteNavItem(event.result.id, event.model.uid)
       } catch (err) {
-        console.log(err)
+        strapi.log.error(err)
       }
     },
 
@@ -323,6 +323,6 @@ async function findAndDeleteNavItem (relatedId: number, relatedContentType: stri
     if (navItem?.documentId) await strapi.documents(waNavItem as UID.ContentType).delete({ documentId: navItem.documentId })
 
   } catch (err) {
-    console.log(err)
+    strapi.log.error(err)
   }
 }

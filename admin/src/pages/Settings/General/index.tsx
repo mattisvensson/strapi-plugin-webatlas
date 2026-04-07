@@ -102,7 +102,7 @@ const Settings = () => {
           defaultMessage: 'An error occurred',
         }) + ': ' + err,
       });
-      console.error(err);
+      strapi.log.error(err);
     }
   }
 

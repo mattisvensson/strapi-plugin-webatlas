@@ -25,8 +25,8 @@ function reducer(newConfig: PluginConfig | null, action: Action): PluginConfig |
   switch (action.type) {
     case 'SET_MAX_DEPTH':
       if (!newConfig) return null;
-      return { 
-        ...newConfig, 
+      return {
+        ...newConfig,
         navigation: { ...newConfig.navigation, maxDepth: action.payload },
         selectedContentTypes: newConfig.selectedContentTypes || []
       };
@@ -89,7 +89,7 @@ const Settings = () => {
           defaultMessage: 'An error occurred',
         }) + ': ' + err,
       });
-      console.error(err);
+      strapi.log.error(err);
     }
   }
 

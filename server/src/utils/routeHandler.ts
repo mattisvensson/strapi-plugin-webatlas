@@ -17,7 +17,7 @@ async function createExternalRoute(data: RouteSettings) {
       },
     });
   } catch (e) {
-    console.log(e)
+    strapi.log.error(e)
   }
 }
 
@@ -32,7 +32,7 @@ async function updateRoute(documentId: string, data: RouteSettings): Promise<Rou
 
     return entity;
   } catch (e) {
-    console.log(e)
+    strapi.log.error(e)
   }
 }
 
@@ -44,7 +44,7 @@ async function deleteRoute(documentId: string) {
 
     return true;
   } catch (e) {
-    console.log(e)
+    strapi.log.error(e)
     return false;
   }
 }

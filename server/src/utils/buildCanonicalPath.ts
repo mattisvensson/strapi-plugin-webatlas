@@ -13,7 +13,7 @@ export default async function buildCanonicalPath(slug: string, parentDocumentId:
 
     return canonicalPath;
   } catch (err) {
-    console.error('Error building canonical path:', err);
+    strapi.log.error('Error building canonical path:', err);
     return slug; // Fallback to just the slug
   }
 }

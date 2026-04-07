@@ -46,7 +46,7 @@ export default function Delete({ variant, item, onDelete }: DeleteProps) {
         onDelete(editedItem);
       }
     } catch (err) {
-      console.log(err)
+      strapi.log.error(err)
     }
 
     setModalType(closeModalState.current)

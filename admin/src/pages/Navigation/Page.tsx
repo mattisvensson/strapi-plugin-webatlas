@@ -87,7 +87,7 @@ const Navigation = () => {
                 const { data } = await get(`/content-manager/collection-types/${ct}/${id}`);
                 return { ...item, status: data.data.status };
               } catch (err) {
-                console.error(err);
+                strapi.log.error(err);
                 return item;
               }
             })
@@ -115,7 +115,7 @@ const Navigation = () => {
       cachedNavigations.current = updatedNavigations;
       switchNavigation(selectedNav, updatedNavigations);
     } catch (error) {
-      console.error('Error fetching navigations: ', error);
+      strapi.log.error('Error fetching navigations: ', error);
       toggleNotification({
         type: 'danger',
         message: formatMessage({
@@ -220,7 +220,7 @@ const Navigation = () => {
         }),
       });
     } catch (e) {
-      console.error(e)
+      strapi.log.error(e)
       toggleNotification({
         type: 'danger',
         message: formatMessage({
