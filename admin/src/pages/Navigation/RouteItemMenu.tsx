@@ -2,8 +2,8 @@ import type { NestedNavItem } from '../../../../types';
 import { Typography, SimpleMenu, MenuItem, IconButton } from '@strapi/design-system';
 import { More } from '@strapi/icons';
 import { getTranslation } from '../../utils';
-import { Link as RouterLink } from 'react-router-dom';
 import { useIntl } from 'react-intl';
+import { useNavigate } from 'react-router-dom';
 
 export default function RouteItemMenu({
   item,
@@ -23,6 +23,7 @@ export default function RouteItemMenu({
   handleRestore: () => void;
 }) {
   const { formatMessage } = useIntl();
+  const navigate = useNavigate();
 
   const viewEntityTo = item.route.relatedContentType && item.route.relatedDocumentId
     ? `/content-manager/collection-types/${item.route.relatedContentType}/${item.route.relatedDocumentId}`
@@ -46,9 +47,7 @@ export default function RouteItemMenu({
           })}
         </MenuItem>
         {item.route.type === 'internal' && viewEntityTo && <MenuItem
-          isLink
-          as={RouterLink}
-          to={viewEntityTo}
+          onClick={() => navigate(viewEntityTo)}
         >
           <Typography>
             {formatMessage({

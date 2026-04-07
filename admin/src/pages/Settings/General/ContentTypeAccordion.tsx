@@ -20,10 +20,10 @@ export default function ContentTypeAccordion({
 
   return (
     <Box
-      borderColor={!contentTypeSettings.default && 'danger500'}
+      borderColor={!contentTypeSettings.default ? 'danger500' : undefined}
       key={contentType.uid}
     >
-      <Accordion.Item key={contentType.uid} value={contentType.uid} size="S">
+      <Accordion.Item key={contentType.uid} value={contentType.uid}>
         <Accordion.Header>
           <Accordion.Trigger>
             {contentType?.info.displayName}
@@ -53,7 +53,7 @@ export default function ContentTypeAccordion({
                 name={`defaultField-${contentType.uid}`}
                 onClear={() => dispatch({ type: 'SET_DEFAULT_FIELD', payload: { ctUid: contentType.uid, field: '' } })}
                 value={contentTypeSettings?.default || ''}
-                onChange={(value: string) => dispatch({ type: 'SET_DEFAULT_FIELD', payload: { ctUid: contentType.uid, field: value } })}
+                onChange={(value: string | number) => dispatch({ type: 'SET_DEFAULT_FIELD', payload: { ctUid: contentType.uid, field: String(value) } })}
               >
                 {Object.entries(contentType.attributes).map(([key], index) => {
                   if (

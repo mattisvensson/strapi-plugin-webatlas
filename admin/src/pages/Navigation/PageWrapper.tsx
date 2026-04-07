@@ -23,15 +23,15 @@ export default function PageWrapper({ navigations, loading = false, children }: 
         }) + (selectedNavigation ? `: ${selectedNavigation.name}` : '')}
         subtitle={
           <Typography textColor="neutral500">
-            {selectedNavigation ? 
-              `ID: ${selectedNavigation.id} | DocumentID : ${selectedNavigation.documentId}` : 
+            {selectedNavigation ?
+              `ID: ${selectedNavigation.id} | DocumentID : ${selectedNavigation.documentId}` :
               formatMessage({
                 id: getTranslation('navigation.page.subtitle.noNavigationSelected'),
                 defaultMessage: 'No navigation selected',
               })}
           </Typography>
         }
-        primaryAction={ !loading && 
+        primaryAction={ !loading &&
           <Flex gap={4}>
             <Button variant="secondary" onClick={() => setModalType('NavOverview')}>
               {formatMessage({
@@ -40,14 +40,13 @@ export default function PageWrapper({ navigations, loading = false, children }: 
               })}
             </Button>
             <SingleSelect
-              value={selectedNavigation ? selectedNavigation.slug : ''} 
+              value={selectedNavigation ? selectedNavigation.slug : ''}
               placeholder={formatMessage({
                 id: getTranslation('navigation.page.selectNavigation'),
                 defaultMessage: 'Select Navigation',
               })}
-              selected={true}
-              onChange={(value: string) => {
-                const navItem = navigations.find(nav => nav.slug === value);
+              onChange={(value: string | number) => {
+                const navItem = navigations.find(nav => nav.slug === String(value));
                 navItem && navigate(`/plugins/${PLUGIN_ID}/navigation/${navItem.documentId}`);
               }}
               disabled={navigations.length === 0}

@@ -301,7 +301,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 
 	return (
 		<Box
-			as="aside"
+			tag="aside"
 			aria-labelledby="URL Route"
 			width="100%"
 		>

@@ -141,7 +141,7 @@ function ItemCreateComponent({
                   id: getTranslation('modal.internalItem.contentType.placeholder'),
                   defaultMessage: 'Select a content type'
                 })}
-                onChange={(value: string) => {
+                onChange={(value: string | number) => {
                   const [contentType] = availableEntities.filter((group: GroupedEntities) => group.contentType.label === value)
                   if (contentType) {
                     setSelectedContentType(contentType)
@@ -173,9 +173,9 @@ function ItemCreateComponent({
                   id: getTranslation('modal.internalItem.entity.placeholder'),
                   defaultMessage: 'Select an entity'
                 })}
-                onChange={(value: string) => {
+                onChange={(value: string | number) => {
                   const flatEntities = availableEntities.flatMap((group: GroupedEntities) => group.entities);
-                  const route = flatEntities.find((route: Entity) => route.documentId === value);
+                  const route = flatEntities.find((route: Entity) => route.documentId === String(value));
                   if (route) setEntity(route);
                 }}
                 disabled={!selectedContentType || (selectedContentType?.entities && selectedContentType?.entities.length === 0)}

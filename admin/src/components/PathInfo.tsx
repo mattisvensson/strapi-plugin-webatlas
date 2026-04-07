@@ -9,7 +9,7 @@ interface PathProps {
 }
 
 export default function PathInfo({ validationState, replacement }: PathProps) {
-	const [color, setColor] = useState<string | null>(null);
+	const [color, setColor] = useState<string>('neutral800');
 	const [text, setText] = useState<string | null>(null);
 	const { formatMessage } = useIntl();
 
@@ -23,11 +23,11 @@ export default function PathInfo({ validationState, replacement }: PathProps) {
 			}))
 		} else if (validationState === 'done') {
 			setColor(replacement ? 'danger500' : 'success500')
-			setText(replacement ? 
+			setText(replacement ?
 				`${formatMessage({
 					id: getTranslation('components.pathInfo.notAvailable'),
 					defaultMessage: 'Path is not available. Replaced with',
-				})} "${replacement}".` : 
+				})} "${replacement}".` :
 				formatMessage({
 					id: getTranslation('components.pathInfo.available'),
 					defaultMessage: 'Path is available.',
