@@ -78,7 +78,7 @@ export default function NavOverview ({ navigations, setActionItem }: NavOverview
               </Button>
               <Button
                 startIcon={<Check />}
-                variant="primary"
+                variant="default"
                 onClick={() => handleSelect(nav)}
                 disabled={selectedNavigation ? selectedNavigation.slug === nav.slug : false}
               >

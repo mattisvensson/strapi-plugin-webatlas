@@ -4,11 +4,11 @@ import { ModalContext } from '../../contexts';
 import { useIntl } from 'react-intl';
 import { getTranslation } from '../../utils';
 
-export default function NavModal({ 
-  triggerText, 
-  triggerVariant = "primary",
-  confirmText, 
-  closeText, 
+export default function NavModal({
+  triggerText,
+  triggerVariant = "default",
+  confirmText,
+  closeText,
   titleText,
   loadingText = 'Loading...',
   children,
@@ -19,11 +19,11 @@ export default function NavModal({
   currentModalType = null,
   currentModalMode = 'create',
   disabled,
-}: { 
-  triggerText?: string, 
-  triggerVariant?: "primary" | "secondary",
-  confirmText: string, 
-  closeText: string, 
+}: {
+  triggerText?: string,
+  triggerVariant?: "default" | "secondary",
+  confirmText: string,
+  closeText: string,
   titleText: string,
   loadingText?: string,
   children: React.ReactNode,
@@ -38,7 +38,7 @@ export default function NavModal({
 
   const { setModalType } = useContext(ModalContext);
   const { formatMessage } = useIntl();
-  
+
   return (
     <Modal.Root open={true} onOpenChange={() => setModalType('')}>
       {triggerText && (
@@ -68,7 +68,7 @@ export default function NavModal({
                 <Flex gap={2}>
                   { currentModalType && currentModalMode === 'create' && (
                     <SingleSelect
-                      onChange={(value: string) => setModalType(value)}
+                      onChange={(value: string | number) => setModalType(String(value))}
                       placeholder="Choose item type"
                       value={currentModalType || ''}
                     >
@@ -94,7 +94,7 @@ export default function NavModal({
                   )}
                   <Button
                     type="submit"
-                    onClick={modalToOpen ? () => setModalType(modalToOpen) : null}
+                    onClick={modalToOpen ? () => setModalType(modalToOpen) : undefined}
                     disabled={disabled}
                   >
                     {loading ? loadingText : confirmText }

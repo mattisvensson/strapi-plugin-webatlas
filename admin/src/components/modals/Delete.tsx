@@ -53,7 +53,10 @@ export default function Delete({ variant, item, onDelete }: DeleteProps) {
   }
 
   return (
-    <Dialog.Root defaultOpen={true} onClose={() => setModalType(closeModalState.current)}>
+    <Dialog.Root
+      defaultOpen={true}
+      onOpenChange={(open: boolean) => { if (!open) setModalType(closeModalState.current); }}
+    >
       <Dialog.Content>
         <Dialog.Header>
           {formatMessage({

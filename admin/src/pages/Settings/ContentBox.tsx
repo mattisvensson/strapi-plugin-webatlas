@@ -13,7 +13,7 @@ export default function ContentBox({ title, children }: { title: string, childre
     alignItems="stretch"
     gap={4}
   >
-    <Typography variant="delta" as="h3">
+    <Typography variant="delta">
       {title}
     </Typography>
     <Box>

@@ -332,7 +332,7 @@ const Navigation = () => {
             <Button
               onClick={() => saveNavigation()}
               loading={isSavingNavigation}
-              variant="primary"
+              variant="default"
               startIcon={<Check />}
               disabled={JSON.stringify(navigationItems) === JSON.stringify(initialNavigationItemsRef.current)}
             >
@@ -393,7 +393,7 @@ const Navigation = () => {
               id: getTranslation('navigation.page.emptyNavigation'),
               defaultMessage: 'You have no navigations yet...',
             })} />
-            <Button variant="primary" onClick={() => setModalType('NavCreate')}>
+            <Button variant="default" onClick={() => setModalType('NavCreate')}>
               {formatMessage({
                 id: getTranslation('navigation.page.createNewNavigation'),
                 defaultMessage: 'Create new navigation',
@@ -402,7 +402,7 @@ const Navigation = () => {
           </Center>}
           {navigations && navigationItems?.length === 0 && <Center height={400}>
             <EmptyBox msg="Your navigation is empty..." />
-            <Button variant="primary" onClick={() => setModalType('ItemCreate')}>
+            <Button variant="default" onClick={() => setModalType('ItemCreate')}>
               {formatMessage({
                 id: getTranslation('navigation.page.createNewItem'),
                 defaultMessage: 'Create new item',

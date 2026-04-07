@@ -10,7 +10,7 @@ export type RouteItemProps = {
   depth?: number;
   maxDepth: number;
   style?: React.CSSProperties;
-  wrapperRef?(node: HTMLLIElement): void;
+  wrapperRef?(node: HTMLDivElement): void;
   handleProps?: any;
   disableInteraction?: boolean;
   indentationWidth?: number;

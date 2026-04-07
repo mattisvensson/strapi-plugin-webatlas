@@ -7,15 +7,15 @@ import { useIntl } from 'react-intl';
 import { getTranslation } from '../../utils';
 
 function PathTable({
-  routes, 
-  sortKey, 
+  routes,
+  sortKey,
   handleSort
-}: { 
-  routes: Route[], 
-  sortKey: RouteSortKey, 
+}: {
+  routes: Route[],
+  sortKey: RouteSortKey,
   handleSort: (key: RouteSortKey) => void
 }) {
-  
+
   const { formatMessage } = useIntl();
 
   const TABLE_COL_COUNT = 5;
@@ -29,17 +29,17 @@ function PathTable({
       <Tbody>
         {routes.length > 0 ? routes.map((route: Route) => (
           <TableRow key={route.id} route={route} />
-        )) : 
+        )) :
           <Tr>
             <Td colSpan={TABLE_COL_COUNT}>
-              <EmptyStateLayout 
+              <EmptyStateLayout
+                shadow="none"
                 content={
                   formatMessage({
                     id: getTranslation('paths.page.emptyPaths'),
                     defaultMessage: 'No paths found',
                   })
-                } 
-                shadow={false}
+                }
               />
             </Td>
           </Tr>
