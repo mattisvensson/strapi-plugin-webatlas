@@ -5,7 +5,7 @@
 
 ---
 
-This plugin bridges the gap between slugs and navigations in Strapi, making URL management and menu building seamless. With automatic slug generation, a clear route overview, and support for multiple navigations, it keeps your content organized and your routes consistent—effortlessly.
+This plugin bridges the gap between slugs and navigations in Strapi, making URL management and menu building seamless. With automatic slug generation, a clear route overview, and support for multiple navigations, it keeps your content organized and your routes consistent — effortlessly.
 
 ---
 
@@ -25,12 +25,12 @@ This plugin is still in the early stages of development. Many features are plann
 
 ## 💎 Versions
 
-- **Strapi v5** - [v0.x.x (work in progress - beta)](https://github.com/mattisvensson/strapi-plugin-webatlas/tree/main)
+- **Strapi v5** - [v0.x.x (work in progress - beta)](https://github.com/mattisvensson/strapi-plugin-webatlas/releases)
 - **Strapi v4** - not supported
 ## ✨ Features
 
-- **🚀 Automatic Slug Generation:** Automatically generate clean, SEO-friendly slugs based on your content fields. No more manual slug writing — just choose the field, and the plugin takes care of the rest. Slugs are unique and easily customizable.
-- **🗺️ Route Overview Page:** Gain a full, centralized overview of all registered routes and their corresponding content entries.
+- **🚀 Automatic Slug Generation:** Automatically generate clean, SEO-friendly slugs based on your content fields and the route hierarchy. No more manual slug writing — just choose the field, place it under a different route and the plugin takes care of the rest. Slugs are unique and easily customizable.
+- **🗺️ Route Hierarchy and Overview:** Create a hierarchical structure for your routes and gain a full, centralized overview of all registered routes and their corresponding content entries. 
 - **🧭 Multiple Navigations** Support for creating and managing multiple navigation structures. Whether it's a main menu, footer links, or a custom mobile drawer — organize your content into any number of navigations with drag-and-drop sorting, nested items, and visibility toggles.
 - **🧩 Composable Component Integration** Use plugin-generated slugs and navigations directly in your frontend. Fetch routes and navigation data by slug and with a consistent API response, optimized for dynamic rendering.
 - **🧠 Conflict Detection & Validation** Webatlas prevents slug collisions and helps avoid route conflicts by validating changes in real time. Get clear error messages and automatic suggestions when something doesn’t align.
@@ -49,9 +49,7 @@ Using Yarn:
 yarn add @mattisvensson/strapi-plugin-webatlas@beta
 ```
 
-As a next step you must configure your the plugin by the way you want to. See [**Configuration**](#🔧-configuration) section.
-
-All done. Enjoy 🎉
+As a next step you must configure your the plugin by the way you want to. See [🔧 Configuration](#-configuration) section.
 
 ## 🖐 Requirements
 
@@ -82,15 +80,23 @@ Your schema should contain the following:
 
 Use the settings page to configure the plugin.
 
-- **Default URL Alias field:** Select a field from which the slug will automatically be generated. For example, use the 'title' field or a dedicated slug field.
-- **URL Alias pattern:** Create a default pattern for the slug. For example, when creating a 'news' content type and you want your url structure to be like '/news/some-title' for all entities, enter 'news' in this setting field. The slug will automatically be appended to this string.
+- **Generate path from:** Select a field from which the slug will automatically be generated. For example, use the 'title' field or a dedicated slug field.
 
 ## 📖 Usage
 
-### Setting the path field
-To set the path (slug) field for a content type, you need to ensure that the content type is enabled for Webatlas in the settings page. Once enabled, the plugin will automatically generate and manage the slug based on your configuration. The generated slug will be visible in the content type's aside panel when editing an entry. The **uid route** and **document route** will also be displayed there. These two path are permanent and cannot be changed.
+### Path Generation & Hierarchy
 
-Hint: If you want a page to be at the root of your website, override the automatic slug generation by setting the slug to `(frontpage)`. 
+After selecting the source field for path generation in settings, you'll see the webatlas panel in the content editor sidebar:
+
+**Parent Hierarchy (Place under)**: Select a parent page to create nested URLs (e.g., placing "Services" under "About" creates `/about/services`)
+
+**Generated Path (Path)**: Automatically created from your selected field (e.g., "About Us" → `/about-us`)
+
+**Override Option**: Check "Override automatic path generation" to set a custom URL that ignores the automatic generation and parent hierarchy. (Be careful: This breaks the automatic slug generation for this entry)
+
+**Canonical Path (Canonical Path)**: Shows the complete URL based on content structure - automatically updates when you change the slug or parent relationship. Changes cascade to all child pages.
+
+**UID Path (UID Path)**: A permanent identifier path that never changes, used as a backup URL.
 
 ### API endpoints
 
@@ -101,47 +107,33 @@ Webatlas provides two API endpoints. One to fetch routes and one to fetch naviga
 `GET /api/webatlas/path`
 
 Query parameters:
-- `slug` (string, required): The slug/path to fetch the route for. This can either be the generated path from webatlas, the uId path or the documentId path.
+- `slug` (string, required): The slug/path to fetch the route for. This can either be the generated path from webatlas, the uId path or the canonical path.
 - `populate` (string, optional): Comma-separated list of relations to populate. Use `deep` to populate all relations in any depth.
 - `populateDeepDepth` (string, optional): Depth for deep population.
 - `fields` (string, optional): Comma-separated list of fields to include in the response.
 - `status` (string, optional): `draft` or `published`. Default is `published`. Returns the draft or published version of the entity.
 
+The response contains the entity's content type and a `webatlas` object with additional information about the path, including the canonical path, uidPath and slug.
+
 #### Fetch navigation
 
 `GET /api/webatlas/navigation`
 
-One of these query parameters are mandatory to fetch a navigation. If you provide multiple, `documentId` has the highest priority, followed by `name` and `id`.
+One of these query parameters (`documentId`, `name`, or `id`) are mandatory to fetch a navigation. If you provide multiple, `documentId` has the highest priority, followed by `name` and `id`.
 - `documentId` (string, optional): The document ID of the navigation to fetch.
 - `name` (string, optional): The name of the navigation to fetch.
 - `id` (string, optional): The ID of the navigation to fetch.
-
-Optional parameters:
-- `variant` (string, optional): `nested` or `flat`.The variant of the navigation to fetch. Default is `nested`.
+- `variant` (string, optional): `nested` or `flat`. The variant of the navigation to fetch. Default is `nested`.
 
 ## 🧩 Roadmap
 
 - More fine-grained RBAC
 - Internationalization
-- Route page
-  - Nested url structure
-- Entity page
- - Add to navigation from entity
-- Settings
-  - Navigation settings
-    - Prevent navigation deletion option
-- Navigation page
-  - Custom fields for nav items
-  - Nested paths through wrapper/external item
-  - Move navigation item with children
-  - Item search
-  - Collapse items
-  - Multi action for items
 - Redirects management
 
 ---
 
-This plugin is still in the early stages of development. Many features are planned but not yet implemented. The plugin is not fully documented. If you find any bugs, please contact me or create an issue.
+This plugin is still in development. Many features are planned but not yet implemented. The plugin is not fully documented. If you find any bugs, please contact me or create an issue.
 
 ---
 
@@ -150,7 +142,3 @@ This plugin is still in the early stages of development. Many features are plann
 [MIT License](LICENSE.md) Copyright (c) [Matti Svensson](https://mattisvensson.dev/)
 
 Webatlas v5 is based on the [plugin boilerplate](https://github.com/pluginpal/strapi-plugin-boilerplate#readme) by [PluginPal](https://www.pluginpal.io/).
-
-> Copyright (c) 2025 PluginPal.
->
-> Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:

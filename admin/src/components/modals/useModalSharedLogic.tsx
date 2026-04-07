@@ -1,40 +1,15 @@
-import { useState, useRef, useReducer, useCallback, useContext } from 'react';
+import type { GroupedEntities, RouteSettings } from '../../../../types';
+import type { ExtendedPanelPathState, ExtendedPanelAction, navItemStateAction, modalSharedLogic } from '../../types';
+import { useState, useRef, useReducer, useCallback, useContext, useMemo } from 'react';
 import { ModalContext, SelectedNavigationContext } from '../../contexts';
-import { GroupedEntities, RouteSettings, Entity, Route, modalSharedLogic } from '../../../../types';
-import { useApi, useAllEntities } from '../../hooks';
+import { useAllEntities } from '../../hooks';
 import { debounce, duplicateCheck } from '../../utils';
-import { transformToUrl } from '../../../../utils';
 import { useFetchClient } from '@strapi/strapi/admin';
 
-type PathState = {
-	value?: string;
-	prevValue?: string,
-	uidPath?: string,
-	initialPath?: string,
-	needsUrlCheck: boolean;
-};
-
-type Action = 
-  | { type: 'SET_TITLE'; payload: string }
-  | { type: 'SET_SLUG'; payload: string }
-  | { type: 'SET_ACTIVE'; payload: boolean }
-  | { type: 'SET_OVERRIDE'; payload: boolean }
-
-type PathAction = 
-  | { type: 'DEFAULT'; payload: string }
-  | { type: 'NO_URL_CHECK'; payload: string }
-  | { type: 'NO_TRANSFORM_AND_CHECK'; payload: string }
-  | { type: 'RESET_URL_CHECK_FLAG'; }
-  | { type: 'SET_UIDPATH'; payload: string }
-  | { type: 'SET_INITIALPATH'; payload: string }
-
-
-function itemStateReducer(navItemState: RouteSettings, action: Action): RouteSettings {
+function navItemStateReducer(navItemState: RouteSettings, action: navItemStateAction): RouteSettings {
   switch (action.type) {
     case 'SET_TITLE':
       return { ...navItemState, title: action.payload };
-    case 'SET_SLUG':
-      return { ...navItemState, slug: action.payload };
     case 'SET_ACTIVE':
       return { ...navItemState, active: action.payload };
     case 'SET_OVERRIDE':
@@ -44,19 +19,19 @@ function itemStateReducer(navItemState: RouteSettings, action: Action): RouteSet
   }
 }
 
-function pathReducer(state: PathState, action: PathAction): PathState {
+function pathReducer(state: ExtendedPanelPathState, action: ExtendedPanelAction): ExtendedPanelPathState {
   switch (action.type) {
     case 'DEFAULT':
       return { 
         ...state,
-        value: transformToUrl(action.payload), 
+        value: action.payload, 
         prevValue: state.value,
         needsUrlCheck: true 
       };
     case 'NO_URL_CHECK':
-      return { 
+      return {
         ...state,
-        value: transformToUrl(action.payload), 
+        value: action.payload, 
         prevValue: state.value,
         needsUrlCheck: false 
       };
@@ -69,55 +44,78 @@ function pathReducer(state: PathState, action: PathAction): PathState {
       };
     case 'RESET_URL_CHECK_FLAG':
       return { ...state, needsUrlCheck: false };
+    case 'SET_REPLACEMENT':
+      return { ...state, replacement: action.payload };
     case 'SET_UIDPATH':
-      return { ...state, uidPath: action.payload };  
+      return { ...state, uidPath: action.payload };
+    case 'SET_SLUG':
+      return { ...state, slug: action.payload };
+    case 'SET_CANONICALPATH':
+      return { ...state, canonicalPath: action.payload };
     case 'SET_INITIALPATH':
-      return { ...state, initialPath: action.payload };  
+      return { ...state, initialPath: action.payload };
     default:
       throw new Error();
   }
 }
 
 export function useModalSharedLogic() {
-  const [availableEntities, setAvailableEntities] = useState<GroupedEntities[]>([]);
-  const [selectedEntity, setSelectedEntity] = useState<Entity | null>();
   const [selectedContentType, setSelectedContentType] = useState<GroupedEntities>();
-  const [entityRoute, setEntityRoute] = useState<Route>();
-  const [replacement, setReplacement] = useState<string>('');
   const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
   // TODO: Fetch entities only once and share between modals
   const { entities } = useAllEntities();
-  const { updateRoute, getRelatedRoute } = useApi();
   const { get } = useFetchClient();
+
+  const availableEntities = useMemo(() => {
+    if (!entities) return [];
+    return entities
+  }, [entities]);
 
   const initialState: React.RefObject<RouteSettings> = useRef({
     title: '',
     slug: '',
     active: true,
-    internal: true,
+    type: 'internal',
     isOverride: false,
   });
 
-  const [navItemState, dispatchItemState] = useReducer(itemStateReducer, initialState.current);
-  const [path, dispatchPath] = useReducer(pathReducer, { needsUrlCheck: false });
+  const [navItemState, dispatchNavItemState] = useReducer(navItemStateReducer, initialState.current);
+  const [path, dispatchPath] = useReducer(pathReducer, {
+		needsUrlCheck: false,
+		value: '',
+		prevValue: '',
+    slug: '',
+		replacement: null,
+		uidPath: '',
+		canonicalPath: '',
+    initialPath: '',
+	});
 
   const debouncedCheckUrl = useCallback(debounce(checkUrl, 500), []);
 
   const { modalType, setModalType } = useContext(ModalContext);
   const { selectedNavigation } = useContext(SelectedNavigationContext);
 
-  async function checkUrl(url: string, routeDocumentId?: string | null) {
+  async function checkUrl({
+    url,
+    routeDocumentId,
+    withoutTransform = false
+  }: {
+    url: string, 
+    routeDocumentId?: string | null, 
+    withoutTransform?: boolean
+  }) {
 		if (!url) return
     setValidationState('checking')
-		setReplacement('')
+		dispatchPath({ type: 'SET_REPLACEMENT', payload: '' });
 		
 		try {
-			const data = await duplicateCheck(get, url, routeDocumentId)
+			const data = await duplicateCheck({fetchFunction: get, path: url, routeDocumentId, withoutTransform });
 
 			if (!data || data === url) return 
 
 			dispatchPath({ type: 'NO_URL_CHECK', payload: data });
-			setReplacement(data)
+			dispatchPath({ type: 'SET_REPLACEMENT', payload: data });
 		} catch (err) {
 			console.log(err)
 		} finally {
@@ -127,23 +125,14 @@ export function useModalSharedLogic() {
 
   const modalSharedLogic: modalSharedLogic =  {
     availableEntities,
-    setAvailableEntities,
-    selectedEntity,
-    setSelectedEntity,
     selectedContentType,
     setSelectedContentType,
-    entityRoute,
-    setEntityRoute,
     entities,
-    updateRoute,
-    getRelatedRoute,
-    replacement,
-    setReplacement,
     validationState,
     setValidationState,
     initialState,
     navItemState,
-    dispatchItemState,
+    dispatchNavItemState,
     path,
     dispatchPath,
     debouncedCheckUrl,

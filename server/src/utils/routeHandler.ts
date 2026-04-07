@@ -1,5 +1,5 @@
 import type { UID } from '@strapi/strapi';
-import type { RouteSettings } from "../../../types";
+import type { Route, RouteSettings } from "../../../types";
 import { waRoute } from "../../../utils/";
 
 async function createExternalRoute(data: RouteSettings) {
@@ -21,4 +21,36 @@ async function createExternalRoute(data: RouteSettings) {
   }
 }
 
-export { createExternalRoute }
+async function updateRoute(documentId: string, data: RouteSettings): Promise<Route> {
+  try {
+    const entity = await strapi.documents(waRoute as UID.ContentType).update({
+      documentId: documentId,
+      data: {
+        ...data,
+      }
+    }) as Route;
+
+    return entity;
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+async function deleteRoute(documentId: string) {
+  try {
+    await strapi.documents(waRoute as UID.ContentType).delete({
+      documentId: documentId,
+    });
+
+    return true;
+  } catch (e) {
+    console.log(e)
+    return false;
+  }
+}
+
+export {
+  createExternalRoute,
+  updateRoute,
+  deleteRoute,
+}

@@ -35,7 +35,6 @@ export type ConfigContentType = {
   uid: string;
   label: string;
   default: string;
-  pattern?: string;
 }
 
 export type PluginConfig = {
@@ -43,7 +42,7 @@ export type PluginConfig = {
   navigation: {
     maxDepth: number;
   }
-  migrationVersion: string;
+  migrationVersion?: string;
 };
 
 

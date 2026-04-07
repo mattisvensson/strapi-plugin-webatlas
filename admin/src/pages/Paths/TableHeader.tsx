@@ -25,6 +25,15 @@ export default function TableHeader({
           </Typography>
           {sortKey === 'title' && <ChevronDown />}
         </Th>
+        <Th onClick={() => handleSort('canonicalPath')} cursor="pointer">
+          <Typography variant="sigma">
+            {formatMessage({
+              id: getTranslation('canonicalPath'),
+              defaultMessage: 'Canonical Path',
+            })}
+          </Typography>
+          {sortKey === 'canonicalPath' && <ChevronDown />}
+        </Th>
         <Th onClick={() => handleSort('path')} cursor="pointer">
           <Typography variant="sigma">
             {formatMessage({

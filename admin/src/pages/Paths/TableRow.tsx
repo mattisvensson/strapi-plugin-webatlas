@@ -9,14 +9,21 @@ export default function TableRow({ route }: { route: Route }) {
   
   return (
     <Tr>
+      {[route.title, route.canonicalPath, route.path].map((field, index) => (
+        <Td key={index}>
+          <Typography
+            title={field}
+            textColor="neutral800"
+          >
+            {field || '-'}
+          </Typography>
+        </Td>
+      ))}
       <Td>
-        <Typography textColor="neutral800">{route.title}</Typography>
-      </Td>
-      <Td>
-        <Typography textColor="neutral800">{route.path}</Typography>
-      </Td>
-      <Td>
-        <Typography textColor="neutral800">
+        <Typography
+          title={route.type}
+          textColor="neutral800"
+        >
           {formatMessage({
             id: getTranslation(`path.type.${route.type}`),
             defaultMessage: '-',

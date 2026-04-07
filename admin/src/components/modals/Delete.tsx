@@ -22,10 +22,10 @@ type ItemDelete = {
 type DeleteProps = NavDelete | ItemDelete;
 
 export default function Delete({ variant, item, onDelete }: DeleteProps) {
-  
+
   const itemName = useRef(variant === "NavDelete" ? item.name : item.route.title)
   const closeModalState = useRef(variant === "NavDelete" ? 'NavOverview' : '')
-  
+
   const { setModalType } = useContext(ModalContext);
   const { formatMessage } = useIntl();
   const { deleteNavigation } = useApi();
@@ -36,7 +36,13 @@ export default function Delete({ variant, item, onDelete }: DeleteProps) {
         await deleteNavigation(item.documentId);
         onDelete(item);
       } else if (variant === "ItemDelete") {
-        const editedItem = { ...item, deleted: true };
+        const editedItem = {
+          ...item,
+          clientModifications: {
+            ...item.clientModifications,
+            type: "delete" as const
+          }
+        };
         onDelete(editedItem);
       }
     } catch (err) {
@@ -67,7 +73,7 @@ export default function Delete({ variant, item, onDelete }: DeleteProps) {
               formatMessage({
                 id: getTranslation('modal.delete.message.navItem'),
                 defaultMessage: 'navigation item'
-              }) : 
+              }) :
               formatMessage({
                 id: getTranslation('modal.delete.message.navigation'),
                 defaultMessage: 'navigation'

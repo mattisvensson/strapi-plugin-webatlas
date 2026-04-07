@@ -1,13 +1,12 @@
-import type { NavigationInput, NestedNavigation, NestedNavItem, PluginConfig, Route, RouteSettings, StructuredNavigationVariant } from "../../../types";
-import duplicateCheck from "../utils/duplicateCheck";
-import { getPath, transformToUrl, waRoute, waNavigation, waNavItem, PLUGIN_ID } from "../../../utils";
-import { reduceDepthOfOrphanedItems, createExternalRoute, createNavItem, updateNavItem, deleteNavItem, buildStructuredNavigation } from "../utils";
+import type { NavigationInput, NestedNavigation, NestedNavItem, Route, PluginConfig, StructuredNavigationVariant } from "../../../types";
+import { transformToUrl, waRoute, waNavigation, waNavItem, PLUGIN_ID } from "../../../utils";
+import { handleItemDeletion, handleItemUpdate, calculateParentAndOrder, buildStructuredNavigation, getNonInternalRouteIds, getRouteDescendants, duplicateCheck } from "../utils";
 
 export default ({strapi}) => ({
 
   async updateConfig(newConfig: Partial<PluginConfig>) {
     if (!newConfig) return;
-      
+
     let newConfigMerged: PluginConfig;
 
     try {
@@ -15,13 +14,13 @@ export default ({strapi}) => ({
       const config = await pluginStore.get({ key: "config" });
       newConfigMerged = { ...config, ...newConfig };
       await pluginStore.set({ key: "config", value: newConfigMerged });
-      
+
     } catch (err) {
       console.log(err);
       return "Error. Couldn't update config";
     }
 
-    // TODO: Is it necessary/intended to delete/mark invalid routes here? 
+    // TODO: Is it necessary/intended to delete/mark invalid routes here?
     // if (newConfigMerged.selectedContentTypes) {
     //   try {
     //     const routes = await strapi.documents(waRoute).findMany();
@@ -49,7 +48,7 @@ export default ({strapi}) => ({
     let config = await pluginStore.get({
       key: "config",
     });
-    
+
     const defaultConfig = strapi.config.get(`plugin::${PLUGIN_ID}`);
 
     config = {
@@ -64,38 +63,20 @@ export default ({strapi}) => ({
     return config;
   },
 
-  async getRoutes() {
+  async getRoute(documentId: string) {
     try {
-      // TODO: populate parent and navigation?
-      const entities = await strapi.documents(waRoute).findMany();
-      return entities;
+      return await strapi.documents(waRoute).findOne({
+        documentId: documentId,
+      });
     } catch (e) {
       console.log(e)
     }
   },
-  // TODO: Types
-  async updateRoute(documentId: string, data: any) {
+
+  async getAllRoutes() {
     try {
-      let checkedPath = data.path
-
-      if (data.internal) {
-        const parent = data.parent ? await strapi.documents(waNavItem).findOne({
-          documentId: data.parent
-        }) : null;
-        
-        const path = data.isOverride ? data.slug : getPath(parent?.path, data.slug)
-        checkedPath = await duplicateCheck(path, documentId);
-      }
-
-      const entity = await strapi.documents(waRoute).update({
-        documentId: documentId,
-        data: {
-          ...data,
-          path: checkedPath,
-        }
-      });
-
-      return entity;
+      const entities = await strapi.documents(waRoute).findMany();
+      return entities;
     } catch (e) {
       console.log(e)
     }
@@ -107,7 +88,30 @@ export default ({strapi}) => ({
         where: {
           relatedDocumentId: documentId
         },
+        populate: ['parent']
       });
+    } catch (e) {
+      console.log(e)
+    }
+  },
+
+  async getProhibitedRouteIds(documentId: string | undefined) {
+    try {
+      let route: Route | null = null;
+      if (documentId) {
+        route = await strapi.documents(waRoute).findOne({
+          documentId: documentId,
+        }) as Route | null;
+      }
+
+      const descendants = route?.documentId ? await getRouteDescendants(route.documentId) : [];
+      const nonInternalRouteIds = await getNonInternalRouteIds()
+
+      const prohibitedRouteIds = [...descendants, ...nonInternalRouteIds]
+      route?.documentId && prohibitedRouteIds.push(route.documentId)
+
+      return prohibitedRouteIds
+
     } catch (e) {
       console.log(e)
     }
@@ -214,57 +218,15 @@ export default ({strapi}) => ({
     if (!navigationId || !navigationItems) return
 
     let error = false;
-    const newNavItemsMap = new Map<string, NestedNavItem>();
-    
+    let newNavItemsMap = new Map<string, NestedNavItem>();
+
     // First pass: Validate and prepare items
-    for (const [index, item] of navigationItems.entries()) {
-      // Handle deletions
-      if (item.deleted) {
-        try {
-          item.documentId && await deleteNavItem(item.documentId);
-
-          const newItems = reduceDepthOfOrphanedItems(navigationItems, item.documentId);
-
-          if (!newItems) throw new Error("Failed to reduce depth of orphaned items");
-        
-          navigationItems = newItems;
-          
-        } catch (error) {
-          error = true;
-          console.error('Error deleting navigation item ', error);
-        }
-        continue;
-      }
-
-      // Handle items without routes (cleanup)
-      // This is a quick fix to remove nav items without route
-      // Ideally, nav items without route shouldn't be created at all
-      // TODO: Find out why nav items without route can exist
-      if (!item.route && item.documentId) {
-        try {
-          console.warn('Navigation item without route found. Deleting it. ', item);
-          await deleteNavItem(item.documentId);
-        } catch (error) {
-          console.error('Error deleting navigation item without route ', error);
-        }
-        continue;
-      }
-
-      // Handle route updates for existing items
-      if (item.update && !item.isNew) {
-        try {
-          await this.updateRoute(item.route.documentId, {
-            title: item.update.title || item.route.title,
-            slug: item.update.slug || item.route.slug,
-            path: item.update.path || item.route.path,
-            isOverride: item.update.isOverride !== undefined ? item.update.isOverride : item.route.isOverride,
-          })
-        } catch (error) {
-          error = true;
-          console.error('Error updating route ', error);
-        }
-      }
+    const deletionResult = await handleItemDeletion(navigationItems);
+    if (!deletionResult.success) {
+      console.error('Deletion errors:', deletionResult.errors);
     }
+
+    navigationItems = deletionResult.items;
 
     // Second pass: Process items sequentially and maintain parent/depth tracking
     let parentIds: string[] = [];
@@ -275,73 +237,26 @@ export default ({strapi}) => ({
         continue;
       }
 
-      // Handle depth changes and maintain parent stack
-      if (item.depth === 0) {
-        if (groupIndices[0] !== undefined) {
-          groupIndices[0] = groupIndices[0] + 1;
-        } else {
-          groupIndices[0] = 0;
-        }
-        parentIds = [];
-      } else {
-        const previousItem = navigationItems[index - 1];
-        
-        if (previousItem && typeof previousItem.depth === 'number') {
-          if (item.depth === previousItem.depth + 1) {
-            // Going deeper - previous item becomes parent
-            parentIds.push(previousItem.documentId.startsWith("temp-") 
-              ? newNavItemsMap.get(previousItem.documentId)?.documentId || previousItem.documentId
-              : previousItem.documentId);
-            groupIndices[item.depth] = 0;
-          } else if (item.depth <= previousItem.depth) {
-            // Going back up - adjust parent stack
-            const diff = previousItem.depth - item.depth;
-            for (let i = 0; i < diff; i++) {
-              parentIds.pop();
-              groupIndices.pop();
-            }
-            groupIndices[item.depth] = (groupIndices[item.depth] || 0) + 1;
-          } else {
-            // Same level or other case
-            groupIndices[item.depth] = (groupIndices[item.depth] || 0) + 1;
-          }
-        }
-      }
-
-      const calculatedParent = parentIds.at(-1) || null;
-      const calculatedOrder = groupIndices[item.depth] || 0;
-
       try {
-        // Create or update the item
-        if (item.isNew) {
-          if (item.isNew.route) {
-            await createNavItem({
-              route: item.isNew.route,
-              parent: calculatedParent,
-              navigation: item.isNew.navigation,
-              order: calculatedOrder,
-            });
-          } else {
-            const newRoute = await createExternalRoute({
-                title: item.route.title,
-                slug: item.route.slug,
-                path: item.route.path,
-                type: item.route.type,
-            })
+        const { calculatedParent, calculatedOrder } = calculateParentAndOrder({
+          navigationItems,
+          item,
+          index,
+          parentIds,
+          groupIndices,
+          newNavItemsMap
+        });
 
-            const newNavItem = await createNavItem({
-              route: newRoute.documentId,
-              navigation: navigationId,
-              parent: calculatedParent,
-              order: calculatedOrder,
-            }) 
-            if (newNavItem) newNavItemsMap.set(item.documentId, newNavItem);
-          }
-        } else {
-          await updateNavItem(item.documentId, {
-            order: calculatedOrder,
-            parent: calculatedParent,
-          });
+        const result = await handleItemUpdate({
+          item,
+          calculatedParent,
+          calculatedOrder,
+          navigationId,
+          newNavItemsMap
+        });
+
+        if (!result.success) {
+          console.error('Error updating item: ', item);
         }
       } catch (errorMsg) {
         error = true;

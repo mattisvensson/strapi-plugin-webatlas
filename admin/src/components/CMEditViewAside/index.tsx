@@ -4,20 +4,13 @@ import { useRBAC } from '@strapi/strapi/admin';
 import type { PanelComponent, PanelComponentProps } from '@strapi/content-manager/strapi-admin';
 import { Typography } from '@strapi/design-system';
 import { usePluginConfig, useAllContentTypes } from '../../hooks';
-import Path from './Path';
+import Panel from './Panel';
 import { getTranslation } from '../../utils';
 import { useIntl } from 'react-intl';
 import pluginPermissions from '../../permissions';
 import { PLUGIN_NAME } from '../../../../utils';
 
-const CMEditViewAside: PanelComponent = ({
-  // activeTab,
-  // collectionType,
-  // document,
-  documentId,
-  // meta,
-  model,
-}: PanelComponentProps) => {
+const CMEditViewAside: PanelComponent = ({ documentId, model }: PanelComponentProps) => {
   const { contentTypes } = useAllContentTypes()
   const { config } = usePluginConfig()
   const { formatMessage } = useIntl();
@@ -29,7 +22,6 @@ const CMEditViewAside: PanelComponent = ({
 
   const panelTitle = PLUGIN_NAME;
 
-  // Check if content type is allowed - moved to useEffect to prevent infinite re-renders
   useEffect(() => {
     const contentType = contentTypes?.find((ct) => ct.uid === model);
     setIsAllowedContentType(!!contentType?.pluginOptions?.webatlas?.enabled);
@@ -126,7 +118,7 @@ const CMEditViewAside: PanelComponent = ({
 
   return {
     title: panelTitle,
-    content: <Path config={contentTypeConfig} />,
+    content: <Panel config={contentTypeConfig} />,
   };
 };
 

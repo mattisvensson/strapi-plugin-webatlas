@@ -54,7 +54,7 @@ const Navigation = () => {
   const [navigationItems, setNavigationItems] = useState<NestedNavItem[]>();
   const initialNavigationItemsRef = useRef<NestedNavItem[] | null>(null);
   const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>();
-  const [parentId, setParentId] = useState<string | undefined>();
+  const [actionItemParent, setActionItemParent] = useState<NestedNavItem | null>(null);
   const { getNavigation, updateNavigationItemStructure } = useApi();
   const [isSavingNavigation, setIsSavingNavigation] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -71,7 +71,7 @@ const Navigation = () => {
   const { toggleNotification } = useNotification();
   const { get } = useFetchClient();
   const { navigationId } = useParams();
-  const navigate = useNavigate();  
+  const navigate = useNavigate();
 
   async function loadNavigations() {
     try {
@@ -95,9 +95,9 @@ const Navigation = () => {
           return { ...nav, items: updatedItems };
         })
       );
-      
+
       let selectedNav = updatedNavigations.find(nav => nav.documentId === navigationId);
-      
+
       if (!selectedNav && navigationId) {
         selectedNav = updatedNavigations[0];
 
@@ -110,7 +110,7 @@ const Navigation = () => {
         });
         navigate(`/plugins/${PLUGIN_ID}/navigation/${updatedNavigations[0]?.documentId}`);
         return
-      } 
+      }
 
       cachedNavigations.current = updatedNavigations;
       switchNavigation(selectedNav, updatedNavigations);
@@ -164,9 +164,21 @@ const Navigation = () => {
   useEffect(() => {
     if (modalType === 'NavOverview' || modalType === '') {
       setActionItem(undefined)
-      setParentId(undefined)
+      setActionItemParent(null)
     }
   }, [modalType]);
+
+  useEffect(() => {
+    if (!selectedNavigation || !navigationItems) return
+
+    setNavigations(navigations.map(nav => {
+      if (nav.documentId !== selectedNavigation.documentId) return nav
+      return {
+        ...nav,
+        items: navigationItems,
+      }
+    }))
+  }, [setNavigations, navigationItems, selectedNavigation])
 
   useEffect(() => {
     if (!activeId || !navigationItems) return
@@ -176,8 +188,8 @@ const Navigation = () => {
   }, [navigationItems, activeId])
 
   function handleSoftAddedItem(newItem: NestedNavItem) {
-    if (newItem.isNew?.parent) {
-      const parentIndex = navigationItems?.findIndex(item => item.documentId === newItem.isNew?.parent);
+    if (newItem.clientModifications?.parent) {
+      const parentIndex = navigationItems?.findIndex(item => item.documentId === newItem.clientModifications?.parent);
       if (parentIndex !== undefined && parentIndex >= 0) {
         const parentDepth = navigationItems ? navigationItems[parentIndex].depth || 0 : 0;
         newItem.depth = parentDepth + 1;
@@ -195,9 +207,9 @@ const Navigation = () => {
 
   async function saveNavigation() {
     if (!navigationItems || !selectedNavigation) return
-    
+
     setIsSavingNavigation(true);
-    
+
     try {
       await updateNavigationItemStructure(selectedNavigation.documentId, navigationItems);
       toggleNotification({
@@ -244,7 +256,7 @@ const Navigation = () => {
   function handleDragCancel() {
     resetState();
   }
-  
+
   function handleDragEnd(event: DragEndEvent) {
     const {active, over} = event;
     resetState();
@@ -342,27 +354,31 @@ const Navigation = () => {
                 measuring={measuring}
               >
                 <SortableContext items={navigationItems} strategy={verticalListSortingStrategy}>
-                  {navigationItems.map((item, index) => (
-                    config?.navigation.maxDepth && <SortableRouteItem
-                      key={item.documentId || index} 
-                      item={item} 
-                      setParentId={setParentId} 
-                      setActionItem={setActionItem} 
+                  {navigationItems.map((item, index) => {
+                    const initialItem = initialNavigationItemsRef.current?.find(i => i.documentId === item.documentId);
+                    return config?.navigation.maxDepth && <SortableRouteItem
+                      key={item.documentId || index}
+                      item={item}
+                      initialItem={initialItem}
+                      setActionItemParent={setActionItemParent}
+                      setActionItem={setActionItem}
                       setNavigationItems={setNavigationItems}
                       indentationWidth={indentationWidth}
                       depth={item.id === activeId && projected ? projected.depth : item.depth}
                       maxDepth={config.navigation.maxDepth}
+                      navigationItems={navigationItems}
                     />
-                  ))}
+                  })}
                   {createPortal(
                     <DragOverlay>
                       {activeId && activeItem ? (
                         config?.navigation.maxDepth && <SortableRouteItem
-                          item={activeItem} 
-                          setParentId={setParentId} 
+                          item={activeItem}
+                          setActionItemParent={setActionItemParent}
                           setActionItem={setActionItem}
                           setNavigationItems={setNavigationItems}
                           maxDepth={config.navigation.maxDepth}
+                          navigationItems={navigationItems}
                         />
                       ) : null}
                     </DragOverlay>,
@@ -423,9 +439,11 @@ const Navigation = () => {
             }}
           />
         }
-        {modalType === 'ItemCreate' && 
+        {modalType === 'ItemCreate' &&
           <ItemCreate
-            parentId={parentId}
+            actionItemParent={actionItemParent}
+            navigationItems={navigationItems || []}
+            navigations={navigations}
             onCreate={(newItem) => {
               handleSoftAddedItem(newItem)
             }}
@@ -433,8 +451,8 @@ const Navigation = () => {
         }
         {modalType === "ItemDelete" &&
           <Delete
-            variant="ItemDelete" 
-            item={actionItem as NestedNavItem} 
+            variant="ItemDelete"
+            item={actionItem as NestedNavItem}
             onDelete={(deletedItem) => {
               setNavigationItems(items =>
                 items?.map(item => item.id === deletedItem.id ? deletedItem : item)
@@ -445,6 +463,7 @@ const Navigation = () => {
         {modalType === 'ItemEdit' &&
           <ItemEdit
             item={actionItem as NestedNavItem}
+            navigationItems={navigationItems || []}
             onEdit={(editedItem) => {
               setNavigationItems(items =>
                 items?.map(item => item.id === editedItem.id ? editedItem : item)
@@ -455,7 +474,7 @@ const Navigation = () => {
         {modalType === 'ExternalCreate' &&
           <ExternalItem
             variant={modalType}
-            parentId={parentId}
+            actionItemParentId={actionItemParent?.documentId}
             onCreate={(newItem) => {
               handleSoftAddedItem(newItem)
             }}
@@ -475,14 +494,14 @@ const Navigation = () => {
         {modalType === 'WrapperCreate' &&
           <WrapperItem
             variant={modalType}
-            parentId={parentId}
+            actionItemParentId={actionItemParent?.documentId}
             onCreate={(newItem) => {
               handleSoftAddedItem(newItem)
             }}
           />
         }
-        {modalType === 'WrapperEdit' && 
-          <WrapperItem 
+        {modalType === 'WrapperEdit' &&
+          <WrapperItem
             variant={modalType}
             item={actionItem as NestedNavItem}
             onSave={(editedItem) => {

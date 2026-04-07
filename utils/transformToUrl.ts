@@ -13,7 +13,10 @@ export default function transformToUrl(input: string): string {
     input = input.replace(/\/+/g, '/');
     input = input.startsWith('/') ? input.slice(1) : input;
     input = input.endsWith('/') ? input.slice(0, -1) : input;
-  
+    
+    // Replace forward slashes with hyphens to avoid path parsing conflicts
+    input = input.replace(/\//g, '-');
+
     // Replace special characters
     for (const char in specialCharMap) {
       const regex = new RegExp(char, 'g');

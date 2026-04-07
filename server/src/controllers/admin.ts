@@ -16,26 +16,25 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async getRoutes(ctx) {
+  async getRoute(ctx) {
     try {
-      return await getAdminService().getRoutes();
-    } catch (e) {
-      return ctx.throw(500, e)
-    }
-  },
-  async updateRoute (ctx) {
-    try {
-      const { documentId } = ctx.query;
+      const { documentId } = ctx.params;
 
       if (!documentId) return ctx.throw(400, 'Route documentId is required');
 
-      const { data } = ctx.request.body;
-      return await getAdminService().updateRoute(documentId, data);
+      return await getAdminService().getRoute(documentId);
     } catch (e) {
       return ctx.throw(500, e)
     }
   },
-  async getRelatedRoute (ctx) {
+  async getAllRoutes(ctx) {
+    try {
+      return await getAdminService().getAllRoutes();
+    } catch (e) {
+      return ctx.throw(500, e)
+    }
+  },
+  async getRelatedRoute(ctx) {
     try {
       const { documentId } = ctx.query;
 
@@ -46,7 +45,16 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async getNavigation (ctx) {
+  async getProhibitedRouteIds(ctx) {
+    try {
+      const { documentId } = ctx.params;
+
+      return await getAdminService().getProhibitedRouteIds(documentId);
+    } catch (e) {
+      return ctx.throw(500, e)
+    }
+  },
+  async getNavigation(ctx) {
     try {
       const { documentId, variant } = ctx.query;
 
@@ -55,18 +63,18 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async createNavigation (ctx) {
+  async createNavigation(ctx) {
     try {
       const { data } = ctx.request.body;
-      
+
       if (!data || !data.name) return ctx.throw(400, 'Navigation name is required');
-      
+
       return await getAdminService().createNavigation(data.name, data.visible);
     } catch (e) {
       return ctx.throw(500, e)
     }
   },
-  async updateNavigation (ctx) {
+  async updateNavigation(ctx) {
     try {
       const { documentId } = ctx.query;
 
@@ -78,7 +86,7 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async updateNavigationItemStructure (ctx) {
+  async updateNavigationItemStructure(ctx) {
     try {
       const { navigationId, navigationItems } = ctx.request.body;
 
@@ -89,7 +97,7 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async deleteNavigation (ctx) {
+  async deleteNavigation(ctx) {
     try {
       const { documentId } = ctx.query;
 
@@ -100,12 +108,12 @@ const admin = () => ({
       return ctx.throw(500, e)
     }
   },
-  async checkUniquePath (ctx) {
+  async checkUniquePath(ctx) {
     try {
       const { path, targetRouteDocumentId } = ctx.query
 
       if (!path) return ctx.throw(400, 'Path is required')
-      
+
       const res = await getAdminService().checkUniquePath(path, targetRouteDocumentId || null);
       return ctx.send({ uniquePath: res });
     } catch (e) {

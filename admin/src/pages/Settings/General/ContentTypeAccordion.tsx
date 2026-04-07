@@ -1,20 +1,19 @@
 import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
-import Tooltip from '../../../components/Tooltip'
 import { Box, Accordion, Field } from '@strapi/design-system';
 import { getTranslation } from '../../../utils';
 import { useIntl } from 'react-intl';
 import type { ContentType, ConfigContentType } from '../../../../../types';
 
-export default function ContentTypeAccordion({ 
+export default function ContentTypeAccordion({
   contentType,
   contentTypeSettings,
   dispatch
-}: { 
-  contentType: ContentType | undefined, 
-  contentTypeSettings: ConfigContentType, 
+}: {
+  contentType: ContentType | undefined,
+  contentTypeSettings: ConfigContentType,
   dispatch: React.Dispatch<any>
 }) {
-  
+
   const { formatMessage } = useIntl();
 
   if (!contentType) return null
@@ -58,55 +57,25 @@ export default function ContentTypeAccordion({
               >
                 {Object.entries(contentType.attributes).map(([key], index) => {
                   if (
-                    key === 'id' || 
+                    key === 'id' ||
                     key === 'documentId' ||
-                    key === 'createdAt' || 
-                    key === 'updatedAt' || 
-                    key === 'createdBy' || 
+                    key === 'createdAt' ||
+                    key === 'updatedAt' ||
+                    key === 'createdBy' ||
                     key === 'updatedBy' ||
                     key === 'webatlas_path' ||
-                    key === 'webatlas_override'
+                    key === 'webatlas_override' ||
+                    key === 'webatlas_parent'
                   ) return null
                   return <SingleSelectOption key={index} value={key}>{key}</SingleSelectOption>
                 })}
               </SingleSelect>
               <Field.Hint/>
             </Field.Root>
-            <Box paddingTop={4}>
-              <Field.Root
-                name="pattern"
-                hint={formatMessage({
-                  id: getTranslation('settings.page.pattern.hint'),
-                  defaultMessage: 'The pattern to prepend to the generated path. For example, if you enter "blog" and the value of default field is "My First Post", the generated path will be "blog/my-first-post". Leave empty for no prefix.',
-                })}
-              >
-                <Field.Label>
-                  {formatMessage({
-                    id: getTranslation('settings.page.pattern'),
-                    defaultMessage: 'Path Pattern',
-                  })}
-                  <Tooltip description={formatMessage({
-                    id: getTranslation('settings.page.pattern.tooltip'),
-                    defaultMessage: 'Leading and trailing slashes will be removed. Spaces will be replaced with hyphens. Special characters will be encoded.',
-                  })} />
-                </Field.Label>
-                <Field.Input
-                  value={contentTypeSettings.pattern}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch({ type: 'SET_PATTERN', payload: { ctUid: contentType.uid, pattern: e.target.value } })}
-                  disabled={!contentTypeSettings.default}
-                  type="text"
-                  placeholder={formatMessage({
-                    id: getTranslation('settings.page.pattern.placeholder'),
-                    defaultMessage: 'e.g. blog',
-                  })}
-                />
-                <Field.Hint />
-              </Field.Root>
-            </Box>
           </Box>
         </Accordion.Content>
       </Accordion.Item>
     </Box>
-    
+
   )
 }

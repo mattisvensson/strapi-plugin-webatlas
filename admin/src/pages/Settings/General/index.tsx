@@ -3,7 +3,7 @@
  * Settings
  * This file contains the general settings page for the Webatlas plugin.
  * It allows users to configure which content types are enabled for URL aliases and navigations,
- * as well as setting default fields and the URL alias patterns for each content type. 
+ * as well as setting default fields for each content type.
  *
 */
 
@@ -12,7 +12,6 @@ import { useEffect, useState, useReducer, useRef } from 'react';
 import { Box, Accordion, Field } from '@strapi/design-system';
 import { useNotification, Page } from '@strapi/strapi/admin'
 import usePluginConfig from '../../../hooks/usePluginConfig';
-import transformToUrl from '../../../../../utils/transformToUrl';
 import useAllContentTypes from '../../../hooks/useAllContentTypes';
 import { getTranslation } from '../../../utils';
 import { useIntl } from 'react-intl';
@@ -27,7 +26,6 @@ import pluginPermissions from '../../../permissions';
 
 type Action =
   | { type: 'SET_DEFAULT_FIELD'; payload: { ctUid: string; field: string } }
-  | { type: 'SET_PATTERN'; payload: { ctUid: string; pattern: string } }
   | { type: 'SET_CONFIG'; payload: PluginConfig }
 
 function reducer(newConfig: PluginConfig | null, action: Action): PluginConfig | null {
@@ -38,12 +36,6 @@ function reducer(newConfig: PluginConfig | null, action: Action): PluginConfig |
       if (!newConfig) return null;
       updatedContentTypes = newConfig?.selectedContentTypes.map(ct =>
         ct.uid === action.payload.ctUid ? { ...ct, default: action.payload.field } : ct
-      );
-      return { ...newConfig, selectedContentTypes: updatedContentTypes || [] };
-    case 'SET_PATTERN':
-      if (!newConfig) return null;
-      updatedContentTypes = newConfig?.selectedContentTypes.map(ct =>
-        ct.uid === action.payload.ctUid ? { ...ct, pattern: transformToUrl(action.payload.pattern) } : ct
       );
       return { ...newConfig, selectedContentTypes: updatedContentTypes || [] };
     case 'SET_CONFIG':
@@ -69,7 +61,7 @@ const Settings = () => {
     if (fetchedConfig)
       dispatch({ type: 'SET_CONFIG', payload: fetchedConfig });
   }, [fetchedConfig]);
-  
+
   useEffect(() => {
     if (fetchError) {
       toggleNotification({
@@ -84,7 +76,7 @@ const Settings = () => {
 
   async function save() {
     if (
-      !config 
+      !config
       || config.selectedContentTypes.find((cta: ConfigContentType) => !cta.default) !== undefined
     ) return
 
@@ -128,7 +120,7 @@ const Settings = () => {
   }
 
   return (
-    <Page.Protect permissions={pluginPermissions['settings.general']}>  
+    <Page.Protect permissions={pluginPermissions['settings.general']}>
       <PageWrapper
         save={save}
         isSaving={isSaving}
@@ -142,7 +134,7 @@ const Settings = () => {
           id: getTranslation('settings.page.general.contentTypes'),
           defaultMessage: 'Content Types',
         })}>
-          {config?.selectedContentTypes && config.selectedContentTypes.length > 0 ? 
+          {config?.selectedContentTypes && config.selectedContentTypes.length > 0 ?
             <Field.Root name="selectedContentTypesAccordion">
               <Field.Label>
                 <SettingTitle>
@@ -150,7 +142,7 @@ const Settings = () => {
                     id: getTranslation('settings.page.contentTypeSettings'),
                     defaultMessage: 'Content Type settings',
                   })}
-                </SettingTitle> 
+                </SettingTitle>
               </Field.Label>
               <Accordion.Root>
                 {config.selectedContentTypes?.map((contentTypeSettings: ConfigContentType) => {

@@ -6,15 +6,10 @@ async function checkPathExists(path: string, targetRoutePath?: string | null): P
   const entities = await strapi.documents(waRoute as UID.ContentType).findMany({
     filters: { 
       $or: [
-        {
-          path: path,
-        },
-        {
-          slug: path,
-        },
-        {
-          uidPath: path,
-        },
+        { path: path },
+        { slug: path },
+        { uidPath: path },
+        { canonicalPath: path },
       ], 
     },
   }) as Route[];
