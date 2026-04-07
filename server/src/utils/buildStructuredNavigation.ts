@@ -24,55 +24,55 @@ export default function buildStructuredNavigation(navigation: NestedNavigation, 
           rootItems.push(newItem);
         }
       });
-  
+
       // Sort root items and their nested items
       sortItems(rootItems);
-  
+
       // Return a new object with the nested and sorted items
       return { ...navigation, items: rootItems };
     } else if (variant === 'flat') {
       // Assign items to their parent's items array or to the root items array
       let itemsToProcess = [...navigation.items];
       let itemsProcessed = new Set();
-  
+
       while (itemsToProcess.length > 0) {
         const remainingItems: NestedNavItem[] = [];
-  
+
         itemsToProcess.forEach(item => {
           const newItem = itemsById.get(item.documentId);
           if (!newItem) return null;
-  
+
           if (item.parent) {
             const parentItem = itemsById.get(item.parent.documentId);
-  
+
             if (!parentItem || !itemsProcessed.has(item.parent.documentId)) {
               // Defer processing this item until the parent is processed
               remainingItems.push(item);
               return;
             }
-  
+
             newItem.depth = parentItem.depth !== undefined ? parentItem.depth + 1 : 0;
             parentItem.items.push(newItem);
           } else {
             newItem.depth = 0;
             rootItems.push(newItem);
           }
-  
+
           itemsById.set(item.documentId, newItem);
           itemsProcessed.add(item.documentId);
         });
-  
+
         itemsToProcess = remainingItems;
       }
       // Flatten and sort the items
       const sortedItems = sortItems(rootItems);
       const flattenedItems = flattenItems(sortedItems);
-    
+
       // Return the sorted items
       return { ...navigation, items: flattenedItems };
     }
   } catch (error) {
-    console.error(error)
+    strapi.log.error(error)
     throw error;
   }
 

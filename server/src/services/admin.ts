@@ -16,7 +16,7 @@ export default ({strapi}) => ({
       await pluginStore.set({ key: "config", value: newConfigMerged });
 
     } catch (err) {
-      console.log(err);
+      strapi.log.error(err);
       return "Error. Couldn't update config";
     }
 
@@ -36,7 +36,7 @@ export default ({strapi}) => ({
     //       // await strapi.documents(waRoute).delete({ documentId: route.documentId });
     //     }
     //   } catch (err) {
-    //     console.log(err);
+    //     strapi.log.error(err);
     //   }
     // }
 
@@ -69,7 +69,7 @@ export default ({strapi}) => ({
         documentId: documentId,
       });
     } catch (e) {
-      console.log(e)
+      strapi.log.error(e)
     }
   },
 
@@ -78,7 +78,7 @@ export default ({strapi}) => ({
       const entities = await strapi.documents(waRoute).findMany();
       return entities;
     } catch (e) {
-      console.log(e)
+      strapi.log.error(e)
     }
   },
 
@@ -91,7 +91,7 @@ export default ({strapi}) => ({
         populate: ['parent']
       });
     } catch (e) {
-      console.log(e)
+      strapi.log.error(e)
     }
   },
 
@@ -113,7 +113,7 @@ export default ({strapi}) => ({
       return prohibitedRouteIds
 
     } catch (e) {
-      console.log(e)
+      strapi.log.error(e)
     }
   },
 
@@ -158,7 +158,7 @@ export default ({strapi}) => ({
 
       return navigation
     } catch (e) {
-      console.log(e)
+      strapi.log.error(e)
     }
   },
 
@@ -172,7 +172,7 @@ export default ({strapi}) => ({
         },
       });
     } catch (e) {
-      console.log(e)
+      strapi.log.error(e)
     }
   },
 
@@ -187,7 +187,7 @@ export default ({strapi}) => ({
       });
       return entity
     } catch (e) {
-      console.log(e)
+      strapi.log.error(e)
     }
   },
 
@@ -210,7 +210,7 @@ export default ({strapi}) => ({
         documentId: documentId
       })
     } catch (e) {
-      console.log(e)
+      strapi.log.error(e)
     }
   },
 
@@ -223,7 +223,7 @@ export default ({strapi}) => ({
     // First pass: Validate and prepare items
     const deletionResult = await handleItemDeletion(navigationItems);
     if (!deletionResult.success) {
-      console.error('Deletion errors:', deletionResult.errors);
+      strapi.log.error('Deletion errors:', deletionResult.errors);
     }
 
     navigationItems = deletionResult.items;
@@ -256,11 +256,11 @@ export default ({strapi}) => ({
         });
 
         if (!result.success) {
-          console.error('Error updating item: ', item);
+          strapi.log.error('Error updating item: ', item);
         }
       } catch (errorMsg) {
         error = true;
-        console.error('Error updating navigation item ', errorMsg);
+        strapi.log.error('Error updating navigation item ', errorMsg);
       }
     }
 
@@ -272,7 +272,7 @@ export default ({strapi}) => ({
     try {
       return await duplicateCheck(initialPath, targetRouteDocumentId);
     } catch (e) {
-      console.log(e)
+      strapi.log.error(e)
     }
   },
 })

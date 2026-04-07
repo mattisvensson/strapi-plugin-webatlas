@@ -56,7 +56,7 @@ function ItemCreateComponent({
 
         setRoute(relatedRoute)
       } catch (err) {
-        console.log(err)
+        strapi.log.error(err)
       } finally {
         setLoadingRoute(false)
       }
@@ -90,7 +90,7 @@ function ItemCreateComponent({
 
       setModalType('')
     } catch (err) {
-      console.log(err)
+      strapi.log.error(err)
     }
   }
 

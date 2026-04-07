@@ -4,17 +4,17 @@ import type { UID } from '@strapi/strapi';
 
 async function checkPathExists(path: string, targetRoutePath?: string | null): Promise<boolean> {
   const entities = await strapi.documents(waRoute as UID.ContentType).findMany({
-    filters: { 
+    filters: {
       $or: [
         { path: path },
         { slug: path },
         { uidPath: path },
         { canonicalPath: path },
-      ], 
+      ],
     },
   }) as Route[];
 
-  if (targetRoutePath && entities && entities[0]?.path === targetRoutePath) 
+  if (targetRoutePath && entities && entities[0]?.path === targetRoutePath)
     return false;
 
   return entities?.length > 0;
@@ -32,7 +32,7 @@ export default async function duplicateCheck(initialPath: string, targetRouteDoc
       }) as Route;
       if (route) targetRoutePath = route.path;
     }
-  
+
     // Check if the path exists
     let exists = await checkPathExists(uniquePath, targetRoutePath);
 
@@ -42,10 +42,10 @@ export default async function duplicateCheck(initialPath: string, targetRouteDoc
       exists = await checkPathExists(uniquePath);
       counter++;
     }
-  
+
     // Return the unique path
     return uniquePath;
   } catch (e) {
-    console.log(e)
+    strapi.log.error(e)
   }
 }

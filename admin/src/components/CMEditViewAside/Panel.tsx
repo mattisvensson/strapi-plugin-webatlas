@@ -211,7 +211,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
         }
 			} catch (err) {
 				setRoute(null)
-				console.error(err)
+				strapi.log.error(err)
 			}
 			setInitialLoadComplete(true); // Mark initial load as complete
 		}
@@ -267,7 +267,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 
 			dispatchPath({ type: 'SET_CANONICALPATH', payload: result });
 		} catch (err) {
-			console.error(err)
+			strapi.log.error(err)
 		}
 	}
 
@@ -284,7 +284,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 			dispatchPath({ type: 'NO_URL_CHECK', payload: data });
 			dispatchPath({ type: 'SET_REPLACEMENT', payload: data });
 		} catch (err) {
-			console.error(err)
+			strapi.log.error(err)
 		} finally {
 			setValidationState('done')
 		}

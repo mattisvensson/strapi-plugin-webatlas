@@ -16,22 +16,22 @@ export default ({strapi}) => ({
       });
 
       if (!route) return null
-      
+
       let populateObject: string | Record<string, boolean | Record<string, any>> = populate
-      
+
       if (populate === 'deep') {
         const modelObject = getFullPopulateObject(route.relatedContentType, Number(populateDeepDepth), []);
         if (typeof modelObject === 'object' && 'populate' in modelObject) {
           populateObject = modelObject.populate;
         }
       }
-      
+
       const contentTypeObject: any = Object.entries(strapi.contentTypes).find(([key, value]) => key === route.relatedContentType)
-      
+
       if (!contentTypeObject) {
         return null
-      }      
-      
+      }
+
       const [contentTypeKey, contentType] = contentTypeObject;
 
       const entity = await strapi.documents(route.relatedContentType).findOne({
@@ -61,7 +61,7 @@ export default ({strapi}) => ({
         ...cleanEntity
       }
     } catch (e) {
-      console.log(e)
+      strapi.log.error(e)
       return e
     }
   },
@@ -101,13 +101,13 @@ export default ({strapi}) => ({
           try {
             navigation = await method.lookup();
           } catch (error) {
-            console.log(`Navigation lookup by ${method.name} failed:`, error);
+            strapi.log.error(`Navigation lookup by ${method.name} failed:`, error);
           }
         }
       }
-      
+
       if (!navigation) return null
-      
+
       const structured = buildStructuredNavigation(navigation, variant)
 
       if (!structured) return null
@@ -116,7 +116,7 @@ export default ({strapi}) => ({
 
       return {...structured,  items: entityNavigation }
     } catch (e) {
-      console.log(e)
+      strapi.log.error(e)
       return e
     }
   },

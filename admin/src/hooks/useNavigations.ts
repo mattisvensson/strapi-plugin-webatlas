@@ -8,7 +8,7 @@ export default function useNavigations () {
   const [navigations, setNavigations] = useState<NestedNavigation[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  
+
   const fetchNavigations = async () => {
     setLoading(true);
 
@@ -17,7 +17,7 @@ export default function useNavigations () {
       setNavigations(data || []);
     } catch (err) {
       setFetchError(err instanceof Error ? err.message : String(err));
-      console.error('Failed to fetch navigations', err);
+      strapi.log.error('Failed to fetch navigations', err);
     } finally {
       setLoading(false);
     }

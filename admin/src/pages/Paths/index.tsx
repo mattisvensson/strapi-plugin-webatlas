@@ -27,7 +27,7 @@ const Paths = () => {
   const { getAllRoutes } = useApi();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  
+
   const [allRoutes, setAllRoutes] = useState<Route[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,7 +71,7 @@ const Paths = () => {
         setAllRoutes(data);
         setRoutes(data);
       } catch (err) {
-        console.error('Failed to fetch paths:', err);
+        strapi.log.error('Failed to fetch paths:', err);
         toggleNotification({
           type: 'danger',
           message: formatMessage({
@@ -111,7 +111,7 @@ const Paths = () => {
           searchQuery={searchQuery}
         />
         <PathTable
-          routes={sortedRoutes} 
+          routes={sortedRoutes}
           sortKey={sortKey}
           handleSort={handleSort}
         />

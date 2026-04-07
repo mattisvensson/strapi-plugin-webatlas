@@ -28,9 +28,9 @@ export default function NavCreate() {
 
       navigate(`/plugins/${PLUGIN_ID}/navigation/${data.documentId}`);
       setModalType('');
-      
+
     } catch (err) {
-      console.log(err);
+      strapi.log.error(err);
       toggleNotification({
         type: 'danger',
         message: formatMessage({

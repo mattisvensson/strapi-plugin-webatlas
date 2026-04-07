@@ -30,7 +30,7 @@ export default function NavEdit({ item, onEdit }: NavEditProps) {
       setModalType('NavOverview')
       onEdit({ ...item, name, visible });
     } catch (err) {
-      console.log(err)
+      strapi.log.error(err)
       toggleNotification({
         type: 'danger',
         message: formatMessage({

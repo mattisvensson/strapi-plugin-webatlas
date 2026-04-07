@@ -10,7 +10,7 @@ export default function useApi() {
       const { data } = await get('/content-manager/content-types');
       return data.data;
     } catch (error) {
-      console.warn('Cannot fetch all content types:', error);
+      strapi.log.error('Cannot fetch all content types:', error);
       return [];
     }
   }
@@ -29,7 +29,7 @@ export default function useApi() {
 
       return allContentTypes.filter((ct: ContentType) => configuredUIDs.has(ct.uid));
     } catch (err) {
-      console.error('Error fetching configured content types:', err);
+      strapi.log.error('Error fetching configured content types:', err);
       return [];
     }
   }
@@ -61,7 +61,7 @@ export default function useApi() {
               contentType
             };
           } catch (err) {
-            console.warn(`Cannot access entities for ${contentType.uid}:`, err);
+            strapi.log.error(`Cannot access entities for ${contentType.uid}:`, err);
             return null;
           }
         })
@@ -73,7 +73,7 @@ export default function useApi() {
 
       return entities;
     } catch (err) {
-      console.error('Error fetching entities:', err);
+      strapi.log.error('Error fetching entities:', err);
       throw err;
     }
   }

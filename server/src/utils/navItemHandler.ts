@@ -17,7 +17,7 @@ async function createNavItem(data: NavItemSettings): Promise<null | NestedNavIte
 
     return entity as NestedNavItem;
   } catch (e) {
-    console.log(e)
+    strapi.log.error(e)
   }
 }
 
@@ -32,7 +32,7 @@ async function updateNavItem(documentId: string, data: Pick<NavItemSettings, "pa
       data: updateData
     });
   } catch (e) {
-    console.log(e)
+    strapi.log.error(e)
   }
 }
 
@@ -43,7 +43,7 @@ async function deleteNavItem(documentId: string) {
     })
     return true
   } catch (e) {
-    console.log(e)
+    strapi.log.error(e)
   }
 }
 

@@ -22,25 +22,25 @@ function navItemStateReducer(navItemState: RouteSettings, action: navItemStateAc
 function pathReducer(state: ExtendedPanelPathState, action: ExtendedPanelAction): ExtendedPanelPathState {
   switch (action.type) {
     case 'DEFAULT':
-      return { 
+      return {
         ...state,
-        value: action.payload, 
+        value: action.payload,
         prevValue: state.value,
-        needsUrlCheck: true 
+        needsUrlCheck: true
       };
     case 'NO_URL_CHECK':
       return {
         ...state,
-        value: action.payload, 
+        value: action.payload,
         prevValue: state.value,
-        needsUrlCheck: false 
+        needsUrlCheck: false
       };
     case 'NO_TRANSFORM_AND_CHECK':
-      return { 
+      return {
         ...state,
-        value: action.payload, 
+        value: action.payload,
         prevValue: state.value,
-        needsUrlCheck: false 
+        needsUrlCheck: false
       };
     case 'RESET_URL_CHECK_FLAG':
       return { ...state, needsUrlCheck: false };
@@ -101,23 +101,23 @@ export function useModalSharedLogic() {
     routeDocumentId,
     withoutTransform = false
   }: {
-    url: string, 
-    routeDocumentId?: string | null, 
+    url: string,
+    routeDocumentId?: string | null,
     withoutTransform?: boolean
   }) {
 		if (!url) return
     setValidationState('checking')
 		dispatchPath({ type: 'SET_REPLACEMENT', payload: '' });
-		
+
 		try {
 			const data = await duplicateCheck({fetchFunction: get, path: url, routeDocumentId, withoutTransform });
 
-			if (!data || data === url) return 
+			if (!data || data === url) return
 
 			dispatchPath({ type: 'NO_URL_CHECK', payload: data });
 			dispatchPath({ type: 'SET_REPLACEMENT', payload: data });
 		} catch (err) {
-			console.log(err)
+			strapi.log.error(err)
 		} finally {
       setValidationState('done')
     }

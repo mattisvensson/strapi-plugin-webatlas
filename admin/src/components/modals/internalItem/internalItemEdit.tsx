@@ -92,7 +92,7 @@ function ItemEditComponent({
     });
       setModalType('')
     } catch (err) {
-      console.log(err)
+      strapi.log.error(err)
     }
   }
 

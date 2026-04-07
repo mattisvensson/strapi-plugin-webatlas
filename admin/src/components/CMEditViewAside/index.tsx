@@ -29,27 +29,27 @@ const CMEditViewAside: PanelComponent = ({ documentId, model }: PanelComponentPr
 
   useEffect(() => {
     const isWebatlasLabel = (label: Element) => label.textContent?.startsWith('webatlas_');
-    
+
     const cleanupLabels = () => {
       const labels = document.querySelectorAll('label');
-      
+
       labels.forEach((label: Element) => {
         if (!isWebatlasLabel(label)) return;
         const container = label.parentElement?.parentElement;
         const parent = container?.parentElement;
         const greatGrandParent = parent?.parentElement?.parentElement;
-        
+
         if (!container || !parent) return;
-        
+
         const parentWebatlasCount = Array.from(parent.querySelectorAll('label')).filter(isWebatlasLabel).length;
         const childrenCount = parent.children.length;
-        
+
         // Remove great grandparent if it only has webatlas fields
-        if (greatGrandParent && greatGrandParent?.querySelectorAll('label').length === 
+        if (greatGrandParent && greatGrandParent?.querySelectorAll('label').length ===
             Array.from(greatGrandParent.querySelectorAll('label')).filter(isWebatlasLabel).length) {
           greatGrandParent.remove();
         }
-        // Remove parent if: single child OR two children with two webatlas fields  
+        // Remove parent if: single child OR two children with two webatlas fields
         else if (childrenCount === 1 || (childrenCount === 2 && parentWebatlasCount === 2)) {
           parent.remove();
         }
@@ -63,10 +63,10 @@ const CMEditViewAside: PanelComponent = ({ documentId, model }: PanelComponentPr
     // Delay execution to ensure DOM is populated by Strapi's form system
     const timeoutId = setTimeout(() => {
       cleanupLabels();
-      
+
       // Also try again after a longer delay in case form takes time to render
       const secondTimeoutId = setTimeout(cleanupLabels, 1000);
-      
+
       // Cleanup function will clear this timeout if component unmounts
       return () => clearTimeout(secondTimeoutId);
     }, 100);
@@ -74,14 +74,14 @@ const CMEditViewAside: PanelComponent = ({ documentId, model }: PanelComponentPr
     return () => clearTimeout(timeoutId);
   }, [documentId, model]);
 
-  
+
   useEffect(() => {
     if (!config) return;
-        
+
     // Reset state first
     setIsActiveContentType(false);
     setContentTypeConfig(null);
-    
+
     config?.selectedContentTypes?.forEach((type) => {
       if (type.uid === model) {
         setIsActiveContentType(true);
@@ -100,7 +100,7 @@ const CMEditViewAside: PanelComponent = ({ documentId, model }: PanelComponentPr
   if (!canAside || !isAllowedContentType || !isActiveContentType || !contentTypeConfig) return null
 
   if (!config) {
-    console.error('CMEditViewAside: Plugin is not configured.');
+    strapi.log.error('CMEditViewAside: Plugin is not configured.');
     return null
   }
 
