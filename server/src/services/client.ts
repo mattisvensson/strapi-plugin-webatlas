@@ -65,24 +65,34 @@ export default ({strapi}) => ({
       return e
     }
   },
-  async getNavigation(id: string, name: string, documentId: string, variant: StructuredNavigationVariant = 'nested') {
+  async getNavigation(id: string, name: string, slug: string, documentId: string, variant: StructuredNavigationVariant = 'nested') {
     try {
       let navigation = null
+
+      const populateObject = ['items', "items.parent", "items.route"]
 
       const lookupMethods = [
         {
           condition: documentId,
           lookup: () => strapi.documents(waNavigation).findOne({
             documentId: documentId,
-            populate: ['items', "items.parent", "items.route"]
+            populate: populateObject,
           }),
           name: 'documentId'
+        },
+        {
+          condition: slug,
+          lookup: () => strapi.db?.query(waNavigation).findOne({
+            where: { slug: slug },
+            populate: populateObject,
+          }),
+          name: 'slug'
         },
         {
           condition: name,
           lookup: () => strapi.db?.query(waNavigation).findOne({
             where: { name: name },
-            populate: ['items', "items.parent", "items.route"],
+            populate: populateObject,
           }),
           name: 'name'
         },
@@ -90,7 +100,7 @@ export default ({strapi}) => ({
           condition: id,
           lookup: () => strapi.db?.query(waNavigation).findOne({
             where: { id: id },
-            populate: ['items', "items.parent", "items.route"],
+            populate: populateObject,
           }),
           name: 'id'
         }

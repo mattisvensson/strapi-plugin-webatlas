@@ -119,8 +119,9 @@ The response contains the entity's content type and a `webatlas` object with add
 
 `GET /api/webatlas/navigation`
 
-One of these query parameters (`documentId`, `name`, or `id`) are mandatory to fetch a navigation. If you provide multiple, `documentId` has the highest priority, followed by `name` and `id`.
+One of these query parameters (`documentId`, `slug`, `name`, or `id`) are mandatory to fetch a navigation. If you provide multiple, `documentId` has the highest priority, followed by `slug`, `name` and `id`.
 - `documentId` (string, optional): The document ID of the navigation to fetch.
+- `slug` (string, optional): The slug of the navigation to fetch.
 - `name` (string, optional): The name of the navigation to fetch.
 - `id` (string, optional): The ID of the navigation to fetch.
 - `variant` (string, optional): `nested` or `flat`. The variant of the navigation to fetch. Default is `nested`.

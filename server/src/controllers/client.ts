@@ -19,11 +19,11 @@ const client = ({ strapi }: { strapi: Core.Strapi }) => ({
   },
   async getNavigation (ctx) {
     try {
-      const { id, name, documentId, variant } = ctx.query;
+      const { id, name, slug, documentId, variant } = ctx.query;
 
-      if (!id && !name && !documentId) return ctx.throw(400, 'Navigation id, name or documentId is required');
+      if (!id && !name && !slug && !documentId) return ctx.throw(400, 'Navigation id, name, slug or documentId is required');
 
-      const navigation = await getClientService().getNavigation(id, name, documentId, variant);
+      const navigation = await getClientService().getNavigation(id, name, slug, documentId, variant);
 
       if (!navigation) return ctx.throw(404, 'Navigation not found');
 
