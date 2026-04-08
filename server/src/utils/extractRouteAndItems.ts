@@ -2,19 +2,21 @@ import { NestedNavItem } from "../../../types";
 import { PLUGIN_ID } from "../../../utils";
 
 export default function extractRouteAndItems(items: NestedNavItem[]) {
-  return items.map((item: any) => {
+  return items.map((item) => {
 
     const route = { ...item.route }
 
     if (!route) return null
 
-    if (item.depth) {
-      route.depth = item.depth;
+    let depth = null
+    if (item.depth !== undefined) {
+      depth = item.depth;
     }
 
+    let children = null
     if (item.items?.length > 0) {
       const items = extractRouteAndItems(item.items);
-      if (items.length > 0) route.items = items;
+      if (items.length > 0) children = items;
     }
 
     delete route.relatedContentType
@@ -23,11 +25,13 @@ export default function extractRouteAndItems(items: NestedNavItem[]) {
     delete route.createdAt
     delete route.updatedAt
     delete route.isOverride
-    
-    return { 
+
+    return {
       __component: route.type === 'wrapper' ? `${PLUGIN_ID}.wrapper` : `${PLUGIN_ID}.route`,
       type: route.type,
-      ...route
+      ...route,
+      depth: depth !== null ? depth : undefined,
+      items: children !== null ? children : undefined,
     };
   });
 }
