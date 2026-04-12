@@ -3,6 +3,7 @@ export default function transformToUrl(input: string): string {
       'ü': 'ue',
       'ä': 'ae',
       'ö': 'oe',
+      'ß': 'ss',
     };
 
     if (!input || typeof input !== 'string') return '';
@@ -13,7 +14,7 @@ export default function transformToUrl(input: string): string {
     input = input.replace(/\/+/g, '/');
     input = input.startsWith('/') ? input.slice(1) : input;
     input = input.endsWith('/') ? input.slice(0, -1) : input;
-    
+
     // Replace forward slashes with hyphens to avoid path parsing conflicts
     input = input.replace(/\//g, '-');
 
@@ -25,13 +26,13 @@ export default function transformToUrl(input: string): string {
 
     // Remove leading and trailing spaces
     input = input.trim();
-    
+
     // Replace spaces with hyphens
     input = input.replace(/\s+/g, '-');
 
     // Encode special characters
     // input = encodeURIComponent(input);
-    
+
     // Remove any characters that are not alphanumeric, hyphens, underscores, or slashes
     input = input.replace(/[^A-Za-z0-9$\-_.+!*'()/]/g, '');
 
