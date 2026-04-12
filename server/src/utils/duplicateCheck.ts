@@ -7,7 +7,6 @@ async function checkPathExists(path: string, targetRoutePath?: string | null): P
     filters: {
       $or: [
         { path: path },
-        { slug: path },
         { uidPath: path },
         { canonicalPath: path },
       ],
