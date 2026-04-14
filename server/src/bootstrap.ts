@@ -276,53 +276,31 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
     async afterDelete(event: any) {
       try {
-        await findAndDeleteNavItem(event.result.id, event.model.uid)
+        const relatedDocumentId = event.result.documentId
+
+        const route = await strapi.db?.query(waRoute).findOne({
+          where: {
+            relatedDocumentId: relatedDocumentId
+          },
+        });
+
+        if (!route?.documentId) return
+
+        const navItem = await strapi.db?.query(waNavItem).findOne({
+          where: {
+            route: {
+              documentId: route.documentId
+            }
+          },
+        });
+
+        await strapi.documents(waRoute as UID.ContentType).delete({ documentId: route.documentId })
+        if (navItem?.documentId) await strapi.documents(waNavItem as UID.ContentType).delete({ documentId: navItem.documentId })
       } catch (err) {
         strapi.log.error(err)
       }
     },
-
-    async afterDeleteMany(event: any) {
-      const deletedArr = event.params.where['$and']
-
-      deletedArr.map((item: {id: {'$in': number[]}}) => {
-        const ids = item.id['$in']
-        ids.map(async (id: number) => {
-          await findAndDeleteNavItem(id, event.model.uid)
-        })
-      })
-    }
   });
 };
 
 export default bootstrap;
-
-async function findAndDeleteNavItem (relatedId: number, relatedContentType: string) {
-
-  if (!relatedId || !relatedContentType) return
-
-  try {
-    const route = await strapi.db?.query(waRoute).findOne({
-      where: {
-        relatedId: relatedId,
-        relatedContentType: relatedContentType
-      },
-    });
-
-    if (!route?.documentId) return
-
-    const navItem = await strapi.db?.query(waNavItem).findOne({
-      where: {
-        route: {
-          documentId: route.documentId
-        }
-      },
-    });
-
-    await strapi.documents(waRoute as UID.ContentType).delete({ documentId: route.documentId })
-    if (navItem?.documentId) await strapi.documents(waNavItem as UID.ContentType).delete({ documentId: navItem.documentId })
-
-  } catch (err) {
-    strapi.log.error(err)
-  }
-}
