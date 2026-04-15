@@ -278,6 +278,15 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       try {
         const relatedDocumentId = event.result.documentId
 
+        // With D&P enabled, Strapi may fire afterDelete for an individual DB row
+        // (e.g. replacing the published row) while the document still exists as a draft.
+        // Only proceed if no other rows for this documentId remain.
+        // TODO: migrate to strapi.documents.use
+        const remainingCount = await strapi.db?.query(event.model.uid).count({
+          where: { documentId: relatedDocumentId },
+        });
+        if (remainingCount > 0) return;
+
         const route = await strapi.db?.query(waRoute).findOne({
           where: {
             relatedDocumentId: relatedDocumentId
