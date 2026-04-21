@@ -1,4 +1,4 @@
-export default function transformToUrl(input: string): string {
+export default function transformToUrl(input: string, replaceSlash: boolean = true): string {
     const specialCharMap: { [key: string]: string } = {
       'ü': 'ue',
       'ä': 'ae',
@@ -15,8 +15,15 @@ export default function transformToUrl(input: string): string {
     input = input.startsWith('/') ? input.slice(1) : input;
     input = input.endsWith('/') ? input.slice(0, -1) : input;
 
-    // Replace forward slashes with hyphens to avoid path parsing conflicts
-    input = input.replace(/\//g, '-');
+    if (replaceSlash) {
+      // Replace forward slashes with hyphens to avoid path parsing conflicts
+      input = input.replace(/\//g, '-');
+    } else {
+      // If not replacing slashes, we still want to ensure that multiple slashes are reduced and leading/trailing slashes are removed
+      input = input.replace(/\/+/g, '/');
+      input = input.startsWith('/') ? input.slice(1) : input;
+      input = input.endsWith('/') ? input.slice(0, -1) : input;
+    }
 
     // Replace special characters
     for (const char in specialCharMap) {
