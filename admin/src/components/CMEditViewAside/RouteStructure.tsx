@@ -5,12 +5,19 @@ import { useIntl } from 'react-intl';
 import { useMemo } from "react";
 import Tooltip from '../Tooltip'
 
-function RouteStructure({ routes, selectedParent, setSelectedParent, canonicalPath, prohibitedRouteIds }: RouteStructureProps) {
+function RouteStructure({
+  routes,
+  selectedParent,
+  setSelectedParent,
+  canonicalPath,
+  prohibitedRouteIds
+}: RouteStructureProps) {
   const { formatMessage } = useIntl();
 
-  const sortedRoutes = useMemo(() => {
-    return [...routes].sort((a, b) => a.title.localeCompare(b.title));
-  }, [routes]);
+  const filteredRoutes = useMemo(() => {
+    return [...routes].sort((a, b) => a.title.localeCompare(b.title))
+      .filter((route) => !prohibitedRouteIds?.includes(route.documentId) || route.documentId === selectedParent?.documentId);
+  }, [routes, prohibitedRouteIds, selectedParent]);
 
   const handleSelectParent = (value: string) => {
     const parentRoute = routes.find(route => route.documentId === value) || null;
@@ -36,16 +43,14 @@ function RouteStructure({ routes, selectedParent, setSelectedParent, canonicalPa
               defaultMessage: 'None (root path)'
             })}
           </SingleSelectOption>
-          {sortedRoutes
-            .filter((route) => !prohibitedRouteIds?.includes(route.documentId) || route.documentId === selectedParent?.documentId)
-            .map((route) =>
-              <SingleSelectOption
-                key={route.documentId}
-                value={route.documentId}
-              >
-                {route.title}
-              </SingleSelectOption>
-          )}
+          {filteredRoutes.map((route) => (
+            <SingleSelectOption
+              key={route.documentId}
+              value={route.documentId}
+            >
+              {route.title}
+            </SingleSelectOption>
+          ))}
         </SingleSelect>
       </Field.Root>
       <Field.Root marginTop={4}>
