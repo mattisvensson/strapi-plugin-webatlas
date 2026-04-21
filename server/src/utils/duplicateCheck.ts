@@ -1,44 +1,35 @@
-import { Route } from "../../../types";
 import { waRoute } from "../../../utils";
 import type { UID } from '@strapi/strapi';
 
-async function checkPathExists(path: string, targetRoutePath?: string | null): Promise<boolean> {
-  const entities = await strapi.documents(waRoute as UID.ContentType).findMany({
-    filters: {
-      $or: [
-        { path: path },
-        { uidPath: path },
-        { canonicalPath: path },
-      ],
-    },
-  }) as Route[];
+async function checkPathExists(path: string, excludeDocumentId?: string | null): Promise<boolean> {
+  const filters: any = {
+    $or: [
+      { path: path },
+      { uidPath: path },
+      { canonicalPath: path },
+    ]
+  };
 
-  if (targetRoutePath && entities && entities[0]?.path === targetRoutePath)
-    return false;
+  if (excludeDocumentId) {
+    filters.documentId = { $ne: excludeDocumentId };
+  }
 
-  return entities?.length > 0;
+  const entity = await strapi.documents(waRoute as UID.ContentType).findFirst({ filters });
+  return !!entity;
 }
 
 export default async function duplicateCheck(initialPath: string, targetRouteDocumentId?: string | null) {
   try {
     let uniquePath = initialPath;
-    let targetRoutePath = null;
     let counter = 1;
 
-    if (targetRouteDocumentId) {
-      const route = await strapi.documents(waRoute as UID.ContentType).findOne({
-        documentId: targetRouteDocumentId
-      }) as Route;
-      if (route) targetRoutePath = route.path;
-    }
-
-    // Check if the path exists
-    let exists = await checkPathExists(uniquePath, targetRoutePath);
+    // Check if the path exists, excluding the target route itself
+    let exists = await checkPathExists(uniquePath, targetRouteDocumentId);
 
     // While the path exists, append/increment a number and check again
     while (exists) {
       uniquePath = `${initialPath}-${counter}`;
-      exists = await checkPathExists(uniquePath);
+      exists = await checkPathExists(uniquePath, targetRouteDocumentId);
       counter++;
     }
 
