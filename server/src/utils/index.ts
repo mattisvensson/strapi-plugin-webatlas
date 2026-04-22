@@ -9,7 +9,7 @@ import getFullPopulateObject from './populateDeep';
 import cleanRootKeys from './cleanRootKeys';
 import removeWaFields from './removeWaFields';
 import buildCanonicalPath from './buildCanonicalPath';
-import cascadeCanonicalPathUpdates from "./cascadeCanonicalPathUpdates";
+import cascadePathUpdates from "./cascadePathUpdates";
 import getRouteAncestors from "./getRouteAncestors";
 import getRouteDescendants from "./getRouteDescendants";
 import getNonInternalRouteIds from "./getNonInternalRouteIds";
@@ -34,7 +34,7 @@ export {
   cleanRootKeys,
   removeWaFields,
   buildCanonicalPath,
-  cascadeCanonicalPathUpdates,
+  cascadePathUpdates,
   getRouteAncestors,
   getRouteDescendants,
   getNonInternalRouteIds,
