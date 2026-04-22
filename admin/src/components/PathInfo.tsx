@@ -1,10 +1,11 @@
+import type { ValidationState } from '../types';
 import { Box, Typography } from '@strapi/design-system';
 import { getTranslation } from '../utils';
 import { useIntl } from 'react-intl';
 import { useState, useEffect } from 'react';
 
 interface PathProps {
-  validationState: 'initial' | 'checking' | 'done';
+  validationState: ValidationState;
 	replacement: string | null;
 }
 

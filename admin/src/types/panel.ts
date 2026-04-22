@@ -5,8 +5,9 @@ export type PanelAction =
   | { type: 'NO_URL_CHECK'; payload: string }
   | { type: 'NO_TRANSFORM_AND_CHECK'; payload: string }
   | { type: 'RESET_URL_CHECK_FLAG'; }
-  | { type: 'SET_REPLACEMENT'; payload: string }
+  | { type: 'SET_REPLACEMENT'; payload: string | null }
   | { type: 'SET_UIDPATH'; payload: string }
+  | { type: 'SET_SLUG'; payload: string }
   | { type: 'SET_CANONICALPATH'; payload: string }
   | { type: 'SET_OVERRIDEPATH'; payload: string }
 
@@ -17,6 +18,7 @@ export type PanelPathState = {
   needsUrlCheck: boolean;
   replacement: string | null;
   canonicalPath?: string;
+  slug?: string;
   overridePath?: string;
 };
 
@@ -27,3 +29,5 @@ export type RouteStructureProps = {
   setSelectedParent: (value: Route | null) => void;
   prohibitedRouteIds?: string[];
 }
+
+export type ValidationState = 'initial' | 'checking' | 'done' | 'idle';

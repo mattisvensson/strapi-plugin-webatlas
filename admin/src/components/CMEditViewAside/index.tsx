@@ -28,7 +28,7 @@ const CMEditViewAside: PanelComponent = ({ documentId, model }: PanelComponentPr
   }, [contentTypes, model]);
 
   useEffect(() => {
-    const isWebatlasLabel = (label: Element) => label.textContent?.startsWith('webatlas_');
+    const isWebatlasLabel = (label: Element) => label.textContent?.startsWith('webatlas');
 
     const cleanupLabels = () => {
       const labels = document.querySelectorAll('label');

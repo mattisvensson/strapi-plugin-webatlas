@@ -4,6 +4,7 @@ import { Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { getTranslation } from '../../utils';
 import Tooltip from '../Tooltip'
+import { transformToUrl } from '../../../../utils';
 
 type PathInputProps = {
   path: PanelPathState;
@@ -60,10 +61,8 @@ function PathInput({ path, dispatchPath, isOverride, config }: PathInputProps) {
         value={displayedPath}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'SET_OVERRIDEPATH', payload: e.target.value })}
         disabled={!isOverride}
-        onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-          if (e.target.value === path.prevValue) return
-          dispatchPath({ type: 'DEFAULT', payload: e.target.value })}
-        }
+        onBlur={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'SET_OVERRIDEPATH', payload: transformToUrl(e.target.value) })}
+
         style={{ outline: inputBorder }}
       />
       <Field.Hint/>

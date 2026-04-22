@@ -1,7 +1,7 @@
 import type { ConfigContentType, Route } from '../../../../types';
-import type { PanelAction, PanelPathState } from '../../types';
+import type { PanelAction, PanelPathState, ValidationState } from '../../types';
 import { Box, Flex, Typography, Divider } from '@strapi/design-system';
-import { useState, useEffect, useRef, useCallback, useReducer, useMemo } from 'react';
+import { useState, useEffect, useRef, useReducer } from 'react';
 import { debounce, duplicateCheck, getTranslation } from '../../utils';
 import { transformToUrl } from '../../../../utils';
 import { unstable_useContentManagerContext as useContentManagerContext, useFetchClient, useRBAC } from '@strapi/strapi/admin';
@@ -14,9 +14,10 @@ import UidPathDisplay from './UidPathDisplay';
 import PathInput from './PathInput';
 import RouteStructure from './RouteStructure';
 
-function getCanonicalPath(selectedParent: Route | null, sourceFieldValue: string) {
-	const parentPath = selectedParent ? selectedParent.canonicalPath + '/' : '';
-	return `${parentPath}${transformToUrl(sourceFieldValue)}`
+function buildPath(type: 'canonical' | 'path', slug: string, parent: Route | null,) {
+  const parentSlug = type === 'canonical' ? parent?.canonicalPath : parent?.path;
+  const parentPath = parentSlug ? `${parentSlug}/` : '';
+  return `${parentPath}${transformToUrl(slug)}`
 }
 
 function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
@@ -48,6 +49,8 @@ function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 			return { ...state, replacement: action.payload };
 		case 'SET_UIDPATH':
 			return { ...state, uidPath: action.payload };
+		case 'SET_SLUG':
+			return { ...state, slug: action.payload };
 		case 'SET_CANONICALPATH':
 			return { ...state, canonicalPath: action.payload };
 		case 'SET_OVERRIDEPATH':
@@ -86,7 +89,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	const [prohibitedRouteIds, setProhibitedRouteIds] = useState<string[]>([]);
 	const [selectedParent, setSelectedParent] = useState<Route | null>(null);
 	const [isOverride, setIsOverride] = useState(false);
-	const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial');
+	const [validationState, setValidationState] = useState<ValidationState>('initial');
 	const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 	const [path, dispatchPath] = useReducer(reducer, {
 		needsUrlCheck: false,
@@ -95,37 +98,58 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		replacement: null,
 		uidPath: '',
 		canonicalPath: '',
+    slug: '',
 		overridePath: '',
 	});
   const hasUserChangedField = useRef(false);
+  const hasUserInteracted = useRef(false);
 	const initialPath = useRef('')
 	const prevSourceValueRef = useRef<string | null>(null);
-	const sourceFieldValue = useMemo(() => {
-		const key = config?.default;
-		if (!key) return '';
+  const sourceFieldValue = values[config?.default] || '';
+  const initialSourceFieldValue = initialValues[config?.default] || '';
 
-		const currentValue = values[key];
-		if (!currentValue) return '';
+  const latestCheckPathRef = useRef<typeof checkPath>(checkPath);
+  latestCheckPathRef.current = checkPath;
+  const debouncedCheckPath = useRef(debounce((p: string, id: string | null) => latestCheckPathRef.current(p, id), 250)).current;
 
-		return currentValue
-	}, [values, config]);
+  const latestCheckCanonicalRef = useRef<typeof checkCanonicalPath>(checkCanonicalPath);
+  latestCheckCanonicalRef.current = checkCanonicalPath;
+  const debouncedCheckCanonicalPath = useRef(debounce((p: string, id: string | null) => latestCheckCanonicalRef.current(p, id), 250)).current;
 
-	const debouncedCheckPath = useCallback(debounce(checkPath, 250), []);
-	const debouncedCheckCanonicalPath = useCallback(debounce(checkCanonicalPath, 250), []);
+  useEffect(() => {
+		async function fetchAllRoutes() {
+			const allRoutes = await getAllRoutes();
+			setRoutes(allRoutes);
+		}
+		fetchAllRoutes();
+	}, [])
 
+  // Update override and parent entry fields when they changes
+  // Only update path field when override mode is enabled
 	useEffect(() => {
-    if (isOverride) onChange('webatlas_path', path.overridePath);
-		onChange('webatlas_override', isOverride);
-		onChange('webatlas_parent', selectedParent?.documentId || null);
-	}, [path.value, path.overridePath, isOverride, selectedParent])
+    const slug = transformToUrl(sourceFieldValue)
+    const overridePath = transformToUrl(path.overridePath || '', false)
+    const data = {
+      path: isOverride ? overridePath : path.value,
+      isOverride,
+      parentDocumentId: selectedParent?.documentId || null,
+      slug: isOverride ? overridePath : slug,
+    }
+    if (hasUserChangedField.current || hasUserInteracted.current) {
+      onChange('webatlas', data)
+    }
+	}, [path.value, path.overridePath, isOverride, selectedParent, sourceFieldValue, hasUserChangedField, hasUserInteracted])
 
-	const debouncedValueEffect = useMemo(() => debounce((currentValues: any) => {
-		const key = config?.default;
-		if (!key) return;
+  // Track when user changes the source field
+  useEffect(() => {
+    if (!initialLoadComplete) return;
 
-		const currentValue = currentValues[key];
+    // Mark as user-changed if current value differs from initial value
+    if (sourceFieldValue !== initialSourceFieldValue) {
+      hasUserChangedField.current = true;
+    }
 
-		if (!currentValue) {
+    if (!sourceFieldValue) {
 			dispatchPath({ type: 'NO_URL_CHECK', payload: '' });
 			return;
 		}
@@ -134,53 +158,43 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		// 1. Initial load is complete
 		// 2. User has manually changed the field OR no route exists
 		// 3. Not in override mode
-		if (initialLoadComplete &&
-				(hasUserChangedField.current || !route) &&
-				prevSourceValueRef.current !== currentValue &&
-				!isOverride) {
+		if (
+      initialLoadComplete
+      && (hasUserChangedField.current || !route)
+      && prevSourceValueRef.current !== sourceFieldValue
+      && !isOverride
+    ) {
+      const newPath = buildPath('path', sourceFieldValue, selectedParent);
+      const type = sourceFieldValue === initialSourceFieldValue ? 'NO_URL_CHECK' : 'DEFAULT';
+      const slug = transformToUrl(sourceFieldValue)
 
-			const path = getCanonicalPath(selectedParent, currentValue);
-			if (currentValue === initialValues[key]) {
-				dispatchPath({ type: 'NO_URL_CHECK', payload: path });
-			} else {
-				dispatchPath({ type: 'DEFAULT', payload: path });
-			}
-			prevSourceValueRef.current = currentValue;
+      dispatchPath({ type, payload: newPath });
+      dispatchPath({ type: 'SET_SLUG', payload: slug });
+      dispatchPath({ type: 'SET_OVERRIDEPATH', payload: slug });
+      prevSourceValueRef.current = sourceFieldValue;
 		}
-	}, 500), [config?.default, initialValues, isOverride, initialLoadComplete, route, selectedParent]);
 
-  // Track when user changes the source field
+    const canonicalPath = buildPath('canonical', sourceFieldValue, selectedParent);
+    dispatchPath({ type: 'SET_CANONICALPATH', payload: canonicalPath });
+    debouncedCheckCanonicalPath(canonicalPath, route?.documentId || null)
+  }, [sourceFieldValue, initialSourceFieldValue, initialLoadComplete, selectedParent, isOverride, route]);
+
+  // Initiate path check
   useEffect(() => {
-		const key = config?.default;
-    if (!key) return;
-
-		const currentValue = values[key];
-    const initialValue = initialValues[key];
-
-    if (currentValue !== initialValue && currentValue && !isOverride) {
-			onChange('webatlas_path', transformToUrl(currentValue));
-		}
-
     if (!initialLoadComplete) return;
-
-    // Mark as user-changed if current value differs from initial value
-    if (currentValue !== initialValue) {
-      hasUserChangedField.current = true;
-    }
-
-		debouncedValueEffect(values);
-  }, [values, debouncedValueEffect, initialLoadComplete, selectedParent]);
-
-  useEffect(() => {
 		if (path.needsUrlCheck && path.value) {
 			if (path.uidPath === path.value || initialPath.current === path.value) return
 			debouncedCheckPath(path.value, route?.documentId || null);
 			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
+    } else {
+      setValidationState('idle');
+      dispatchPath({ type: 'SET_REPLACEMENT', payload: null });
     }
-  }, [path.needsUrlCheck, path.value, path.uidPath, route]);
+  }, [path.needsUrlCheck, path.value, path.uidPath, route, initialLoadComplete]);
 
+  // Fetch related route on initial load
 	useEffect(() => {
-		async function getTypes() {
+		async function fetchRelatedRute() {
 			if (!initialValues.documentId) {
         setInitialLoadComplete(true); // Mark as complete even if no route
         return;
@@ -188,21 +202,18 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 
 			try {
 				const route = await getRelatedRoute(initialValues.documentId)
-
 				if (!route) return
 
-				initialPath.current = initialValues.webatlas_path || route.uidPath
+        initialPath.current = initialValues.webatlas_path || route.uidPath
 
         setRoute(route)
 				setIsOverride(route.isOverride || false)
 
-        if (route.isOverride) {
-          dispatchPath({ type: 'SET_OVERRIDEPATH', payload: route.path || '' });
-        } else {
-          dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: route.path || '' });
-        }
-
+        dispatchPath({ type: 'SET_OVERRIDEPATH', payload: route.path || '' });
+        dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: route.path || '' });
 				dispatchPath({ type: 'SET_UIDPATH', payload: route.uidPath || '' });
+				dispatchPath({ type: 'SET_SLUG', payload: route.slug || '' });
+        dispatchPath({ type: 'SET_CANONICALPATH', payload: route.canonicalPath || '' });
 
 				// Set the prevSourceValueRef to prevent immediate override
 				const key = config?.default;
@@ -215,30 +226,15 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 			}
 			setInitialLoadComplete(true); // Mark initial load as complete
 		}
-		getTypes()
+		fetchRelatedRute()
 	}, [config])
 
-	useEffect(() => {
-		if (initialValues.webatlas_parent && routes.length > 0 && !selectedParent) {
-			const parentRoute = routes.find(route => route.documentId === initialValues.webatlas_parent);
-			if (parentRoute) {
-				setSelectedParent(parentRoute);
-				const canonicalPath = getCanonicalPath(parentRoute, sourceFieldValue);
-				dispatchPath({ type: 'DEFAULT', payload: canonicalPath });
-			}
-		}
-	}, [initialValues, routes])
-
-	useEffect(() => {
-		if (initialValues.webatlas_path) dispatchPath({ type: 'NO_URL_CHECK', payload: initialValues.webatlas_path });
-		if (initialValues.webatlas_override) setIsOverride(initialValues.webatlas_override);
-
-		async function fetchAllRoutes() {
-			const allRoutes = await getAllRoutes();
-			setRoutes(allRoutes);
-		}
-		fetchAllRoutes();
-	}, [])
+  // set selected parent based on initial value
+  useEffect(() => {
+    if (!route || !routes.length) return;
+    const parentRoute = routes.find(singleRoute => singleRoute.documentId === route.parent?.documentId);
+    setSelectedParent(parentRoute || null);
+  }, [route, routes])
 
 	useEffect(() => {
 		async function fetchProhibitedRouteIds() {
@@ -248,22 +244,21 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		fetchProhibitedRouteIds();
 	}, [route])
 
+  // Update path when parent changes
 	useEffect(() => {
 		if (!sourceFieldValue) return;
 
-		const canonicalPath = getCanonicalPath(selectedParent, sourceFieldValue);
-		!isOverride && dispatchPath({ type: 'DEFAULT', payload: canonicalPath });
-		dispatchPath({ type: 'SET_CANONICALPATH', payload: canonicalPath });
-
-		debouncedCheckCanonicalPath(canonicalPath, route?.documentId || null)
-		dispatchPath({ type: 'RESET_URL_CHECK_FLAG' });
+		if (!isOverride) {
+      const newPath = buildPath('path', sourceFieldValue, selectedParent);
+      dispatchPath({ type: 'DEFAULT', payload: newPath });
+    }
 	}, [selectedParent, sourceFieldValue, route, isOverride]);
 
-	async function checkCanonicalPath(path: string, documentId: string | null) {
+	async function checkCanonicalPath(path: string, routeDocumentId: string | null) {
 		if (!path) return
 
 		try {
-			const result = await duplicateCheck({fetchFunction: get, path, routeDocumentId: documentId, withoutTransform: true});
+			const result = await duplicateCheck({fetchFunction: get, path, routeDocumentId, withoutTransform: true});
 
 			dispatchPath({ type: 'SET_CANONICALPATH', payload: result });
 		} catch (err) {
@@ -271,13 +266,13 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		}
 	}
 
-	async function checkPath(path: string, route: string | null) {
+	async function checkPath(path: string, routeDocumentId: string | null) {
 		if (!path) return
 		setValidationState('checking')
 		dispatchPath({ type: 'SET_REPLACEMENT', payload: '' });
 
 		try {
-			const data = await duplicateCheck({fetchFunction: get, path, routeDocumentId: route, withoutTransform: true});
+			const data = await duplicateCheck({fetchFunction: get, path, routeDocumentId, withoutTransform: true});
 
 			if (!data || data === path) return
 
@@ -318,7 +313,10 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 					canonicalPath={path.canonicalPath}
 					routes={routes}
 					selectedParent={selectedParent}
-					setSelectedParent={setSelectedParent}
+					setSelectedParent={(val) => {
+						hasUserInteracted.current = true;
+						setSelectedParent(val);
+					}}
 					prohibitedRouteIds={prohibitedRouteIds}
 				/>
 				<Divider marginTop={2} marginBottom={2} />
@@ -336,7 +334,10 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 				</Box>
 				<OverrideCheckbox
 					isOverride={isOverride}
-					setIsOverride={setIsOverride}
+					setIsOverride={(val) => {
+						hasUserInteracted.current = true;
+						setIsOverride(val);
+					}}
 					disabledCondition={!canCreate && !canUpdate}
 				/>
 				{path.uidPath && <>
