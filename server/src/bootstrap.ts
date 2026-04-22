@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/strapi';
 import { ContentType } from "../../types";
 import runMigrations from './migrations';
-import { syncConfig, registerPermissions, documentMiddleware, webatlasMiddleware } from './bootstrap/index';
+import { syncConfig, registerPermissions, documentMiddleware, webatlasMiddleware, contentTypeMiddleware } from './bootstrap/index';
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   try {
@@ -19,6 +19,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
     documentMiddleware(strapi, enabledContentTypes, config);
     webatlasMiddleware(strapi);
+    contentTypeMiddleware(strapi);
   } catch (error) {
     strapi.log.error(`Bootstrap failed. ${String(error)}`);
   }
