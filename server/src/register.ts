@@ -18,21 +18,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       default: null,
     }
 
-    set(attributes, 'webatlas_path', {
-      ...fieldSettings,
-      type: 'string',
-      private: false,
-    });
-    set(attributes, 'webatlas_override', {
-      ...fieldSettings,
-      type: 'boolean',
-      private: true,
-    });
-    set(attributes, 'webatlas_parent', {
-      ...fieldSettings,
-      type: 'string',
-      private: true,
-    });
     set(attributes, 'webatlas', {
       ...fieldSettings,
       type: 'json',
