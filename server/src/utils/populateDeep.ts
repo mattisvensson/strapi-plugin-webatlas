@@ -4,10 +4,10 @@ import { isEmpty, merge } from 'lodash/fp';
 /*
 * Base code from original strapi-plugin-populate-deep Strapi v4 plugin:*
 * https://github.com/Barelydead/strapi-plugin-populate-deep
-* 
+*
 * Some modifications were made to work with Strapi v5:
 * https://github.com/NEDDL/strapi-v5-plugin-populate-deep
-* 
+*
 * The Strapi v5 version has been used as a base and further modified to
 * fit the specific needs of this project, mainly typescript types.
 */
@@ -35,8 +35,12 @@ export default function getFullPopulateObject(modelUid: UID.Schema, maxDepth = 5
 
   const populate: Record<string, boolean | Record<string, any>> = {};
   const model = strapi.getModel(modelUid);
-  
   const newIgnore = [...ignore, modelUid];
+
+  if (model.options?.populateCreatorFields) {
+    populate.createdBy = true;
+    populate.updatedBy = true;
+  }
 
   for (const [key, value] of Object.entries(getModelPopulationAttributes(model))) {
     if (ignore?.includes(key)) continue;
@@ -71,5 +75,6 @@ export default function getFullPopulateObject(modelUid: UID.Schema, maxDepth = 5
       }
     }
   }
+
   return isEmpty(populate) ? true : { populate };
 }
