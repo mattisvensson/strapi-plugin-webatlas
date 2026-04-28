@@ -1,1 +1,5 @@
-export default {};
+import sanitizeWebatlas from './sanitizeWebatlasFields';
+
+export default {
+  sanitizeWebatlas,
+};
