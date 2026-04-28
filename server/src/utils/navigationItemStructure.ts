@@ -156,25 +156,28 @@ export async function handleItemUpdate({
         ? await buildNavigationPath({ slug, routeDocumentId: route.documentId, calculatedParent })
         : slug;
 
+      const isOverride = path !== route.canonicalPath
+
       if (needsRouteUpdate) {
         await updateRoute(route.documentId, {
           title: item.clientModifications?.title || item.route.title,
           slug,
           path,
-          isOverride: path !== route.canonicalPath,
+          isOverride,
         });
       }
 
       if (isInternal) {
-        // For some reason, strapi.documents().update() doesn't allow updating only partial data.
-        // It throws an error if required fields are missing in the update payload, even if they are not being changed.
-        // As a workaround, we can use the entityService API which allows partial updates without requiring all fields.
-        // TODO: Since the API is marked as deprecated, consider migrating to the new recommended approach in future Strapi versions.
-        await strapi.entityService.update(item.route.relatedContentType as UID.ContentType, item.route.relatedDocumentId, {
-          data: {
-            webatlas_path: path,
-            webatlas_override: path !== route.canonicalPath,
-          },
+        const webatlasObj = {
+          path,
+          isOverride,
+          parentDocumentId: calculatedParent,
+          slug,
+        }
+
+        await strapi.db.query(item.route.relatedContentType as UID.ContentType).updateMany({
+          where: { documentId: item.route.relatedDocumentId },
+          data: { webatlas: webatlasObj },
         });
       }
     } catch (err) {
