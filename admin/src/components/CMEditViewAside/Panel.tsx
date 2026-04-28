@@ -204,7 +204,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 				const route = await getRelatedRoute(initialValues.documentId)
 				if (!route) return
 
-        initialPath.current = initialValues.webatlas_path || route.uidPath
+        initialPath.current = initialValues.webatlas.path || route.uidPath
 
         setRoute(route)
 				setIsOverride(route.isOverride || false)

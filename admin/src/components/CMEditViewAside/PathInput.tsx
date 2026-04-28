@@ -61,7 +61,7 @@ function PathInput({ path, dispatchPath, isOverride, config }: PathInputProps) {
         value={displayedPath}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'SET_OVERRIDEPATH', payload: e.target.value })}
         disabled={!isOverride}
-        onBlur={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'SET_OVERRIDEPATH', payload: transformToUrl(e.target.value) })}
+        onBlur={(e: React.ChangeEvent<HTMLInputElement>) => dispatchPath({ type: 'SET_OVERRIDEPATH', payload: transformToUrl(e.target.value, false) })}
 
         style={{ outline: inputBorder }}
       />

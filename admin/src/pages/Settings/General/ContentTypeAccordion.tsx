@@ -63,6 +63,8 @@ export default function ContentTypeAccordion({
                     key === 'updatedAt' ||
                     key === 'createdBy' ||
                     key === 'updatedBy' ||
+                    key === 'webatlas' ||
+                    // The following fields are not longer used in the new implementation, but we keep them hidden just in case
                     key === 'webatlas_path' ||
                     key === 'webatlas_override' ||
                     key === 'webatlas_parent'
