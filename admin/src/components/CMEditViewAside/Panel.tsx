@@ -246,12 +246,10 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 
   // Update path when parent changes
 	useEffect(() => {
-		if (!sourceFieldValue) return;
+		if (!sourceFieldValue || isOverride || (!hasUserChangedField.current && !hasUserInteracted.current)) return;
 
-		if (!isOverride) {
-      const newPath = buildPath('path', sourceFieldValue, selectedParent);
-      dispatchPath({ type: 'DEFAULT', payload: newPath });
-    }
+    const newPath = buildPath('path', sourceFieldValue, selectedParent);
+    dispatchPath({ type: 'DEFAULT', payload: newPath });
 	}, [selectedParent, sourceFieldValue, route, isOverride]);
 
 	async function checkCanonicalPath(path: string, routeDocumentId: string | null) {
