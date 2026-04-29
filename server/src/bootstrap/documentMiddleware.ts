@@ -31,7 +31,6 @@ export function documentMiddleware(strapi: Core.Strapi, enabledContentTypes: Con
       return next();
     }
 
-
     const ctSettings = config.selectedContentTypes.find((ct) => ct.uid === context.uid)
 
     if (context.action === 'create') {
@@ -91,7 +90,15 @@ export function documentMiddleware(strapi: Core.Strapi, enabledContentTypes: Con
 
       await strapi.db?.query(context.uid as UID.ContentType).updateMany({
         where: { documentId: result.documentId },
-        data: { webatlas: { ...webatlas, slug: transformedSlug, path: validatedPath, parentDocumentId: isValid ? parent?.documentId : null } } as any,
+        data: {
+          webatlas: {
+            ...webatlas,
+            slug: transformedSlug,
+            path: validatedPath,
+            parentDocumentId: isValid ? parent?.documentId : "null",
+            isOverride: isOverride || false,
+          }
+        },
       })
 
       return result
