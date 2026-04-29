@@ -1,37 +1,36 @@
-import { NestedNavItem } from "../../../types";
-import { PLUGIN_ID } from "../../../utils";
+import { NestedNavItem } from '../../../types'
+import { PLUGIN_ID } from '../../../utils'
 
 export default function extractRouteAndItems(items: NestedNavItem[]) {
-  return items.map((item) => {
+	return items.map((item) => {
+		const route = { ...item.route }
 
-    const route = { ...item.route }
+		if (!route) return null
 
-    if (!route) return null
+		let depth = null
+		if (item.depth !== undefined) {
+			depth = item.depth
+		}
 
-    let depth = null
-    if (item.depth !== undefined) {
-      depth = item.depth;
-    }
+		let children = null
+		if (item.items?.length > 0) {
+			const items = extractRouteAndItems(item.items)
+			if (items.length > 0) children = items
+		}
 
-    let children = null
-    if (item.items?.length > 0) {
-      const items = extractRouteAndItems(item.items);
-      if (items.length > 0) children = items;
-    }
+		delete route.relatedContentType
+		delete route.relatedDocumentId
+		delete route.relatedId
+		delete route.createdAt
+		delete route.updatedAt
+		delete route.isOverride
 
-    delete route.relatedContentType
-    delete route.relatedDocumentId
-    delete route.relatedId
-    delete route.createdAt
-    delete route.updatedAt
-    delete route.isOverride
-
-    return {
-      __component: route.type === 'wrapper' ? `${PLUGIN_ID}.wrapper` : `${PLUGIN_ID}.route`,
-      type: route.type,
-      ...route,
-      depth: depth !== null ? depth : undefined,
-      items: children !== null ? children : undefined,
-    };
-  });
+		return {
+			__component: route.type === 'wrapper' ? `${PLUGIN_ID}.wrapper` : `${PLUGIN_ID}.route`,
+			type: route.type,
+			...route,
+			depth: depth !== null ? depth : undefined,
+			items: children !== null ? children : undefined,
+		}
+	})
 }

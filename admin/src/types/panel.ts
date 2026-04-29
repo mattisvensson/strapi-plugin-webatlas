@@ -1,33 +1,33 @@
-import { Route } from "../../../types";
+import { Route } from '../../../types'
 
 export type PanelAction =
-  | { type: 'DEFAULT'; payload: string }
-  | { type: 'NO_URL_CHECK'; payload: string }
-  | { type: 'NO_TRANSFORM_AND_CHECK'; payload: string }
-  | { type: 'RESET_URL_CHECK_FLAG'; }
-  | { type: 'SET_REPLACEMENT'; payload: string | null }
-  | { type: 'SET_UIDPATH'; payload: string }
-  | { type: 'SET_SLUG'; payload: string }
-  | { type: 'SET_CANONICALPATH'; payload: string }
-  | { type: 'SET_OVERRIDEPATH'; payload: string }
+	| { type: 'DEFAULT'; payload: string }
+	| { type: 'NO_URL_CHECK'; payload: string }
+	| { type: 'NO_TRANSFORM_AND_CHECK'; payload: string }
+	| { type: 'RESET_URL_CHECK_FLAG' }
+	| { type: 'SET_REPLACEMENT'; payload: string | null }
+	| { type: 'SET_UIDPATH'; payload: string }
+	| { type: 'SET_SLUG'; payload: string }
+	| { type: 'SET_CANONICALPATH'; payload: string }
+	| { type: 'SET_OVERRIDEPATH'; payload: string }
 
 export type PanelPathState = {
-  value?: string;
-  prevValue?: string,
-  uidPath?: string,
-  needsUrlCheck: boolean;
-  replacement: string | null;
-  canonicalPath?: string;
-  slug?: string;
-  overridePath?: string;
-};
-
-export type RouteStructureProps = {
-  canonicalPath?: string;
-  routes: Route[];
-  selectedParent: Route | null;
-  setSelectedParent: (value: Route | null) => void;
-  prohibitedRouteIds?: string[];
+	value?: string
+	prevValue?: string
+	uidPath?: string
+	needsUrlCheck: boolean
+	replacement: string | null
+	canonicalPath?: string
+	slug?: string
+	overridePath?: string
 }
 
-export type ValidationState = 'initial' | 'checking' | 'done' | 'idle';
+export type RouteStructureProps = {
+	canonicalPath?: string
+	routes: Route[]
+	selectedParent: Route | null
+	setSelectedParent: (value: Route | null) => void
+	prohibitedRouteIds?: string[]
+}
+
+export type ValidationState = 'initial' | 'checking' | 'done' | 'idle'

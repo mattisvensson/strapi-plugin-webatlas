@@ -1,7 +1,6 @@
-
-import * as RadixTooltip from '@radix-ui/react-tooltip';
-import { Information } from '@strapi/icons';
-import { Box, Typography } from '@strapi/design-system';
+import * as RadixTooltip from '@radix-ui/react-tooltip'
+import { Information } from '@strapi/icons'
+import { Box, Typography } from '@strapi/design-system'
 
 // Since there occurs an error with the Strapi design system Tooltip component,
 // we use the Radix Tooltip component directly here.
@@ -24,9 +23,7 @@ export default function Tooltip({ description }: { description: string }) {
 							shadow="filterShadow"
 							maxWidth="300px"
 						>
-							<Typography textColor="neutral0">
-								{description}
-							</Typography>
+							<Typography textColor="neutral0">{description}</Typography>
 						</Box>
 					</RadixTooltip.Content>
 				</RadixTooltip.Portal>
@@ -34,4 +31,3 @@ export default function Tooltip({ description }: { description: string }) {
 		</RadixTooltip.Provider>
 	)
 }
-

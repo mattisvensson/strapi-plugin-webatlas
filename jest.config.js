@@ -1,8 +1,4 @@
 module.exports = {
-  testEnvironment: "node",
-  testPathIgnorePatterns: [
-    "/node_modules/",
-    ".tmp",
-    ".cache"
-  ]
-};
+	testEnvironment: 'node',
+	testPathIgnorePatterns: ['/node_modules/', '.tmp', '.cache'],
+}

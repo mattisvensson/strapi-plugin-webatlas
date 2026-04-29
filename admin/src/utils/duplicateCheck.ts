@@ -1,4 +1,4 @@
-import { transformToUrl, PLUGIN_ID} from "../../../utils";
+import { transformToUrl, PLUGIN_ID } from '../../../utils'
 
 /**
  * Checks if a URL is unique by making a GET request to the checkUniquePath endpoint.
@@ -11,28 +11,30 @@ import { transformToUrl, PLUGIN_ID} from "../../../utils";
  */
 
 export default async function duplicateCheck({
-  fetchFunction,
-  path,
-  routeDocumentId,
-  withoutTransform = false,
+	fetchFunction,
+	path,
+	routeDocumentId,
+	withoutTransform = false,
 }: {
-  fetchFunction: (path: string) => Promise<any>;
-  path: string;
-  routeDocumentId?: string | null;
-  withoutTransform?: boolean;
+	fetchFunction: (path: string) => Promise<any>
+	path: string
+	routeDocumentId?: string | null
+	withoutTransform?: boolean
 }): Promise<string> {
-  if (!path) throw new Error("URL is required");
-  
-  try {
-    const pathToCheck = withoutTransform ? path : transformToUrl(path);
-    const { data } = await fetchFunction(`/${PLUGIN_ID}/checkUniquePath?path=${pathToCheck}${routeDocumentId ? `&targetRouteDocumentId=${routeDocumentId}` : ''}`);
+	if (!path) throw new Error('URL is required')
 
-    if (!data.uniquePath) {
-      throw new Error("Network response was not ok");
-    }
+	try {
+		const pathToCheck = withoutTransform ? path : transformToUrl(path)
+		const { data } = await fetchFunction(
+			`/${PLUGIN_ID}/checkUniquePath?path=${pathToCheck}${routeDocumentId ? `&targetRouteDocumentId=${routeDocumentId}` : ''}`,
+		)
 
-    return data.uniquePath;
-  } catch (err: any) {
-    throw new Error("Failed to check URL uniqueness: " + err.message);
-  }
+		if (!data.uniquePath) {
+			throw new Error('Network response was not ok')
+		}
+
+		return data.uniquePath
+	} catch (err: any) {
+		throw new Error('Failed to check URL uniqueness: ' + err.message)
+	}
 }

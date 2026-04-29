@@ -1,77 +1,88 @@
-import { useState, useContext } from 'react';
-import { Grid, Box, Field } from '@strapi/design-system';
-import { useNotification } from '@strapi/strapi/admin';
-import NavModal from './NavModal';
-import { ModalContext } from '../../contexts';
-import { useIntl } from 'react-intl';
-import { getTranslation } from '../../utils';
-import { useNavigate  } from 'react-router-dom';
-import { PLUGIN_ID } from '../../../../utils';
-import { useApi } from '../../hooks';
+import { useState, useContext } from 'react'
+import { Grid, Box, Field } from '@strapi/design-system'
+import { useNotification } from '@strapi/strapi/admin'
+import NavModal from './NavModal'
+import { ModalContext } from '../../contexts'
+import { useIntl } from 'react-intl'
+import { getTranslation } from '../../utils'
+import { useNavigate } from 'react-router-dom'
+import { PLUGIN_ID } from '../../../../utils'
+import { useApi } from '../../hooks'
 
 export default function NavCreate() {
-  const { setModalType } = useContext(ModalContext);
-  const [name, setName] = useState('');
-  const [visible, setVisible] = useState(true) // Temporary not used
-  const [loading, setLoading] = useState(false)
-  const { formatMessage } = useIntl();
-  const { toggleNotification } = useNotification();
-  const navigate = useNavigate();
-  const {  createNavigation } = useApi();
+	const { setModalType } = useContext(ModalContext)
+	const [name, setName] = useState('')
+	const [visible, setVisible] = useState(true) // Temporary not used
+	const [loading, setLoading] = useState(false)
+	const { formatMessage } = useIntl()
+	const { toggleNotification } = useNotification()
+	const navigate = useNavigate()
+	const { createNavigation } = useApi()
 
-  const onConfirm = async () => {
-    setLoading(true);
-    try {
-      const data = await createNavigation({ name, visible });
+	const onConfirm = async () => {
+		setLoading(true)
+		try {
+			const data = await createNavigation({ name, visible })
 
-      if (!data.documentId) throw new Error('No documentId returned');
+			if (!data.documentId) throw new Error('No documentId returned')
 
-      navigate(`/plugins/${PLUGIN_ID}/navigation/${data.documentId}`);
-      setModalType('');
+			navigate(`/plugins/${PLUGIN_ID}/navigation/${data.documentId}`)
+			setModalType('')
+		} catch (err) {
+			strapi.log.error(err)
+			toggleNotification({
+				type: 'danger',
+				message: formatMessage({
+					id: getTranslation('notification.navigation.creationFailed'),
+					defaultMessage: 'Creation of navigation failed',
+				}),
+			})
+		} finally {
+			setLoading(false)
+		}
+	}
 
-    } catch (err) {
-      strapi.log.error(err);
-      toggleNotification({
-        type: 'danger',
-        message: formatMessage({
-          id: getTranslation('notification.navigation.creationFailed'),
-          defaultMessage: 'Creation of navigation failed',
-        }),
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <NavModal
-      confirmText={formatMessage({ id: getTranslation('modal.navCreate.confirmText'), defaultMessage: 'Create' })}
-      closeText={formatMessage({ id: getTranslation('modal.navCreate.closeText'), defaultMessage: 'Cancel' })}
-      titleText={formatMessage({ id: getTranslation('modal.navCreate.titleText'), defaultMessage: 'Create new navigation' })}
-      loadingText={formatMessage({ id: getTranslation('modal.navCreate.loadingText'), defaultMessage: 'Creating' })}
-      onConfirm={onConfirm}
-      loading={loading}
-      disabled={name.trim() === ''}
-    >
-      <Grid.Root gap={4}>
-        <Grid.Item col={12} s={12}>
-          <Box width="100%">
-            <Field.Root>
-              <Field.Label>
-                {formatMessage({
-                  id: getTranslation('modal.nameField.label'),
-                  defaultMessage: 'Name'
-                })}
-              </Field.Label>
-              <Field.Input
-                type="text"
-                value={name}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-              />
-            </Field.Root>
-          </Box>
-        </Grid.Item>
-        {/* <Grid.Item col={6} s={12}>
+	return (
+		<NavModal
+			confirmText={formatMessage({
+				id: getTranslation('modal.navCreate.confirmText'),
+				defaultMessage: 'Create',
+			})}
+			closeText={formatMessage({
+				id: getTranslation('modal.navCreate.closeText'),
+				defaultMessage: 'Cancel',
+			})}
+			titleText={formatMessage({
+				id: getTranslation('modal.navCreate.titleText'),
+				defaultMessage: 'Create new navigation',
+			})}
+			loadingText={formatMessage({
+				id: getTranslation('modal.navCreate.loadingText'),
+				defaultMessage: 'Creating',
+			})}
+			onConfirm={onConfirm}
+			loading={loading}
+			disabled={name.trim() === ''}
+		>
+			<Grid.Root gap={4}>
+				<Grid.Item col={12} s={12}>
+					<Box width="100%">
+						<Field.Root>
+							<Field.Label>
+								{formatMessage({
+									id: getTranslation('modal.nameField.label'),
+									defaultMessage: 'Name',
+								})}
+							</Field.Label>
+							<Field.Input
+								type="text"
+								value={name}
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+							/>
+						</Field.Root>
+					</Box>
+				</Grid.Item>
+				{/* <Grid.Item col={6} s={12}>
           <Box width="100%">
             <Field.Root>
               <Field.Label>
@@ -95,7 +106,7 @@ export default function NavCreate() {
             </Field.Root>
           </Box>
         </Grid.Item> */}
-      </Grid.Root>
-    </NavModal>
-  );
+			</Grid.Root>
+		</NavModal>
+	)
 }

@@ -11,6 +11,7 @@ The migration system automatically runs database migrations when the plugin boot
 1. **Migration Files**: Each migration is a TypeScript file in this directory following the naming pattern `XXX-description.ts` where `XXX` is a 3-digit version number.
 
 2. **Migration Structure**: Each migration exports a default object with:
+
    - `version`: A string version identifier (e.g., '001')
    - `description`: A human-readable description of what the migration does
    - `up`: An async function that performs the migration
@@ -22,7 +23,9 @@ The migration system automatically runs database migrations when the plugin boot
 ## Existing Migrations
 
 ### 001-canonical-path.ts
+
 Migrates existing route titles to canonical paths using the `transformToUrl` utility. This migration:
+
 - Finds all routes with titles but missing canonical paths
 - Transforms the title using `transformToUrl()`
 - Builds proper canonical paths considering parent-child relationships

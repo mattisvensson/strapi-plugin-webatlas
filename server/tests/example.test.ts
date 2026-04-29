@@ -1,26 +1,24 @@
-const request = require('supertest');
-const { setupStrapi, stopStrapi } = require('../../playground/tests/helpers');
+const request = require('supertest')
+const { setupStrapi, stopStrapi } = require('../../playground/tests/helpers')
 
-let strapi;
+let strapi
 
 beforeAll(async () => {
-  strapi = await setupStrapi();
-});
+	strapi = await setupStrapi()
+})
 
 afterAll(async () => {
-  await stopStrapi();
-});
+	await stopStrapi()
+})
 
 it('should return a successful response from the example endpoint', async () => {
-  const response = await request(strapi.server.httpServer)
-    .get('/api/boilerplate')
-    .expect(200);
+	const response = await request(strapi.server.httpServer).get('/api/boilerplate').expect(200)
 
-  expect(response.text).toBe('Welcome to Strapi 🚀');
-});
+	expect(response.text).toBe('Welcome to Strapi 🚀')
+})
 
 it('should return the correct message from the example service', async () => {
-  const welcomeMessage = strapi.service('plugin::boilerplate.service').getWelcomeMessage();
+	const welcomeMessage = strapi.service('plugin::boilerplate.service').getWelcomeMessage()
 
-  expect(welcomeMessage).toBe('Welcome to Strapi 🚀');
-});
+	expect(welcomeMessage).toBe('Welcome to Strapi 🚀')
+})
