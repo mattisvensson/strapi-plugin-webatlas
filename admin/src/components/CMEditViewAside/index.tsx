@@ -10,7 +10,7 @@ import { useIntl } from 'react-intl';
 import pluginPermissions from '../../permissions';
 import { PLUGIN_NAME } from '../../../../utils';
 
-const CMEditViewAside: PanelComponent = ({ documentId, model }: PanelComponentProps) => {
+const CMEditViewAside: PanelComponent = ({ documentId, model, activeTab }: PanelComponentProps) => {
   const { contentTypes } = useAllContentTypes()
   const { config } = usePluginConfig()
   const { formatMessage } = useIntl();
@@ -72,7 +72,7 @@ const CMEditViewAside: PanelComponent = ({ documentId, model }: PanelComponentPr
     }, 100);
 
     return () => clearTimeout(timeoutId);
-  }, [documentId, model]);
+  }, [documentId, model, activeTab]);
 
 
   useEffect(() => {
