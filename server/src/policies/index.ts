@@ -1,5 +1,5 @@
-import hasPermissions from './has-permissions';
+import hasPermissions from './has-permissions'
 
 export default {
-  'has-permissions': hasPermissions,
-};
+	'has-permissions': hasPermissions,
+}

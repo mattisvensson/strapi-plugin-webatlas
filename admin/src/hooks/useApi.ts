@@ -1,150 +1,172 @@
-import { ContentType, Route, GroupedEntities, RouteSettings, ConfigContentType, StructuredNavigationVariant, NavigationInput, NestedNavItem } from '../../../types';
-import { useFetchClient } from '@strapi/strapi/admin';
-import { PLUGIN_ID } from '../../../utils';
+import {
+	ContentType,
+	Route,
+	GroupedEntities,
+	RouteSettings,
+	ConfigContentType,
+	StructuredNavigationVariant,
+	NavigationInput,
+	NestedNavItem,
+} from '../../../types'
+import { useFetchClient } from '@strapi/strapi/admin'
+import { PLUGIN_ID } from '../../../utils'
 
 export default function useApi() {
-  const { get, put, del, post } = useFetchClient();
+	const { get, put, del, post } = useFetchClient()
 
-  const fetchAllContentTypes = async () => {
-    try {
-      const { data } = await get('/content-manager/content-types');
-      return data.data;
-    } catch (error) {
-      strapi.log.error('Cannot fetch all content types:', error);
-      return [];
-    }
-  }
+	const fetchAllContentTypes = async () => {
+		try {
+			const { data } = await get('/content-manager/content-types')
+			return data.data
+		} catch (error) {
+			strapi.log.error('Cannot fetch all content types:', error)
+			return []
+		}
+	}
 
-  const fetchConfiguredContentTypes = async () => {
-    try {
-      const { data: config } = await get(`/${PLUGIN_ID}/config`);
-      const configuredTypes = config?.selectedContentTypes || [];
+	const fetchConfiguredContentTypes = async () => {
+		try {
+			const { data: config } = await get(`/${PLUGIN_ID}/config`)
+			const configuredTypes = config?.selectedContentTypes || []
 
-      if (configuredTypes.length === 0) {
-        return [];
-      }
+			if (configuredTypes.length === 0) {
+				return []
+			}
 
-      const allContentTypes = await fetchAllContentTypes();
-      const configuredUIDs = new Set(configuredTypes.map((ct: ConfigContentType) => ct.uid));
+			const allContentTypes = await fetchAllContentTypes()
+			const configuredUIDs = new Set(configuredTypes.map((ct: ConfigContentType) => ct.uid))
 
-      return allContentTypes.filter((ct: ContentType) => configuredUIDs.has(ct.uid));
-    } catch (err) {
-      strapi.log.error('Error fetching configured content types:', err);
-      return [];
-    }
-  }
+			return allContentTypes.filter((ct: ContentType) => configuredUIDs.has(ct.uid))
+		} catch (err) {
+			strapi.log.error('Error fetching configured content types:', err)
+			return []
+		}
+	}
 
-  const fetchAllEntities = async (): Promise<GroupedEntities[]> => {
-    try {
+	const fetchAllEntities = async (): Promise<GroupedEntities[]> => {
+		try {
+			const { data } = await get(`/${PLUGIN_ID}/config`)
+			const contentTypes = data?.selectedContentTypes || []
 
-      const { data } = await get(`/${PLUGIN_ID}/config`)
-      const contentTypes = data?.selectedContentTypes || []
+			if (!contentTypes || contentTypes.length === 0) {
+				return []
+			}
 
+			let entities: GroupedEntities[] = []
 
-      if (!contentTypes || contentTypes.length === 0) {
-        return [];
-      }
+			const entityResults = await Promise.allSettled(
+				contentTypes.map(async (contentType: ConfigContentType) => {
+					try {
+						const { data } = await get(
+							`/content-manager/collection-types/${contentType.uid}?pageSize=9999`,
+						)
 
-      let entities: GroupedEntities[] = [];
+						if (!data || !data.results) {
+							return null
+						}
 
-      const entityResults = await Promise.allSettled(
-        contentTypes.map(async (contentType: ConfigContentType) => {
-          try {
-            const { data } = await get(`/content-manager/collection-types/${contentType.uid}?pageSize=9999`);
+						return {
+							entities: data.results,
+							contentType,
+						}
+					} catch (err) {
+						strapi.log.error(`Cannot access entities for ${contentType.uid}:`, err)
+						return null
+					}
+				}),
+			)
 
-            if (!data || !data.results) {
-              return null;
-            }
+			entities = entityResults
+				.map((result) => (result.status === 'fulfilled' ? result.value : null))
+				.filter(Boolean) as GroupedEntities[]
 
-            return {
-              entities: data.results,
-              contentType
-            };
-          } catch (err) {
-            strapi.log.error(`Cannot access entities for ${contentType.uid}:`, err);
-            return null;
-          }
-        })
-      );
+			return entities
+		} catch (err) {
+			strapi.log.error('Error fetching entities:', err)
+			throw err
+		}
+	}
 
-      entities = entityResults
-        .map(result => result.status === 'fulfilled' ? result.value : null)
-        .filter(Boolean) as GroupedEntities[];
+	const getRelatedRoute = async (relatedDocumentId: string): Promise<Route> => {
+		const { data } = await get(`/${PLUGIN_ID}/route/related?documentId=${relatedDocumentId}`)
+		return data
+	}
 
-      return entities;
-    } catch (err) {
-      strapi.log.error('Error fetching entities:', err);
-      throw err;
-    }
-  }
+	const getRoute = async (documentId: string): Promise<Route> => {
+		const { data } = await get(`/${PLUGIN_ID}/route/${documentId}`)
+		return data
+	}
 
-  const getRelatedRoute = async (relatedDocumentId: string): Promise<Route> => {
-    const { data } = await get(`/${PLUGIN_ID}/route/related?documentId=${relatedDocumentId}`);
-    return data
-  };
+	const getAllRoutes = async (): Promise<Route[]> => {
+		const { data } = await get(`/${PLUGIN_ID}/route`)
+		return data
+	}
 
-  const getRoute = async (documentId: string): Promise<Route> => {
-    const { data } = await get(`/${PLUGIN_ID}/route/${documentId}`);
-    return data
-  };
+	const getProhibitedRouteIds = async (documentId?: string): Promise<string[]> => {
+		const { data } = await get(
+			`/${PLUGIN_ID}/route/prohibitedIds/${documentId ? `${documentId}` : ''}`,
+		)
+		return data
+	}
 
-  const getAllRoutes = async (): Promise<Route[]> => {
-    const { data } = await get(`/${PLUGIN_ID}/route`);
-    return data
-  };
+	const getNavigation = async ({
+		documentId,
+		variant,
+	}: {
+		documentId?: string
+		variant?: StructuredNavigationVariant | 'namesOnly'
+	} = {}) => {
+		const query = []
+		if (documentId) query.push(`documentId=${documentId}`)
+		if (variant) query.push(`variant=${variant}`)
+		const { data } = await get(
+			`/${PLUGIN_ID}/navigation${query.length > 0 ? `?${query.join('&')}` : ''}`,
+		)
+		return data
+	}
 
-  const getProhibitedRouteIds = async (documentId?: string): Promise<string[]> => {
-    const { data } = await get(`/${PLUGIN_ID}/route/prohibitedIds/${documentId ? `${documentId}` : ''}`);
-    return data
-  };
+	const createNavigation = async (body: NavigationInput) => {
+		const { data } = await post(`/${PLUGIN_ID}/navigation`, {
+			data: body,
+		})
+		return data
+	}
 
-  const getNavigation = async ({ documentId, variant }: {documentId?: string, variant?: StructuredNavigationVariant | "namesOnly"} = {}) => {
-    const query = [];
-    if (documentId) query.push(`documentId=${documentId}`);
-    if (variant) query.push(`variant=${variant}`);
-    const { data } = await get(`/${PLUGIN_ID}/navigation${query.length > 0 ? `?${query.join('&')}` : ''}`);
-    return data
-  }
+	const deleteNavigation = async (documentId: string) => {
+		const { data } = await del(`/${PLUGIN_ID}/navigation?documentId=${documentId}`)
+		return data
+	}
 
-  const createNavigation = async (body: NavigationInput) => {
-    const { data } = await post(`/${PLUGIN_ID}/navigation`, {
-      data: body,
-    });
-    return data
-  }
+	const updateNavigation = async (documentId: string, body: NavigationInput) => {
+		const { data } = await put(`/${PLUGIN_ID}/navigation?documentId=${documentId}`, {
+			data: body,
+		})
+		return data
+	}
 
-  const deleteNavigation = async (documentId: string) => {
-    const { data } = await del(`/${PLUGIN_ID}/navigation?documentId=${documentId}`);
-    return data
-  }
+	const updateNavigationItemStructure = async (
+		documentId: string,
+		navigationItems: NestedNavItem[],
+	) => {
+		const { data } = await put(`/${PLUGIN_ID}/navigation/items`, {
+			navigationId: documentId,
+			navigationItems,
+		})
+		return data
+	}
 
-  const updateNavigation = async (documentId: string, body: NavigationInput) => {
-    const { data } = await put(`/${PLUGIN_ID}/navigation?documentId=${documentId}`, {
-      data: body,
-    });
-    return data
-  };
-
-  const updateNavigationItemStructure = async (documentId: string, navigationItems: NestedNavItem[]) => {
-    const { data } = await put(`/${PLUGIN_ID}/navigation/items`, {
-      navigationId: documentId,
-      navigationItems,
-    });
-    return data
-  };
-
-  return {
-    fetchAllContentTypes,
-    fetchConfiguredContentTypes,
-    fetchAllEntities,
-    getRelatedRoute,
-    getRoute,
-    getAllRoutes,
-    getProhibitedRouteIds,
-    getNavigation,
-    createNavigation,
-    deleteNavigation,
-    updateNavigation,
-    updateNavigationItemStructure,
-  }
+	return {
+		fetchAllContentTypes,
+		fetchConfiguredContentTypes,
+		fetchAllEntities,
+		getRelatedRoute,
+		getRoute,
+		getAllRoutes,
+		getProhibitedRouteIds,
+		getNavigation,
+		createNavigation,
+		deleteNavigation,
+		updateNavigation,
+		updateNavigationItemStructure,
+	}
 }

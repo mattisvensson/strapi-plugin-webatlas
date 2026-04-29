@@ -1,43 +1,44 @@
-import type { UID } from "@strapi/strapi";
-import { getRouteDescendants, getNonInternalRouteIds } from '.';
-import { waRoute } from '../../../utils';
+import type { UID } from '@strapi/strapi'
+import { getRouteDescendants, getNonInternalRouteIds } from '.'
+import { waRoute } from '../../../utils'
 
 export default async function validateRouteDependencies({
-  routeId,
-  newParentId
+	routeId,
+	newParentId,
 }: {
-  routeId?: string | null,
-  newParentId: string
-}
-): Promise<boolean> {
-  if (!newParentId) return true
+	routeId?: string | null
+	newParentId: string
+}): Promise<boolean> {
+	if (!newParentId) return true
 
-  const normalizedRouteId = routeId ?? undefined
+	const normalizedRouteId = routeId ?? undefined
 
-  const parentRoute = await strapi.documents(waRoute as UID.ContentType).findOne({
-    documentId: newParentId
-  });
+	const parentRoute = await strapi.documents(waRoute as UID.ContentType).findOne({
+		documentId: newParentId,
+	})
 
-  if (!parentRoute) {
-    throw new Error(`Parent route not found: ${newParentId}`);
-  }
+	if (!parentRoute) {
+		throw new Error(`Parent route not found: ${newParentId}`)
+	}
 
-  if (parentRoute?.type === 'external') {
-    throw new Error('External routes cannot have children');
-  }
+	if (parentRoute?.type === 'external') {
+		throw new Error('External routes cannot have children')
+	}
 
-  if (!normalizedRouteId) return true
+	if (!normalizedRouteId) return true
 
-  const descendants = await getRouteDescendants(normalizedRouteId);
-  const nonInternalRouteIds = await getNonInternalRouteIds();
+	const descendants = await getRouteDescendants(normalizedRouteId)
+	const nonInternalRouteIds = await getNonInternalRouteIds()
 
-  if (
-    normalizedRouteId === newParentId
-    || descendants.includes(newParentId)
-    || nonInternalRouteIds.includes(newParentId)
-  ) {
-    throw new Error(`Circular dependency detected: Cannot set route ${newParentId} as parent of ${normalizedRouteId}`);
-  }
+	if (
+		normalizedRouteId === newParentId ||
+		descendants.includes(newParentId) ||
+		nonInternalRouteIds.includes(newParentId)
+	) {
+		throw new Error(
+			`Circular dependency detected: Cannot set route ${newParentId} as parent of ${normalizedRouteId}`,
+		)
+	}
 
-  return true;
+	return true
 }

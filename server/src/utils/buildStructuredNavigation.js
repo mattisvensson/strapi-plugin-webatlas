@@ -1,0 +1,90 @@
+export default function buildStructuredNavigation(navigation, variant = 'nested') {
+	var _a
+	const itemsById = new Map()
+	const rootItems = []
+	if (
+		!navigation.items ||
+		((_a = navigation.items) === null || _a === void 0 ? void 0 : _a.length) === 0
+	)
+		return navigation
+	// First pass: create a map of all items by id and initialize their items array
+	navigation.items.forEach((item) => {
+		itemsById.set(item.documentId, { ...item, items: [] })
+	})
+	try {
+		if (variant === 'nested') {
+			// Second pass: assign items to their parent's items array or to the root items array
+			navigation.items.forEach((item) => {
+				const newItem = itemsById.get(item.documentId)
+				if (!newItem) return null
+				if (item.parent) {
+					const parentItem = itemsById.get(item.parent.documentId)
+					parentItem && parentItem.items.push(newItem)
+				} else {
+					rootItems.push(newItem)
+				}
+			})
+			// Sort root items and their nested items
+			sortItems(rootItems)
+			// Return a new object with the nested and sorted items
+			return { ...navigation, items: rootItems }
+		} else if (variant === 'flat') {
+			// Assign items to their parent's items array or to the root items array
+			let itemsToProcess = [...navigation.items]
+			let itemsProcessed = new Set()
+			while (itemsToProcess.length > 0) {
+				const remainingItems = []
+				itemsToProcess.forEach((item) => {
+					const newItem = itemsById.get(item.documentId)
+					if (!newItem) return null
+					if (item.parent) {
+						const parentItem = itemsById.get(item.parent.documentId)
+						if (!parentItem || !itemsProcessed.has(item.parent.documentId)) {
+							// Defer processing this item until the parent is processed
+							remainingItems.push(item)
+							return
+						}
+						newItem.depth = parentItem.depth !== undefined ? parentItem.depth + 1 : 0
+						parentItem.items.push(newItem)
+					} else {
+						newItem.depth = 0
+						rootItems.push(newItem)
+					}
+					itemsById.set(item.documentId, newItem)
+					itemsProcessed.add(item.documentId)
+				})
+				itemsToProcess = remainingItems
+			}
+			// Flatten and sort the items
+			const sortedItems = sortItems(rootItems)
+			const flattenedItems = flattenItems(sortedItems)
+			// Return the sorted items
+			return { ...navigation, items: flattenedItems }
+		}
+	} catch (error) {
+		strapi.log.error(error)
+		throw error
+	}
+}
+// Helper function to flatten the nested items into a sorted array
+const flattenItems = (items, result = []) => {
+	items.forEach((item) => {
+		const itemCopy = { ...item }
+		delete itemCopy.items
+		result.push(itemCopy)
+		if (item.items && item.items.length > 0) {
+			flattenItems(item.items, result)
+		}
+	})
+	return result
+}
+// Helper function to sort items by route.order
+const sortItems = (items) => {
+	items.sort((a, b) => a.order - b.order)
+	items.forEach((item) => {
+		if (item.items && item.items.length > 0) {
+			sortItems(item.items)
+		}
+	})
+	return items
+}

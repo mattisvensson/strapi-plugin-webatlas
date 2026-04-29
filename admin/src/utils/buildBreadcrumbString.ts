@@ -1,4 +1,4 @@
-import type { NestedNavItem } from '../../../types';
+import type { NestedNavItem } from '../../../types'
 
 /**
  * Builds a string representing the navigation hierarchy for a given target item.
@@ -11,36 +11,35 @@ import type { NestedNavItem } from '../../../types';
  * @returns The navigation hierarchy as a string (e.g., "Parent > Child > Target"), or null if the target is not found or input is invalid.
  */
 export default function buildBreadcrumbString({
-  navigationItems,
-  targetItem,
-  includeTarget = true,
+	navigationItems,
+	targetItem,
+	includeTarget = true,
 }: {
-  navigationItems?: NestedNavItem[] | null,
-  targetItem: NestedNavItem,
-  includeTarget?: boolean,
+	navigationItems?: NestedNavItem[] | null
+	targetItem: NestedNavItem
+	includeTarget?: boolean
 }): string | null {
-  if (!navigationItems || !Array.isArray(navigationItems)) return null;
-  if (!targetItem || typeof targetItem.depth !== 'number') return null;
-  if (targetItem.depth <= 0) return targetItem.route.title;
+	if (!navigationItems || !Array.isArray(navigationItems)) return null
+	if (!targetItem || typeof targetItem.depth !== 'number') return null
+	if (targetItem.depth <= 0) return targetItem.route.title
 
-  const targetIndex = navigationItems.findIndex(
-    navItem => navItem.documentId === targetItem.documentId
-  );
+	const targetIndex = navigationItems.findIndex(
+		(navItem) => navItem.documentId === targetItem.documentId,
+	)
 
-  if (targetIndex === -1) return null;
-  const parts: string[] = [];
+	if (targetIndex === -1) return null
+	const parts: string[] = []
 
-  for (let i = targetIndex - 1; i >= 0; i--) {
-    const candidate = navigationItems[i];
-    if (candidate.clientModifications?.type === 'delete') continue;
-    parts.unshift(candidate.route.title);
-    if (typeof candidate.depth === 'number' && candidate.depth === 0) break;
-  }
+	for (let i = targetIndex - 1; i >= 0; i--) {
+		const candidate = navigationItems[i]
+		if (candidate.clientModifications?.type === 'delete') continue
+		parts.unshift(candidate.route.title)
+		if (typeof candidate.depth === 'number' && candidate.depth === 0) break
+	}
 
-  if (includeTarget) {
-    parts.push(targetItem.route.title);
-  }
+	if (includeTarget) {
+		parts.push(targetItem.route.title)
+	}
 
-  return parts.join(' > ');
+	return parts.join(' > ')
 }
-

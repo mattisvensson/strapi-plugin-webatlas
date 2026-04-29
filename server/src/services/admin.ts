@@ -1,279 +1,292 @@
-import type { NavigationInput, NestedNavigation, NestedNavItem, Route, PluginConfig, StructuredNavigationVariant } from "../../../types";
-import { transformToUrl, waRoute, waNavigation, waNavItem, PLUGIN_ID } from "../../../utils";
-import { handleItemDeletion, handleItemUpdate, calculateParentAndOrder, buildStructuredNavigation, getNonInternalRouteIds, getRouteDescendants, duplicateCheck } from "../utils";
+import type {
+	NavigationInput,
+	NestedNavigation,
+	NestedNavItem,
+	Route,
+	PluginConfig,
+	StructuredNavigationVariant,
+} from '../../../types'
+import { transformToUrl, waRoute, waNavigation, waNavItem, PLUGIN_ID } from '../../../utils'
+import {
+	handleItemDeletion,
+	handleItemUpdate,
+	calculateParentAndOrder,
+	buildStructuredNavigation,
+	getNonInternalRouteIds,
+	getRouteDescendants,
+	duplicateCheck,
+} from '../utils'
 
-export default ({strapi}) => ({
+export default ({ strapi }) => ({
+	async updateConfig(newConfig: Partial<PluginConfig>) {
+		if (!newConfig) return
 
-  async updateConfig(newConfig: Partial<PluginConfig>) {
-    if (!newConfig) return;
+		let newConfigMerged: PluginConfig
 
-    let newConfigMerged: PluginConfig;
+		try {
+			const pluginStore = await strapi.store({
+				type: 'plugin',
+				name: PLUGIN_ID,
+			})
+			const config = await pluginStore.get({ key: 'config' })
+			newConfigMerged = { ...config, ...newConfig }
+			await pluginStore.set({ key: 'config', value: newConfigMerged })
+		} catch (err) {
+			strapi.log.error(err)
+			return "Error. Couldn't update config"
+		}
 
-    try {
-      const pluginStore = await strapi.store({ type: 'plugin', name: PLUGIN_ID });
-      const config = await pluginStore.get({ key: "config" });
-      newConfigMerged = { ...config, ...newConfig };
-      await pluginStore.set({ key: "config", value: newConfigMerged });
+		// TODO: Is it necessary/intended to delete/mark invalid routes here?
+		// if (newConfigMerged.selectedContentTypes) {
+		//   try {
+		//     const routes = await strapi.documents(waRoute).findMany();
+		//     const invalidRoutes = routes.filter((route: Route) =>
+		//       route.internal && !newConfigMerged.selectedContentTypes.find((type) => type.uid === route.relatedContentType)
+		//     );
+		//     for (const route of invalidRoutes) {
+		//       // await strapi.documents(waNavItem).deleteMany({
+		//       //   where: {
+		//       //     route: route.documentId
+		//       //   }
+		//       // });
+		//       // await strapi.documents(waRoute).delete({ documentId: route.documentId });
+		//     }
+		//   } catch (err) {
+		//     strapi.log.error(err);
+		//   }
+		// }
 
-    } catch (err) {
-      strapi.log.error(err);
-      return "Error. Couldn't update config";
-    }
+		return newConfigMerged
+	},
 
-    // TODO: Is it necessary/intended to delete/mark invalid routes here?
-    // if (newConfigMerged.selectedContentTypes) {
-    //   try {
-    //     const routes = await strapi.documents(waRoute).findMany();
-    //     const invalidRoutes = routes.filter((route: Route) =>
-    //       route.internal && !newConfigMerged.selectedContentTypes.find((type) => type.uid === route.relatedContentType)
-    //     );
-    //     for (const route of invalidRoutes) {
-    //       // await strapi.documents(waNavItem).deleteMany({
-    //       //   where: {
-    //       //     route: route.documentId
-    //       //   }
-    //       // });
-    //       // await strapi.documents(waRoute).delete({ documentId: route.documentId });
-    //     }
-    //   } catch (err) {
-    //     strapi.log.error(err);
-    //   }
-    // }
+	async getConfig() {
+		const pluginStore = await strapi.store({ type: 'plugin', name: PLUGIN_ID })
+		let config = await pluginStore.get({
+			key: 'config',
+		})
 
-    return newConfigMerged;
-  },
+		const defaultConfig = strapi.config.get(`plugin::${PLUGIN_ID}`)
 
-  async getConfig() {
-    const pluginStore = await strapi.store({ type: 'plugin', name: PLUGIN_ID });
-    let config = await pluginStore.get({
-      key: "config",
-    });
+		config = {
+			...defaultConfig,
+			...config,
+			navigation: {
+				...defaultConfig.navigation,
+				...config?.navigation,
+			},
+		}
 
-    const defaultConfig = strapi.config.get(`plugin::${PLUGIN_ID}`);
+		return config
+	},
 
-    config = {
-      ...defaultConfig,
-      ...config,
-      navigation: {
-        ...defaultConfig.navigation,
-        ...config?.navigation
-      }
-    };
+	async getRoute(documentId: string) {
+		try {
+			return await strapi.documents(waRoute).findOne({
+				documentId: documentId,
+			})
+		} catch (e) {
+			strapi.log.error(e)
+		}
+	},
 
-    return config;
-  },
+	async getAllRoutes() {
+		try {
+			const entities = await strapi.documents(waRoute).findMany()
+			return entities
+		} catch (e) {
+			strapi.log.error(e)
+		}
+	},
 
-  async getRoute(documentId: string) {
-    try {
-      return await strapi.documents(waRoute).findOne({
-        documentId: documentId,
-      });
-    } catch (e) {
-      strapi.log.error(e)
-    }
-  },
+	async getRelatedRoute(documentId: string) {
+		try {
+			return await strapi.db?.query(waRoute).findOne({
+				where: {
+					relatedDocumentId: documentId,
+				},
+				populate: ['parent'],
+			})
+		} catch (e) {
+			strapi.log.error(e)
+		}
+	},
 
-  async getAllRoutes() {
-    try {
-      const entities = await strapi.documents(waRoute).findMany();
-      return entities;
-    } catch (e) {
-      strapi.log.error(e)
-    }
-  },
+	async getProhibitedRouteIds(documentId: string | undefined) {
+		try {
+			let route: Route | null = null
+			if (documentId) {
+				route = (await strapi.documents(waRoute).findOne({
+					documentId: documentId,
+				})) as Route | null
+			}
 
-  async getRelatedRoute(documentId: string) {
-    try {
-      return await strapi.db?.query(waRoute).findOne({
-        where: {
-          relatedDocumentId: documentId
-        },
-        populate: ['parent']
-      });
-    } catch (e) {
-      strapi.log.error(e)
-    }
-  },
+			const descendants = route?.documentId ? await getRouteDescendants(route.documentId) : []
+			const nonInternalRouteIds = await getNonInternalRouteIds()
 
-  async getProhibitedRouteIds(documentId: string | undefined) {
-    try {
-      let route: Route | null = null;
-      if (documentId) {
-        route = await strapi.documents(waRoute).findOne({
-          documentId: documentId,
-        }) as Route | null;
-      }
+			const prohibitedRouteIds = [...descendants, ...nonInternalRouteIds]
+			route?.documentId && prohibitedRouteIds.push(route.documentId)
 
-      const descendants = route?.documentId ? await getRouteDescendants(route.documentId) : [];
-      const nonInternalRouteIds = await getNonInternalRouteIds()
+			return prohibitedRouteIds
+		} catch (e) {
+			strapi.log.error(e)
+		}
+	},
 
-      const prohibitedRouteIds = [...descendants, ...nonInternalRouteIds]
-      route?.documentId && prohibitedRouteIds.push(route.documentId)
+	async getNavigation(documentId?: string, variant?: StructuredNavigationVariant | 'namesOnly') {
+		try {
+			let navigation = null
 
-      return prohibitedRouteIds
+			if (variant === 'namesOnly') {
+				if (documentId) {
+					return await strapi.documents(waNavigation).findOne({
+						documentId: documentId,
+						select: ['documentId', 'name', 'slug', 'visible'],
+					})
+				}
+				return await strapi.documents(waNavigation).findMany({
+					select: ['documentId', 'name', 'slug', 'visible'],
+				})
+			}
 
-    } catch (e) {
-      strapi.log.error(e)
-    }
-  },
+			if (documentId) {
+				navigation = await strapi.documents(waNavigation).findOne({
+					documentId: documentId,
+					populate: ['items', 'items.route', 'items.parent'],
+				})
 
-  async getNavigation(documentId?: string, variant?: StructuredNavigationVariant | "namesOnly") {
-    try {
+				if (!navigation) throw new Error('Navigation not found')
 
-      let navigation = null
+				if (variant) navigation = buildStructuredNavigation(navigation, variant)
+			} else {
+				navigation = await strapi.documents(waNavigation).findMany({
+					populate: ['items', 'items.route', 'items.parent'],
+				})
 
-      if (variant === "namesOnly") {
-        if (documentId) {
-          return await strapi.documents(waNavigation).findOne({
-            documentId: documentId,
-            select: ['documentId', 'name', 'slug', 'visible'],
-          });
-        }
-        return await strapi.documents(waNavigation).findMany({
-          select: ['documentId', 'name', 'slug', 'visible'],
-        });
-      }
+				if (!navigation) throw new Error('Navigation not found')
 
-      if (documentId) {
-        navigation = await strapi.documents(waNavigation).findOne({
-          documentId: documentId,
-          populate: ['items', "items.route", "items.parent"]
-        });
+				if (variant) {
+					navigation = navigation.map((nav: NestedNavigation) =>
+						buildStructuredNavigation(nav, variant),
+					)
+				}
+			}
 
-        if (!navigation) throw new Error("Navigation not found");
+			return navigation
+		} catch (e) {
+			strapi.log.error(e)
+		}
+	},
 
-        if (variant)
-          navigation = buildStructuredNavigation(navigation, variant)
-      } else {
-        navigation =  await strapi.documents(waNavigation).findMany({
-          populate: ['items', "items.route", "items.parent"],
-        });
+	async createNavigation(name: string, visible: boolean) {
+		try {
+			return await strapi.documents(waNavigation).create({
+				data: {
+					name: name,
+					slug: transformToUrl(name),
+					visible: visible,
+				},
+			})
+		} catch (e) {
+			strapi.log.error(e)
+		}
+	},
 
-        if (!navigation) throw new Error("Navigation not found");
+	async updateNavigation(documentId: string, data: NavigationInput) {
+		try {
+			const entity = await strapi.documents(waNavigation).update({
+				documentId: documentId,
+				data: {
+					name: data.name,
+					visible: data.visible,
+				},
+			})
+			return entity
+		} catch (e) {
+			strapi.log.error(e)
+		}
+	},
 
-        if (variant) {
-          navigation = navigation.map((nav: NestedNavigation) => buildStructuredNavigation(nav, variant))
-        }
-      }
+	async deleteNavigation(documentId: string) {
+		try {
+			const navigation = await strapi.documents(waNavigation).findOne({
+				documentId: documentId,
+				populate: ['items'],
+			})
 
-      return navigation
-    } catch (e) {
-      strapi.log.error(e)
-    }
-  },
+			if (!navigation) throw new Error('Navigation not found')
 
-  async createNavigation(name: string, visible: boolean) {
-    try {
-      return await strapi.documents(waNavigation).create({
-        data: {
-          name: name,
-          slug: transformToUrl(name),
-          visible: visible,
-        },
-      });
-    } catch (e) {
-      strapi.log.error(e)
-    }
-  },
+			for (const item of navigation.items) {
+				await strapi.documents(waNavItem).delete({
+					documentId: item.documentId,
+				})
+			}
 
-  async updateNavigation(documentId: string, data: NavigationInput) {
-    try {
-      const entity = await strapi.documents(waNavigation).update({
-        documentId: documentId,
-        data: {
-          name: data.name,
-          visible: data.visible,
-        }
-      });
-      return entity
-    } catch (e) {
-      strapi.log.error(e)
-    }
-  },
+			return await strapi.documents(waNavigation).delete({
+				documentId: documentId,
+			})
+		} catch (e) {
+			strapi.log.error(e)
+		}
+	},
 
-  async deleteNavigation(documentId: string) {
-    try {
-      const navigation =  await strapi.documents(waNavigation).findOne({
-        documentId: documentId,
-        populate: ['items'],
-      })
+	async updateNavigationItemStructure(navigationId: string, navigationItems: NestedNavItem[]) {
+		if (!navigationId || !navigationItems) return
 
-      if (!navigation) throw new Error("Navigation not found");
+		let error = false
+		let newNavItemsMap = new Map<string, NestedNavItem>()
 
-      for (const item of navigation.items) {
-        await strapi.documents(waNavItem).delete({
-          documentId: item.documentId
-        })
-      }
+		// First pass: Validate and prepare items
+		const deletionResult = await handleItemDeletion(navigationItems)
+		if (!deletionResult.success) {
+			strapi.log.error('Deletion errors:', deletionResult.errors)
+		}
 
-      return await strapi.documents(waNavigation).delete({
-        documentId: documentId
-      })
-    } catch (e) {
-      strapi.log.error(e)
-    }
-  },
+		navigationItems = deletionResult.items
 
-  async updateNavigationItemStructure(navigationId: string, navigationItems: NestedNavItem[]) {
-    if (!navigationId || !navigationItems) return
+		// Second pass: Process items sequentially and maintain parent/depth tracking
+		let parentIds: string[] = []
+		let groupIndices: number[] = []
 
-    let error = false;
-    let newNavItemsMap = new Map<string, NestedNavItem>();
+		for (const [index, item] of navigationItems.entries()) {
+			if (typeof item.depth !== 'number') {
+				continue
+			}
 
-    // First pass: Validate and prepare items
-    const deletionResult = await handleItemDeletion(navigationItems);
-    if (!deletionResult.success) {
-      strapi.log.error('Deletion errors:', deletionResult.errors);
-    }
+			try {
+				const { calculatedParent, calculatedOrder } = calculateParentAndOrder({
+					navigationItems,
+					item,
+					index,
+					parentIds,
+					groupIndices,
+					newNavItemsMap,
+				})
 
-    navigationItems = deletionResult.items;
+				const result = await handleItemUpdate({
+					item,
+					calculatedParent,
+					calculatedOrder,
+					navigationId,
+					newNavItemsMap,
+				})
 
-    // Second pass: Process items sequentially and maintain parent/depth tracking
-    let parentIds: string[] = [];
-    let groupIndices: number[] = [];
+				if (!result.success) {
+					strapi.log.error('Error updating item: ', item)
+				}
+			} catch (errorMsg) {
+				error = true
+				strapi.log.error('Error updating navigation item ', errorMsg)
+			}
+		}
 
-    for (const [index, item] of navigationItems.entries()) {
-      if (typeof item.depth !== 'number') {
-        continue;
-      }
+		return !error
+	},
 
-      try {
-        const { calculatedParent, calculatedOrder } = calculateParentAndOrder({
-          navigationItems,
-          item,
-          index,
-          parentIds,
-          groupIndices,
-          newNavItemsMap
-        });
-
-        const result = await handleItemUpdate({
-          item,
-          calculatedParent,
-          calculatedOrder,
-          navigationId,
-          newNavItemsMap
-        });
-
-        if (!result.success) {
-          strapi.log.error('Error updating item: ', item);
-        }
-      } catch (errorMsg) {
-        error = true;
-        strapi.log.error('Error updating navigation item ', errorMsg);
-      }
-    }
-
-    return !error
-  },
-
-
-  async checkUniquePath(initialPath: string, targetRouteDocumentId: string | null = null) {
-    try {
-      return await duplicateCheck(initialPath, targetRouteDocumentId);
-    } catch (e) {
-      strapi.log.error(e)
-    }
-  },
+	async checkUniquePath(initialPath: string, targetRouteDocumentId: string | null = null) {
+		try {
+			return await duplicateCheck(initialPath, targetRouteDocumentId)
+		} catch (e) {
+			strapi.log.error(e)
+		}
+	},
 })
-

@@ -1,33 +1,35 @@
-import type { Core } from '@strapi/strapi';
-import { ContentType } from "../../types";
-import runMigrations from './migrations';
-import { syncConfig, registerPermissions, documentMiddleware, webatlasMiddleware } from './bootstrap/index';
-import middlewares from './middlewares';
+import type { Core } from '@strapi/strapi'
+import { ContentType } from '../../types'
+import runMigrations from './migrations'
+import {
+	syncConfig,
+	registerPermissions,
+	documentMiddleware,
+	webatlasMiddleware,
+} from './bootstrap/index'
+import middlewares from './middlewares'
 
 const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
-  try {
-    await runMigrations(strapi)
+	try {
+		await runMigrations(strapi)
 
-    registerPermissions(strapi);
+		registerPermissions(strapi)
 
-    const enabledContentTypes: ContentType[] = Object.values(strapi.contentTypes).filter((type) =>
-      type.pluginOptions?.webatlas?.enabled === true
-    );
+		const enabledContentTypes: ContentType[] = Object.values(strapi.contentTypes).filter(
+			(type) => type.pluginOptions?.webatlas?.enabled === true,
+		)
 
-    const config = await syncConfig(strapi, enabledContentTypes);
+		const config = await syncConfig(strapi, enabledContentTypes)
 
-    if (!enabledContentTypes.length) return
+		if (!enabledContentTypes.length) return
 
-    documentMiddleware(strapi, enabledContentTypes, config);
-    webatlasMiddleware(strapi);
+		documentMiddleware(strapi, enabledContentTypes, config)
+		webatlasMiddleware(strapi)
 
-    strapi.server.use(middlewares.sanitizeWebatlas({}, { strapi }));
-  } catch (error) {
-    strapi.log.error(`Bootstrap failed. ${String(error)}`);
-  }
+		strapi.server.use(middlewares.sanitizeWebatlas({}, { strapi }))
+	} catch (error) {
+		strapi.log.error(`Bootstrap failed. ${String(error)}`)
+	}
+}
 
-
-
-};
-
-export default bootstrap;
+export default bootstrap

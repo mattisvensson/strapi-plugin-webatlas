@@ -27,10 +27,11 @@ This plugin is still in the early stages of development. Many features are plann
 
 - **Strapi v5** - [v0.x.x (work in progress - beta)](https://github.com/mattisvensson/strapi-plugin-webatlas/releases)
 - **Strapi v4** - not supported
+
 ## ✨ Features
 
 - **🚀 Automatic Slug Generation:** Automatically generate clean, SEO-friendly slugs based on your content fields and the route hierarchy. No more manual slug writing — just choose the field, place it under a different route and the plugin takes care of the rest. Slugs are unique and easily customizable.
-- **🗺️ Route Hierarchy and Overview:** Create a hierarchical structure for your routes and gain a full, centralized overview of all registered routes and their corresponding content entries. 
+- **🗺️ Route Hierarchy and Overview:** Create a hierarchical structure for your routes and gain a full, centralized overview of all registered routes and their corresponding content entries.
 - **🧭 Multiple Navigations** Support for creating and managing multiple navigation structures. Whether it's a main menu, footer links, or a custom mobile drawer — organize your content into any number of navigations with drag-and-drop sorting, nested items, and visibility toggles.
 - **🧩 Composable Component Integration** Use plugin-generated slugs and navigations directly in your frontend. Fetch routes and navigation data by slug and with a consistent API response, optimized for dynamic rendering.
 - **🧠 Conflict Detection & Validation** Webatlas prevents slug collisions and helps avoid route conflicts by validating changes in real time. Get clear error messages and automatic suggestions when something doesn’t align.
@@ -38,13 +39,16 @@ This plugin is still in the early stages of development. Many features are plann
 ## ⏳ Installation
 
 ### Via command line
+
 Install Webatlas via command line with a package manager of your choice.
 Using NPM:
+
 ```bash
 npm install @mattisvensson/strapi-plugin-webatlas@beta
 ```
 
 Using Yarn:
+
 ```bash
 yarn add @mattisvensson/strapi-plugin-webatlas@beta
 ```
@@ -66,13 +70,13 @@ Your schema should contain the following:
 
 ```json
 {
-  // ... other schema properties ...
-  "pluginOptions": {
-    "webatlas": {
-      "enabled": true
-    },
-    // ... other plugin options ...
-  }
+	// ... other schema properties ...
+	"pluginOptions": {
+		"webatlas": {
+			"enabled": true
+		}
+		// ... other plugin options ...
+	}
 }
 ```
 
@@ -107,6 +111,7 @@ Webatlas provides two API endpoints. One to fetch routes and one to fetch naviga
 `GET /api/webatlas/path`
 
 Query parameters:
+
 - `slug` (string, required): The slug/path to fetch the route for. This can either be the generated path from webatlas, the uId path or the canonical path.
 - `populate` (string, optional): Comma-separated list of relations to populate. Use `deep` to populate all relations in any depth.
 - `populateDeepDepth` (string, optional): Depth for deep population.
@@ -120,6 +125,7 @@ The response contains the entity's content type and a `webatlas` object with add
 `GET /api/webatlas/navigation`
 
 One of these query parameters (`documentId`, `slug`, `name`, or `id`) are mandatory to fetch a navigation. If you provide multiple, `documentId` has the highest priority, followed by `slug`, `name` and `id`.
+
 - `documentId` (string, optional): The document ID of the navigation to fetch.
 - `slug` (string, optional): The slug of the navigation to fetch.
 - `name` (string, optional): The name of the navigation to fetch.
