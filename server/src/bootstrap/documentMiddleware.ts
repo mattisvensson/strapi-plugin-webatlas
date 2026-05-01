@@ -110,7 +110,7 @@ export function documentMiddleware(
 						...webatlas,
 						slug: transformedSlug,
 						path: validatedPath,
-						parentDocumentId: isValid ? parent?.documentId : 'null',
+						parentDocumentId: isValid ? parent?.documentId : null,
 						isOverride: isOverride || false,
 					},
 				},
