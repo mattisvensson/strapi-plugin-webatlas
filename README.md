@@ -61,7 +61,8 @@ To use **Webatlas**, you need to be running **Strapi v5.42.1** or higher. The pl
 **Minimum environment requirements**
 
 - Strapi `>=5.42.1`
-- Node.js `>=22.0.0`
+- Node.js `>=22.x.x` and `<=24.x.x`
+- NPM `>=6.0.0`
 
 ## 🔧 Configuration
 
