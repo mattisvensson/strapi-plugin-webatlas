@@ -1,5 +1,5 @@
-import sanitizeWebatlas from './sanitizeWebatlasFields'
+import addWebatlasField from './addWebatlasField'
 
 export default {
-	sanitizeWebatlas,
+	addWebatlasField,
 }
