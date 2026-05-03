@@ -2,7 +2,7 @@
 	"name": "@mattisvensson/strapi-plugin-webatlas",
 	"description": "A strapi plugin to manage URL routes and navigations.",
 	"license": "MIT",
-	"version": "0.11.3",
+	"version": "0.11.4",
 	"keywords": [
 		"strapi",
 		"plugin",
