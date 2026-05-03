@@ -15,7 +15,7 @@ This plugin is still in the early stages of development. Many features are plann
 
 ### Table of Contents
 
-1. [💎 Versions](#-versions)
+1. [💎 Version](#-version)
 2. [✨ Features](#-features)
 3. [⏳ Installation](#-installation)
 4. [🖐 Requirements](#-requirements)
@@ -23,10 +23,9 @@ This plugin is still in the early stages of development. Many features are plann
 6. [📖 Usage](#-usage)
 7. [🧩 Roadmap](#-roadmap)
 
-## 💎 Versions
+## 💎 Version
 
-- **Strapi v5** - [v0.x.x (work in progress - beta)](https://github.com/mattisvensson/strapi-plugin-webatlas/releases)
-- **Strapi v4** - not supported
+**Webatlas** is currently in beta. Check the [releases page](https://github.com/mattisvensson/strapi-plugin-webatlas/releases) for the latest updates.
 
 ## ✨ Features
 
@@ -57,9 +56,11 @@ As a next step you must configure your the plugin by the way you want to. See [�
 
 ## 🖐 Requirements
 
+To use **Webatlas**, you need to be running **Strapi v5.42.1** or higher. The plugin is currently in beta and only supports **Strapi v5.42.1**. Support for **Strapi v4** is not supported and there are no plans to backport it.
+
 **Minimum environment requirements**
 
-- Strapi `>=5.0.0`
+- Strapi `>=5.42.1`
 - Node.js `>=22.0.0`
 
 ## 🔧 Configuration
@@ -118,7 +119,7 @@ Query parameters:
 - `fields` (string, optional): Comma-separated list of fields to include in the response.
 - `status` (string, optional): `draft` or `published`. Default is `published`. Returns the draft or published version of the entity.
 
-The response contains the entity's content type and a `webatlas` object with additional information about the path, including the canonical path, uidPath and slug.
+The response contains the entity's content type and a `webatlas` object with additional information about the path, including the canonical path, uidPath and slug. The `webatlas` object is also available in the Content API responses of entities with webatlas enabled.
 
 #### Fetch navigation
 
