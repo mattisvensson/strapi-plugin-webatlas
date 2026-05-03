@@ -66,7 +66,11 @@ function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 
 const Panel = ({ config }: { config: ConfigContentType }) => {
 	const { form, model } = useContentManagerContext()
-	const { initialValues, values, onChange } = form
+	const { initialValues, values, onChange } = form as {
+		initialValues: Record<string, any>
+		values: Record<string, any>
+		onChange: (eventOrPath: React.ChangeEvent<any> | string, value?: any) => void
+	}
 	const { getRelatedRoute, getAllRoutes, getProhibitedRouteIds } = useApi()
 	const { formatMessage } = useIntl()
 	const { get } = useFetchClient()
@@ -226,7 +230,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 				const route = await getRelatedRoute(initialValues.documentId)
 				if (!route) return
 
-				initialPath.current = initialValues.webatlas.path || route.uidPath
+				initialPath.current = route.uidPath
 
 				setRoute(route)
 				setIsOverride(route.isOverride || false)
@@ -251,8 +255,9 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 			} catch (err) {
 				setRoute(null)
 				strapi.log.error(err)
+			} finally {
+				setInitialLoadComplete(true) // Mark initial load as complete
 			}
-			setInitialLoadComplete(true) // Mark initial load as complete
 		}
 		fetchRelatedRute()
 	}, [config])
