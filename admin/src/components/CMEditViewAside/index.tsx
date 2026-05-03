@@ -10,7 +10,7 @@ import { useIntl } from 'react-intl'
 import pluginPermissions from '../../permissions'
 import { PLUGIN_NAME } from '../../../../utils'
 
-const CMEditViewAside: PanelComponent = ({ documentId, model, activeTab }: PanelComponentProps) => {
+const CMEditViewAside: PanelComponent = ({ model }: PanelComponentProps) => {
 	const { contentTypes } = useAllContentTypes()
 	const { config } = usePluginConfig()
 	const { formatMessage } = useIntl()
@@ -26,58 +26,6 @@ const CMEditViewAside: PanelComponent = ({ documentId, model, activeTab }: Panel
 		const contentType = contentTypes?.find((ct) => ct.uid === model)
 		setIsAllowedContentType(!!contentType?.pluginOptions?.webatlas?.enabled)
 	}, [contentTypes, model])
-
-	useEffect(() => {
-		const isWebatlasLabel = (label: Element) => label.textContent?.startsWith('webatlas')
-
-		const cleanupLabels = () => {
-			const labels = document.querySelectorAll('label')
-
-			labels.forEach((label: Element) => {
-				if (!isWebatlasLabel(label)) return
-				const container = label.parentElement?.parentElement
-				const parent = container?.parentElement
-				const greatGrandParent = parent?.parentElement?.parentElement
-
-				if (!container || !parent) return
-
-				const parentWebatlasCount = Array.from(parent.querySelectorAll('label')).filter(
-					isWebatlasLabel,
-				).length
-				const childrenCount = parent.children.length
-
-				// Remove great grandparent if it only has webatlas fields
-				if (
-					greatGrandParent &&
-					greatGrandParent?.querySelectorAll('label').length ===
-						Array.from(greatGrandParent.querySelectorAll('label')).filter(isWebatlasLabel).length
-				) {
-					greatGrandParent.remove()
-				}
-				// Remove parent if: single child OR two children with two webatlas fields
-				else if (childrenCount === 1 || (childrenCount === 2 && parentWebatlasCount === 2)) {
-					parent.remove()
-				}
-				// Remove container if: two children with one webatlas field OR fallback
-				else {
-					container.remove()
-				}
-			})
-		}
-
-		// Delay execution to ensure DOM is populated by Strapi's form system
-		const timeoutId = setTimeout(() => {
-			cleanupLabels()
-
-			// Also try again after a longer delay in case form takes time to render
-			const secondTimeoutId = setTimeout(cleanupLabels, 1000)
-
-			// Cleanup function will clear this timeout if component unmounts
-			return () => clearTimeout(secondTimeoutId)
-		}, 100)
-
-		return () => clearTimeout(timeoutId)
-	}, [documentId, model, activeTab])
 
 	useEffect(() => {
 		if (!config) return
