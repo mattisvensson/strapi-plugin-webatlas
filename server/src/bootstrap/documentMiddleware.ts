@@ -108,7 +108,10 @@ export function documentMiddleware(
 			const { webatlas } = data
 			const { slug, parentDocumentId, isOverride } = webatlas || {}
 
-			if (!slug) return
+			if (!slug) {
+				const result = await next()
+				return result
+			}
 
 			const relatedRoute = (await strapi.documents(waRoute as UID.ContentType).findFirst({
 				filters: {
