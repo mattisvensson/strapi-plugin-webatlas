@@ -26,7 +26,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 		documentMiddleware(strapi, enabledContentTypes, config)
 		webatlasMiddleware(strapi)
 
-		strapi.server.use(middlewares.sanitizeWebatlas({}, { strapi }))
+		strapi.server.use(middlewares.addWebatlasField({ strapi }))
 	} catch (error) {
 		strapi.log.error(`Bootstrap failed. ${String(error)}`)
 	}
