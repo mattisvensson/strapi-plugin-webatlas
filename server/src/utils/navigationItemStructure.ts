@@ -183,20 +183,6 @@ export async function handleItemUpdate({
 					isOverride,
 				})
 			}
-
-			if (isInternal) {
-				const webatlasObj = {
-					path,
-					isOverride,
-					parentDocumentId: calculatedParent,
-					slug,
-				}
-
-				await strapi.db.query(item.route.relatedContentType as UID.ContentType).updateMany({
-					where: { documentId: item.route.relatedDocumentId },
-					data: { webatlas: webatlasObj },
-				})
-			}
 		} catch (err) {
 			errors.push(err instanceof Error ? err.message : String(err))
 			strapi.log.error(`Error processing route for navigation item '${item.route.title}': `, err)

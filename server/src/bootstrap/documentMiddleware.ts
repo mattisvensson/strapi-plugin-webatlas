@@ -48,10 +48,6 @@ export function documentMiddleware(
 			const { slug, parentDocumentId, isOverride } = webatlas || {}
 			const transformedSlug = slug ? transformToUrl(slug) : null
 
-			if (transformedSlug) {
-				data.webatlas.slug = transformedSlug
-			}
-
 			const result = (await next()) as DocumentResult
 
 			if (!transformedSlug) return result
@@ -103,19 +99,6 @@ export function documentMiddleware(
 				},
 			})
 
-			await strapi.db?.query(context.uid as UID.ContentType).updateMany({
-				where: { documentId: result.documentId },
-				data: {
-					webatlas: {
-						...webatlas,
-						slug: transformedSlug,
-						path: validatedPath,
-						parentDocumentId: isValid ? parent?.documentId : null,
-						isOverride: isOverride || false,
-					},
-				},
-			})
-
 			return result
 		}
 
@@ -151,12 +134,6 @@ export function documentMiddleware(
 			let rawPath = transformedSlug
 			if (!isOverride) rawPath = parent ? `${parent.path}/${transformedSlug}` : transformedSlug
 			const validatedPath = await duplicateCheck(rawPath, relatedRoute?.documentId ?? null)
-
-			data.webatlas.path = validatedPath
-			data.webatlas.slug = transformedSlug
-
-			if (relatedRoute) data.relatedRoute = relatedRoute
-			if (!isValid && parentDocumentId) data.webatlas.parent = null
 
 			const result = (await next()) as DocumentResult
 
