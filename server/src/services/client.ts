@@ -4,6 +4,7 @@ import {
 	getFullPopulateObject,
 	cleanRootKeys,
 	removeWaFields,
+	enrichWebatlasData,
 } from '../utils'
 import { StructuredNavigationVariant } from '../../../types'
 import { waRoute, waNavigation } from '../../../utils'
@@ -60,18 +61,10 @@ export default ({ strapi }) => ({
 			let cleanEntity = cleanRootKeys(entity)
 			cleanEntity = removeWaFields(cleanEntity)
 
-			const webatlasFields = {
-				path: route.path,
-				canonicalPath: route.canonicalPath,
-				slug: route.slug,
-				uidPath: route.uidPath,
-			}
+			cleanEntity = await enrichWebatlasData(cleanEntity, route.relatedContentType)
 
 			return {
 				contentType: contentType.info.singularName,
-				webatlas: {
-					...webatlasFields,
-				},
 				...cleanEntity,
 			}
 		} catch (e) {
@@ -79,6 +72,7 @@ export default ({ strapi }) => ({
 			return e
 		}
 	},
+
 	async getNavigation(
 		id: string,
 		name: string,
