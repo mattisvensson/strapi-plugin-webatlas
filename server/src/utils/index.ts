@@ -20,6 +20,7 @@ import {
 	handleItemUpdate,
 	calculateParentAndOrder,
 } from './navigationItemStructure'
+import { enrichWebatlasData } from './enrichWebatlasData'
 
 export {
 	duplicateCheck,
@@ -47,4 +48,5 @@ export {
 	handleItemDeletion,
 	handleItemUpdate,
 	calculateParentAndOrder,
+	enrichWebatlasData,
 }
