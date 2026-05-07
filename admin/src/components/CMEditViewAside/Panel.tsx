@@ -47,8 +47,8 @@ function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 				prevValue: state.value,
 				needsUrlCheck: false,
 			}
-		case 'RESET_URL_CHECK_FLAG':
-			return { ...state, needsUrlCheck: false }
+		case 'SET_URL_CHECK_FLAG':
+			return { ...state, needsUrlCheck: action.payload || false }
 		case 'SET_REPLACEMENT':
 			return { ...state, replacement: action.payload }
 		case 'SET_UIDPATH':
@@ -211,7 +211,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		if (path.needsUrlCheck && path.value) {
 			if (path.uidPath === path.value || initialPath.current === path.value) return
 			debouncedCheckPath(path.value, route?.documentId || null)
-			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' })
+			dispatchPath({ type: 'SET_URL_CHECK_FLAG' })
 		} else {
 			setValidationState('idle')
 			dispatchPath({ type: 'SET_REPLACEMENT', payload: null })
@@ -369,6 +369,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 						dispatchPath={dispatchPath}
 						isOverride={isOverride}
 						config={config}
+						hasUserInteracted={hasUserInteracted}
 					/>
 					{validationState !== 'initial' && (
 						<PathInfo validationState={validationState} replacement={path.replacement} />

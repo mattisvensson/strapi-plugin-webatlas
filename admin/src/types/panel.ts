@@ -4,7 +4,7 @@ export type PanelAction =
 	| { type: 'DEFAULT'; payload: string }
 	| { type: 'NO_URL_CHECK'; payload: string }
 	| { type: 'NO_TRANSFORM_AND_CHECK'; payload: string }
-	| { type: 'RESET_URL_CHECK_FLAG' }
+	| { type: 'SET_URL_CHECK_FLAG'; payload?: boolean }
 	| { type: 'SET_REPLACEMENT'; payload: string | null }
 	| { type: 'SET_UIDPATH'; payload: string }
 	| { type: 'SET_SLUG'; payload: string }

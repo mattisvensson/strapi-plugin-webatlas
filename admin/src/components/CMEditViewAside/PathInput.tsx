@@ -11,9 +11,10 @@ type PathInputProps = {
 	dispatchPath: React.Dispatch<PanelAction>
 	isOverride: boolean
 	config: ConfigContentType
+	hasUserInteracted: React.RefObject<boolean>
 }
 
-function PathInput({ path, dispatchPath, isOverride, config }: PathInputProps) {
+function PathInput({ path, dispatchPath, isOverride, config, hasUserInteracted }: PathInputProps) {
 	const { formatMessage } = useIntl()
 
 	const displayedPath =
@@ -59,16 +60,21 @@ function PathInput({ path, dispatchPath, isOverride, config }: PathInputProps) {
 			<Field.Input
 				id="path-input"
 				value={displayedPath}
-				onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+				onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+					hasUserInteracted.current = true
 					dispatchPath({ type: 'SET_OVERRIDEPATH', payload: e.target.value })
-				}
+				}}
 				disabled={!isOverride}
-				onBlur={(e: React.ChangeEvent<HTMLInputElement>) =>
+				onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
 					dispatchPath({
 						type: 'SET_OVERRIDEPATH',
 						payload: transformToUrl(e.target.value, false),
 					})
-				}
+					dispatchPath({
+						type: 'SET_URL_CHECK_FLAG',
+						payload: true,
+					})
+				}}
 				style={{ outline: inputBorder }}
 			/>
 			<Field.Hint />

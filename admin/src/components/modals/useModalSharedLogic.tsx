@@ -53,8 +53,8 @@ function pathReducer(
 				prevValue: state.value,
 				needsUrlCheck: false,
 			}
-		case 'RESET_URL_CHECK_FLAG':
-			return { ...state, needsUrlCheck: false }
+		case 'SET_URL_CHECK_FLAG':
+			return { ...state, needsUrlCheck: action.payload || false }
 		case 'SET_REPLACEMENT':
 			return { ...state, replacement: action.payload }
 		case 'SET_UIDPATH':
