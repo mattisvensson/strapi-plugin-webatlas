@@ -46,7 +46,7 @@ export function documentMiddleware(
 			const data = context.params.data as WebatlasDocumentData
 			const { webatlas } = data
 			const { slug, parentDocumentId, isOverride } = webatlas || {}
-			const transformedSlug = slug ? transformToUrl(slug) : null
+			const transformedSlug = slug ? transformToUrl(slug, !isOverride) : null
 
 			const result = (await next()) as DocumentResult
 
@@ -132,7 +132,7 @@ export function documentMiddleware(
 					})) as Route
 				}
 			}
-			const transformedSlug = transformToUrl(slug)
+			const transformedSlug = transformToUrl(slug, !isOverride)
 
 			let rawPath = transformedSlug
 			if (!isOverride) rawPath = parent ? `${parent.path}/${transformedSlug}` : transformedSlug

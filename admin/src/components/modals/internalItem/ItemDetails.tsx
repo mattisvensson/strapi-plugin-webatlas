@@ -90,7 +90,7 @@ export default function ItemDetails({
 				routeDocumentId: route.documentId,
 				withoutTransform: true,
 			})
-			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' })
+			dispatchPath({ type: 'SET_URL_CHECK_FLAG' })
 		}
 	}, [path.needsUrlCheck, route.documentId])
 

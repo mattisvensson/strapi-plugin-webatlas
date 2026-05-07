@@ -81,7 +81,7 @@ function ItemEditComponent({
 				url: path.value,
 				routeDocumentId: item.route.documentId,
 			})
-			dispatchPath({ type: 'RESET_URL_CHECK_FLAG' })
+			dispatchPath({ type: 'SET_URL_CHECK_FLAG' })
 		}
 	}, [path.needsUrlCheck, item.route.documentId])
 
