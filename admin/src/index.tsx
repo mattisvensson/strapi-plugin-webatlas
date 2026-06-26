@@ -56,6 +56,49 @@ export default {
 			Component: () => import('./pages/Settings/Navigation'),
 			permissions: [pluginPermissions['settings.navigation'][0]],
 		})
+		app.customFields.register({
+			name: 'route-picker',
+			pluginId: PLUGIN_ID,
+			type: 'string',
+			intlLabel: {
+				id: `${PLUGIN_ID}.route-picker.label`,
+				defaultMessage: 'Route Picker',
+			},
+			intlDescription: {
+				id: `${PLUGIN_ID}.route-picker.description`,
+				defaultMessage: 'Select a route',
+			},
+			components: {
+				Input: async () =>
+					import('./components/customFields/RoutePicker').then((module) => ({
+						default: module.default as any,
+					})),
+			},
+			options: {
+				advanced: [
+					{
+						sectionTitle: {
+							id: 'global.settings',
+							defaultMessage: 'Settings',
+						},
+						items: [
+							{
+								name: 'required',
+								type: 'checkbox',
+								intlLabel: {
+									id: 'content-type-builder.form.attribute.item.requiredField',
+									defaultMessage: 'Required field',
+								},
+								description: {
+									id: 'content-type-builder.form.attribute.item.requiredField.description',
+									defaultMessage: "You won't be able to create an entry if this field is empty",
+								},
+							},
+						],
+					},
+				],
+			},
+		})
 
 		app.registerPlugin({
 			id: PLUGIN_ID,
