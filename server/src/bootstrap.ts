@@ -27,6 +27,7 @@ const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 		webatlasMiddleware(strapi)
 
 		strapi.server.use(middlewares.addWebatlasField({ strapi }))
+		strapi.server.use(middlewares.enrichRoutePicker({ strapi }))
 	} catch (error) {
 		strapi.log.error(`Bootstrap failed. ${String(error)}`)
 	}

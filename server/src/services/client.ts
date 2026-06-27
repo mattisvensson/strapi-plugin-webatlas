@@ -5,6 +5,7 @@ import {
 	cleanRootKeys,
 	removeWaFields,
 	enrichWebatlasData,
+	enrichRoutePickerFields,
 } from '../utils'
 import { StructuredNavigationVariant } from '../../../types'
 import { waRoute, waNavigation } from '../../../utils'
@@ -62,6 +63,7 @@ export default ({ strapi }) => ({
 			cleanEntity = removeWaFields(cleanEntity)
 
 			cleanEntity = await enrichWebatlasData(cleanEntity, route.relatedContentType)
+			cleanEntity = await enrichRoutePickerFields(cleanEntity, contentTypeKey)
 
 			return {
 				contentType: contentType.info.singularName,
