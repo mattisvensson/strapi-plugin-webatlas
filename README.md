@@ -34,6 +34,7 @@ This plugin is still in the early stages of development. Many features are plann
 - **🧭 Multiple Navigations** Support for creating and managing multiple navigation structures. Whether it's a main menu, footer links, or a custom mobile drawer — organize your content into any number of navigations with drag-and-drop sorting, nested items, and visibility toggles.
 - **🧩 Composable Component Integration** Use plugin-generated slugs and navigations directly in your frontend. Fetch routes and navigation data by slug and with a consistent API response, optimized for dynamic rendering.
 - **🧠 Conflict Detection & Validation** Webatlas prevents slug collisions and helps avoid route conflicts by validating changes in real time. Get clear error messages and automatic suggestions when something doesn’t align.
+- **🔗 RoutePicker Custom Field** Use the RoutePicker custom field to select routes within your content types, ensuring consistent linking and navigation throughout your application.
 
 ## ⏳ Installation
 
@@ -103,6 +104,10 @@ After selecting the source field for path generation in settings, you'll see the
 **Canonical Path (Canonical Path)**: Shows the complete URL based on content structure - automatically updates when you change the slug or parent relationship. Changes cascade to all child pages.
 
 **UID Path (UID Path)**: A permanent identifier path that never changes, used as a backup URL.
+
+### RoutePicker Custom Field
+
+The RoutePicker custom field allows you to select a route from the existing routes in your Strapi application. This ensures that links between content types are consistent and automatically updated when the route changes. You can use it for example in a "Button" component to link to a different page.
 
 ### API endpoints
 
