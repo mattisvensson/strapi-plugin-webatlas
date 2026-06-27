@@ -10,72 +10,143 @@ function isExternalUrl(value: string): boolean {
 }
 
 /**
- * Recursively enrich route-picker fields in the data
+ * Collect all route-picker field documentIds from data (including nested structures)
  */
-export async function enrichRoutePickerFields(data: any, contentTypeUid: string): Promise<any> {
-	if (!data || typeof data !== 'object') return data
+function collectRoutePickerIds(obj: any, uid?: string): string[] {
+	if (!obj || typeof obj !== 'object') return []
 
-	const ct = strapi.contentTypes[contentTypeUid]
-	if (!ct?.attributes) return data
+	const ids: string[] = []
 
-	// Collect all documentIds from route-picker fields
-	const routePickerFields: { fieldName: string; documentId: string }[] = []
-	for (const [fieldName, attribute] of Object.entries(ct.attributes)) {
-		const attr = attribute as any
+	if (!uid) return ids
 
-		// Check if this is a route-picker custom field
-		if (attr.customField === 'plugin::webatlas.route-picker' && data[fieldName]) {
-			const value = data[fieldName]
+	// Check both contentTypes and components
+	const ct = strapi.contentTypes[uid] || strapi.components?.[uid]
+	if (!ct?.attributes) return ids
 
-			// Only collect if it's not an external URL
+	for (const [key, attr] of Object.entries(ct.attributes)) {
+		const attribute = attr as any
+
+		// Collect from route-picker fields
+		if (attribute.customField === 'plugin::webatlas.route-picker' && obj[key]) {
+			const value = obj[key]
 			if (typeof value === 'string' && !isExternalUrl(value)) {
-				routePickerFields.push({ fieldName, documentId: value })
+				ids.push(value)
 			}
 		}
 
-		// Handle relations - recursively process
-		if (attr.type === 'relation' && data[fieldName]) {
-			const targetUid = attr.target
-			if (Array.isArray(data[fieldName])) {
-				data[fieldName] = await Promise.all(
-					data[fieldName].map((item: any) => enrichRoutePickerFields(item, targetUid)),
-				)
+		// Collect from relations
+		if (attribute.type === 'relation' && obj[key]) {
+			const targetUid = attribute.target
+			if (Array.isArray(obj[key])) {
+				ids.push(...obj[key].flatMap((item: any) => collectRoutePickerIds(item, targetUid)))
 			} else {
-				data[fieldName] = await enrichRoutePickerFields(data[fieldName], targetUid)
+				ids.push(...collectRoutePickerIds(obj[key], targetUid))
 			}
 		}
 
-		// Handle components - recursively process
-		if (attr.type === 'component' && data[fieldName]) {
-			const componentUid = attr.component
-			if (Array.isArray(data[fieldName])) {
-				data[fieldName] = await Promise.all(
-					data[fieldName].map((item: any) => enrichRoutePickerFields(item, componentUid)),
-				)
+		// Collect from components
+		if (attribute.type === 'component' && obj[key]) {
+			const componentUid = attribute.component
+			if (Array.isArray(obj[key])) {
+				ids.push(...obj[key].flatMap((item: any) => collectRoutePickerIds(item, componentUid)))
 			} else {
-				data[fieldName] = await enrichRoutePickerFields(data[fieldName], componentUid)
+				ids.push(...collectRoutePickerIds(obj[key], componentUid))
 			}
 		}
 
-		// Handle dynamic zones - recursively process
-		if (attr.type === 'dynamiczone' && Array.isArray(data[fieldName])) {
-			data[fieldName] = await Promise.all(
-				data[fieldName].map((item: any) => {
-					if (!item || !item.__component) return item
-					return enrichRoutePickerFields(item, item.__component)
+		// Collect from dynamic zones
+		if (attribute.type === 'dynamiczone' && Array.isArray(obj[key])) {
+			ids.push(
+				...obj[key].flatMap((item: any) => {
+					if (!item || !item.__component) return []
+					return collectRoutePickerIds(item, item.__component)
 				}),
 			)
 		}
 	}
 
-	// If no route-picker fields found, return as is
-	if (routePickerFields.length === 0) return data
+	return ids
+}
 
-	// Fetch all routes at once for efficiency
-	const documentIds = routePickerFields.map((f) => f.documentId)
+/**
+ * Recursively enrich route-picker fields in the data using pre-fetched route map
+ */
+function enrichEntity(entity: any, uid: string, routeMap: Map<string, any>): any {
+	if (!entity || typeof entity !== 'object') return entity
+
+	// Check both contentTypes and components
+	const ct = strapi.contentTypes[uid] || strapi.components?.[uid]
+	if (!ct?.attributes) return entity
+
+	for (const [key, attr] of Object.entries(ct.attributes)) {
+		const attribute = attr as any
+
+		// Replace route-picker field values
+		if (attribute.customField === 'plugin::webatlas.route-picker' && entity[key]) {
+			const value = entity[key]
+			if (typeof value === 'string' && !isExternalUrl(value)) {
+				const route = routeMap.get(value)
+				if (route) {
+					entity[key] = route.canonicalPath || route.path || value
+				}
+			}
+		}
+
+		// Recursively process relations
+		if (attribute.type === 'relation' && entity[key]) {
+			const targetUid = attribute.target
+			if (Array.isArray(entity[key])) {
+				entity[key] = entity[key].map((item: any) =>
+					item ? enrichEntity(item, targetUid, routeMap) : item,
+				)
+			} else {
+				entity[key] = enrichEntity(entity[key], targetUid, routeMap)
+			}
+		}
+
+		// Recursively process components
+		if (attribute.type === 'component' && entity[key]) {
+			const componentUid = attribute.component
+			if (Array.isArray(entity[key])) {
+				entity[key] = entity[key].map((item: any) =>
+					item ? enrichEntity(item, componentUid, routeMap) : item,
+				)
+			} else {
+				entity[key] = enrichEntity(entity[key], componentUid, routeMap)
+			}
+		}
+
+		// Recursively process dynamic zones
+		if (attribute.type === 'dynamiczone' && Array.isArray(entity[key])) {
+			entity[key] = entity[key].map((item: any) => {
+				if (!item || !item.__component) return item
+				return enrichEntity(item, item.__component, routeMap)
+			})
+		}
+	}
+
+	return entity
+}
+
+/**
+ * Recursively enrich route-picker fields in the data
+ * Uses a two-pass approach: first collect all IDs, then fetch routes once, then enrich
+ */
+export async function enrichRoutePickerFields(data: any, contentTypeUid: string): Promise<any> {
+	if (!data || typeof data !== 'object') return data
+
+	// First pass: Collect all route-picker documentIds from all nested levels
+	const documentIds = collectRoutePickerIds(data, contentTypeUid)
+
+	if (documentIds.length === 0) return data
+
+	// Remove duplicates
+	const uniqueDocumentIds = [...new Set(documentIds)]
+
+	// Fetch all routes in one query
 	const routes = await strapi.db?.query(waRoute).findMany({
 		where: {
-			documentId: { $in: documentIds },
+			documentId: { $in: uniqueDocumentIds },
 		},
 		select: ['documentId', 'path', 'canonicalPath'],
 	})
@@ -83,15 +154,7 @@ export async function enrichRoutePickerFields(data: any, contentTypeUid: string)
 	// Create a map for quick lookup
 	const routeMap = new Map(routes?.map((route: any) => [route.documentId, route]) || [])
 
-	// Replace documentIds with paths
-	for (const { fieldName, documentId } of routePickerFields) {
-		const route = routeMap.get(documentId)
-		if (route) {
-			// Use canonicalPath if available, otherwise path
-			data[fieldName] = route.canonicalPath || route.path || documentId
-		}
-		// If route not found, leave the documentId as is (fallback)
-	}
-
-	return data
+	// Second pass: Recursively enrich all entities using the route map
+	const enriched = enrichEntity(data, contentTypeUid, routeMap)
+	return enriched
 }
