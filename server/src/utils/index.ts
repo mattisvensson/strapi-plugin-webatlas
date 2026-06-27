@@ -21,6 +21,7 @@ import {
 	calculateParentAndOrder,
 } from './navigationItemStructure'
 import { enrichWebatlasData } from './enrichWebatlasData'
+import { enrichRoutePickerFields } from './enrichRoutePickerFields'
 
 export {
 	duplicateCheck,
@@ -49,4 +50,5 @@ export {
 	handleItemUpdate,
 	calculateParentAndOrder,
 	enrichWebatlasData,
+	enrichRoutePickerFields,
 }
