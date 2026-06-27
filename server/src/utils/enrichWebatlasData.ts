@@ -1,4 +1,3 @@
-import type { Core } from '@strapi/strapi'
 import { waRoute } from '../../../utils'
 
 /**
@@ -6,8 +5,6 @@ import { waRoute } from '../../../utils'
  * Works recursively to handle nested relations, components, and dynamic zones
  */
 export async function enrichWebatlasData(data: any, contentTypeUid?: string): Promise<any> {
-	console.log('Enriching data with webatlas fields...', { contentTypeUid })
-	console.log('Original data:', JSON.stringify(data, null, 2))
 	if (!data || typeof data !== 'object') return data
 
 	// Helper to collect all documentIds from the data (including nested)
@@ -105,7 +102,6 @@ export async function enrichWebatlasData(data: any, contentTypeUid?: string): Pr
 				// Handle relations
 				if (attribute.type === 'relation' && entity[key]) {
 					const targetUid = attribute.target
-					strapi.log.debug('relation found')
 					if (Array.isArray(entity[key])) {
 						entity[key] = entity[key].map((item: any) =>
 							item ? enrichEntity(item, targetUid) : item,
@@ -136,7 +132,6 @@ export async function enrichWebatlasData(data: any, contentTypeUid?: string): Pr
 				}
 			}
 		}
-		strapi.log.debug('finished - returning')
 		return entity
 	}
 
