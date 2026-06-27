@@ -33,7 +33,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
 		if (!contentTypeEntry) return
 
-		const [contentTypeUid, contentType] = contentTypeEntry
+		const [contentTypeUid] = contentTypeEntry
 
 		// Handle both single and paginated responses
 		if (ctx.body.data) {
