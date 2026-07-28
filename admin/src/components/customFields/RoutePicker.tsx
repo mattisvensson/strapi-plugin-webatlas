@@ -63,7 +63,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
 		const fetchRoutes = async () => {
 			setIsLoading(true)
 			const fetchedRoutes = await getAllRoutes()
-			setRoutes(fetchedRoutes)
+			const filteredRoutes = fetchedRoutes.filter((route) => route.type !== 'wrapper')
+			setRoutes(filteredRoutes)
 			setIsLoading(false)
 
 			if (value) {
