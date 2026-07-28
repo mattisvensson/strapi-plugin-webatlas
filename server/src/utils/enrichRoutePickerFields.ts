@@ -87,7 +87,15 @@ function enrichEntity(entity: any, uid: string, routeMap: Map<string, any>): any
 			if (typeof value === 'string' && !isExternalUrl(value)) {
 				const route = routeMap.get(value)
 				if (route) {
-					entity[key] = route.canonicalPath || route.path || value
+					// Wrapper routes should not be used in route-picker fields
+					if (route.type === 'wrapper') {
+						strapi.log.warn(
+							`Wrapper route detected in route-picker field '${key}'. Wrapper routes cannot be used as page links. Setting to null.`,
+						)
+						entity[key] = null
+					} else {
+						entity[key] = route.canonicalPath || route.path || value
+					}
 				}
 			}
 		}
@@ -148,7 +156,7 @@ export async function enrichRoutePickerFields(data: any, contentTypeUid: string)
 		where: {
 			documentId: { $in: uniqueDocumentIds },
 		},
-		select: ['documentId', 'path', 'canonicalPath'],
+		select: ['documentId', 'path', 'canonicalPath', 'type'],
 	})
 
 	// Create a map for quick lookup
