@@ -82,7 +82,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
 	}, [value])
 
 	return (
-		<Field.Root id={name} required={required} hint={hint} disabled={isDisabled}>
+		<Field.Root id={name} required={required} hint={hint}>
 			<Field.Label>{label}</Field.Label>
 			<Combobox
 				ref={ref}
