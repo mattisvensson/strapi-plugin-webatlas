@@ -16,7 +16,7 @@ export async function enrichWebatlasData(data: any, contentTypeUid?: string): Pr
 
 		if (!uid) return ids
 
-		const ct = strapi.contentTypes[uid]
+		const ct = strapi.contentTypes[uid] || strapi.components?.[uid]
 		if (!ct?.attributes) return ids
 
 		// Collect from nested relations and components
@@ -80,7 +80,7 @@ export async function enrichWebatlasData(data: any, contentTypeUid?: string): Pr
 		if (!entity || typeof entity !== 'object') return entity
 
 		// Check if webatlas is enabled for this content type
-		const ct = uid ? strapi.contentTypes[uid] : null
+		const ct = uid ? strapi.contentTypes[uid] || strapi.components?.[uid] : null
 		const isWebatlasEnabled = ct?.pluginOptions?.webatlas?.enabled === true
 
 		// Add webatlas data if enabled and we have a route
