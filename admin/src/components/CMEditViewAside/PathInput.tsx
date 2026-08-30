@@ -26,13 +26,13 @@ function PathInput({ path, dispatchPath, isOverride, config, hasUserInteracted }
 	return (
 		<Field.Root
 			hint={
-				config.default
+				config.routeSourceField
 					? formatMessage({
 							id: getTranslation('components.CMEditViewAside.path.input.start'),
 							defaultMessage: 'Edit the',
 						}) +
 						' "' +
-						config.default +
+						config.routeSourceField +
 						'" ' +
 						formatMessage({
 							id: getTranslation('components.CMEditViewAside.path.input.end'),

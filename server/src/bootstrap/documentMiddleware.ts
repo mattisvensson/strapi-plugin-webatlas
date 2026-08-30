@@ -78,7 +78,7 @@ export function documentMiddleware(
 				throw new Error(`Failed to generate a unique path for slug: ${transformedSlug}`)
 
 			const singularName = context.contentType.info.singularName
-			const title = context.params.data[ctSettings?.default]?.trim() || transformedSlug
+			const title = context.params.data[ctSettings?.routeSourceField]?.trim() || transformedSlug
 			const canonicalPath = await buildCanonicalPath(
 				transformToUrl(title),
 				isValid ? parent.documentId : null,
@@ -140,7 +140,7 @@ export function documentMiddleware(
 
 			const result = (await next()) as DocumentResult
 
-			const title = context.params.data[ctSettings?.default]?.trim() || slug
+			const title = context.params.data[ctSettings?.routeSourceField]?.trim() || slug
 			const canonicalPath = isOverride
 				? relatedRoute.path
 				: await buildCanonicalPath(transformToUrl(title), parent?.documentId)

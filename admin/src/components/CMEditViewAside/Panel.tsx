@@ -112,8 +112,8 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	const hasUserInteracted = useRef(false)
 	const initialPath = useRef('')
 	const prevSourceValueRef = useRef<string | null>(null)
-	const sourceFieldValue = values[config?.default] || ''
-	const initialSourceFieldValue = initialValues[config?.default] || ''
+	const sourceFieldValue = values[config?.routeSourceField] || ''
+	const initialSourceFieldValue = initialValues[config?.routeSourceField] || ''
 
 	const latestCheckPathRef = useRef<typeof checkPath>(checkPath)
 	latestCheckPathRef.current = checkPath
@@ -248,7 +248,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 				})
 
 				// Set the prevSourceValueRef to prevent immediate override
-				const key = config?.default
+				const key = config?.routeSourceField
 				if (key) {
 					prevSourceValueRef.current = values[key]
 				}

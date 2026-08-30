@@ -18,7 +18,10 @@ export default function ContentTypeAccordion({
 	if (!contentType) return null
 
 	return (
-		<Box borderColor={!contentTypeSettings.default ? 'danger500' : undefined} key={contentType.uid}>
+		<Box
+			borderColor={!contentTypeSettings.routeSourceField ? 'danger500' : undefined}
+			key={contentType.uid}
+		>
 			<Accordion.Item key={contentType.uid} value={contentType.uid}>
 				<Accordion.Header>
 					<Accordion.Trigger>{contentType?.info.displayName}</Accordion.Trigger>
@@ -33,7 +36,7 @@ export default function ContentTypeAccordion({
 									'The selected field from the content type will be used to generate the path. Use a field that is unique and descriptive, such as a "title" or "name".',
 							})}
 							error={
-								!contentTypeSettings.default &&
+								!contentTypeSettings.routeSourceField &&
 								formatMessage({
 									id: getTranslation('settings.page.generate.error'),
 									defaultMessage: 'Please select a default field',
@@ -55,7 +58,7 @@ export default function ContentTypeAccordion({
 										payload: { ctUid: contentType.uid, field: '' },
 									})
 								}
-								value={contentTypeSettings?.default || ''}
+								value={contentTypeSettings?.routeSourceField || ''}
 								onChange={(value: string | number) =>
 									dispatch({
 										type: 'SET_DEFAULT_FIELD',

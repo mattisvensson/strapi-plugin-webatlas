@@ -35,7 +35,7 @@ function reducer(newConfig: PluginConfig | null, action: Action): PluginConfig |
 		case 'SET_DEFAULT_FIELD':
 			if (!newConfig) return null
 			updatedContentTypes = newConfig?.selectedContentTypes.map((ct) =>
-				ct.uid === action.payload.ctUid ? { ...ct, default: action.payload.field } : ct,
+				ct.uid === action.payload.ctUid ? { ...ct, routeSourceField: action.payload.field } : ct,
 			)
 			return { ...newConfig, selectedContentTypes: updatedContentTypes || [] }
 		case 'SET_CONFIG':
@@ -81,7 +81,8 @@ const Settings = () => {
 	async function save() {
 		if (
 			!config ||
-			config.selectedContentTypes.find((cta: ConfigContentType) => !cta.default) !== undefined
+			config.selectedContentTypes.find((cta: ConfigContentType) => !cta.routeSourceField) !==
+				undefined
 		)
 			return
 
