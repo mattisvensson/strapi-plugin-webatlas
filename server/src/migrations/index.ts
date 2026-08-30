@@ -3,6 +3,7 @@ import type { PluginConfig } from '../../../types'
 import { PLUGIN_ID } from '../../../utils'
 import migration_001_canonical_path from './001-canonical-path'
 import migration_002_webatlas_json_field from './002-webatlas-json-field'
+import migration_003_route_source_field from './003-route-source-field'
 
 interface Migration {
 	version: string
@@ -10,7 +11,11 @@ interface Migration {
 	up: (strapi: Core.Strapi) => Promise<void>
 }
 
-const migrations: Migration[] = [migration_001_canonical_path, migration_002_webatlas_json_field]
+const migrations: Migration[] = [
+	migration_001_canonical_path,
+	migration_002_webatlas_json_field,
+	migration_003_route_source_field,
+]
 
 export const runMigrations = async (strapi: Core.Strapi) => {
 	const pluginStore = strapi.store({ type: 'plugin', name: PLUGIN_ID })
