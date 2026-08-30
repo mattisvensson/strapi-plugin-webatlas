@@ -25,7 +25,7 @@ export async function syncConfig(strapi: Core.Strapi, enabledContentTypes: Conte
 		newConfig.selectedContentTypes.push({
 			uid: type.uid,
 			label: type.info.displayName,
-			default: existingConfig?.default || null,
+			routeSourceField: existingConfig?.routeSourceField || null,
 		})
 	})
 

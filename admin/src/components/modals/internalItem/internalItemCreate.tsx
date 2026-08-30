@@ -227,7 +227,7 @@ function ItemCreateComponent({
 								{selectedContentType &&
 									selectedContentType.entities?.map((entity: Entity) => (
 										<SingleSelectOption key={entity.id} value={entity.documentId}>
-											{entity[selectedContentType.contentType.default]}
+											{entity[selectedContentType.contentType.routeSourceField]}
 										</SingleSelectOption>
 									))}
 							</SingleSelect>

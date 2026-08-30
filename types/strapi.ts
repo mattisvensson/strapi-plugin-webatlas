@@ -34,7 +34,7 @@ export type ContentType = {
 export type ConfigContentType = {
 	uid: string
 	label: string
-	default: string
+	routeSourceField: string
 }
 
 export type PluginConfig = {
