@@ -25,6 +25,10 @@
 	"webatlas.settings.page.generate": "Generate paths from",
 	"webatlas.settings.page.generate.hint": "The selected field from the content type will be used to generate the path. Use a field that is unique and descriptive, such as a \"title\" or \"name\".",
 	"webatlas.settings.page.generate.error": "Please select a default field",
+	"webatlas.settings.page.defaultParentRoute": "Default parent route",
+	"webatlas.settings.page.defaultParentRoute.hint": "Select a default parent route for the content type. When creating a new entry, the default parent route will be pre-selected.",
+	"webatlas.settings.page.defaultParentRoute.contentType.placeholder": "Select a content type",
+	"webatlas.settings.page.defaultParentRoute.entity.placeholder": "Select an entity",
 	"webatlas.settings.page.navigation.subtitle": "Configure navigation settings",
 	"webatlas.settings.page.navigation.navigation": "Navigation",
 	"webatlas.settings.page.navigation.maxNavDepth.label": "Max depth of navigation tree",
@@ -120,6 +124,9 @@
 	"webatlas.restore.metadata": "Restore Metadata",
 	"webatlas.loading": "Loading...",
 	"webatlas.version": "Version",
+
+	"webatlas.contentType": "Content Type",
+	"webatlas.entity": "Entity",
 
 	"webatlas.notification.error": "An error occurred",
 	"webatlas.notification.settings.saved": "Settings saved successfully",
