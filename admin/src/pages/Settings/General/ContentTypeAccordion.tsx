@@ -44,6 +44,11 @@ export default function ContentTypeAccordion({
 	const defaultParentRoute = selectedContentType?.entities.find(
 		(entity) => entity.documentId === contentTypeSettings.defaultParentRoute,
 	)
+	const filteredAttributes = contentType?.attributes
+		? Object.entries(contentType.attributes).filter(
+				([key, attribute]) => attribute.type === 'string' && key !== 'documentId',
+			)
+		: []
 
 	if (!contentType) return null
 
@@ -96,21 +101,7 @@ export default function ContentTypeAccordion({
 									})
 								}
 							>
-								{Object.entries(contentType.attributes).map(([key], index) => {
-									if (
-										key === 'id' ||
-										key === 'documentId' ||
-										key === 'createdAt' ||
-										key === 'updatedAt' ||
-										key === 'createdBy' ||
-										key === 'updatedBy' ||
-										key === 'webatlas' ||
-										// The following fields are not longer used in the new implementation, but we keep them hidden just in case
-										key === 'webatlas_path' ||
-										key === 'webatlas_override' ||
-										key === 'webatlas_parent'
-									)
-										return null
+								{filteredAttributes.map(([key], index) => {
 									return (
 										<SingleSelectOption key={index} value={key}>
 											{key}
