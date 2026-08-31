@@ -25,6 +25,10 @@
 	"webatlas.settings.page.generate": "Generiere Pfade aus",
 	"webatlas.settings.page.generate.hint": "Das ausgewählte Feld aus dem Inhaltstyp wird verwendet, um den Pfad zu generieren. Verwenden Sie ein Feld, das einzigartig und beschreibend ist, wie z.B. \"Titel\" oder \"Name\".",
 	"webatlas.settings.page.generate.error": "Bitte wählen Sie ein Standardfeld aus",
+	"webatlas.settings.page.defaultParentRoute": "Standard-Elternpfad",
+	"webatlas.settings.page.defaultParentRoute.hint": "Wählen Sie einen Standard-Elternpfad für den Inhaltstyp aus. Beim Erstellen eines neuen Eintrags wird der Standard-Elternpfad vorab ausgewählt.",
+	"webatlas.settings.page.defaultParentRoute.contentType.placeholder": "Wählen Sie einen Inhaltstyp aus",
+	"webatlas.settings.page.defaultParentRoute.entity.placeholder": "Wählen Sie eine Entität aus",
 	"webatlas.settings.page.navigation.subtitle": "Konfigurieren Sie Navigationseinstellungen",
 	"webatlas.settings.page.navigation.navigation": "Navigation",
 	"webatlas.settings.page.navigation.maxNavDepth.label": "Maximale Tiefe des Navigationsbaums",
@@ -120,6 +124,9 @@
 	"webatlas.restore.metadata": "Metadaten wiederherstellen",
 	"webatlas.loading": "Laden...",
 	"webatlas.version": "Version",
+
+	"webatlas.contentType": "Inhaltstyp",
+	"webatlas.entity": "Entität",
 
 	"webatlas.notification.error": "Ein Fehler ist aufgetreten",
 	"webatlas.notification.settings.saved": "Einstellungen erfolgreich gespeichert",

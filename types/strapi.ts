@@ -35,6 +35,7 @@ export type ConfigContentType = {
 	uid: string
 	label: string
 	routeSourceField: string
+	defaultParentRoute: string | null
 }
 
 export type PluginConfig = {

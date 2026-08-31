@@ -361,6 +361,8 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 						setSelectedParent(val)
 					}}
 					prohibitedRouteIds={prohibitedRouteIds}
+					defaultParentRoute={config.defaultParentRoute || ''}
+					isCreatingEntry={!initialValues.documentId}
 				/>
 				<Divider marginTop={2} marginBottom={2} />
 				<Box>

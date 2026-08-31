@@ -2,7 +2,7 @@ import { Box, Field, SingleSelect, SingleSelectOption } from '@strapi/design-sys
 import { RouteStructureProps } from '../../types'
 import { getTranslation } from '../../utils'
 import { useIntl } from 'react-intl'
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import Tooltip from '../Tooltip'
 
 function RouteStructure({
@@ -11,8 +11,15 @@ function RouteStructure({
 	setSelectedParent,
 	canonicalPath,
 	prohibitedRouteIds,
+	defaultParentRoute,
+	isCreatingEntry,
 }: RouteStructureProps) {
 	const { formatMessage } = useIntl()
+
+	const handleSelectParent = (value: string) => {
+		const parentRoute = routes.find((route) => route.documentId === value) || null
+		setSelectedParent(parentRoute)
+	}
 
 	const filteredRoutes = useMemo(() => {
 		return [...routes]
@@ -24,10 +31,21 @@ function RouteStructure({
 			)
 	}, [routes, prohibitedRouteIds, selectedParent])
 
-	const handleSelectParent = (value: string) => {
-		const parentRoute = routes.find((route) => route.documentId === value) || null
-		setSelectedParent(parentRoute)
-	}
+	const defaultParentRouteValue = useMemo(() => {
+		if (defaultParentRoute && isCreatingEntry) {
+			const defaultParent = routes.find((route) => route.relatedDocumentId === defaultParentRoute)
+			return defaultParent || null
+		}
+		return null
+	}, [defaultParentRoute, routes, isCreatingEntry])
+
+	useEffect(() => {
+		if (defaultParentRouteValue && isCreatingEntry) {
+			handleSelectParent(defaultParentRouteValue?.documentId || '')
+		}
+	}, [defaultParentRouteValue, isCreatingEntry])
+
+	const selectValue = selectedParent?.documentId || defaultParentRouteValue?.documentId || ''
 
 	return (
 		<Box paddingBottom={2}>
@@ -38,7 +56,7 @@ function RouteStructure({
 						defaultMessage: 'Place under',
 					})}
 				</Field.Label>
-				<SingleSelect value={selectedParent?.documentId || ''} onValueChange={handleSelectParent}>
+				<SingleSelect value={selectValue} onValueChange={handleSelectParent}>
 					<SingleSelectOption value="">
 						{formatMessage({
 							id: getTranslation('components.CMEditViewAside.path.input.parentSelect.rootPath'),

@@ -1,5 +1,5 @@
 import type { Core, UID } from '@strapi/strapi'
-import { transformToUrl, waRoute, waNavItem } from '../../../utils'
+import { transformToUrl, waRoute, waNavItem, PLUGIN_ID } from '../../../utils'
 import { ContentType, PluginConfig, Route } from '../../../types'
 import {
 	duplicateCheck,
@@ -199,6 +199,19 @@ export function documentMiddleware(
 					where: { relatedDocumentId: relatedDocumentId },
 					populate: ['navitem'],
 				})
+
+				// Check if related documentId is present in plugin config in defaultParentRoute of any content type, and if so, remove it
+				const pluginStore = strapi.store({ type: 'plugin', name: PLUGIN_ID })
+				const currentConfig = (await pluginStore.get({ key: 'config' })) as PluginConfig
+				const selectedContentTypes = currentConfig.selectedContentTypes.map((ct) =>
+					ct.defaultParentRoute === relatedDocumentId ? { ...ct, defaultParentRoute: null } : ct,
+				)
+				if (selectedContentTypes.some((ct, i) => ct !== currentConfig.selectedContentTypes[i])) {
+					await pluginStore.set({
+						key: 'config',
+						value: { ...currentConfig, selectedContentTypes },
+					})
+				}
 
 				if (!deletedRoute?.documentId) return result
 

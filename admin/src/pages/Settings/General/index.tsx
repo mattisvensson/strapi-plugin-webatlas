@@ -9,10 +9,9 @@
 
 import type { ContentType, ConfigContentType, PluginConfig } from '../../../../../types'
 import { useEffect, useState, useReducer, useRef } from 'react'
-import { Box, Accordion, Field } from '@strapi/design-system'
+import { Accordion, Field } from '@strapi/design-system'
 import { useNotification, Page } from '@strapi/strapi/admin'
-import usePluginConfig from '../../../hooks/usePluginConfig'
-import useAllContentTypes from '../../../hooks/useAllContentTypes'
+import { useAllContentTypes, usePluginConfig, useAllEntities } from '../../../hooks'
 import { getTranslation } from '../../../utils'
 import { useIntl } from 'react-intl'
 import { FullLoader } from '../../../components/UI'
@@ -27,6 +26,7 @@ import pluginPermissions from '../../../permissions'
 type Action =
 	| { type: 'SET_DEFAULT_FIELD'; payload: { ctUid: string; field: string } }
 	| { type: 'SET_CONFIG'; payload: PluginConfig }
+	| { type: 'SET_DEFAULT_PARENT_ROUTE'; payload: { ctUid: string; parentRoute: string | null } }
 
 function reducer(newConfig: PluginConfig | null, action: Action): PluginConfig | null {
 	let updatedContentTypes
@@ -36,6 +36,14 @@ function reducer(newConfig: PluginConfig | null, action: Action): PluginConfig |
 			if (!newConfig) return null
 			updatedContentTypes = newConfig?.selectedContentTypes.map((ct) =>
 				ct.uid === action.payload.ctUid ? { ...ct, routeSourceField: action.payload.field } : ct,
+			)
+			return { ...newConfig, selectedContentTypes: updatedContentTypes || [] }
+		case 'SET_DEFAULT_PARENT_ROUTE':
+			if (!newConfig) return null
+			updatedContentTypes = newConfig?.selectedContentTypes.map((ct) =>
+				ct.uid === action.payload.ctUid
+					? { ...ct, defaultParentRoute: action.payload.parentRoute }
+					: ct,
 			)
 			return { ...newConfig, selectedContentTypes: updatedContentTypes || [] }
 		case 'SET_CONFIG':
@@ -56,6 +64,7 @@ const Settings = () => {
 	const { formatMessage } = useIntl()
 	const [isSaving, setIsSaving] = useState(false)
 	const initialConfig = useRef<PluginConfig | null>(fetchedConfig)
+	const { entities } = useAllEntities()
 
 	useEffect(() => {
 		initialConfig.current = fetchedConfig
@@ -168,6 +177,7 @@ const Settings = () => {
 											contentType={ct}
 											contentTypeSettings={contentTypeSettings}
 											dispatch={dispatch}
+											allGroupedEntities={entities}
 										/>
 									)
 								})}

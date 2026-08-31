@@ -26,6 +26,7 @@ export async function syncConfig(strapi: Core.Strapi, enabledContentTypes: Conte
 			uid: type.uid,
 			label: type.info.displayName,
 			routeSourceField: existingConfig?.routeSourceField || null,
+			defaultParentRoute: existingConfig?.defaultParentRoute || null,
 		})
 	})
 

@@ -28,6 +28,8 @@ export type RouteStructureProps = {
 	selectedParent: Route | null
 	setSelectedParent: (value: Route | null) => void
 	prohibitedRouteIds?: string[]
+	defaultParentRoute?: string
+	isCreatingEntry: boolean
 }
 
 export type ValidationState = 'initial' | 'checking' | 'done' | 'idle'

@@ -58,7 +58,7 @@ export async function enrichWebatlasData(data: any, contentTypeUid?: string): Pr
 	}
 
 	const documentIds = collectDocumentIds(data, contentTypeUid)
-	// console.log(`documentIds: ${documentIds}`)
+
 	if (documentIds.length === 0) return data
 
 	// Remove duplicates
@@ -74,7 +74,7 @@ export async function enrichWebatlasData(data: any, contentTypeUid?: string): Pr
 
 	// Create a map for quick lookup
 	const routeMap = new Map(routes?.map((route: any) => [route.relatedDocumentId, route]) || [])
-	// console.log(routeMap)
+
 	// Helper to enrich data recursively
 	const enrichEntity = (entity: any, uid?: string): any => {
 		if (!entity || typeof entity !== 'object') return entity
