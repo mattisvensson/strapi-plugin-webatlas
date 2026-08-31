@@ -65,11 +65,6 @@ export default function ContentTypeAccordion({
 					<Box padding={3}>
 						<Field.Root
 							name="selectedContentTypes"
-							hint={formatMessage({
-								id: getTranslation('settings.page.generate.hint'),
-								defaultMessage:
-									'The selected field from the content type will be used to generate the path. Use a field that is unique and descriptive, such as a "title" or "name".',
-							})}
 							error={
 								!contentTypeSettings.routeSourceField &&
 								formatMessage({
@@ -84,6 +79,13 @@ export default function ContentTypeAccordion({
 									id: getTranslation('settings.page.generate'),
 									defaultMessage: 'Generate paths from',
 								})}
+								<Tooltip
+									description={formatMessage({
+										id: getTranslation('settings.page.generate.hint'),
+										defaultMessage:
+											'The selected field from the content type will be used to generate the path. Use a field that is unique and descriptive, such as a "title" or "name".',
+									})}
+								/>
 							</Field.Label>
 							<SingleSelect
 								name={`defaultField-${contentType.uid}`}
@@ -109,7 +111,7 @@ export default function ContentTypeAccordion({
 									)
 								})}
 							</SingleSelect>
-							<Field.Hint />
+							<Field.Error />
 						</Field.Root>
 						<Grid.Root gap={4} marginTop={4}>
 							<Grid.Item col={6} s={12}>
