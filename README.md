@@ -88,6 +88,7 @@ Your schema should contain the following:
 Use the settings page to configure the plugin.
 
 - **Generate path from:** Select a field from which the slug will automatically be generated. For example, use the 'title' field or a dedicated slug field.
+- **Default parent route:** Optionally select an entry that new entries of this content type should be placed under by default. Pick the content type first, then the specific entry. For example, set a "News overview" page as the default parent for your "News" collection, so a new article is created at `/news/some-article` without the editor having to select the parent manually. The preselection can still be changed (or reset to the root path) per entry in the content editor. If the selected entry is deleted, the setting is cleared automatically.
 
 ## 📖 Usage
 
@@ -95,7 +96,7 @@ Use the settings page to configure the plugin.
 
 After selecting the source field for path generation in settings, you'll see the webatlas panel in the content editor sidebar:
 
-**Parent Hierarchy (Place under)**: Select a parent page to create nested URLs (e.g., placing "Services" under "About" creates `/about/services`)
+**Parent Hierarchy (Place under)**: Select a parent page to create nested URLs (e.g., placing "Services" under "About" creates `/about/services`). If a default parent route is configured for the content type in the settings, it is preselected for new entries and can be changed or reset to the root path at any time.
 
 **Generated Path (Path)**: Automatically created from your selected field (e.g., "About Us" → `/about-us`)
 
