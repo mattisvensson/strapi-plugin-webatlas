@@ -1,30 +1,13 @@
 import type { Route, NestedNavItem, NestedNavigation } from '../../../../../types'
 import type { ModalItem_VariantCreate } from '../../../types'
-import { Box, Grid, Field, Flex, Badge } from '@strapi/design-system'
+import { Box, Grid, Field } from '@strapi/design-system'
 import PathInfo from '../../PathInfo'
 import { useEffect, useMemo } from 'react'
 import { useModalSharedLogic } from '../useModalSharedLogic'
 import { useIntl } from 'react-intl'
 import { buildBreadcrumbString, getTranslation } from '../../../utils'
 import Tooltip from '../../Tooltip'
-import { Typography } from '@strapi/design-system'
-import { WarningCircle } from '@strapi/icons'
-
-function Warning({ main, info }: { main: React.ReactNode; info?: React.ReactNode }) {
-	return (
-		<Grid.Item col={12} s={12} alignItems="baseline">
-			<Badge variant="warning" minWidth="100%">
-				<Flex direction="column" alignItems="center" gap={2}>
-					<Flex alignItems="center" gap={2}>
-						<WarningCircle />
-						<Typography>{main}</Typography>
-					</Flex>
-					{info && <Typography variant="sigma">{info}</Typography>}
-				</Flex>
-			</Badge>
-		</Grid.Item>
-	)
-}
+import { WarningBox } from '../../UI'
 
 type ItemDetailsProps = Pick<
 	ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>,
@@ -106,31 +89,35 @@ export default function ItemDetails({
 	return (
 		<Grid.Root gap={4}>
 			{path.canonicalPath !== path.value && (
-				<Warning
-					main={formatMessage({
-						id: getTranslation('modal.item.canonicalPathMismatch'),
-						defaultMessage: 'Warning: Canonical Path does not match navigation path',
-					})}
-				/>
+				<Grid.Item col={12} s={12} alignItems="baseline">
+					<WarningBox
+						title={formatMessage({
+							id: getTranslation('modal.item.canonicalPathMismatch'),
+							defaultMessage: 'Warning: Canonical Path does not match navigation path',
+						})}
+					/>
+				</Grid.Item>
 			)}
 			{navigationWhereRouteExists && (
-				<Warning
-					main={formatMessage(
-						{
-							id: getTranslation('modal.item.routeAlreadyUsed'),
+				<Grid.Item col={12} s={12} alignItems="baseline">
+					<WarningBox
+						title={formatMessage(
+							{
+								id: getTranslation('modal.item.routeAlreadyUsed'),
+								defaultMessage:
+									'Warning: This route is already used in the navigation "{navigationName}"',
+							},
+							{
+								navigationName: navigationWhereRouteExists.name,
+							},
+						)}
+						description={formatMessage({
+							id: getTranslation('modal.item.routeAlreadyUsed.info'),
 							defaultMessage:
-								'Warning: This route is already used in the navigation "{navigationName}"',
-						},
-						{
-							navigationName: navigationWhereRouteExists.name,
-						},
-					)}
-					info={formatMessage({
-						id: getTranslation('modal.item.routeAlreadyUsed.info'),
-						defaultMessage:
-							'Changing the path for this item will also update the path in the existing item.',
-					})}
-				/>
+								'Changing the path for this item will also update the path in the existing item.',
+						})}
+					/>
+				</Grid.Item>
 			)}
 			<Grid.Item col={12} s={12} alignItems="baseline">
 				<Box width="100%">
