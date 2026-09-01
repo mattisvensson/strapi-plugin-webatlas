@@ -87,7 +87,7 @@ Your schema should contain the following:
 
 Use the settings page to configure the plugin.
 
-- **Generate path from:** Select a field from which the slug will automatically be generated. For example, use the 'title' field or a dedicated slug field.
+- **Generate path from:** Select a field from which the slug will automatically be generated. For example, use the 'title' field or a dedicated slug field. Content types without a text field cannot generate a path, so no field can be selected and Webatlas stays disabled for them until you add one.
 - **Default parent route:** Optionally select an entry that new entries of this content type should be placed under by default. Pick the content type first, then the specific entry. For example, set a "News overview" page as the default parent for your "News" collection, so a new article is created at `/news/some-article` without the editor having to select the parent manually. The preselection can still be changed (or reset to the root path) per entry in the content editor. If the selected entry is deleted, the setting is cleared automatically.
 
 ## 📖 Usage

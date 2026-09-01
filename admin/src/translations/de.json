@@ -25,6 +25,8 @@
 	"webatlas.settings.page.generate": "Generiere Pfade aus",
 	"webatlas.settings.page.generate.hint": "Das ausgewählte Feld aus dem Inhaltstyp wird verwendet, um den Pfad zu generieren. Verwenden Sie ein Feld, das einzigartig und beschreibend ist, wie z.B. \"Titel\" oder \"Name\".",
 	"webatlas.settings.page.generate.error": "Bitte wählen Sie ein Standardfeld aus",
+	"webatlas.settings.page.generate.warning.title": "Kein Routen-Quellfeld verfügbar",
+	"webatlas.settings.page.generate.warning.description": "Bitte fügen Sie ein String-Feld zum Inhaltstyp hinzu, um diesen Inhaltstyp mit Webatlas zu verwenden.",
 	"webatlas.settings.page.defaultParentRoute": "Standard-Elternpfad",
 	"webatlas.settings.page.defaultParentRoute.hint": "Wählen Sie einen Standard-Elternpfad für den Inhaltstyp aus. Beim Erstellen eines neuen Eintrags wird der Standard-Elternpfad vorab ausgewählt.",
 	"webatlas.settings.page.defaultParentRoute.contentType.placeholder": "Wählen Sie einen Inhaltstyp aus",
@@ -79,7 +81,7 @@
 	"webatlas.modal.item.navigationPosition.label": "Navigationsposition",
 	"webatlas.modal.item.pathField.label": "Pfad",
 	"webatlas.modal.item.canonicalPathMismatch": "Warnung: Der kanonische Pfad stimmt nicht mit dem Navigationspfad überein",
-	"webatlas.modal.item.routeAlreadyUsed": "Warnung: Diese Route wird bereits in der Navigation \"{navigationName}\" verwendet",
+	"webatlas.modal.item.routeAlreadyUsed": "Warnung: Dieser Pfad wird bereits in der Navigation \"{navigationName}\" verwendet",
 	"webatlas.modal.item.routeAlreadyUsed.info": "Wenn Sie den Pfad für dieses Element ändern, wird der Pfad im vorhandenen Element ebenfalls aktualisiert.",
 
 	"webatlas.components.pathInfo.checking": "Überprüfe, ob der Pfad verfügbar ist...",

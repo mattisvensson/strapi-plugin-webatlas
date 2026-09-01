@@ -34,7 +34,7 @@ export type ContentType = {
 export type ConfigContentType = {
 	uid: string
 	label: string
-	routeSourceField: string
+	routeSourceField: string | null
 	defaultParentRoute: string | null
 }
 
