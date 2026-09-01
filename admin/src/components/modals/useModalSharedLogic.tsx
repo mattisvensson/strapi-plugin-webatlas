@@ -77,9 +77,10 @@ export function useModalSharedLogic() {
 	const { entities } = useAllEntities()
 	const { get } = useFetchClient()
 
+	// Without a route source field no route can be generated, so the content type cannot be selected
 	const availableEntities = useMemo(() => {
 		if (!entities) return []
-		return entities
+		return entities.filter((group) => group.contentType.routeSourceField)
 	}, [entities])
 
 	const initialState: React.RefObject<RouteSettings> = useRef({

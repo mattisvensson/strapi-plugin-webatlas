@@ -49,7 +49,14 @@ const CMEditViewAside: PanelComponent = ({ model }: PanelComponentProps) => {
 		cmAside: pluginPermissions['cm.aside'],
 	})
 
-	if (!canAside || !isAllowedContentType || !isActiveContentType || !contentTypeConfig) return null
+	if (
+		!canAside ||
+		!isAllowedContentType ||
+		!isActiveContentType ||
+		!contentTypeConfig ||
+		!contentTypeConfig.routeSourceField
+	)
+		return null
 
 	if (!config) {
 		strapi.log.error('CMEditViewAside: Plugin is not configured.')

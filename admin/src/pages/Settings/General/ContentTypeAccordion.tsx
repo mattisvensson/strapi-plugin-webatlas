@@ -1,54 +1,61 @@
 import { SingleSelect, SingleSelectOption, Grid } from '@strapi/design-system'
 import { Box, Accordion, Field } from '@strapi/design-system'
-import { getTranslation } from '../../../utils'
+import { getTranslation, getRouteSourceFields } from '../../../utils'
 import { useIntl } from 'react-intl'
 import type { ContentType, ConfigContentType, GroupedEntities } from '../../../../../types'
 import { useEffect, useState } from 'react'
 import Tooltip from '../../../components/Tooltip'
+import { WarningBox } from '../../../components/UI'
 
 export default function ContentTypeAccordion({
 	contentType,
 	contentTypeSettings,
 	dispatch,
 	allGroupedEntities,
+	entitiesLoading,
 }: {
 	contentType: ContentType | undefined
 	contentTypeSettings: ConfigContentType
 	dispatch: React.Dispatch<any>
 	allGroupedEntities: GroupedEntities[]
+	entitiesLoading: boolean
 }) {
 	const { formatMessage } = useIntl()
 	const [selectedContentType, setSelectedContentType] = useState<GroupedEntities | null>(null)
 
 	useEffect(() => {
-		if (contentType && !selectedContentType && contentTypeSettings?.defaultParentRoute) {
-			allGroupedEntities.forEach((groupedEntity) => {
-				const foundEntity = groupedEntity.entities.find(
-					(entity) => entity.documentId === contentTypeSettings.defaultParentRoute,
-				)
-				if (foundEntity) {
-					setSelectedContentType({
-						contentType: groupedEntity.contentType,
-						entities: groupedEntity.entities,
-					})
-					dispatch({
-						type: 'SET_DEFAULT_PARENT_ROUTE',
-						payload: { ctUid: contentType.uid, parentRoute: foundEntity.documentId },
-					})
-					return foundEntity
-				}
+		if (
+			entitiesLoading ||
+			!contentType ||
+			selectedContentType ||
+			!contentTypeSettings?.defaultParentRoute
+		)
+			return
+
+		const groupedEntity = allGroupedEntities.find((group) =>
+			group.entities.some((entity) => entity.documentId === contentTypeSettings.defaultParentRoute),
+		)
+
+		// The stored parent route belongs to a content type that can no longer be used, so it is cleared
+		if (!groupedEntity) {
+			dispatch({
+				type: 'SET_DEFAULT_PARENT_ROUTE',
+				payload: { ctUid: contentType.uid, parentRoute: null },
 			})
+			return
 		}
-	}, [contentTypeSettings?.defaultParentRoute, allGroupedEntities, contentType])
+
+		setSelectedContentType(groupedEntity)
+		dispatch({
+			type: 'SET_DEFAULT_PARENT_ROUTE',
+			payload: { ctUid: contentType.uid, parentRoute: contentTypeSettings.defaultParentRoute },
+		})
+	}, [contentTypeSettings?.defaultParentRoute, allGroupedEntities, contentType, entitiesLoading])
 
 	const defaultParentRoute = selectedContentType?.entities.find(
 		(entity) => entity.documentId === contentTypeSettings.defaultParentRoute,
 	)
-	const filteredAttributes = contentType?.attributes
-		? Object.entries(contentType.attributes).filter(
-				([key, attribute]) => attribute.type === 'string' && key !== 'documentId',
-			)
-		: []
+	const filteredAttributes = getRouteSourceFields(contentType)
 
 	if (!contentType) return null
 
@@ -62,10 +69,26 @@ export default function ContentTypeAccordion({
 					<Accordion.Trigger>{contentType?.info.displayName}</Accordion.Trigger>
 				</Accordion.Header>
 				<Accordion.Content>
+					{filteredAttributes.length === 0 && (
+						<Box padding={3}>
+							<WarningBox
+								title={formatMessage({
+									id: getTranslation('settings.page.generate.warning.title'),
+									defaultMessage: 'No route source field available',
+								})}
+								description={formatMessage({
+									id: getTranslation('settings.page.generate.warning.description'),
+									defaultMessage:
+										'Please add a string field to the content type in order to use this content type with Webatlas.',
+								})}
+							/>
+						</Box>
+					)}
 					<Box padding={3}>
 						<Field.Root
 							name="selectedContentTypes"
 							error={
+								filteredAttributes.length > 0 &&
 								!contentTypeSettings.routeSourceField &&
 								formatMessage({
 									id: getTranslation('settings.page.generate.error'),
@@ -102,6 +125,7 @@ export default function ContentTypeAccordion({
 										payload: { ctUid: contentType.uid, field: String(value) },
 									})
 								}
+								disabled={filteredAttributes.length === 0}
 							>
 								{filteredAttributes.map(([key], index) => {
 									return (
@@ -203,6 +227,7 @@ export default function ContentTypeAccordion({
 											}
 										>
 											{selectedContentType?.entities.map((entity) => {
+												if (!selectedContentType.contentType.routeSourceField) return null
 												return (
 													<SingleSelectOption key={entity.documentId} value={entity.documentId}>
 														{entity[selectedContentType.contentType.routeSourceField]}

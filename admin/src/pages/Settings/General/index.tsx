@@ -8,11 +8,11 @@
  */
 
 import type { ContentType, ConfigContentType, PluginConfig } from '../../../../../types'
-import { useEffect, useState, useReducer, useRef } from 'react'
+import { useEffect, useState, useReducer, useRef, useMemo } from 'react'
 import { Accordion, Field } from '@strapi/design-system'
 import { useNotification, Page } from '@strapi/strapi/admin'
 import { useAllContentTypes, usePluginConfig, useAllEntities } from '../../../hooks'
-import { getTranslation } from '../../../utils'
+import { getTranslation, getRouteSourceFields } from '../../../utils'
 import { useIntl } from 'react-intl'
 import { FullLoader } from '../../../components/UI'
 import { PageWrapper, ContentBox, SettingTitle } from '..'
@@ -64,7 +64,26 @@ const Settings = () => {
 	const { formatMessage } = useIntl()
 	const [isSaving, setIsSaving] = useState(false)
 	const initialConfig = useRef<PluginConfig | null>(fetchedConfig)
-	const { entities } = useAllEntities()
+	const { entities, loading: entitiesLoading } = useAllEntities()
+
+	// Without a route source field no route can be generated, so the content type is not selectable as parent
+	const selectableEntities = useMemo(
+		() =>
+			entities.filter((groupedEntity) =>
+				config?.selectedContentTypes.some(
+					(ct) => ct.uid === groupedEntity.contentType.uid && ct.routeSourceField,
+				),
+			),
+		[entities, config?.selectedContentTypes],
+	)
+
+	// A content type that offers usable fields must have one selected before the settings can be saved
+	const hasMissingRouteSourceField =
+		config?.selectedContentTypes.some(
+			(ct) =>
+				!ct.routeSourceField &&
+				getRouteSourceFields(allContentTypes?.find((item) => item.uid === ct.uid)).length > 0,
+		) ?? false
 
 	useEffect(() => {
 		initialConfig.current = fetchedConfig
@@ -88,12 +107,9 @@ const Settings = () => {
 	}, [fetchError, toggleNotification, formatMessage])
 
 	async function save() {
-		if (
-			!config ||
-			config.selectedContentTypes.find((cta: ConfigContentType) => !cta.routeSourceField) !==
-				undefined
-		)
-			return
+		if (!config || hasMissingRouteSourceField) return
+
+		console.log('Saving config:', config)
 
 		setIsSaving(true)
 		try {
@@ -148,7 +164,10 @@ const Settings = () => {
 					id: getTranslation('settings.page.general.subtitle'),
 					defaultMessage: 'Configure general settings',
 				})}
-				disabledCondition={JSON.stringify(config) === JSON.stringify(initialConfig.current)}
+				disabledCondition={
+					JSON.stringify(config) === JSON.stringify(initialConfig.current) ||
+					hasMissingRouteSourceField
+				}
 			>
 				<ContentBox
 					title={formatMessage({
@@ -177,7 +196,8 @@ const Settings = () => {
 											contentType={ct}
 											contentTypeSettings={contentTypeSettings}
 											dispatch={dispatch}
-											allGroupedEntities={entities}
+											allGroupedEntities={selectableEntities}
+											entitiesLoading={entitiesLoading}
 										/>
 									)
 								})}
