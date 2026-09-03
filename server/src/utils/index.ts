@@ -26,6 +26,7 @@ import isBlacklistedPath from './isBlacklistedPath'
 import assertPathAllowed, { getRouteBlacklist } from './assertPathAllowed'
 import assertDescendantPathsAllowed from './assertDescendantPathsAllowed'
 import normalizeRouteBlacklist from './normalizeRouteBlacklist'
+import { addWebatlasBreadcrumb } from './addWebatlasBreadcrumb'
 
 export {
 	duplicateCheck,
@@ -60,4 +61,5 @@ export {
 	getRouteBlacklist,
 	assertDescendantPathsAllowed,
 	normalizeRouteBlacklist,
+	addWebatlasBreadcrumb,
 }

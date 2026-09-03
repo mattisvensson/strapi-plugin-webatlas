@@ -4,7 +4,7 @@ import type { Core } from '@strapi/strapi'
 const client = ({ strapi }: { strapi: Core.Strapi }) => ({
 	async getEntityByPath(ctx) {
 		try {
-			const { slug, populate, populateDeepDepth, fields, status } = ctx.query
+			const { slug, populate, populateDeepDepth, fields, status, breadcrumb } = ctx.query
 
 			if (!slug) return ctx.throw(400, 'Slug is required')
 
@@ -14,6 +14,7 @@ const client = ({ strapi }: { strapi: Core.Strapi }) => ({
 				populateDeepDepth,
 				fields,
 				status,
+				breadcrumb !== 'false',
 			)
 
 			if (!entity) return ctx.throw(404, 'Entity not found')
