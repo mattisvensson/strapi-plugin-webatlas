@@ -59,7 +59,7 @@ export function documentMiddleware(
 					newParentId: parentDocumentId,
 				})
 				if (isValid) {
-					parent = (await strapi.documents(waRoute as UID.ContentType).findOne({
+					parent = (await strapi.documents(waRoute).findOne({
 						documentId: parentDocumentId,
 					})) as Route
 				}
@@ -97,7 +97,7 @@ export function documentMiddleware(
 
 			const singularName = context.contentType.info.singularName
 
-			await strapi.documents(waRoute as UID.ContentType).create({
+			await strapi.documents(waRoute).create({
 				data: {
 					relatedContentType: context.uid,
 					relatedId: result.id,
@@ -126,7 +126,7 @@ export function documentMiddleware(
 				return result
 			}
 
-			const relatedRoute = (await strapi.documents(waRoute as UID.ContentType).findFirst({
+			const relatedRoute = (await strapi.documents(waRoute).findFirst({
 				filters: {
 					relatedDocumentId: documentId,
 				},
@@ -140,7 +140,7 @@ export function documentMiddleware(
 					newParentId: parentDocumentId,
 				})
 				if (isValid) {
-					parent = (await strapi.documents(waRoute as UID.ContentType).findOne({
+					parent = (await strapi.documents(waRoute).findOne({
 						documentId: parentDocumentId,
 					})) as Route
 				}
@@ -186,7 +186,7 @@ export function documentMiddleware(
 			let routeDocumentId: string | undefined = relatedRoute?.documentId
 
 			if (!relatedRoute) {
-				const createdRoute = await strapi.documents(waRoute as UID.ContentType).create({
+				const createdRoute = await strapi.documents(waRoute).create({
 					data: {
 						relatedContentType: context.uid,
 						relatedId: result.id,
@@ -202,7 +202,7 @@ export function documentMiddleware(
 				// both draft and published route rows are updated atomically. strapi.documents().update()
 				// is draft-only and its changes may not be visible to subsequent strapi.db queries
 				// (e.g. inside cascadePathUpdates), causing children to read stale parent data.
-				await strapi.documents(waRoute as UID.ContentType).update({
+				await strapi.documents(waRoute).update({
 					documentId: relatedRoute.documentId,
 					data: routeData,
 				})
@@ -248,9 +248,7 @@ export function documentMiddleware(
 					deletedRoute.navitem?.map((item) => item.documentId),
 				) as string[]
 				for (const navItemDocumentId of navItemDocumentIds) {
-					await strapi
-						.documents(waNavItem as UID.ContentType)
-						.delete({ documentId: navItemDocumentId })
+					await strapi.documents(waNavItem).delete({ documentId: navItemDocumentId })
 				}
 			} catch (err) {
 				strapi.log.error(err)

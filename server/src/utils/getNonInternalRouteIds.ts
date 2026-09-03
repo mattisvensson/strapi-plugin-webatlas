@@ -2,7 +2,7 @@ import type { UID } from '@strapi/strapi'
 import { waRoute } from '../../../utils'
 
 export default async function getNonInternalRouteIds(): Promise<string[]> {
-	const routes = await strapi.documents(waRoute as UID.ContentType).findMany({
+	const routes = await strapi.documents(waRoute).findMany({
 		filters: {
 			type: {
 				$ne: 'internal',

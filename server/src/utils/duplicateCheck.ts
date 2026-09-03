@@ -10,7 +10,7 @@ async function checkPathExists(path: string, excludeDocumentId?: string | null):
 		filters.documentId = { $ne: excludeDocumentId }
 	}
 
-	const entity = await strapi.documents(waRoute as UID.ContentType).findFirst({ filters })
+	const entity = await strapi.documents(waRoute).findFirst({ filters })
 	return !!entity
 }
 

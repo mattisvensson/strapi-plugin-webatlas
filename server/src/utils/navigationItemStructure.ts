@@ -118,7 +118,7 @@ export async function handleItemUpdate({
 	// Internal create — link to existing route, update its path and create nav item
 	if (isCreate && item.clientModifications!.route) {
 		try {
-			const route = (await strapi.documents(waRoute as UID.ContentType).findOne({
+			const route = (await strapi.documents(waRoute).findOne({
 				documentId: item.clientModifications!.route,
 			})) as Route
 			if (!route)
@@ -162,7 +162,7 @@ export async function handleItemUpdate({
 
 	if (needsRouteUpdate || isInternal) {
 		try {
-			const route = (await strapi.documents(waRoute as UID.ContentType).findOne({
+			const route = (await strapi.documents(waRoute).findOne({
 				documentId: item.route.documentId,
 			})) as Route
 			if (!route)
