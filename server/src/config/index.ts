@@ -4,6 +4,7 @@ export default {
 		navigation: {
 			maxDepth: 1,
 		},
+		routeBlacklist: [],
 	},
 	validator() {},
 }

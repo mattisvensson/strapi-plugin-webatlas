@@ -25,6 +25,9 @@
 	"webatlas.settings.page.generate": "Generate paths from",
 	"webatlas.settings.page.generate.hint": "The selected field from the content type will be used to generate the path. Use a field that is unique and descriptive, such as a \"title\" or \"name\".",
 	"webatlas.settings.page.generate.error": "Please select a default field",
+	"webatlas.settings.page.blacklist.label": "URL Blacklist",
+	"webatlas.settings.page.blacklist.placeholder": "Enter comma-separated URL segments to block",
+	"webatlas.settings.page.blacklist.hint": "Enter a comma-separated list of URL segments that should be blocked from being used in generated paths. For example, if you enter \"admin, login\", then any generated path that starts with \"/admin\" or \"/login\" will be blocked, while paths like \"/admin-guide\" stay allowed. The blacklist only applies to routes that are created or updated after saving — it does not affect existing routes.",
 	"webatlas.settings.page.generate.warning.title": "No route source field available",
 	"webatlas.settings.page.generate.warning.description": "Please add a string field to the content type in order to use this content type with Webatlas.",
 	"webatlas.settings.page.defaultParentRoute": "Default parent path",
@@ -87,6 +90,7 @@
 	"webatlas.components.pathInfo.checking": "Checking if path is available...",
 	"webatlas.components.pathInfo.available": "Path is available",
 	"webatlas.components.pathInfo.notAvailable": "Path is not available. Replaced with",
+	"webatlas.components.pathInfo.blacklisted": "This path is blocked by the URL blacklist and cannot be saved.",
 
 	"webatlas.components.CMEditViewAside.path.input.tooltip": "The following characters are valid: A-Z, a-z, 0-9, /, -, _, $, ., +, !, *, ', (, )",
 	"webatlas.components.CMEditViewAside.path.input.label": "Path",

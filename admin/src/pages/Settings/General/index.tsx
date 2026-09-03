@@ -18,15 +18,16 @@ import { FullLoader } from '../../../components/UI'
 import { PageWrapper, ContentBox, SettingTitle } from '..'
 import ContentTypeAccordion from './ContentTypeAccordion'
 import { PLUGIN_VERSION, PLUGIN_NAME } from '../../../../../utils/pluginId'
-import { Typography } from '@strapi/design-system'
+import { Typography, Box } from '@strapi/design-system'
 import { Link } from '@strapi/design-system'
 import { ExternalLink } from '@strapi/icons'
 import pluginPermissions from '../../../permissions'
 
 type Action =
 	| { type: 'SET_DEFAULT_FIELD'; payload: { ctUid: string; field: string } }
-	| { type: 'SET_CONFIG'; payload: PluginConfig }
 	| { type: 'SET_DEFAULT_PARENT_ROUTE'; payload: { ctUid: string; parentRoute: string | null } }
+	| { type: 'SET_ROUTE_BLACKLIST'; payload: { blacklist: string[] } }
+	| { type: 'SET_CONFIG'; payload: PluginConfig }
 
 function reducer(newConfig: PluginConfig | null, action: Action): PluginConfig | null {
 	let updatedContentTypes
@@ -46,6 +47,9 @@ function reducer(newConfig: PluginConfig | null, action: Action): PluginConfig |
 					: ct,
 			)
 			return { ...newConfig, selectedContentTypes: updatedContentTypes || [] }
+		case 'SET_ROUTE_BLACKLIST':
+			if (!newConfig) return null
+			return { ...newConfig, routeBlacklist: action.payload.blacklist }
 		case 'SET_CONFIG':
 			return action.payload
 		default:
@@ -63,6 +67,7 @@ const Settings = () => {
 	const { toggleNotification } = useNotification()
 	const { formatMessage } = useIntl()
 	const [isSaving, setIsSaving] = useState(false)
+	const [blacklistInput, setBlacklistInput] = useState('')
 	const initialConfig = useRef<PluginConfig | null>(fetchedConfig)
 	const { entities, loading: entitiesLoading } = useAllEntities()
 
@@ -88,7 +93,10 @@ const Settings = () => {
 	useEffect(() => {
 		initialConfig.current = fetchedConfig
 
-		if (fetchedConfig) dispatch({ type: 'SET_CONFIG', payload: fetchedConfig })
+		if (fetchedConfig) {
+			dispatch({ type: 'SET_CONFIG', payload: fetchedConfig })
+			setBlacklistInput(fetchedConfig.routeBlacklist?.join(', ') || '')
+		}
 	}, [fetchedConfig])
 
 	useEffect(() => {
@@ -109,11 +117,12 @@ const Settings = () => {
 	async function save() {
 		if (!config || hasMissingRouteSourceField) return
 
-		console.log('Saving config:', config)
-
 		setIsSaving(true)
 		try {
-			await setConfig({ selectedContentTypes: config.selectedContentTypes })
+			await setConfig({
+				selectedContentTypes: config.selectedContentTypes,
+				routeBlacklist: config.routeBlacklist,
+			})
 			initialConfig.current = config
 
 			toggleNotification({
@@ -222,6 +231,48 @@ const Settings = () => {
 							</Link>
 						</Typography>
 					)}
+					<Box marginTop={4}>
+						<Field.Root
+							name="routeBlacklist"
+							hint={formatMessage({
+								id: getTranslation('settings.page.blacklist.hint'),
+								defaultMessage:
+									'Enter a comma-separated list of URL segments that should be blocked from being used in generated paths. For example, if you enter "admin, login", then any generated path that starts with "/admin" or "/login" will be blocked, while paths like "/admin-guide" stay allowed. The blacklist only applies to routes that are created or updated after saving — it does not affect existing routes.',
+							})}
+						>
+							<Field.Label>
+								<SettingTitle>
+									{formatMessage({
+										id: getTranslation('settings.page.blacklist.label'),
+										defaultMessage: 'URL Blacklist',
+									})}
+								</SettingTitle>
+							</Field.Label>
+							<Field.Input
+								type="text"
+								placeholder={formatMessage({
+									id: getTranslation('settings.page.blacklist.placeholder'),
+									defaultMessage: 'Enter comma-separated URL segments to block',
+								})}
+								value={blacklistInput}
+								onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+									setBlacklistInput(e.target.value)
+								}
+								onBlur={() => {
+									// Mirror the server-side normalization (normalizeRouteBlacklist) so that the
+									// stored entries match the shape of generated paths
+									const blacklist = blacklistInput
+										.split(',')
+										.map((s) => s.trim().toLowerCase().replace(/^\/+/, '').replace(/\/+$/, ''))
+										.filter(Boolean)
+
+									dispatch({ type: 'SET_ROUTE_BLACKLIST', payload: { blacklist } })
+									setBlacklistInput(blacklist.join(', '))
+								}}
+							/>
+							<Field.Hint />
+						</Field.Root>
+					</Box>
 				</ContentBox>
 				<ContentBox
 					title={formatMessage({

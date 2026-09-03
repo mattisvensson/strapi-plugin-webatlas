@@ -6,7 +6,8 @@ import { transformToUrl, PLUGIN_ID } from '../../../utils'
  * @param path The path to check for uniqueness.
  * @param routeDocumentId The ID of the route to exclude from the check.
  * @param withoutTransform If true, the path will not be transformed/normalized before checking.
- * @returns A promise that resolves to the unique path if the request is successful.
+ * @returns A promise that resolves to the unique path, or `blacklisted` if the path is blocked by
+ * the route blacklist.
  * @throws {Error} Throws an error if the request fails or the network response is not ok.
  */
 
@@ -20,7 +21,7 @@ export default async function duplicateCheck({
 	path: string
 	routeDocumentId?: string | null
 	withoutTransform?: boolean
-}): Promise<string> {
+}): Promise<{ uniquePath: string | null; blacklisted: boolean }> {
 	if (!path) throw new Error('URL is required')
 
 	try {
@@ -29,11 +30,13 @@ export default async function duplicateCheck({
 			`/${PLUGIN_ID}/checkUniquePath?path=${pathToCheck}${routeDocumentId ? `&targetRouteDocumentId=${routeDocumentId}` : ''}`,
 		)
 
+		if (data.blacklisted) return { uniquePath: null, blacklisted: true }
+
 		if (!data.uniquePath) {
 			throw new Error('Network response was not ok')
 		}
 
-		return data.uniquePath
+		return { uniquePath: data.uniquePath, blacklisted: false }
 	} catch (err: any) {
 		throw new Error('Failed to check URL uniqueness: ' + err.message)
 	}

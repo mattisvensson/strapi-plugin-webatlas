@@ -225,7 +225,14 @@ const Navigation = () => {
 		setIsSavingNavigation(true)
 
 		try {
-			await updateNavigationItemStructure(selectedNavigation.documentId, navigationItems)
+			const result = await updateNavigationItemStructure(
+				selectedNavigation.documentId,
+				navigationItems,
+			)
+
+			// The endpoint reports per-item failures in its payload instead of failing the request
+			if (result?.success === false) throw new Error(result.errors?.[0])
+
 			toggleNotification({
 				type: 'success',
 				message: formatMessage({
@@ -237,10 +244,13 @@ const Navigation = () => {
 			strapi.log.error(e)
 			toggleNotification({
 				type: 'danger',
-				message: formatMessage({
-					id: getTranslation('notification.navigation.saveNavigationFailed'),
-					defaultMessage: 'Error updating navigation item',
-				}),
+				message:
+					e instanceof Error && e.message
+						? e.message
+						: formatMessage({
+								id: getTranslation('notification.navigation.saveNavigationFailed'),
+								defaultMessage: 'Error updating navigation item',
+							}),
 			})
 		} finally {
 			await loadNavigations()

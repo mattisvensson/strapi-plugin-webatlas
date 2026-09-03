@@ -16,11 +16,13 @@ function ItemCreateComponent({
 	selectedContentType,
 	setSelectedContentType,
 	validationState,
+	isBlacklisted,
 	navItemState,
 	dispatchNavItemState,
 	path,
 	dispatchPath,
 	debouncedCheckUrl,
+	debouncedCheckBlacklist,
 	setModalType,
 	selectedNavigation,
 	actionItemParent,
@@ -155,7 +157,8 @@ function ItemCreateComponent({
 				!path.value?.trim() ||
 				!path.slug?.trim() ||
 				!navItemState.title ||
-				!navItemState.title?.trim()
+				!navItemState.title?.trim() ||
+				isBlacklisted
 			}
 		>
 			<Grid.Root gap={4}>
@@ -252,10 +255,12 @@ function ItemCreateComponent({
 							path={path}
 							dispatchPath={dispatchPath}
 							validationState={validationState}
+							isBlacklisted={isBlacklisted}
 							parentNavItem={actionItemParent}
 							navigationItems={navigationItems}
 							navigations={navigations}
 							debouncedCheckUrl={debouncedCheckUrl}
+							debouncedCheckBlacklist={debouncedCheckBlacklist}
 							route={route}
 							modalVariant="create"
 						/>

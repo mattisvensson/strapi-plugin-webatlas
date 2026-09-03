@@ -7,14 +7,26 @@ import { useState, useEffect } from 'react'
 interface PathProps {
 	validationState: ValidationState
 	replacement: string | null
+	isBlacklisted?: boolean
 }
 
-export default function PathInfo({ validationState, replacement }: PathProps) {
+export default function PathInfo({ validationState, replacement, isBlacklisted }: PathProps) {
 	const [color, setColor] = useState<string>('neutral800')
 	const [text, setText] = useState<string | null>(null)
 	const { formatMessage } = useIntl()
 
 	useEffect(() => {
+		if (isBlacklisted) {
+			setColor('danger500')
+			setText(
+				formatMessage({
+					id: getTranslation('components.pathInfo.blacklisted'),
+					defaultMessage: 'This path is blocked by the URL blacklist and cannot be saved.',
+				}),
+			)
+			return
+		}
+
 		if (validationState === 'initial') return
 		if (validationState === 'checking') {
 			setColor('neutral800')
@@ -38,7 +50,7 @@ export default function PathInfo({ validationState, replacement }: PathProps) {
 						}),
 			)
 		}
-	}, [validationState, replacement, formatMessage])
+	}, [validationState, replacement, isBlacklisted, formatMessage])
 
 	return (
 		<Box paddingTop={1}>

@@ -4,6 +4,7 @@ import type {
 	ExtendedPanelAction,
 	navItemStateAction,
 	modalSharedLogic,
+	ValidationState,
 } from '../../types'
 import { useState, useRef, useReducer, useCallback, useContext, useMemo } from 'react'
 import { ModalContext, SelectedNavigationContext } from '../../contexts'
@@ -72,7 +73,8 @@ function pathReducer(
 
 export function useModalSharedLogic() {
 	const [selectedContentType, setSelectedContentType] = useState<GroupedEntities>()
-	const [validationState, setValidationState] = useState<'initial' | 'checking' | 'done'>('initial')
+	const [validationState, setValidationState] = useState<ValidationState>('initial')
+	const [isBlacklisted, setIsBlacklisted] = useState(false)
 	// TODO: Fetch entities only once and share between modals
 	const { entities } = useAllEntities()
 	const { get } = useFetchClient()
@@ -104,6 +106,7 @@ export function useModalSharedLogic() {
 	})
 
 	const debouncedCheckUrl = useCallback(debounce(checkUrl, 500), [])
+	const debouncedCheckBlacklist = useCallback(debounce(checkBlacklist, 500), [])
 
 	const { modalType, setModalType } = useContext(ModalContext)
 	const { selectedNavigation } = useContext(SelectedNavigationContext)
@@ -122,21 +125,45 @@ export function useModalSharedLogic() {
 		dispatchPath({ type: 'SET_REPLACEMENT', payload: '' })
 
 		try {
-			const data = await duplicateCheck({
+			const { uniquePath, blacklisted } = await duplicateCheck({
 				fetchFunction: get,
 				path: url,
 				routeDocumentId,
 				withoutTransform,
 			})
 
-			if (!data || data === url) return
+			setIsBlacklisted(blacklisted)
+			if (blacklisted) return
 
-			dispatchPath({ type: 'NO_URL_CHECK', payload: data })
-			dispatchPath({ type: 'SET_REPLACEMENT', payload: data })
+			if (!uniquePath || uniquePath === url) return
+
+			dispatchPath({ type: 'NO_URL_CHECK', payload: uniquePath })
+			dispatchPath({ type: 'SET_REPLACEMENT', payload: uniquePath })
 		} catch (err) {
 			strapi.log.error(err)
 		} finally {
 			setValidationState('done')
+		}
+	}
+
+	// Kept separate from checkUrl: the blacklist has to be re-checked on every path change, while the
+	// duplicate check only runs on the guarded needsUrlCheck transitions
+	async function checkBlacklist({ url }: { url: string }) {
+		if (!url) {
+			setIsBlacklisted(false)
+			return
+		}
+
+		try {
+			const { blacklisted } = await duplicateCheck({
+				fetchFunction: get,
+				path: url,
+				withoutTransform: true,
+			})
+
+			setIsBlacklisted(blacklisted)
+		} catch (err) {
+			strapi.log.error(err)
 		}
 	}
 
@@ -147,12 +174,14 @@ export function useModalSharedLogic() {
 		entities,
 		validationState,
 		setValidationState,
+		isBlacklisted,
 		initialState,
 		navItemState,
 		dispatchNavItemState,
 		path,
 		dispatchPath,
 		debouncedCheckUrl,
+		debouncedCheckBlacklist,
 		modalType,
 		setModalType,
 		selectedNavigation,

@@ -4,7 +4,7 @@ import type {
 	NestedNavigation,
 	RouteSettings,
 } from '../../../types'
-import type { PanelPathState, PanelAction } from '../types'
+import type { PanelPathState, PanelAction, ValidationState } from '../types'
 
 export type ModalItem_VariantCreate = {
 	actionItemParent: NestedNavItem | null
@@ -24,8 +24,9 @@ export type modalSharedLogic = {
 	selectedContentType: GroupedEntities | undefined
 	setSelectedContentType: (value: GroupedEntities) => void
 	entities: GroupedEntities[]
-	validationState: 'initial' | 'checking' | 'done'
-	setValidationState: (value: 'initial' | 'checking' | 'done') => void
+	validationState: ValidationState
+	setValidationState: (value: ValidationState) => void
+	isBlacklisted: boolean
 	initialState: React.RefObject<RouteSettings>
 	navItemState: RouteSettings
 	dispatchNavItemState: React.Dispatch<any>
@@ -40,6 +41,7 @@ export type modalSharedLogic = {
 		routeDocumentId?: string | null
 		withoutTransform?: boolean
 	}) => void
+	debouncedCheckBlacklist: ({ url }: { url: string }) => void
 	modalType: string
 	setModalType: (value: string) => void
 	selectedNavigation: NestedNavigation | undefined

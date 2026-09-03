@@ -10,6 +10,8 @@ import {
 	reduceDepthOfOrphanedItems,
 	updateNavItem,
 	updateRoute,
+	assertPathAllowed,
+	getRouteBlacklist,
 } from './'
 
 export async function handleItemDeletion(navigationItems: NestedNavItem[]) {
@@ -93,6 +95,8 @@ export async function handleItemUpdate({
 	// External / wrapper create — no existing route to link, create both route and nav item
 	if (isCreate && !item.clientModifications!.route) {
 		try {
+			assertPathAllowed(item.route.path, await getRouteBlacklist())
+
 			const newRoute = await createExternalRoute({
 				title: item.route.title,
 				slug: item.route.slug,
@@ -127,6 +131,8 @@ export async function handleItemUpdate({
 				routeDocumentId: route.documentId,
 				calculatedParent,
 			})
+
+			assertPathAllowed(path, await getRouteBlacklist())
 
 			await updateRoute(route.documentId, {
 				title: item.route.title,
@@ -176,6 +182,8 @@ export async function handleItemUpdate({
 			const isOverride = path !== route.canonicalPath
 
 			if (needsRouteUpdate) {
+				assertPathAllowed(path, await getRouteBlacklist())
+
 				await updateRoute(route.documentId, {
 					title: item.clientModifications?.title || item.route.title,
 					slug,

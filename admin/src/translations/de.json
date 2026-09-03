@@ -25,6 +25,9 @@
 	"webatlas.settings.page.generate": "Generiere Pfade aus",
 	"webatlas.settings.page.generate.hint": "Das ausgewählte Feld aus dem Inhaltstyp wird verwendet, um den Pfad zu generieren. Verwenden Sie ein Feld, das einzigartig und beschreibend ist, wie z.B. \"Titel\" oder \"Name\".",
 	"webatlas.settings.page.generate.error": "Bitte wählen Sie ein Standardfeld aus",
+	"webatlas.settings.page.blacklist.label": "URL-Blacklist",
+	"webatlas.settings.page.blacklist.placeholder": "Kommagetrennte URL-Segmente eingeben, die gesperrt werden sollen",
+	"webatlas.settings.page.blacklist.hint": "Geben Sie eine kommagetrennte Liste von URL-Segmenten ein, die nicht in generierten Pfaden verwendet werden dürfen. Wenn Sie z. B. \"admin, login\" eingeben, wird jeder generierte Pfad blockiert, der mit \"/admin\" oder \"/login\" beginnt, während Pfade wie \"/admin-guide\" weiterhin erlaubt sind. Die Blacklist gilt nur für Routen, die nach dem Speichern angelegt oder geändert werden — bestehende Routen bleiben unberührt.",
 	"webatlas.settings.page.generate.warning.title": "Kein Routen-Quellfeld verfügbar",
 	"webatlas.settings.page.generate.warning.description": "Bitte fügen Sie ein String-Feld zum Inhaltstyp hinzu, um diesen Inhaltstyp mit Webatlas zu verwenden.",
 	"webatlas.settings.page.defaultParentRoute": "Standard-Elternpfad",
@@ -87,6 +90,7 @@
 	"webatlas.components.pathInfo.checking": "Überprüfe, ob der Pfad verfügbar ist...",
 	"webatlas.components.pathInfo.available": "Pfad ist verfügbar",
 	"webatlas.components.pathInfo.notAvailable": "Pfad ist nicht verfügbar. Ersetzt durch",
+	"webatlas.components.pathInfo.blacklisted": "Dieser Pfad ist durch die URL-Blacklist gesperrt und kann nicht gespeichert werden.",
 
 	"webatlas.components.CMEditViewAside.path.input.tooltip": "Die folgenden Zeichen sind gültig: A-Z, a-z, 0-9, /, -, _, $, ., +, !, *, ', (, )",
 	"webatlas.components.CMEditViewAside.path.input.label": "Pfad",

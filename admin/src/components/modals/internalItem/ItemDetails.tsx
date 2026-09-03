@@ -16,7 +16,9 @@ type ItemDetailsProps = Pick<
 	| 'path'
 	| 'dispatchPath'
 	| 'validationState'
+	| 'isBlacklisted'
 	| 'debouncedCheckUrl'
+	| 'debouncedCheckBlacklist'
 > & {
 	route: Route
 	parentNavItem?: NestedNavItem | null
@@ -32,10 +34,12 @@ export default function ItemDetails({
 	path,
 	dispatchPath,
 	validationState,
+	isBlacklisted,
 	parentNavItem,
 	navigationItems,
 	navigations,
 	debouncedCheckUrl,
+	debouncedCheckBlacklist,
 	item,
 	route,
 	modalVariant,
@@ -76,6 +80,12 @@ export default function ItemDetails({
 			dispatchPath({ type: 'SET_URL_CHECK_FLAG' })
 		}
 	}, [path.needsUrlCheck, route.documentId])
+
+	// Unlike the duplicate check, this has to run on every path change: an unchanged path can become
+	// blocked by an edited slug or by moving the item to a different parent
+	useEffect(() => {
+		debouncedCheckBlacklist({ url: path.value || '' })
+	}, [path.value])
 
 	useEffect(() => {
 		if (!path.slug) return
@@ -208,7 +218,11 @@ export default function ItemDetails({
 						</Field.Label>
 						<Field.Input name="path" value={path.value} disabled />
 					</Field.Root>
-					<PathInfo validationState={validationState} replacement={path.replacement} />
+					<PathInfo
+						validationState={validationState}
+						replacement={path.replacement}
+						isBlacklisted={isBlacklisted}
+					/>
 				</Box>
 			</Grid.Item>
 		</Grid.Root>

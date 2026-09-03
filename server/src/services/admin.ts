@@ -15,6 +15,9 @@ import {
 	getNonInternalRouteIds,
 	getRouteDescendants,
 	duplicateCheck,
+	normalizeRouteBlacklist,
+	getRouteBlacklist,
+	isBlacklistedPath,
 } from '../utils'
 
 export default ({ strapi }) => ({
@@ -30,6 +33,10 @@ export default ({ strapi }) => ({
 			})
 			const config = await pluginStore.get({ key: 'config' })
 			newConfigMerged = { ...config, ...newConfig }
+
+			if (newConfig.routeBlacklist !== undefined)
+				newConfigMerged.routeBlacklist = normalizeRouteBlacklist(newConfig.routeBlacklist)
+
 			await pluginStore.set({ key: 'config', value: newConfigMerged })
 		} catch (err) {
 			strapi.log.error(err)
@@ -232,12 +239,13 @@ export default ({ strapi }) => ({
 	async updateNavigationItemStructure(navigationId: string, navigationItems: NestedNavItem[]) {
 		if (!navigationId || !navigationItems) return
 
-		let error = false
+		const errors: string[] = []
 		let newNavItemsMap = new Map<string, NestedNavItem>()
 
 		// First pass: Validate and prepare items
 		const deletionResult = await handleItemDeletion(navigationItems)
 		if (!deletionResult.success) {
+			errors.push(...deletionResult.errors)
 			strapi.log.error('Deletion errors:', deletionResult.errors)
 		}
 
@@ -271,22 +279,27 @@ export default ({ strapi }) => ({
 				})
 
 				if (!result.success) {
+					errors.push(...result.errors)
 					strapi.log.error('Error updating item: ', item)
 				}
-			} catch (errorMsg) {
-				error = true
-				strapi.log.error('Error updating navigation item ', errorMsg)
+			} catch (err) {
+				errors.push(err instanceof Error ? err.message : String(err))
+				strapi.log.error('Error updating navigation item ', err)
 			}
 		}
 
-		return !error
+		return { success: errors.length === 0, errors }
 	},
 
 	async checkUniquePath(initialPath: string, targetRouteDocumentId: string | null = null) {
 		try {
-			return await duplicateCheck(initialPath, targetRouteDocumentId)
+			const routeBlacklist = await getRouteBlacklist()
+			if (isBlacklistedPath(initialPath, routeBlacklist)) return { blacklisted: true }
+
+			return { uniquePath: await duplicateCheck(initialPath, targetRouteDocumentId) }
 		} catch (e) {
 			strapi.log.error(e)
+			return {}
 		}
 	},
 })
