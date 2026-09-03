@@ -241,7 +241,9 @@ const Navigation = () => {
 				}),
 			})
 		} catch (e) {
-			strapi.log.error(e)
+			// console instead of strapi.log: `strapi` is not defined in the admin bundle and would
+			// throw here, swallowing the notification below
+			console.error(e)
 			toggleNotification({
 				type: 'danger',
 				message:
