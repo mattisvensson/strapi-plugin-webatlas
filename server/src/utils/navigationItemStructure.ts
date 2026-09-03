@@ -95,8 +95,6 @@ export async function handleItemUpdate({
 	// External / wrapper create — no existing route to link, create both route and nav item
 	if (isCreate && !item.clientModifications!.route) {
 		try {
-			assertPathAllowed(item.route.path, await getRouteBlacklist())
-
 			const newRoute = await createExternalRoute({
 				title: item.route.title,
 				slug: item.route.slug,
@@ -182,7 +180,7 @@ export async function handleItemUpdate({
 			const isOverride = path !== route.canonicalPath
 
 			if (needsRouteUpdate) {
-				assertPathAllowed(path, await getRouteBlacklist())
+				if (isInternal) assertPathAllowed(path, await getRouteBlacklist())
 
 				await updateRoute(route.documentId, {
 					title: item.clientModifications?.title || item.route.title,
@@ -197,11 +195,14 @@ export async function handleItemUpdate({
 		}
 	}
 
-	// Update nav item parent/order regardless of create/update since both can change position in the tree
-	await updateNavItem(item.documentId, {
-		parent: calculatedParent,
-		order: calculatedOrder,
-	})
+	// Update nav item parent/order regardless of create/update since both can change position in the
+	// tree — but not when the route update failed, since the item's position is what determines the
+	// rejected path
+	if (errors.length === 0)
+		await updateNavItem(item.documentId, {
+			parent: calculatedParent,
+			order: calculatedOrder,
+		})
 
 	return {
 		success: errors.length === 0,
