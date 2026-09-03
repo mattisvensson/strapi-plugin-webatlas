@@ -1,3 +1,5 @@
+import type { Route, StructuredNavigationVariant } from '../../../types'
+import type { UID } from '@strapi/strapi'
 import {
 	buildStructuredNavigation,
 	extractRouteAndItems,
@@ -6,8 +8,8 @@ import {
 	removeWaFields,
 	enrichWebatlasData,
 	enrichRoutePickerFields,
+	addWebatlasBreadcrumb,
 } from '../utils'
-import { StructuredNavigationVariant } from '../../../types'
 import { waRoute, waNavigation } from '../../../utils'
 
 export default ({ strapi }) => ({
@@ -17,9 +19,10 @@ export default ({ strapi }) => ({
 		populateDeepDepth: string,
 		fields: any,
 		status: 'draft' | 'published' = 'published',
+		breadcrumb: boolean = true,
 	) {
 		try {
-			const route = await strapi.documents(waRoute).findFirst({
+			const route: Route = await strapi.documents(waRoute).findFirst({
 				filters: {
 					$or: [{ path: slug }, { canonicalPath: slug }, { uidPath: slug }],
 				},
@@ -31,7 +34,7 @@ export default ({ strapi }) => ({
 
 			if (populate === 'deep') {
 				const modelObject = getFullPopulateObject(
-					route.relatedContentType,
+					route.relatedContentType as UID.Schema,
 					Number(populateDeepDepth),
 					[],
 				)
@@ -63,6 +66,9 @@ export default ({ strapi }) => ({
 			cleanEntity = removeWaFields(cleanEntity)
 
 			cleanEntity = await enrichWebatlasData(cleanEntity, route.relatedContentType)
+			if (breadcrumb) {
+				cleanEntity = await addWebatlasBreadcrumb(cleanEntity, route)
+			}
 			cleanEntity = await enrichRoutePickerFields(cleanEntity, contentTypeKey)
 
 			return {

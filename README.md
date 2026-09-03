@@ -125,8 +125,11 @@ Query parameters:
 - `populateDeepDepth` (string, optional): Depth for deep population.
 - `fields` (string, optional): Comma-separated list of fields to include in the response.
 - `status` (string, optional): `draft` or `published`. Default is `published`. Returns the draft or published version of the entity.
+- `breadcrumb` (string, optional): Pass `false` to omit the breadcrumb from the response. Enabled by default.
 
 The response contains the entity's content type and a `webatlas` object with additional information about the path, including the canonical path, uidPath and slug. The `webatlas` object is also available in the Content API responses of entities with webatlas enabled.
+
+The `webatlas` object also contains a `breadcrumb` array, ordered from the root to the requested page, with the requested page as its last entry. Each entry provides `path`, `canonicalPath`, `slug`, `uidPath` and `title`, so it can be looped over directly. The hierarchy is derived from the canonical path, which is based on the content structure — an overridden path does not change the breadcrumb's hierarchy, but each entry still carries its own `path`.
 
 #### Fetch navigation
 
