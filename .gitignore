@@ -82,7 +82,7 @@ $RECYCLE.BIN/
 ssl
 .idea
 nbproject
-.tsbuildinfo
+*.tsbuildinfo
 .eslintcache
 
 
