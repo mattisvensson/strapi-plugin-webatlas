@@ -13,7 +13,7 @@ export default async function validateRouteDependencies({
 
 	const normalizedRouteId = routeId ?? undefined
 
-	const parentRoute = await strapi.documents(waRoute as UID.ContentType).findOne({
+	const parentRoute = await strapi.documents(waRoute).findOne({
 		documentId: newParentId,
 	})
 

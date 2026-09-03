@@ -10,7 +10,7 @@ export default async function getRouteDescendants(routeId: string): Promise<stri
 
 		if (!currentId) continue
 
-		const children = await strapi.documents(waRoute as UID.ContentType).findMany({
+		const children = await strapi.documents(waRoute).findMany({
 			filters: {
 				parent: {
 					documentId: currentId,

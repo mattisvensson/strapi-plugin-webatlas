@@ -17,7 +17,7 @@ export default async function buildNavigationPath({
 
 	if (parentDocumentId) {
 		do {
-			const navItem = (await strapi.documents(waNavItem as UID.ContentType).findOne({
+			const navItem = (await strapi.documents(waNavItem).findOne({
 				documentId: parentDocumentId,
 				populate: ['route', 'parent'],
 			})) as NestedNavItem | null

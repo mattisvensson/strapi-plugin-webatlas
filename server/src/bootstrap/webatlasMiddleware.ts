@@ -24,9 +24,7 @@ export function webatlasMiddleware(strapi: Core.Strapi) {
 
 			if (externalRouteDocumentId) {
 				try {
-					await strapi
-						.documents(waRoute as UID.ContentType)
-						.delete({ documentId: externalRouteDocumentId })
+					await strapi.documents(waRoute).delete({ documentId: externalRouteDocumentId })
 				} catch (err) {
 					strapi.log.error(err)
 				}

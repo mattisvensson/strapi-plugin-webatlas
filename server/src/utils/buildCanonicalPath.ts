@@ -7,7 +7,7 @@ export default async function buildCanonicalPath(
 	parentDocumentId: string | null,
 ): Promise<string> {
 	try {
-		const parentRoute: Route | null = (await strapi.documents(waRoute as UID.ContentType).findOne({
+		const parentRoute: Route | null = (await strapi.documents(waRoute).findOne({
 			documentId: parentDocumentId,
 		})) as Route | null
 

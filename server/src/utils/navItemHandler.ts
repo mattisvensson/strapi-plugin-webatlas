@@ -6,7 +6,7 @@ async function createNavItem(data: NavItemSettings): Promise<null | NestedNavIte
 	try {
 		if (!data.route || !data.navigation) return null
 
-		const entity = await strapi.documents(waNavItem as UID.ContentType).create({
+		const entity = await strapi.documents(waNavItem).create({
 			data: {
 				navigation: data.navigation,
 				route: data.route || null,
@@ -27,7 +27,7 @@ async function updateNavItem(documentId: string, data: Pick<NavItemSettings, 'pa
 		if (data.parent !== undefined) updateData.parent = data.parent
 		if (data.order !== undefined && typeof data.order === 'number') updateData.order = data.order
 
-		return await strapi.documents(waNavItem as UID.ContentType).update({
+		return await strapi.documents(waNavItem).update({
 			documentId: documentId,
 			data: updateData,
 		})
@@ -38,7 +38,7 @@ async function updateNavItem(documentId: string, data: Pick<NavItemSettings, 'pa
 
 async function deleteNavItem(documentId: string) {
 	try {
-		await strapi.documents(waNavItem as UID.ContentType).delete({
+		await strapi.documents(waNavItem).delete({
 			documentId: documentId,
 		})
 		return true

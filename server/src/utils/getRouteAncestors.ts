@@ -6,7 +6,7 @@ export default async function getRouteAncestors(routeId: string): Promise<string
 	let currentId = routeId
 
 	while (currentId) {
-		const route = await strapi.documents(waRoute as UID.ContentType).findOne({
+		const route = await strapi.documents(waRoute).findOne({
 			documentId: currentId,
 			populate: ['parent'],
 		})

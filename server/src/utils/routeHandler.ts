@@ -4,7 +4,7 @@ import { waRoute } from '../../../utils/'
 
 async function createExternalRoute(data: RouteSettings) {
 	try {
-		return await strapi.documents(waRoute as UID.ContentType).create({
+		return await strapi.documents(waRoute).create({
 			data: {
 				title: data.title,
 				slug: data.path,
@@ -23,7 +23,7 @@ async function createExternalRoute(data: RouteSettings) {
 
 async function updateRoute(documentId: string, data: RouteSettings): Promise<Route> {
 	try {
-		const entity = (await strapi.documents(waRoute as UID.ContentType).update({
+		const entity = (await strapi.documents(waRoute).update({
 			documentId: documentId,
 			data: {
 				...data,
@@ -38,7 +38,7 @@ async function updateRoute(documentId: string, data: RouteSettings): Promise<Rou
 
 async function deleteRoute(documentId: string) {
 	try {
-		await strapi.documents(waRoute as UID.ContentType).delete({
+		await strapi.documents(waRoute).delete({
 			documentId: documentId,
 		})
 

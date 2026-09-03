@@ -40,14 +40,12 @@ export default async function cascadePathUpdates({
 				},
 			})
 
-			const existingEntry = await strapi.db
-				.query(child.relatedContentType as UID.ContentType)
-				.findOne({
-					where: { documentId: child.relatedDocumentId },
-				})
+			const existingEntry = await strapi.db.query(child.relatedContentType).findOne({
+				where: { documentId: child.relatedDocumentId },
+			})
 
 			if (existingEntry) {
-				await strapi.db.query(child.relatedContentType as UID.ContentType).updateMany({
+				await strapi.db.query(child.relatedContentType).updateMany({
 					where: { documentId: child.relatedDocumentId },
 					data: {
 						webatlas: {
