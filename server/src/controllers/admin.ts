@@ -116,7 +116,7 @@ const admin = () => ({
 			if (!path) return ctx.throw(400, 'Path is required')
 
 			const res = await getAdminService().checkUniquePath(path, targetRouteDocumentId || null)
-			return ctx.send({ uniquePath: res })
+			return ctx.send(res)
 		} catch (e) {
 			return ctx.throw(500, e)
 		}

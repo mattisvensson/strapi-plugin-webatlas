@@ -97,6 +97,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	const [selectedParent, setSelectedParent] = useState<Route | null>(null)
 	const [isOverride, setIsOverride] = useState(false)
 	const [validationState, setValidationState] = useState<ValidationState>('initial')
+	const [isBlacklisted, setIsBlacklisted] = useState(false)
 	const [initialLoadComplete, setInitialLoadComplete] = useState(false)
 	const [path, dispatchPath] = useReducer(reducer, {
 		needsUrlCheck: false,
@@ -296,14 +297,19 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		if (!path) return
 
 		try {
-			const result = await duplicateCheck({
+			const { uniquePath, blacklisted } = await duplicateCheck({
 				fetchFunction: get,
 				path,
 				routeDocumentId,
 				withoutTransform: true,
 			})
 
-			dispatchPath({ type: 'SET_CANONICALPATH', payload: result })
+			setIsBlacklisted(blacklisted)
+			if (blacklisted) return
+
+			if (!uniquePath) return
+
+			dispatchPath({ type: 'SET_CANONICALPATH', payload: uniquePath })
 		} catch (err) {
 			strapi.log.error(err)
 		}
@@ -315,17 +321,20 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		dispatchPath({ type: 'SET_REPLACEMENT', payload: '' })
 
 		try {
-			const data = await duplicateCheck({
+			const { uniquePath, blacklisted } = await duplicateCheck({
 				fetchFunction: get,
 				path,
 				routeDocumentId,
 				withoutTransform: true,
 			})
 
-			if (!data || data === path) return
+			setIsBlacklisted(blacklisted)
+			if (blacklisted) return
 
-			dispatchPath({ type: 'NO_URL_CHECK', payload: data })
-			dispatchPath({ type: 'SET_REPLACEMENT', payload: data })
+			if (!uniquePath || uniquePath === path) return
+
+			dispatchPath({ type: 'NO_URL_CHECK', payload: uniquePath })
+			dispatchPath({ type: 'SET_REPLACEMENT', payload: uniquePath })
 		} catch (err) {
 			strapi.log.error(err)
 		} finally {
@@ -373,8 +382,12 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 						config={config}
 						hasUserInteracted={hasUserInteracted}
 					/>
-					{validationState !== 'initial' && (
-						<PathInfo validationState={validationState} replacement={path.replacement} />
+					{(validationState !== 'initial' || isBlacklisted) && (
+						<PathInfo
+							validationState={validationState}
+							replacement={path.replacement}
+							isBlacklisted={isBlacklisted}
+						/>
 					)}
 				</Box>
 				<OverrideCheckbox

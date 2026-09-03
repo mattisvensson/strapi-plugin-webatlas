@@ -16,12 +16,14 @@ function ItemEditComponent({
 	setSelectedContentType,
 	entities,
 	validationState,
+	isBlacklisted,
 	initialState,
 	navItemState,
 	dispatchNavItemState,
 	path,
 	dispatchPath,
 	debouncedCheckUrl,
+	debouncedCheckBlacklist,
 	setModalType,
 	navigationItems,
 	onEdit,
@@ -128,7 +130,10 @@ function ItemEditComponent({
 			modalToOpen=""
 			currentModalType="ItemCreate"
 			currentModalMode="edit"
-			disabled={isEqual(navItemState, initialState.current) && path.value === path.initialPath}
+			disabled={
+				(isEqual(navItemState, initialState.current) && path.value === path.initialPath) ||
+				isBlacklisted
+			}
 		>
 			<Grid.Root gap={8}>
 				<Grid.Item col={6} s={12}>
@@ -169,9 +174,11 @@ function ItemEditComponent({
 						path={path}
 						dispatchPath={dispatchPath}
 						validationState={validationState}
+						isBlacklisted={isBlacklisted}
 						parentNavItem={parentNavItem}
 						navigationItems={navigationItems}
 						debouncedCheckUrl={debouncedCheckUrl}
+						debouncedCheckBlacklist={debouncedCheckBlacklist}
 						item={item}
 						route={item.route}
 						modalVariant="edit"

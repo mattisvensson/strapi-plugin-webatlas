@@ -40,6 +40,7 @@ export type ConfigContentType = {
 
 export type PluginConfig = {
 	selectedContentTypes: ConfigContentType[]
+	routeBlacklist: string[]
 	navigation: {
 		maxDepth: number
 	}

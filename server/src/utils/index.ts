@@ -22,6 +22,10 @@ import {
 } from './navigationItemStructure'
 import { enrichWebatlasData } from './enrichWebatlasData'
 import { enrichRoutePickerFields } from './enrichRoutePickerFields'
+import isBlacklistedPath from './isBlacklistedPath'
+import assertPathAllowed, { getRouteBlacklist } from './assertPathAllowed'
+import assertDescendantPathsAllowed from './assertDescendantPathsAllowed'
+import normalizeRouteBlacklist from './normalizeRouteBlacklist'
 
 export {
 	duplicateCheck,
@@ -51,4 +55,9 @@ export {
 	calculateParentAndOrder,
 	enrichWebatlasData,
 	enrichRoutePickerFields,
+	isBlacklistedPath,
+	assertPathAllowed,
+	getRouteBlacklist,
+	assertDescendantPathsAllowed,
+	normalizeRouteBlacklist,
 }

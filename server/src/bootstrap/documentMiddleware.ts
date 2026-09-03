@@ -1,4 +1,5 @@
 import type { Core, UID } from '@strapi/strapi'
+import { errors } from '@strapi/utils'
 import { transformToUrl, waRoute, waNavItem, PLUGIN_ID } from '../../../utils'
 import { ContentType, PluginConfig, Route } from '../../../types'
 import {
@@ -6,6 +7,9 @@ import {
 	buildCanonicalPath,
 	cascadePathUpdates,
 	validateRouteDependencies,
+	assertPathAllowed,
+	getRouteBlacklist,
+	assertDescendantPathsAllowed,
 } from '../utils'
 
 // types/strapi.ts (or a new types/webatlas.ts)
@@ -48,16 +52,6 @@ export function documentMiddleware(
 			const { slug, parentDocumentId, isOverride } = webatlas || {}
 			const transformedSlug = slug ? transformToUrl(slug, !isOverride) : null
 
-			const result = (await next()) as DocumentResult
-
-			if (!transformedSlug) return result
-
-			// Safety guard in case middleware fires more than once for the same document
-			const existing = await strapi.db?.query(waRoute).findOne({
-				where: { relatedDocumentId: result.documentId },
-			})
-			if (existing) return result
-
 			let parent: Route | null = null
 			let isValid = false
 			if (parentDocumentId) {
@@ -75,14 +69,33 @@ export function documentMiddleware(
 			if (!isOverride) rawPath = parent ? `${parent.path}/${transformedSlug}` : transformedSlug
 			const validatedPath = await duplicateCheck(rawPath)
 			if (!validatedPath)
-				throw new Error(`Failed to generate a unique path for slug: ${transformedSlug}`)
+				throw new errors.ApplicationError(
+					`Failed to generate a unique path for slug: ${transformedSlug}`,
+				)
 
-			const singularName = context.contentType.info.singularName
 			const title = context.params.data[ctSettings?.routeSourceField]?.trim() || transformedSlug
 			const canonicalPath = await buildCanonicalPath(
 				transformToUrl(title),
 				isValid ? parent.documentId : null,
 			)
+
+			// Check the raw paths, since the deduplication suffix of duplicateCheck would otherwise
+			// turn a blocked path into an allowed one
+			const routeBlacklist = await getRouteBlacklist()
+			assertPathAllowed(rawPath, routeBlacklist)
+			assertPathAllowed(canonicalPath, routeBlacklist)
+
+			const result = (await next()) as DocumentResult
+
+			if (!transformedSlug) return result
+
+			// Safety guard in case middleware fires more than once for the same document
+			const existing = await strapi.db?.query(waRoute).findOne({
+				where: { relatedDocumentId: result.documentId },
+			})
+			if (existing) return result
+
+			const singularName = context.contentType.info.singularName
 
 			await strapi.documents(waRoute as UID.ContentType).create({
 				data: {
@@ -138,12 +151,28 @@ export function documentMiddleware(
 			if (!isOverride) rawPath = parent ? `${parent.path}/${transformedSlug}` : transformedSlug
 			const validatedPath = await duplicateCheck(rawPath, relatedRoute?.documentId ?? null)
 
-			const result = (await next()) as DocumentResult
-
 			const title = context.params.data[ctSettings?.routeSourceField]?.trim() || slug
 			const canonicalPath = isOverride
 				? relatedRoute.path
 				: await buildCanonicalPath(transformToUrl(title), parent?.documentId)
+
+			// Check the raw paths, since the deduplication suffix of duplicateCheck would otherwise
+			// turn a blocked path into an allowed one
+			const routeBlacklist = await getRouteBlacklist()
+			assertPathAllowed(rawPath, routeBlacklist)
+			assertPathAllowed(canonicalPath, routeBlacklist)
+
+			// Children inherit the new paths, so reject the move before anything is written
+			if (relatedRoute)
+				await assertDescendantPathsAllowed({
+					validatedParentPath: validatedPath,
+					parentRouteDocumentId: relatedRoute.documentId,
+					canonicalPath,
+					isOverride: isOverride || false,
+					routeBlacklist,
+				})
+
+			const result = (await next()) as DocumentResult
 
 			const routeData: any = {
 				title,
