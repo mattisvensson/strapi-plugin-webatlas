@@ -45,9 +45,7 @@ const CMEditViewAside: PanelComponent = ({ model }: PanelComponentProps) => {
 
 	const {
 		allowedActions: { canAside },
-	} = useRBAC({
-		cmAside: pluginPermissions['cm.aside'],
-	})
+	} = useRBAC(pluginPermissions['cm.aside'])
 
 	if (
 		!canAside ||
