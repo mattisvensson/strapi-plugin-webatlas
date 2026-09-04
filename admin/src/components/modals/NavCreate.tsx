@@ -7,7 +7,7 @@ import { useIntl } from 'react-intl'
 import { getTranslation } from '../../utils'
 import { useNavigate } from 'react-router-dom'
 import { PLUGIN_ID } from '../../../../utils'
-import { useApi } from '../../hooks'
+import { useApi, useErrorMessage } from '../../hooks'
 
 export default function NavCreate() {
 	const { setModalType } = useContext(ModalContext)
@@ -18,6 +18,7 @@ export default function NavCreate() {
 	const { toggleNotification } = useNotification()
 	const navigate = useNavigate()
 	const { createNavigation } = useApi()
+	const getErrorMessage = useErrorMessage()
 
 	const onConfirm = async () => {
 		setLoading(true)
@@ -29,13 +30,16 @@ export default function NavCreate() {
 			navigate(`/plugins/${PLUGIN_ID}/navigation/${data.documentId}`)
 			setModalType('')
 		} catch (err) {
-			strapi.log.error(err)
+			console.error(err)
 			toggleNotification({
 				type: 'danger',
-				message: formatMessage({
-					id: getTranslation('notification.navigation.creationFailed'),
-					defaultMessage: 'Creation of navigation failed',
-				}),
+				message: getErrorMessage(
+					err,
+					formatMessage({
+						id: getTranslation('notification.navigation.creationFailed'),
+						defaultMessage: 'Creation of navigation failed',
+					}),
+				),
 			})
 		} finally {
 			setLoading(false)

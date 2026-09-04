@@ -6,7 +6,7 @@ const useAllEntities = () => {
 	const { fetchAllEntities } = useApi()
 	const [entities, setEntities] = useState<GroupedEntities[]>([])
 	const [loading, setLoading] = useState(true)
-	const [error, setError] = useState(null)
+	const [error, setError] = useState<unknown>(null)
 
 	useEffect(() => {
 		const fetchEntities = async () => {

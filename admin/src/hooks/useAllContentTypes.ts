@@ -6,7 +6,7 @@ const useAllContentTypes = () => {
 	const { fetchAllContentTypes } = useApi()
 	const [contentTypes, setContentTypes] = useState<ContentType[]>([])
 	const [loading, setLoading] = useState(true)
-	const [error, setError] = useState(null)
+	const [error, setError] = useState<unknown>(null)
 
 	useEffect(() => {
 		const fetchEntities = async () => {

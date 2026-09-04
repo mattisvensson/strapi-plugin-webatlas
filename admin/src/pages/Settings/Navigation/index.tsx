@@ -10,6 +10,7 @@ import { useEffect, useState, useReducer, useRef } from 'react'
 import { Field } from '@strapi/design-system'
 import { useNotification, Page } from '@strapi/strapi/admin'
 import usePluginConfig from '../../../hooks/usePluginConfig'
+import useErrorMessage from '../../../hooks/useErrorMessage'
 import type { PluginConfig } from '../../../../../types'
 import { getTranslation } from '../../../utils'
 import { useIntl } from 'react-intl'
@@ -41,6 +42,7 @@ const Settings = () => {
 	const { config: fetchedConfig, setConfig, loading, fetchError } = usePluginConfig()
 	const [config, dispatch] = useReducer(reducer, fetchedConfig)
 	const { toggleNotification } = useNotification()
+	const getErrorMessage = useErrorMessage()
 	const { formatMessage } = useIntl()
 	const [isSaving, setIsSaving] = useState(false)
 	const initialConfig = useRef<PluginConfig | null>(fetchedConfig)
@@ -55,16 +57,16 @@ const Settings = () => {
 		if (fetchError) {
 			toggleNotification({
 				type: 'danger',
-				message:
+				message: getErrorMessage(
+					fetchError,
 					formatMessage({
 						id: getTranslation('notification.error'),
 						defaultMessage: 'An error occurred',
-					}) +
-					': ' +
-					fetchError,
+					}),
+				),
 			})
 		}
-	}, [fetchError, toggleNotification, formatMessage])
+	}, [fetchError, toggleNotification, getErrorMessage, formatMessage])
 
 	async function save() {
 		if (!config) return
@@ -86,13 +88,13 @@ const Settings = () => {
 			setIsSaving(false)
 			toggleNotification({
 				type: 'danger',
-				message:
+				message: getErrorMessage(
+					err,
 					formatMessage({
 						id: getTranslation('notification.error'),
 						defaultMessage: 'An error occurred',
-					}) +
-					': ' +
-					err,
+					}),
+				),
 			})
 			console.error(err)
 		}

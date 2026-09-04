@@ -6,7 +6,7 @@ import { PLUGIN_ID } from '../../../utils'
 type UsePluginConfigResponse = {
 	config: PluginConfig | null
 	loading: boolean
-	fetchError: string | null
+	fetchError: unknown
 	setConfig: (body: Partial<PluginConfig>) => Promise<void>
 }
 
@@ -15,7 +15,7 @@ export default function usePluginConfig(): UsePluginConfigResponse {
 
 	const [config, setConfigData] = useState<PluginConfig | null>(null)
 	const [loading, setLoading] = useState<boolean>(true)
-	const [fetchError, setFetchError] = useState<string | null>(null)
+	const [fetchError, setFetchError] = useState<unknown>(null)
 
 	useEffect(() => {
 		const fetchData = async () => {
@@ -28,6 +28,7 @@ export default function usePluginConfig(): UsePluginConfigResponse {
 				let { data: config } = await get(`/${PLUGIN_ID}/config`)
 
 				if (!config || !config.selectedContentTypes) {
+					console.error(`Couldn't fetch plugin config`)
 					throw new Error(`Couldn't fetch plugin config`)
 				}
 
@@ -46,8 +47,8 @@ export default function usePluginConfig(): UsePluginConfigResponse {
 				}
 
 				setConfigData(displayConfig)
-			} catch (error: any) {
-				setFetchError(error.message)
+			} catch (error) {
+				setFetchError(error)
 			} finally {
 				setLoading(false)
 			}
