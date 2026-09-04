@@ -91,7 +91,7 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
 
 			setModalType('')
 		} catch (err) {
-			strapi.log.error(err)
+			console.error(err)
 		}
 	}
 

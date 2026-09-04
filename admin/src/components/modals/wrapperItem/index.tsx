@@ -81,7 +81,7 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
 
 			setModalType('')
 		} catch (err) {
-			strapi.log.error(err)
+			console.error(err)
 		}
 	}
 

@@ -92,7 +92,7 @@ const Navigation = () => {
 								const { data } = await get(`/content-manager/collection-types/${ct}/${id}`)
 								return { ...item, status: data.data.status }
 							} catch (err) {
-								strapi.log.error(err)
+								console.error(err)
 								return item
 							}
 						}),

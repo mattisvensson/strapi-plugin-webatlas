@@ -57,7 +57,7 @@ const CMEditViewAside: PanelComponent = ({ model }: PanelComponentProps) => {
 		return null
 
 	if (!config) {
-		strapi.log.error('CMEditViewAside: Plugin is not configured.')
+		console.error('CMEditViewAside: Plugin is not configured.')
 		return null
 	}
 
