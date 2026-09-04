@@ -8,7 +8,8 @@ import { NavModal } from '../'
 import { useIntl } from 'react-intl'
 import { getTranslation, createTempNavItemObject } from '../../../utils'
 import { FullLoader } from '../../UI'
-import { useApi } from '../../../hooks'
+import { useApi, useErrorMessage } from '../../../hooks'
+import { useNotification } from '@strapi/strapi/admin'
 import ItemDetails from './ItemDetails'
 
 function ItemCreateComponent({
@@ -35,6 +36,8 @@ function ItemCreateComponent({
 	const [loadingRoute, setLoadingRoute] = useState(true)
 	const { formatMessage } = useIntl()
 	const { getRelatedRoute } = useApi()
+	const { toggleNotification } = useNotification()
+	const getErrorMessage = useErrorMessage()
 
 	useEffect(() => {
 		async function fetchRoute() {
@@ -67,7 +70,17 @@ function ItemCreateComponent({
 
 				setRoute(relatedRoute)
 			} catch (err) {
-				strapi.log.error(err)
+				console.error(err)
+				toggleNotification({
+					type: 'danger',
+					message: getErrorMessage(
+						err,
+						formatMessage({
+							id: getTranslation('notification.navigation.relatedRouteFetchFailed'),
+							defaultMessage: 'Failed to load the route of the selected entry',
+						}),
+					),
+				})
 			} finally {
 				setLoadingRoute(false)
 			}

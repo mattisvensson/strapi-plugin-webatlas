@@ -15,76 +15,49 @@ export default function useApi() {
 	const { get, put, del, post } = useFetchClient()
 
 	const fetchAllContentTypes = async () => {
-		try {
-			const { data } = await get('/content-manager/content-types')
-			return data.data
-		} catch (error) {
-			strapi.log.error('Cannot fetch all content types:', error)
-			return []
-		}
-	}
-
-	const fetchConfiguredContentTypes = async () => {
-		try {
-			const { data: config } = await get(`/${PLUGIN_ID}/config`)
-			const configuredTypes = config?.selectedContentTypes || []
-
-			if (configuredTypes.length === 0) {
-				return []
-			}
-
-			const allContentTypes = await fetchAllContentTypes()
-			const configuredUIDs = new Set(configuredTypes.map((ct: ConfigContentType) => ct.uid))
-
-			return allContentTypes.filter((ct: ContentType) => configuredUIDs.has(ct.uid))
-		} catch (err) {
-			strapi.log.error('Error fetching configured content types:', err)
-			return []
-		}
+		const { data } = await get('/content-manager/content-types')
+		return data.data
 	}
 
 	const fetchAllEntities = async (): Promise<GroupedEntities[]> => {
-		try {
-			const { data } = await get(`/${PLUGIN_ID}/config`)
-			const contentTypes = data?.selectedContentTypes || []
+		const { data } = await get(`/${PLUGIN_ID}/config`)
+		const contentTypes = data?.selectedContentTypes || []
 
-			if (!contentTypes || contentTypes.length === 0) {
-				return []
-			}
+		if (!contentTypes || contentTypes.length === 0) {
+			return []
+		}
 
-			let entities: GroupedEntities[] = []
+		let entities: GroupedEntities[] = []
 
-			const entityResults = await Promise.allSettled(
-				contentTypes.map(async (contentType: ConfigContentType) => {
-					try {
-						const { data } = await get(
-							`/content-manager/collection-types/${contentType.uid}?pageSize=9999`,
-						)
+		const entityResults = await Promise.allSettled(
+			contentTypes.map(async (contentType: ConfigContentType) => {
+				try {
+					const { data } = await get(
+						`/content-manager/collection-types/${contentType.uid}?pageSize=9999`,
+					)
 
-						if (!data || !data.results) {
-							return null
-						}
-
-						return {
-							entities: data.results,
-							contentType,
-						}
-					} catch (err) {
-						strapi.log.error(`Cannot access entities for ${contentType.uid}:`, err)
+					if (!data || !data.results) {
 						return null
 					}
-				}),
-			)
 
-			entities = entityResults
-				.map((result) => (result.status === 'fulfilled' ? result.value : null))
-				.filter(Boolean) as GroupedEntities[]
+					return {
+						entities: data.results,
+						contentType,
+					}
+				} catch (err) {
+					// Tolerated on purpose: a content type the user cannot read must not fail the
+					// whole list
+					console.error(`Cannot access entities for ${contentType.uid}:`, err)
+					return null
+				}
+			}),
+		)
 
-			return entities
-		} catch (err) {
-			strapi.log.error('Error fetching entities:', err)
-			throw err
-		}
+		entities = entityResults
+			.map((result) => (result.status === 'fulfilled' ? result.value : null))
+			.filter(Boolean) as GroupedEntities[]
+
+		return entities
 	}
 
 	const getRelatedRoute = async (relatedDocumentId: string): Promise<Route> => {
@@ -157,7 +130,6 @@ export default function useApi() {
 
 	return {
 		fetchAllContentTypes,
-		fetchConfiguredContentTypes,
 		fetchAllEntities,
 		getRelatedRoute,
 		getRoute,

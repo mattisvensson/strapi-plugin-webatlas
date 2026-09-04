@@ -136,6 +136,7 @@
 
 	"webatlas.notification.error": "Ein Fehler ist aufgetreten",
 	"webatlas.notification.settings.saved": "Einstellungen erfolgreich gespeichert",
+	"webatlas.notification.settings.fetchFailed": "Content-Types konnten nicht geladen werden",
 	"webatlas.notification.paths.fetchFailed": "Pfade konnten nicht abgerufen werden",
 	"webatlas.notification.navigation.saveNavigationFailed": "Fehler beim Aktualisieren des Navigationselements",
 	"webatlas.notification.navigation.navigationSaved": "Navigation erfolgreich aktualisiert",
@@ -143,6 +144,8 @@
 	"webatlas.notification.navigation.notFound": "Navigation nicht gefunden. Zur Navigation weitergeleitet",
 	"webatlas.notification.navigation.creationFailed": "Erstellung der Navigation fehlgeschlagen",
 	"webatlas.notification.navigation.updateFailed": "Fehler beim Aktualisieren der Navigation",
+	"webatlas.notification.navigation.deleteFailed": "Löschen fehlgeschlagen",
+	"webatlas.notification.navigation.relatedRouteFetchFailed": "Route des ausgewählten Eintrags konnte nicht geladen werden",
 
 	"webatlas.settings.section.general": "Allgemein",
 	"webatlas.settings.section.navigation": "Navigation"

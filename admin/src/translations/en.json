@@ -136,6 +136,7 @@
 
 	"webatlas.notification.error": "An error occurred",
 	"webatlas.notification.settings.saved": "Settings saved successfully",
+	"webatlas.notification.settings.fetchFailed": "Failed to load content types",
 	"webatlas.notification.paths.fetchFailed": "Failed to fetch paths",
 	"webatlas.notification.navigation.saveNavigationFailed": "Error updating navigation item",
 	"webatlas.notification.navigation.navigationSaved": "Navigation updated successfully",
@@ -143,6 +144,8 @@
 	"webatlas.notification.navigation.notFound": "Navigation not found. Redirected to navigation",
 	"webatlas.notification.navigation.creationFailed": "Creation of navigation failed",
 	"webatlas.notification.navigation.updateFailed": "Updating navigation failed",
+	"webatlas.notification.navigation.deleteFailed": "Deleting failed",
+	"webatlas.notification.navigation.relatedRouteFetchFailed": "Failed to load the route of the selected entry",
 
 	"webatlas.settings.section.general": "General",
 	"webatlas.settings.section.navigation": "Navigation"

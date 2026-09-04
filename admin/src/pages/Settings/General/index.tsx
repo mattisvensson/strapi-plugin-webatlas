@@ -11,7 +11,12 @@ import type { ContentType, ConfigContentType, PluginConfig } from '../../../../.
 import { useEffect, useState, useReducer, useRef, useMemo } from 'react'
 import { Accordion, Field } from '@strapi/design-system'
 import { useNotification, Page } from '@strapi/strapi/admin'
-import { useAllContentTypes, usePluginConfig, useAllEntities } from '../../../hooks'
+import {
+	useAllContentTypes,
+	useErrorMessage,
+	usePluginConfig,
+	useAllEntities,
+} from '../../../hooks'
 import { getTranslation, getRouteSourceFields } from '../../../utils'
 import { useIntl } from 'react-intl'
 import { FullLoader } from '../../../components/UI'
@@ -60,16 +65,17 @@ function reducer(newConfig: PluginConfig | null, action: Action): PluginConfig |
 const Settings = () => {
 	const { config: fetchedConfig, setConfig, loading, fetchError } = usePluginConfig()
 	const [config, dispatch] = useReducer(reducer, fetchedConfig)
-	const { contentTypes: allContentTypesData } = useAllContentTypes()
+	const { contentTypes: allContentTypesData, error: contentTypesError } = useAllContentTypes()
 	const allContentTypes = allContentTypesData?.filter(
 		(ct: ContentType) => ct.pluginOptions?.webatlas?.enabled === true,
 	)
 	const { toggleNotification } = useNotification()
+	const getErrorMessage = useErrorMessage()
 	const { formatMessage } = useIntl()
 	const [isSaving, setIsSaving] = useState(false)
 	const [blacklistInput, setBlacklistInput] = useState('')
 	const initialConfig = useRef<PluginConfig | null>(fetchedConfig)
-	const { entities, loading: entitiesLoading } = useAllEntities()
+	const { entities, loading: entitiesLoading, error: entitiesError } = useAllEntities()
 
 	// Without a route source field no route can be generated, so the content type is not selectable as parent
 	const selectableEntities = useMemo(
@@ -100,19 +106,35 @@ const Settings = () => {
 	}, [fetchedConfig])
 
 	useEffect(() => {
+		const error = contentTypesError ?? entitiesError
+		if (!error) return
+
+		toggleNotification({
+			type: 'danger',
+			message: getErrorMessage(
+				error,
+				formatMessage({
+					id: getTranslation('notification.settings.fetchFailed'),
+					defaultMessage: 'Failed to load content types',
+				}),
+			),
+		})
+	}, [contentTypesError, entitiesError, toggleNotification, getErrorMessage, formatMessage])
+
+	useEffect(() => {
 		if (fetchError) {
 			toggleNotification({
 				type: 'danger',
-				message:
+				message: getErrorMessage(
+					fetchError,
 					formatMessage({
 						id: getTranslation('notification.error'),
 						defaultMessage: 'An error occurred',
-					}) +
-					': ' +
-					fetchError,
+					}),
+				),
 			})
 		}
-	}, [fetchError, toggleNotification, formatMessage])
+	}, [fetchError, toggleNotification, getErrorMessage, formatMessage])
 
 	async function save() {
 		if (!config || hasMissingRouteSourceField) return
@@ -137,13 +159,13 @@ const Settings = () => {
 			setIsSaving(false)
 			toggleNotification({
 				type: 'danger',
-				message:
+				message: getErrorMessage(
+					err,
 					formatMessage({
 						id: getTranslation('notification.error'),
 						defaultMessage: 'An error occurred',
-					}) +
-					': ' +
-					err,
+					}),
+				),
 			})
 			console.error(err)
 		}

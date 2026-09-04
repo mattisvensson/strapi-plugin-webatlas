@@ -3,7 +3,7 @@ import { useState, useContext } from 'react'
 import { ModalContext } from '../../contexts'
 import { NestedNavigation } from '../../../../types'
 import NavModal from './NavModal'
-import { useApi } from '../../hooks'
+import { useApi, useErrorMessage } from '../../hooks'
 import { useIntl } from 'react-intl'
 import { getTranslation } from '../../utils'
 import { useNotification } from '@strapi/strapi/admin'
@@ -21,6 +21,7 @@ export default function NavEdit({ item, onEdit }: NavEditProps) {
 	const { updateNavigation } = useApi()
 	const { formatMessage } = useIntl()
 	const { toggleNotification } = useNotification()
+	const getErrorMessage = useErrorMessage()
 	const initialNavState = { name: item.name, visible: item.visible }
 
 	const updateNav = async () => {
@@ -30,13 +31,16 @@ export default function NavEdit({ item, onEdit }: NavEditProps) {
 			setModalType('NavOverview')
 			onEdit({ ...item, name, visible })
 		} catch (err) {
-			strapi.log.error(err)
+			console.error(err)
 			toggleNotification({
 				type: 'danger',
-				message: formatMessage({
-					id: getTranslation('notification.navigation.updateFailed'),
-					defaultMessage: 'Updating navigation failed',
-				}),
+				message: getErrorMessage(
+					err,
+					formatMessage({
+						id: getTranslation('notification.navigation.updateFailed'),
+						defaultMessage: 'Updating navigation failed',
+					}),
+				),
 			})
 		} finally {
 			setLoading(false)

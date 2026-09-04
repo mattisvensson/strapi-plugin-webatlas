@@ -5,7 +5,8 @@ import { Trash } from '@strapi/icons'
 import { NestedNavigation, NestedNavItem } from '../../../../types'
 import { useIntl } from 'react-intl'
 import { getTranslation } from '../../utils'
-import { useApi } from '../../hooks'
+import { useApi, useErrorMessage } from '../../hooks'
+import { useNotification } from '@strapi/strapi/admin'
 
 type NavDelete = {
 	variant: 'NavDelete'
@@ -28,6 +29,8 @@ export default function Delete({ variant, item, onDelete }: DeleteProps) {
 	const { setModalType } = useContext(ModalContext)
 	const { formatMessage } = useIntl()
 	const { deleteNavigation } = useApi()
+	const { toggleNotification } = useNotification()
+	const getErrorMessage = useErrorMessage()
 
 	const handleDelete = async () => {
 		try {
@@ -45,7 +48,17 @@ export default function Delete({ variant, item, onDelete }: DeleteProps) {
 				onDelete(editedItem)
 			}
 		} catch (err) {
-			strapi.log.error(err)
+			console.error(err)
+			toggleNotification({
+				type: 'danger',
+				message: getErrorMessage(
+					err,
+					formatMessage({
+						id: getTranslation('notification.navigation.deleteFailed'),
+						defaultMessage: 'Deleting failed',
+					}),
+				),
+			})
 		}
 
 		setModalType(closeModalState.current)

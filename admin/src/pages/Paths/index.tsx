@@ -9,7 +9,7 @@
 import type { Route } from '../../../../types'
 import type { RouteSortKey } from '../../types'
 import { useState, useEffect } from 'react'
-import { useApi } from '../../hooks'
+import { useApi, useErrorMessage } from '../../hooks'
 import { FullLoader } from '../../components/UI'
 import { getTranslation } from '../../utils'
 import { useIntl } from 'react-intl'
@@ -27,6 +27,7 @@ const Paths = () => {
 	const { getAllRoutes } = useApi()
 	const { formatMessage } = useIntl()
 	const { toggleNotification } = useNotification()
+	const getErrorMessage = useErrorMessage()
 
 	const [allRoutes, setAllRoutes] = useState<Route[]>([])
 	const [routes, setRoutes] = useState<Route[]>([])
@@ -75,10 +76,13 @@ const Paths = () => {
 				console.error('Failed to fetch paths:', err)
 				toggleNotification({
 					type: 'danger',
-					message: formatMessage({
-						id: getTranslation('notification.paths.fetchFailed'),
-						defaultMessage: 'Failed to fetch paths',
-					}),
+					message: getErrorMessage(
+						err,
+						formatMessage({
+							id: getTranslation('notification.paths.fetchFailed'),
+							defaultMessage: 'Failed to fetch paths',
+						}),
+					),
 				})
 			} finally {
 				setLoading(false)

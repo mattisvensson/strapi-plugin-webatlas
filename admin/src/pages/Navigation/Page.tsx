@@ -24,7 +24,7 @@ import {
 import { EmptyBox, Center, FullLoader } from '../../components/UI'
 import { ModalContext, SelectedNavigationContext } from '../../contexts'
 import type { NestedNavigation, NestedNavItem } from '../../../../types'
-import { useApi, usePluginConfig } from '../../hooks/'
+import { useApi, useErrorMessage, usePluginConfig } from '../../hooks/'
 import { getTranslation } from '../../utils'
 import { useIntl } from 'react-intl'
 import { useNotification, useFetchClient } from '@strapi/strapi/admin'
@@ -74,6 +74,7 @@ const Navigation = () => {
 
 	const { formatMessage } = useIntl()
 	const { toggleNotification } = useNotification()
+	const getErrorMessage = useErrorMessage()
 	const { get } = useFetchClient()
 	const { navigationId } = useParams()
 	const navigate = useNavigate()
@@ -123,13 +124,16 @@ const Navigation = () => {
 			cachedNavigations.current = updatedNavigations
 			switchNavigation(selectedNav, updatedNavigations)
 		} catch (error) {
-			strapi.log.error('Error fetching navigations: ', error)
+			console.error('Error fetching navigations: ', error)
 			toggleNotification({
 				type: 'danger',
-				message: formatMessage({
-					id: getTranslation('notification.navigation.fetchFailed'),
-					defaultMessage: 'Failed to fetch navigations',
-				}),
+				message: getErrorMessage(
+					error,
+					formatMessage({
+						id: getTranslation('notification.navigation.fetchFailed'),
+						defaultMessage: 'Failed to fetch navigations',
+					}),
+				),
 			})
 		}
 	}
@@ -241,18 +245,19 @@ const Navigation = () => {
 				}),
 			})
 		} catch (e) {
-			// console instead of strapi.log: `strapi` is not defined in the admin bundle and would
-			// throw here, swallowing the notification below
 			console.error(e)
 			toggleNotification({
 				type: 'danger',
-				message:
+				message: getErrorMessage(
+					e,
+					// The per-item failures of updateNavigationItemStructure arrive as a local Error
 					e instanceof Error && e.message
 						? e.message
 						: formatMessage({
 								id: getTranslation('notification.navigation.saveNavigationFailed'),
 								defaultMessage: 'Error updating navigation item',
 							}),
+				),
 			})
 		} finally {
 			await loadNavigations()
