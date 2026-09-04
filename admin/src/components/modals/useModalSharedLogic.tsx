@@ -140,7 +140,7 @@ export function useModalSharedLogic() {
 			dispatchPath({ type: 'NO_URL_CHECK', payload: uniquePath })
 			dispatchPath({ type: 'SET_REPLACEMENT', payload: uniquePath })
 		} catch (err) {
-			strapi.log.error(err)
+			console.error(err)
 		} finally {
 			setValidationState('done')
 		}
@@ -163,7 +163,7 @@ export function useModalSharedLogic() {
 
 			setIsBlacklisted(blacklisted)
 		} catch (err) {
-			strapi.log.error(err)
+			console.error(err)
 		}
 	}
 

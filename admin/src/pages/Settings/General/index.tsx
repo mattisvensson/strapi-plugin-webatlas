@@ -145,7 +145,7 @@ const Settings = () => {
 					': ' +
 					err,
 			})
-			strapi.log.error(err)
+			console.error(err)
 		}
 	}
 

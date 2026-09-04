@@ -72,7 +72,7 @@ const Paths = () => {
 				setAllRoutes(data)
 				setRoutes(data)
 			} catch (err) {
-				strapi.log.error('Failed to fetch paths:', err)
+				console.error('Failed to fetch paths:', err)
 				toggleNotification({
 					type: 'danger',
 					message: formatMessage({
