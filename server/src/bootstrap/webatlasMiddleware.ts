@@ -6,28 +6,23 @@ export function webatlasMiddleware(strapi: Core.Strapi) {
 		if (context.uid !== waNavItem) return next()
 
 		if (context.action === 'delete') {
+			// Read the route before the nav item is gone, so the external route it owns can be
+			// deleted with it
 			let externalRouteDocumentId: string | null = null
-			try {
-				const navItem = await strapi.db?.query(waNavItem).findOne({
-					where: { documentId: context.params.documentId },
-					populate: ['route'],
-				})
 
-				if (navItem?.route?.type === 'external') {
-					externalRouteDocumentId = navItem.route.documentId
-				}
-			} catch (err) {
-				strapi.log.error(err)
+			const navItem = await strapi.db?.query(waNavItem).findOne({
+				where: { documentId: context.params.documentId },
+				populate: ['route'],
+			})
+
+			if (navItem?.route?.type === 'external') {
+				externalRouteDocumentId = navItem.route.documentId
 			}
 
 			const result = await next()
 
 			if (externalRouteDocumentId) {
-				try {
-					await strapi.documents(waRoute).delete({ documentId: externalRouteDocumentId })
-				} catch (err) {
-					strapi.log.error(err)
-				}
+				await strapi.documents(waRoute).delete({ documentId: externalRouteDocumentId })
 			}
 
 			return result

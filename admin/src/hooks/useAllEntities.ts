@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import useApi from './useApi'
 import { GroupedEntities } from '../../../types'
+import { isAbortError } from '../utils'
 
 const useAllEntities = () => {
 	const { fetchAllEntities } = useApi()
@@ -15,7 +16,8 @@ const useAllEntities = () => {
 
 				setEntities(result)
 				setLoading(false)
-			} catch (err: any) {
+			} catch (err) {
+				if (isAbortError(err)) return
 				setError(err)
 				setLoading(false)
 			}

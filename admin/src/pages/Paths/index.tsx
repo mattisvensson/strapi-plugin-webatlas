@@ -11,7 +11,7 @@ import type { RouteSortKey } from '../../types'
 import { useState, useEffect } from 'react'
 import { useApi, useErrorMessage } from '../../hooks'
 import { FullLoader } from '../../components/UI'
-import { getTranslation } from '../../utils'
+import { getTranslation, isAbortError } from '../../utils'
 import { useIntl } from 'react-intl'
 import { useNotification, Page } from '@strapi/strapi/admin'
 import PageWrapper from './PageWrapper'
@@ -73,6 +73,8 @@ const Paths = () => {
 				setAllRoutes(data)
 				setRoutes(data)
 			} catch (err) {
+				if (isAbortError(err)) return
+
 				console.error('Failed to fetch paths:', err)
 				toggleNotification({
 					type: 'danger',

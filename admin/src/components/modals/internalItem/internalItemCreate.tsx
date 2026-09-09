@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { useModalSharedLogic } from '../useModalSharedLogic'
 import { NavModal } from '../'
 import { useIntl } from 'react-intl'
-import { getTranslation, createTempNavItemObject } from '../../../utils'
+import { getTranslation, createTempNavItemObject, isAbortError } from '../../../utils'
 import { FullLoader } from '../../UI'
 import { useApi, useErrorMessage } from '../../../hooks'
 import { useNotification } from '@strapi/strapi/admin'
@@ -70,6 +70,8 @@ function ItemCreateComponent({
 
 				setRoute(relatedRoute)
 			} catch (err) {
+				if (isAbortError(err)) return
+
 				console.error(err)
 				toggleNotification({
 					type: 'danger',

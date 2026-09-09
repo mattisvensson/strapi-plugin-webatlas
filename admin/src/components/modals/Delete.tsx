@@ -1,10 +1,10 @@
 import { ModalContext } from '../../contexts'
-import { useContext, useRef } from 'react'
+import { useContext, useRef, useState } from 'react'
 import { Dialog, Typography, Button } from '@strapi/design-system'
 import { Trash } from '@strapi/icons'
 import { NestedNavigation, NestedNavItem } from '../../../../types'
 import { useIntl } from 'react-intl'
-import { getTranslation } from '../../utils'
+import { getTranslation, isAbortError } from '../../utils'
 import { useApi, useErrorMessage } from '../../hooks'
 import { useNotification } from '@strapi/strapi/admin'
 
@@ -31,8 +31,10 @@ export default function Delete({ variant, item, onDelete }: DeleteProps) {
 	const { deleteNavigation } = useApi()
 	const { toggleNotification } = useNotification()
 	const getErrorMessage = useErrorMessage()
+	const [isDeleting, setIsDeleting] = useState(false)
 
 	const handleDelete = async () => {
+		setIsDeleting(true)
 		try {
 			if (variant === 'NavDelete') {
 				await deleteNavigation(item.documentId)
@@ -48,6 +50,8 @@ export default function Delete({ variant, item, onDelete }: DeleteProps) {
 				onDelete(editedItem)
 			}
 		} catch (err) {
+			if (isAbortError(err)) return
+
 			console.error(err)
 			toggleNotification({
 				type: 'danger',
@@ -119,7 +123,18 @@ export default function Delete({ variant, item, onDelete }: DeleteProps) {
 						</Button>
 					</Dialog.Cancel>
 					<Dialog.Action>
-						<Button variant="danger-light" onClick={() => handleDelete()} startIcon={<Trash />}>
+						<Button
+							variant="danger-light"
+							disabled={isDeleting}
+							// Dialog.Action closes the dialog on click, which unmounts this component and
+							// makes useFetchClient abort the running request. preventDefault keeps it open;
+							// handleDelete closes it once the request finished.
+							onClick={(e: React.MouseEvent) => {
+								e.preventDefault()
+								handleDelete()
+							}}
+							startIcon={<Trash />}
+						>
 							{formatMessage({
 								id: getTranslation('modal.delete.confirmText'),
 								defaultMessage: 'Yes, delete',

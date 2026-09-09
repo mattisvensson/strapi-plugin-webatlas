@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { ContentType, PluginConfig } from '../../../types'
 import { useFetchClient } from '@strapi/strapi/admin'
 import { PLUGIN_ID } from '../../../utils'
+import { isAbortError } from '../utils'
 
 type UsePluginConfigResponse = {
 	config: PluginConfig | null
@@ -48,6 +49,7 @@ export default function usePluginConfig(): UsePluginConfigResponse {
 
 				setConfigData(displayConfig)
 			} catch (error) {
+				if (isAbortError(error)) return
 				setFetchError(error)
 			} finally {
 				setLoading(false)

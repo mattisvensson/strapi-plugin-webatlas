@@ -6,6 +6,7 @@ import type {
 	PluginConfig,
 	StructuredNavigationVariant,
 } from '../../../types'
+import { errors } from '@strapi/utils'
 import { transformToUrl, waRoute, waNavigation, waNavItem, PLUGIN_ID } from '../../../utils'
 import {
 	handleItemDeletion,
@@ -24,24 +25,17 @@ export default ({ strapi }) => ({
 	async updateConfig(newConfig: Partial<PluginConfig>) {
 		if (!newConfig) return
 
-		let newConfigMerged: PluginConfig
+		const pluginStore = await strapi.store({
+			type: 'plugin',
+			name: PLUGIN_ID,
+		})
+		const config = await pluginStore.get({ key: 'config' })
+		const newConfigMerged: PluginConfig = { ...config, ...newConfig }
 
-		try {
-			const pluginStore = await strapi.store({
-				type: 'plugin',
-				name: PLUGIN_ID,
-			})
-			const config = await pluginStore.get({ key: 'config' })
-			newConfigMerged = { ...config, ...newConfig }
+		if (newConfig.routeBlacklist !== undefined)
+			newConfigMerged.routeBlacklist = normalizeRouteBlacklist(newConfig.routeBlacklist)
 
-			if (newConfig.routeBlacklist !== undefined)
-				newConfigMerged.routeBlacklist = normalizeRouteBlacklist(newConfig.routeBlacklist)
-
-			await pluginStore.set({ key: 'config', value: newConfigMerged })
-		} catch (err) {
-			strapi.log.error(err)
-			return "Error. Couldn't update config"
-		}
+		await pluginStore.set({ key: 'config', value: newConfigMerged })
 
 		// TODO: Is it necessary/intended to delete/mark invalid routes here?
 		// if (newConfigMerged.selectedContentTypes) {
@@ -87,153 +81,119 @@ export default ({ strapi }) => ({
 	},
 
 	async getRoute(documentId: string) {
-		try {
-			return await strapi.documents(waRoute).findOne({
-				documentId: documentId,
-			})
-		} catch (e) {
-			strapi.log.error(e)
-		}
+		return await strapi.documents(waRoute).findOne({
+			documentId: documentId,
+		})
 	},
 
 	async getAllRoutes() {
-		try {
-			const entities = await strapi.documents(waRoute).findMany()
-			return entities
-		} catch (e) {
-			strapi.log.error(e)
-		}
+		return await strapi.documents(waRoute).findMany()
 	},
 
 	async getRelatedRoute(documentId: string) {
-		try {
-			return await strapi.db?.query(waRoute).findOne({
-				where: {
-					relatedDocumentId: documentId,
-				},
-				populate: ['parent'],
-			})
-		} catch (e) {
-			strapi.log.error(e)
-		}
+		return await strapi.db?.query(waRoute).findOne({
+			where: {
+				relatedDocumentId: documentId,
+			},
+			populate: ['parent'],
+		})
 	},
 
 	async getProhibitedRouteIds(documentId: string | undefined) {
-		try {
-			let route: Route | null = null
-			if (documentId) {
-				route = (await strapi.documents(waRoute).findOne({
-					documentId: documentId,
-				})) as Route | null
-			}
-
-			const descendants = route?.documentId ? await getRouteDescendants(route.documentId) : []
-			const nonInternalRouteIds = await getNonInternalRouteIds()
-
-			const prohibitedRouteIds = [...descendants, ...nonInternalRouteIds]
-			route?.documentId && prohibitedRouteIds.push(route.documentId)
-
-			return prohibitedRouteIds
-		} catch (e) {
-			strapi.log.error(e)
+		let route: Route | null = null
+		if (documentId) {
+			route = (await strapi.documents(waRoute).findOne({
+				documentId: documentId,
+			})) as Route | null
 		}
+
+		const descendants = route?.documentId ? await getRouteDescendants(route.documentId) : []
+		const nonInternalRouteIds = await getNonInternalRouteIds()
+
+		const prohibitedRouteIds = [...descendants, ...nonInternalRouteIds]
+		route?.documentId && prohibitedRouteIds.push(route.documentId)
+
+		return prohibitedRouteIds
 	},
 
 	async getNavigation(documentId?: string, variant?: StructuredNavigationVariant | 'namesOnly') {
-		try {
-			let navigation = null
+		let navigation = null
 
-			if (variant === 'namesOnly') {
-				if (documentId) {
-					return await strapi.documents(waNavigation).findOne({
-						documentId: documentId,
-						select: ['documentId', 'name', 'slug', 'visible'],
-					})
-				}
-				return await strapi.documents(waNavigation).findMany({
+		if (variant === 'namesOnly') {
+			if (documentId) {
+				return await strapi.documents(waNavigation).findOne({
+					documentId: documentId,
 					select: ['documentId', 'name', 'slug', 'visible'],
 				})
 			}
-
-			if (documentId) {
-				navigation = await strapi.documents(waNavigation).findOne({
-					documentId: documentId,
-					populate: ['items', 'items.route', 'items.parent'],
-				})
-
-				if (!navigation) throw new Error('Navigation not found')
-
-				if (variant) navigation = buildStructuredNavigation(navigation, variant)
-			} else {
-				navigation = await strapi.documents(waNavigation).findMany({
-					populate: ['items', 'items.route', 'items.parent'],
-				})
-
-				if (!navigation) throw new Error('Navigation not found')
-
-				if (variant) {
-					navigation = navigation.map((nav: NestedNavigation) =>
-						buildStructuredNavigation(nav, variant),
-					)
-				}
-			}
-
-			return navigation
-		} catch (e) {
-			strapi.log.error(e)
+			return await strapi.documents(waNavigation).findMany({
+				select: ['documentId', 'name', 'slug', 'visible'],
+			})
 		}
+
+		if (documentId) {
+			navigation = await strapi.documents(waNavigation).findOne({
+				documentId: documentId,
+				populate: ['items', 'items.route', 'items.parent'],
+			})
+
+			if (!navigation) throw new errors.NotFoundError('Navigation not found')
+
+			if (variant) navigation = buildStructuredNavigation(navigation, variant)
+		} else {
+			navigation = await strapi.documents(waNavigation).findMany({
+				populate: ['items', 'items.route', 'items.parent'],
+			})
+
+			if (!navigation) throw new errors.NotFoundError('Navigation not found')
+
+			if (variant) {
+				navigation = navigation.map((nav: NestedNavigation) =>
+					buildStructuredNavigation(nav, variant),
+				)
+			}
+		}
+
+		return navigation
 	},
 
 	async createNavigation(name: string, visible: boolean) {
-		try {
-			return await strapi.documents(waNavigation).create({
-				data: {
-					name: name,
-					slug: transformToUrl(name),
-					visible: visible,
-				},
-			})
-		} catch (e) {
-			strapi.log.error(e)
-		}
+		return await strapi.documents(waNavigation).create({
+			data: {
+				name: name,
+				slug: transformToUrl(name),
+				visible: visible,
+			},
+		})
 	},
 
 	async updateNavigation(documentId: string, data: NavigationInput) {
-		try {
-			const entity = await strapi.documents(waNavigation).update({
-				documentId: documentId,
-				data: {
-					name: data.name,
-					visible: data.visible,
-				},
-			})
-			return entity
-		} catch (e) {
-			strapi.log.error(e)
-		}
+		return await strapi.documents(waNavigation).update({
+			documentId: documentId,
+			data: {
+				name: data.name,
+				visible: data.visible,
+			},
+		})
 	},
 
 	async deleteNavigation(documentId: string) {
-		try {
-			const navigation = await strapi.documents(waNavigation).findOne({
-				documentId: documentId,
-				populate: ['items'],
+		const navigation = await strapi.documents(waNavigation).findOne({
+			documentId: documentId,
+			populate: ['items'],
+		})
+
+		if (!navigation) throw new errors.NotFoundError('Navigation not found')
+
+		for (const item of navigation.items) {
+			await strapi.documents(waNavItem).delete({
+				documentId: item.documentId,
 			})
-
-			if (!navigation) throw new Error('Navigation not found')
-
-			for (const item of navigation.items) {
-				await strapi.documents(waNavItem).delete({
-					documentId: item.documentId,
-				})
-			}
-
-			return await strapi.documents(waNavigation).delete({
-				documentId: documentId,
-			})
-		} catch (e) {
-			strapi.log.error(e)
 		}
+
+		return await strapi.documents(waNavigation).delete({
+			documentId: documentId,
+		})
 	},
 
 	async updateNavigationItemStructure(navigationId: string, navigationItems: NestedNavItem[]) {
@@ -292,14 +252,9 @@ export default ({ strapi }) => ({
 	},
 
 	async checkUniquePath(initialPath: string, targetRouteDocumentId: string | null = null) {
-		try {
-			const routeBlacklist = await getRouteBlacklist()
-			if (isBlacklistedPath(initialPath, routeBlacklist)) return { blacklisted: true }
+		const routeBlacklist = await getRouteBlacklist()
+		if (isBlacklistedPath(initialPath, routeBlacklist)) return { blacklisted: true }
 
-			return { uniquePath: await duplicateCheck(initialPath, targetRouteDocumentId) }
-		} catch (e) {
-			strapi.log.error(e)
-			return {}
-		}
+		return { uniquePath: await duplicateCheck(initialPath, targetRouteDocumentId) }
 	},
 })

@@ -1,44 +1,37 @@
+import { errors } from '@strapi/utils'
 import { getClientService } from '../utils/pluginHelpers'
 import type { Core } from '@strapi/strapi'
 
 const client = ({ strapi }: { strapi: Core.Strapi }) => ({
 	async getEntityByPath(ctx) {
-		try {
-			const { slug, populate, populateDeepDepth, fields, status, breadcrumb } = ctx.query
+		const { slug, populate, populateDeepDepth, fields, status, breadcrumb } = ctx.query
 
-			if (!slug) return ctx.throw(400, 'Slug is required')
+		if (!slug) throw new errors.ValidationError('Slug is required')
 
-			const entity = await getClientService().getEntityByPath(
-				slug,
-				populate,
-				populateDeepDepth,
-				fields,
-				status,
-				breadcrumb !== 'false',
-			)
+		const entity = await getClientService().getEntityByPath(
+			slug,
+			populate,
+			populateDeepDepth,
+			fields,
+			status,
+			breadcrumb !== 'false',
+		)
 
-			if (!entity) return ctx.throw(404, 'Entity not found')
+		if (!entity) throw new errors.NotFoundError('Entity not found')
 
-			return ctx.send(entity)
-		} catch (e) {
-			ctx.throw(500, e)
-		}
+		return ctx.send(entity)
 	},
 	async getNavigation(ctx) {
-		try {
-			const { id, name, slug, documentId, variant } = ctx.query
+		const { id, name, slug, documentId, variant } = ctx.query
 
-			if (!id && !name && !slug && !documentId)
-				return ctx.throw(400, 'Navigation id, name, slug or documentId is required')
+		if (!id && !name && !slug && !documentId)
+			throw new errors.ValidationError('Navigation id, name, slug or documentId is required')
 
-			const navigation = await getClientService().getNavigation(id, name, slug, documentId, variant)
+		const navigation = await getClientService().getNavigation(id, name, slug, documentId, variant)
 
-			if (!navigation) return ctx.throw(404, 'Navigation not found')
+		if (!navigation) throw new errors.NotFoundError('Navigation not found')
 
-			return ctx.send(navigation)
-		} catch (e) {
-			return ctx.throw(500, e)
-		}
+		return ctx.send(navigation)
 	},
 })
 

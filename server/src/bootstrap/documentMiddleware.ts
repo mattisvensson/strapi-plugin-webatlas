@@ -221,37 +221,33 @@ export function documentMiddleware(
 		if (context.action === 'delete') {
 			const result = await next()
 
-			try {
-				const relatedDocumentId = context.params.documentId
+			const relatedDocumentId = context.params.documentId
 
-				const deletedRoute = await strapi.db.query(waRoute).delete({
-					where: { relatedDocumentId: relatedDocumentId },
-					populate: ['navitem'],
+			const deletedRoute = await strapi.db.query(waRoute).delete({
+				where: { relatedDocumentId: relatedDocumentId },
+				populate: ['navitem'],
+			})
+
+			// Check if related documentId is present in plugin config in defaultParentRoute of any content type, and if so, remove it
+			const pluginStore = strapi.store({ type: 'plugin', name: PLUGIN_ID })
+			const currentConfig = (await pluginStore.get({ key: 'config' })) as PluginConfig
+			const selectedContentTypes = currentConfig.selectedContentTypes.map((ct) =>
+				ct.defaultParentRoute === relatedDocumentId ? { ...ct, defaultParentRoute: null } : ct,
+			)
+			if (selectedContentTypes.some((ct, i) => ct !== currentConfig.selectedContentTypes[i])) {
+				await pluginStore.set({
+					key: 'config',
+					value: { ...currentConfig, selectedContentTypes },
 				})
+			}
 
-				// Check if related documentId is present in plugin config in defaultParentRoute of any content type, and if so, remove it
-				const pluginStore = strapi.store({ type: 'plugin', name: PLUGIN_ID })
-				const currentConfig = (await pluginStore.get({ key: 'config' })) as PluginConfig
-				const selectedContentTypes = currentConfig.selectedContentTypes.map((ct) =>
-					ct.defaultParentRoute === relatedDocumentId ? { ...ct, defaultParentRoute: null } : ct,
-				)
-				if (selectedContentTypes.some((ct, i) => ct !== currentConfig.selectedContentTypes[i])) {
-					await pluginStore.set({
-						key: 'config',
-						value: { ...currentConfig, selectedContentTypes },
-					})
-				}
+			if (!deletedRoute?.documentId) return result
 
-				if (!deletedRoute?.documentId) return result
-
-				const navItemDocumentIds = Array.from(
-					deletedRoute.navitem?.map((item) => item.documentId),
-				) as string[]
-				for (const navItemDocumentId of navItemDocumentIds) {
-					await strapi.documents(waNavItem).delete({ documentId: navItemDocumentId })
-				}
-			} catch (err) {
-				strapi.log.error(err)
+			const navItemDocumentIds = Array.from(
+				deletedRoute.navitem?.map((item) => item.documentId),
+			) as string[]
+			for (const navItemDocumentId of navItemDocumentIds) {
+				await strapi.documents(waNavItem).delete({ documentId: navItemDocumentId })
 			}
 
 			return result

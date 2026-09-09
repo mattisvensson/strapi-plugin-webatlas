@@ -1,4 +1,5 @@
 import type { UID } from '@strapi/strapi'
+import { errors } from '@strapi/utils'
 import { getRouteDescendants, getNonInternalRouteIds } from '.'
 import { waRoute } from '../../../utils'
 
@@ -18,11 +19,11 @@ export default async function validateRouteDependencies({
 	})
 
 	if (!parentRoute) {
-		throw new Error(`Parent route not found: ${newParentId}`)
+		throw new errors.ApplicationError(`Parent route not found: ${newParentId}`)
 	}
 
 	if (parentRoute?.type === 'external') {
-		throw new Error('External routes cannot have children')
+		throw new errors.ApplicationError('External routes cannot have children')
 	}
 
 	if (!normalizedRouteId) return true
@@ -35,7 +36,7 @@ export default async function validateRouteDependencies({
 		descendants.includes(newParentId) ||
 		nonInternalRouteIds.includes(newParentId)
 	) {
-		throw new Error(
+		throw new errors.ApplicationError(
 			`Circular dependency detected: Cannot set route ${newParentId} as parent of ${normalizedRouteId}`,
 		)
 	}

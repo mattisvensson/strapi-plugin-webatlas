@@ -25,7 +25,7 @@ import { EmptyBox, Center, FullLoader } from '../../components/UI'
 import { ModalContext, SelectedNavigationContext } from '../../contexts'
 import type { NestedNavigation, NestedNavItem } from '../../../../types'
 import { useApi, useErrorMessage, usePluginConfig } from '../../hooks/'
-import { getTranslation } from '../../utils'
+import { getTranslation, isAbortError } from '../../utils'
 import { useIntl } from 'react-intl'
 import { useNotification, useFetchClient } from '@strapi/strapi/admin'
 import {
@@ -124,6 +124,8 @@ const Navigation = () => {
 			cachedNavigations.current = updatedNavigations
 			switchNavigation(selectedNav, updatedNavigations)
 		} catch (error) {
+			if (isAbortError(error)) return
+
 			console.error('Error fetching navigations: ', error)
 			toggleNotification({
 				type: 'danger',
@@ -474,8 +476,17 @@ const Navigation = () => {
 						item={actionItem as NestedNavigation}
 						onDelete={(deletedItem) => {
 							cachedNavigations.current = null
-							setNavigations((navs) => navs.filter((nav) => nav.id !== deletedItem.id))
-							navigate(`/plugins/${PLUGIN_ID}/navigation`)
+							const remaining = navigations.filter((nav) => nav.id !== deletedItem.id)
+							setNavigations(remaining)
+
+							// Nur umleiten, wenn die gelöschte Navigation gerade angezeigt wird
+							if (deletedItem.documentId === navigationId) {
+								navigate(
+									remaining.length > 0
+										? `/plugins/${PLUGIN_ID}/navigation/${remaining[0].documentId}`
+										: `/plugins/${PLUGIN_ID}/navigation`,
+								)
+							}
 						}}
 					/>
 				)}

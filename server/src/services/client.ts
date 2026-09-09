@@ -21,63 +21,58 @@ export default ({ strapi }) => ({
 		status: 'draft' | 'published' = 'published',
 		breadcrumb: boolean = true,
 	) {
-		try {
-			const route: Route = await strapi.documents(waRoute).findFirst({
-				filters: {
-					$or: [{ path: slug }, { canonicalPath: slug }, { uidPath: slug }],
-				},
-			})
+		const route: Route = await strapi.documents(waRoute).findFirst({
+			filters: {
+				$or: [{ path: slug }, { canonicalPath: slug }, { uidPath: slug }],
+			},
+		})
 
-			if (!route) return null
+		if (!route) return null
 
-			let populateObject: string | Record<string, boolean | Record<string, any>> = populate
+		let populateObject: string | Record<string, boolean | Record<string, any>> = populate
 
-			if (populate === 'deep') {
-				const modelObject = getFullPopulateObject(
-					route.relatedContentType as UID.Schema,
-					Number(populateDeepDepth),
-					[],
-				)
-				if (typeof modelObject === 'object' && 'populate' in modelObject) {
-					populateObject = modelObject.populate
-				}
-			}
-
-			const contentTypeObject: any = Object.entries(strapi.contentTypes).find(
-				([key, value]) => key === route.relatedContentType,
+		if (populate === 'deep') {
+			const modelObject = getFullPopulateObject(
+				route.relatedContentType as UID.Schema,
+				Number(populateDeepDepth),
+				[],
 			)
-
-			if (!contentTypeObject) {
-				return null
+			if (typeof modelObject === 'object' && 'populate' in modelObject) {
+				populateObject = modelObject.populate
 			}
+		}
 
-			const [contentTypeKey, contentType] = contentTypeObject
+		const contentTypeObject: any = Object.entries(strapi.contentTypes).find(
+			([key, value]) => key === route.relatedContentType,
+		)
 
-			const entity = await strapi.documents(route.relatedContentType).findOne({
-				documentId: route.relatedDocumentId,
-				populate: populateObject,
-				fields: fields,
-				status: status,
-			})
+		if (!contentTypeObject) {
+			return null
+		}
 
-			if (!entity) return null
+		const [contentTypeKey, contentType] = contentTypeObject
 
-			let cleanEntity = cleanRootKeys(entity)
-			cleanEntity = removeWaFields(cleanEntity)
+		const entity = await strapi.documents(route.relatedContentType).findOne({
+			documentId: route.relatedDocumentId,
+			populate: populateObject,
+			fields: fields,
+			status: status,
+		})
 
-			cleanEntity = await enrichWebatlasData(cleanEntity, route.relatedContentType)
-			if (breadcrumb) {
-				cleanEntity = await addWebatlasBreadcrumb(cleanEntity, route)
-			}
-			cleanEntity = await enrichRoutePickerFields(cleanEntity, contentTypeKey)
+		if (!entity) return null
 
-			return {
-				contentType: contentType.info.singularName,
-				...cleanEntity,
-			}
-		} catch (e) {
-			strapi.log.error(e)
-			return e
+		let cleanEntity = cleanRootKeys(entity)
+		cleanEntity = removeWaFields(cleanEntity)
+
+		cleanEntity = await enrichWebatlasData(cleanEntity, route.relatedContentType)
+		if (breadcrumb) {
+			cleanEntity = await addWebatlasBreadcrumb(cleanEntity, route)
+		}
+		cleanEntity = await enrichRoutePickerFields(cleanEntity, contentTypeKey)
+
+		return {
+			contentType: contentType.info.singularName,
+			...cleanEntity,
 		}
 	},
 
@@ -88,72 +83,67 @@ export default ({ strapi }) => ({
 		documentId: string,
 		variant: StructuredNavigationVariant = 'nested',
 	) {
-		try {
-			let navigation = null
+		let navigation = null
 
-			const populateObject = ['items', 'items.parent', 'items.route']
+		const populateObject = ['items', 'items.parent', 'items.route']
 
-			const lookupMethods = [
-				{
-					condition: documentId,
-					lookup: () =>
-						strapi.documents(waNavigation).findOne({
-							documentId: documentId,
-							populate: populateObject,
-						}),
-					name: 'documentId',
-				},
-				{
-					condition: slug,
-					lookup: () =>
-						strapi.db?.query(waNavigation).findOne({
-							where: { slug: slug },
-							populate: populateObject,
-						}),
-					name: 'slug',
-				},
-				{
-					condition: name,
-					lookup: () =>
-						strapi.db?.query(waNavigation).findOne({
-							where: { name: name },
-							populate: populateObject,
-						}),
-					name: 'name',
-				},
-				{
-					condition: id,
-					lookup: () =>
-						strapi.db?.query(waNavigation).findOne({
-							where: { id: id },
-							populate: populateObject,
-						}),
-					name: 'id',
-				},
-			]
+		const lookupMethods = [
+			{
+				condition: documentId,
+				lookup: () =>
+					strapi.documents(waNavigation).findOne({
+						documentId: documentId,
+						populate: populateObject,
+					}),
+				name: 'documentId',
+			},
+			{
+				condition: slug,
+				lookup: () =>
+					strapi.db?.query(waNavigation).findOne({
+						where: { slug: slug },
+						populate: populateObject,
+					}),
+				name: 'slug',
+			},
+			{
+				condition: name,
+				lookup: () =>
+					strapi.db?.query(waNavigation).findOne({
+						where: { name: name },
+						populate: populateObject,
+					}),
+				name: 'name',
+			},
+			{
+				condition: id,
+				lookup: () =>
+					strapi.db?.query(waNavigation).findOne({
+						where: { id: id },
+						populate: populateObject,
+					}),
+				name: 'id',
+			},
+		]
 
-			for (const method of lookupMethods) {
-				if (method.condition && !navigation) {
-					try {
-						navigation = await method.lookup()
-					} catch (error) {
-						strapi.log.error(`Navigation lookup by ${method.name} failed:`, error)
-					}
+		for (const method of lookupMethods) {
+			if (method.condition && !navigation) {
+				try {
+					navigation = await method.lookup()
+				} catch (error) {
+					strapi.log.error(`Navigation lookup by ${method.name} failed:`, error)
 				}
 			}
-
-			if (!navigation) return null
-
-			const structured = buildStructuredNavigation(navigation, variant)
-
-			if (!structured) return null
-
-			const entityNavigation = extractRouteAndItems(structured.items)
-
-			return { ...structured, items: entityNavigation }
-		} catch (e) {
-			strapi.log.error(e)
-			return e
 		}
+
+		if (!navigation) return null
+
+		const structured = buildStructuredNavigation(navigation, variant)
+
+		if (!structured) return null
+
+		const entityNavigation = extractRouteAndItems(structured.items)
+
+		return { ...structured, items: entityNavigation }
 	},
 })
