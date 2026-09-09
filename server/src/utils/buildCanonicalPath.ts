@@ -6,17 +6,11 @@ export default async function buildCanonicalPath(
 	slug: string,
 	parentDocumentId: string | null,
 ): Promise<string> {
-	try {
-		const parentRoute: Route | null = (await strapi.documents(waRoute).findOne({
-			documentId: parentDocumentId,
-		})) as Route | null
+	const parentRoute: Route | null = (await strapi.documents(waRoute).findOne({
+		documentId: parentDocumentId,
+	})) as Route | null
 
-		const parentCanonicalPath = parentRoute?.canonicalPath || ''
-		const canonicalPath = `${parentCanonicalPath ? parentCanonicalPath + '/' : ''}${slug}`
+	const parentCanonicalPath = parentRoute?.canonicalPath || ''
 
-		return canonicalPath
-	} catch (err) {
-		strapi.log.error('Error building canonical path:', err)
-		return slug // Fallback to just the slug
-	}
+	return `${parentCanonicalPath ? parentCanonicalPath + '/' : ''}${slug}`
 }

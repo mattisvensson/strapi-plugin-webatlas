@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import useApi from './useApi'
 import { ContentType } from '../../../types'
+import { isAbortError } from '../utils'
 
 const useAllContentTypes = () => {
 	const { fetchAllContentTypes } = useApi()
@@ -15,7 +16,8 @@ const useAllContentTypes = () => {
 
 				setContentTypes(result)
 				setLoading(false)
-			} catch (err: any) {
+			} catch (err) {
+				if (isAbortError(err)) return
 				setError(err)
 				setLoading(false)
 			}

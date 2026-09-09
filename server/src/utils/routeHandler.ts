@@ -3,50 +3,35 @@ import type { Route, RouteSettings } from '../../../types'
 import { waRoute } from '../../../utils/'
 
 async function createExternalRoute(data: RouteSettings) {
-	try {
-		return await strapi.documents(waRoute).create({
-			data: {
-				title: data.title,
-				slug: data.path,
-				path: data.path,
-				relatedContentType: '',
-				relatedId: 0,
-				relatedDocumentId: '',
-				uidPath: '',
-				type: data.type || 'external',
-			},
-		})
-	} catch (e) {
-		strapi.log.error(e)
-	}
+	return await strapi.documents(waRoute).create({
+		data: {
+			title: data.title,
+			slug: data.path,
+			path: data.path,
+			relatedContentType: '',
+			relatedId: 0,
+			relatedDocumentId: '',
+			uidPath: '',
+			type: data.type || 'external',
+		},
+	})
 }
 
 async function updateRoute(documentId: string, data: RouteSettings): Promise<Route> {
-	try {
-		const entity = (await strapi.documents(waRoute).update({
-			documentId: documentId,
-			data: {
-				...data,
-			},
-		})) as Route
-
-		return entity
-	} catch (e) {
-		strapi.log.error(e)
-	}
+	return (await strapi.documents(waRoute).update({
+		documentId: documentId,
+		data: {
+			...data,
+		},
+	})) as Route
 }
 
 async function deleteRoute(documentId: string) {
-	try {
-		await strapi.documents(waRoute).delete({
-			documentId: documentId,
-		})
+	await strapi.documents(waRoute).delete({
+		documentId: documentId,
+	})
 
-		return true
-	} catch (e) {
-		strapi.log.error(e)
-		return false
-	}
+	return true
 }
 
 export { createExternalRoute, updateRoute, deleteRoute }

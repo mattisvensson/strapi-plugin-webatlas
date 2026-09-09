@@ -6,6 +6,7 @@ import createTempNavItemObject from './createTempNavItemObject'
 import findParentNavItem from './findParentNavItem'
 import buildBreadcrumbString from './buildBreadcrumbString'
 import getRouteSourceFields from './getRouteSourceFields'
+import isAbortError from './isAbortError'
 
 export {
 	debounce,
@@ -17,4 +18,5 @@ export {
 	findParentNavItem,
 	buildBreadcrumbString,
 	getRouteSourceFields,
+	isAbortError,
 }
