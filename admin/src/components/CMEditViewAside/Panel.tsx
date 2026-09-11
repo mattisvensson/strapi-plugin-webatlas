@@ -111,7 +111,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	})
 	const hasUserChangedField = useRef(false)
 	const hasUserInteracted = useRef(false)
-	const initialPath = useRef('')
+	const initialRouteData = useRef<Route | null>(null)
 	const prevSourceValueRef = useRef<string | null>(null)
 	const routeSourceField = config?.routeSourceField
 	const sourceFieldValue = routeSourceField ? values[routeSourceField] || '' : ''
@@ -148,6 +148,16 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 			parentDocumentId: selectedParent?.documentId || null,
 			slug: isOverride ? overridePath : slug,
 		}
+
+		if (
+			initialRouteData.current?.isOverride === isOverride &&
+			data.path === initialRouteData.current?.path &&
+			data.parentDocumentId === (initialRouteData.current?.parent?.documentId ?? null)
+		) {
+			onChange('webatlas', undefined) // Clear the webatlas field to avoid unnecessary updates
+			return
+		}
+
 		if (hasUserChangedField.current || hasUserInteracted.current) {
 			onChange('webatlas', data)
 		}
@@ -210,15 +220,28 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	// Initiate path check
 	useEffect(() => {
 		if (!initialLoadComplete) return
-		if (path.needsUrlCheck && path.value) {
-			if (path.uidPath === path.value || initialPath.current === path.value) return
-			debouncedCheckPath(path.value, route?.documentId || null)
+		const pathToCheck = isOverride ? path.overridePath : path.value
+		// In override mode the entry's own path is stored in `path`, otherwise in `uidPath`
+		const initialPathToCompare = isOverride
+			? initialRouteData.current?.path
+			: initialRouteData.current?.uidPath
+		if (path.needsUrlCheck && pathToCheck) {
+			if (path.uidPath === pathToCheck || initialPathToCompare === pathToCheck) return
+			debouncedCheckPath(pathToCheck, route?.documentId || null)
 			dispatchPath({ type: 'SET_URL_CHECK_FLAG' })
 		} else {
 			setValidationState('idle')
 			dispatchPath({ type: 'SET_REPLACEMENT', payload: null })
 		}
-	}, [path.needsUrlCheck, path.value, path.uidPath, route, initialLoadComplete])
+	}, [
+		path.needsUrlCheck,
+		path.value,
+		path.uidPath,
+		path.overridePath,
+		route,
+		initialLoadComplete,
+		isOverride,
+	])
 
 	// Fetch related route on initial load
 	useEffect(() => {
@@ -232,7 +255,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 				const route = await getRelatedRoute(initialValues.documentId)
 				if (!route) return
 
-				initialPath.current = route.uidPath
+				initialRouteData.current = route
 
 				setRoute(route)
 				setIsOverride(route.isOverride || false)
@@ -334,6 +357,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 			if (!uniquePath || uniquePath === path) return
 
 			dispatchPath({ type: 'NO_URL_CHECK', payload: uniquePath })
+			if (isOverride) dispatchPath({ type: 'SET_OVERRIDEPATH', payload: uniquePath })
 			dispatchPath({ type: 'SET_REPLACEMENT', payload: uniquePath })
 		} catch (err) {
 			console.error(err)
