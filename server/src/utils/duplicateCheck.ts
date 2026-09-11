@@ -1,5 +1,4 @@
 import { waRoute } from '../../../utils'
-import type { UID } from '@strapi/strapi'
 
 async function checkPathExists(path: string, excludeDocumentId?: string | null): Promise<boolean> {
 	const filters: any = {
