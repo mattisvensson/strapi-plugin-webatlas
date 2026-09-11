@@ -2,7 +2,7 @@ import type { Entity, GroupedEntities, Route } from '../../../../../types'
 import type { ModalItem_VariantCreate } from '../../../types'
 import { SingleSelect, SingleSelectOption, Box, Divider, Grid, Field } from '@strapi/design-system'
 import { withModalSharedLogic } from '../withModalSharedLogic'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useModalSharedLogic } from '../useModalSharedLogic'
 import { NavModal } from '../'
 import { useIntl } from 'react-intl'
@@ -38,6 +38,20 @@ function ItemCreateComponent({
 	const { getRelatedRoute } = useApi()
 	const { toggleNotification } = useNotification()
 	const getErrorMessage = useErrorMessage()
+
+	const sortedEntities = useMemo(() => {
+		if (!selectedContentType || !selectedContentType.entities) return []
+
+		return [...selectedContentType.entities].sort((a, b) => {
+			const field = selectedContentType.contentType.routeSourceField
+			if (!field) return 0
+
+			const aValue = String(a[field] ?? '')
+			const bValue = String(b[field] ?? '')
+
+			return aValue.localeCompare(bValue, undefined, { sensitivity: 'base', numeric: true })
+		})
+	}, [selectedContentType])
 
 	useEffect(() => {
 		async function fetchRoute() {
@@ -243,7 +257,7 @@ function ItemCreateComponent({
 								}
 							>
 								{selectedContentType &&
-									selectedContentType.entities?.map((entity: Entity) => {
+									sortedEntities.map((entity: Entity) => {
 										if (!selectedContentType.contentType.routeSourceField) return null
 										return (
 											<SingleSelectOption key={entity.id} value={entity.documentId}>
