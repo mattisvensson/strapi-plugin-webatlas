@@ -418,6 +418,8 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 					isOverride={isOverride}
 					setIsOverride={(val) => {
 						hasUserInteracted.current = true
+						if (val && path.overridePath)
+							dispatchPath({ type: 'SET_URL_CHECK_FLAG', payload: true })
 						setIsOverride(val)
 					}}
 					disabledCondition={!canCreate && !canUpdate}
