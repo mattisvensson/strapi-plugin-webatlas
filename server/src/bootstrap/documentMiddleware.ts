@@ -151,7 +151,12 @@ export function documentMiddleware(
 			if (!isOverride) rawPath = parent ? `${parent.path}/${transformedSlug}` : transformedSlug
 			const validatedPath = await duplicateCheck(rawPath, relatedRoute?.documentId ?? null)
 
-			const title = context.params.data[ctSettings?.routeSourceField]?.trim() || slug
+			// Partial updates (path/parent change, publish) omit the source field, so keep the
+			// stored route title instead of falling back to the URL-shaped slug
+			const sourceValue = ctSettings?.routeSourceField
+				? context.params.data[ctSettings.routeSourceField]?.trim()
+				: undefined
+			const title = sourceValue || relatedRoute?.title || slug
 			const canonicalPath = isOverride
 				? relatedRoute.path
 				: await buildCanonicalPath(transformToUrl(title), parent?.documentId)
