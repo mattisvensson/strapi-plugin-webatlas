@@ -66,10 +66,11 @@ function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 
 const Panel = ({ config }: { config: ConfigContentType }) => {
 	const { form, model } = useContentManagerContext()
-	const { initialValues, values, onChange } = form as {
+	const { initialValues, values, onChange, isSubmitting } = form as {
 		initialValues: Record<string, any>
 		values: Record<string, any>
 		onChange: (eventOrPath: React.ChangeEvent<any> | string, value?: any) => void
+		isSubmitting: boolean
 	}
 	const { getRelatedRoute, getAllRoutes, getProhibitedRouteIds } = useApi()
 	const { formatMessage } = useIntl()
@@ -109,6 +110,8 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		slug: '',
 		overridePath: '',
 	})
+	const [routeRefreshKey, setRouteRefreshKey] = useState(0)
+	const wasSubmitting = useRef(false)
 	const hasUserChangedField = useRef(false)
 	const hasUserInteracted = useRef(false)
 	const initialRouteData = useRef<Route | null>(null)
@@ -152,7 +155,8 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		if (
 			initialRouteData.current?.isOverride === isOverride &&
 			data.path === initialRouteData.current?.path &&
-			data.parentDocumentId === (initialRouteData.current?.parent?.documentId ?? null)
+			data.parentDocumentId === (initialRouteData.current?.parent?.documentId ?? null) &&
+			sourceFieldValue.trim() === (initialRouteData.current?.title ?? '')
 		) {
 			onChange('webatlas', undefined) // Clear the webatlas field to avoid unnecessary updates
 			return
@@ -284,7 +288,20 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 			}
 		}
 		fetchRelatedRute()
-	}, [config])
+	}, [config, routeRefreshKey])
+
+	// The form keeps its initialValues after a save, so a finished submit (save, publish or
+	// unpublish) is what triggers reloading the route snapshot. Without it, the initialRouteData.current would be stale and the
+	// code keeps running against the state the edit view was opened with.
+	useEffect(() => {
+		if (isSubmitting) {
+			wasSubmitting.current = true
+			return
+		}
+		if (!wasSubmitting.current) return
+		wasSubmitting.current = false
+		setRouteRefreshKey((key) => key + 1)
+	}, [isSubmitting])
 
 	// set selected parent based on initial value
 	useEffect(() => {
