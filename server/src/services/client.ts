@@ -20,6 +20,7 @@ export default ({ strapi }) => ({
 		fields: any,
 		status: 'draft' | 'published' = 'published',
 		breadcrumb: boolean = true,
+		auth?: any,
 	) {
 		const route: Route = await strapi.documents(waRoute).findFirst({
 			filters: {
@@ -52,16 +53,33 @@ export default ({ strapi }) => ({
 
 		const [contentTypeKey, contentType] = contentTypeObject
 
+		// Validate and sanitize like the Strapi core controllers do, so private fields, passwords and
+		// relations the requester has no find permission for can neither be requested nor returned.
+		// sanitize.query does not pass auth to the populate sanitizer, so populate is sanitized separately.
+		// The generated deep populate object may contain private relations, which validation would reject,
+		// so only user-supplied populate values are validated. Sanitizing strips them from both.
+		await strapi.contentAPI.validate.query(
+			{ populate: populate === 'deep' ? undefined : populate, fields },
+			contentType,
+			{ auth },
+		)
+		const sanitizedQuery = await strapi.contentAPI.sanitize.query({ fields }, contentType, { auth })
+		const sanitizedPopulate = populateObject
+			? await strapi.contentAPI.sanitize.populate(populateObject, contentType, { auth })
+			: undefined
+
 		const entity = await strapi.documents(route.relatedContentType).findOne({
 			documentId: route.relatedDocumentId,
-			populate: populateObject,
-			fields: fields,
+			populate: sanitizedPopulate,
+			fields: sanitizedQuery.fields,
 			status: status,
 		})
 
 		if (!entity) return null
 
-		let cleanEntity = cleanRootKeys(entity)
+		const sanitizedEntity = await strapi.contentAPI.sanitize.output(entity, contentType, { auth })
+
+		let cleanEntity = cleanRootKeys(sanitizedEntity)
 		cleanEntity = removeWaFields(cleanEntity)
 
 		cleanEntity = await enrichWebatlasData(cleanEntity, route.relatedContentType)

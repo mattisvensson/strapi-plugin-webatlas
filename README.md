@@ -114,6 +114,15 @@ The RoutePicker custom field allows you to select a route from the existing rout
 
 Webatlas provides two API endpoints. One to fetch routes and one to fetch navigations.
 
+#### Permissions
+
+The endpoints use the Users & Permissions plugin like any other Strapi API endpoint. In **Settings → Users & Permissions plugin → Roles**, configure the role that calls the API (e.g. `Public`, or the role of your API token):
+
+- Under **Webatlas**, enable `getEntityByPath` and/or `getNavigation`.
+- Enable `find` for every content type that is referenced through a relation and should be included when using `populate`. Relations to content types without `find` permission are removed from the response, private fields are never returned.
+
+Only enable `find` for content types whose entries are meant to be public, since it also exposes the regular `/api/<content-type>` endpoint.
+
 #### Fetch route
 
 `GET /api/webatlas/path`
