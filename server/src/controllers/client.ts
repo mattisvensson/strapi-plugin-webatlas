@@ -7,6 +7,8 @@ const client = ({ strapi }: { strapi: Core.Strapi }) => ({
 		const { slug, populate, populateDeepDepth, fields, status, breadcrumb } = ctx.query
 
 		if (!slug) throw new errors.ValidationError('Slug is required')
+		if (status !== undefined && status !== 'draft' && status !== 'published')
+			throw new errors.ValidationError('Status must be "draft" or "published"')
 
 		const entity = await getClientService().getEntityByPath(
 			slug,

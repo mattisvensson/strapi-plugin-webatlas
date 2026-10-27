@@ -122,7 +122,7 @@ The endpoints are protected like any other Strapi API endpoint. Grant the follow
 - Enable `findOne` (collection types) or `find` (single types) for every content type with webatlas enabled whose entries should be fetchable via `/api/webatlas/path`. Without this permission, the endpoint responds with `404`.
 - Enable `find` for every content type that is referenced through a relation and should be included when using `populate`. Relations to content types without `find` permission are removed from the response, private fields are never returned.
 
-Only enable `find` and `findOne` for content types whose entries are meant to be public, since they also expose the regular `/api/<content-type>` endpoints.
+Only enable `find` and `findOne` for content types whose entries are meant to be public, since they also expose the regular `/api/<content-type>` endpoints. Like with the Strapi REST API, anyone who can read a content type can also fetch its drafts by passing `status=draft`.
 
 To keep your content types private, leave the `Public` role untouched and grant the permissions to an API token instead. Make sure to allow the `getEntityByPath` and `getNavigation` permissions for the API token.
 
