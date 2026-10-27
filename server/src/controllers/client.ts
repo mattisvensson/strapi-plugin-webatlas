@@ -15,6 +15,7 @@ const client = ({ strapi }: { strapi: Core.Strapi }) => ({
 			fields,
 			status,
 			breadcrumb !== 'false',
+			ctx.state.auth,
 		)
 
 		if (!entity) throw new errors.NotFoundError('Entity not found')
