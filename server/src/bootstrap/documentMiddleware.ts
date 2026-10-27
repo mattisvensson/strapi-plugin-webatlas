@@ -52,6 +52,10 @@ export function documentMiddleware(
 			const { slug, parentDocumentId, isOverride } = webatlas || {}
 			const transformedSlug = slug ? transformToUrl(slug, !isOverride) : null
 
+			// The route source field is not required, so an entry can be created without a slug.
+			// No route is created in that case, it is created on a later update once a slug exists.
+			if (!transformedSlug) return next()
+
 			let parent: Route | null = null
 			let isValid = false
 			if (parentDocumentId) {
@@ -86,8 +90,6 @@ export function documentMiddleware(
 			assertPathAllowed(canonicalPath, routeBlacklist)
 
 			const result = (await next()) as DocumentResult
-
-			if (!transformedSlug) return result
 
 			// Safety guard in case middleware fires more than once for the same document
 			const existing = await strapi.db?.query(waRoute).findOne({
