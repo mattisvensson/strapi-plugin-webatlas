@@ -10,10 +10,14 @@ const client = ({ strapi }: { strapi: Core.Strapi }) => ({
 		if (status !== undefined && status !== 'draft' && status !== 'published')
 			throw new errors.ValidationError('Status must be "draft" or "published"')
 
+		const depth = populateDeepDepth === undefined ? 5 : Number(populateDeepDepth)
+		if (!Number.isInteger(depth) || depth < 1 || depth > 10)
+			throw new errors.ValidationError('populateDeepDepth must be a number between 1 and 10')
+
 		const entity = await getClientService().getEntityByPath(
 			slug,
 			populate,
-			populateDeepDepth,
+			depth,
 			fields,
 			status,
 			breadcrumb !== 'false',

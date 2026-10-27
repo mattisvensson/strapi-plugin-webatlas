@@ -16,7 +16,7 @@ export default ({ strapi }) => ({
 	async getEntityByPath(
 		slug: string,
 		populate: string,
-		populateDeepDepth: string,
+		populateDeepDepth: number,
 		fields: any,
 		status: 'draft' | 'published' = 'published',
 		breadcrumb: boolean = true,
@@ -35,12 +35,14 @@ export default ({ strapi }) => ({
 		if (populate === 'deep') {
 			const modelObject = getFullPopulateObject(
 				route.relatedContentType as UID.Schema,
-				Number(populateDeepDepth),
+				populateDeepDepth,
 				[],
 			)
-			if (typeof modelObject === 'object' && 'populate' in modelObject) {
-				populateObject = modelObject.populate
-			}
+			// Without populatable attributes (or at depth 1) there is nothing to populate
+			populateObject =
+				typeof modelObject === 'object' && 'populate' in modelObject
+					? modelObject.populate
+					: undefined
 		}
 
 		const contentTypeObject: any = Object.entries(strapi.contentTypes).find(
