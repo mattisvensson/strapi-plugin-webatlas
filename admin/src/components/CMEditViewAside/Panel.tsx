@@ -65,7 +65,7 @@ function reducer(state: PanelPathState, action: PanelAction): PanelPathState {
 }
 
 const Panel = ({ config }: { config: ConfigContentType }) => {
-	const { form, model } = useContentManagerContext()
+	const { form, model, contentType } = useContentManagerContext()
 	const { initialValues, values, onChange, isSubmitting } = form as {
 		initialValues: Record<string, any>
 		values: Record<string, any>
@@ -119,6 +119,10 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	const routeSourceField = config?.routeSourceField
 	const sourceFieldValue = routeSourceField ? values[routeSourceField] || '' : ''
 	const initialSourceFieldValue = routeSourceField ? initialValues[routeSourceField] || '' : ''
+	// A required source field cannot be left empty, so warning about a missing path would be noise
+	const isSourceFieldRequired = !!(
+		routeSourceField && contentType?.attributes?.[routeSourceField]?.required
+	)
 
 	const latestCheckPathRef = useRef<typeof checkPath>(checkPath)
 	latestCheckPathRef.current = checkPath
@@ -185,7 +189,11 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 		}
 
 		if (!sourceFieldValue) {
-			dispatchPath({ type: 'NO_URL_CHECK', payload: '' })
+			dispatchPath({ type: 'NO_URL_CHECK', payload: initialRouteData.current?.path ?? '' })
+			dispatchPath({
+				type: 'SET_CANONICALPATH',
+				payload: initialRouteData.current?.canonicalPath ?? '',
+			})
 			return
 		}
 
@@ -398,7 +406,13 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 			<Flex direction="column" alignItems="stretch" gap={1}>
 				{!route && (
 					<>
-						<NewPathInfo />
+						<NewPathInfo
+							hasSlug={
+								!!(isOverride ? path.overridePath : sourceFieldValue.trim()) ||
+								(!isOverride && isSourceFieldRequired)
+							}
+							routeSourceField={routeSourceField}
+						/>
 						<Divider marginTop={2} marginBottom={2} />
 					</>
 				)}

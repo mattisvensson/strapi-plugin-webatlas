@@ -99,6 +99,7 @@
 	"webatlas.components.CMEditViewAside.path.overrideCheckbox": "Automatische Pfad-Generierung überschreiben",
 	"webatlas.components.CMEditViewAside.path.uidPath.hint": "Permanenter UID-Pfad, kann nicht geändert werden",
 	"webatlas.components.CMEditViewAside.path.newPathInfo": "Ein neuer Pfad wird beim Speichern dieses Eintrags erstellt.",
+	"webatlas.components.CMEditViewAside.path.noPathInfo": "Es wird kein Pfad erstellt, solange das Feld \"{field}\" leer ist. Füllen Sie es aus oder verwenden Sie die Überschreibungsoption, um einen benutzerdefinierten Pfad festzulegen.",
 	"webatlas.components.CMEditViewAside.path.input.noSourceField": "Verwenden Sie die Überschreibungsoption, um einen benutzerdefinierten Pfad festzulegen.",
 	"webatlas.components.CMEditViewAside.path.input.parentSelect.label": "Platzieren unter",
 	"webatlas.components.CMEditViewAside.path.input.parentSelect.rootPath": "Keine (Stammverzeichnis)",

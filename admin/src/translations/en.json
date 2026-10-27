@@ -99,6 +99,7 @@
 	"webatlas.components.CMEditViewAside.path.overrideCheckbox": "Override automatic path generation",
 	"webatlas.components.CMEditViewAside.path.uidPath.hint": "Permanent UID path, cannot be changed",
 	"webatlas.components.CMEditViewAside.path.newPathInfo": "A new path will be created upon saving this entry.",
+	"webatlas.components.CMEditViewAside.path.noPathInfo": "No path will be created while the \"{field}\" field is empty. Fill it in or use the override option to set a custom path.",
 	"webatlas.components.CMEditViewAside.path.input.noSourceField": "Use the override option to set a custom Path.",
 	"webatlas.components.CMEditViewAside.path.input.parentSelect.label": "Place under",
 	"webatlas.components.CMEditViewAside.path.input.parentSelect.rootPath": "None (root path)",
