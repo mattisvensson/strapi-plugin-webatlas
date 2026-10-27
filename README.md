@@ -134,7 +134,7 @@ Query parameters:
 
 - `slug` (string, required): The slug/path to fetch the route for. This can either be the generated path from webatlas, the uId path or the canonical path.
 - `populate` (string, optional): Comma-separated list of relations to populate. Use `deep` to populate all relations in any depth.
-- `populateDeepDepth` (string, optional): Depth for deep population.
+- `populateDeepDepth` (string, optional): Depth for deep population, between `1` and `10`. Default is `5`.
 - `fields` (string, optional): Comma-separated list of fields to include in the response.
 - `status` (string, optional): `draft` or `published`. Default is `published`. Returns the draft or published version of the entity.
 - `breadcrumb` (string, optional): Pass `false` to omit the breadcrumb from the response. Enabled by default.
