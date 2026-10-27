@@ -53,6 +53,16 @@ export default ({ strapi }) => ({
 
 		const [contentTypeKey, contentType] = contentTypeObject
 
+		// The webatlas permission only grants access to the endpoint, the requester also needs read
+		// access to the content type of the requested entry, like on its regular API endpoint.
+		// A missing permission results in a 404, so it is not revealed whether the path exists.
+		const action = contentType.kind === 'singleType' ? 'find' : 'findOne'
+		try {
+			await strapi.auth.verify(auth, { scope: [`${contentTypeKey}.${action}`] })
+		} catch {
+			return null
+		}
+
 		// Validate and sanitize like the Strapi core controllers do, so private fields, passwords and
 		// relations the requester has no find permission for can neither be requested nor returned.
 		// sanitize.query does not pass auth to the populate sanitizer, so populate is sanitized separately.

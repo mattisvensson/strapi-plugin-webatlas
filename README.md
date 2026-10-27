@@ -116,12 +116,15 @@ Webatlas provides two API endpoints. One to fetch routes and one to fetch naviga
 
 #### Permissions
 
-The endpoints use the Users & Permissions plugin like any other Strapi API endpoint. In **Settings → Users & Permissions plugin → Roles**, configure the role that calls the API (e.g. `Public`, or the role of your API token):
+The endpoints are protected like any other Strapi API endpoint. Grant the following permissions either to a role in **Settings → Users & Permissions plugin → Roles** (e.g. `Public`) or to an API token in **Settings → API Tokens**:
 
 - Under **Webatlas**, enable `getEntityByPath` and/or `getNavigation`.
+- Enable `findOne` (collection types) or `find` (single types) for every content type with webatlas enabled whose entries should be fetchable via `/api/webatlas/path`. Without this permission, the endpoint responds with `404`.
 - Enable `find` for every content type that is referenced through a relation and should be included when using `populate`. Relations to content types without `find` permission are removed from the response, private fields are never returned.
 
-Only enable `find` for content types whose entries are meant to be public, since it also exposes the regular `/api/<content-type>` endpoint.
+Only enable `find` and `findOne` for content types whose entries are meant to be public, since they also expose the regular `/api/<content-type>` endpoints.
+
+To keep your content types private, leave the `Public` role untouched and grant the permissions to an API token instead. Make sure to allow the `getEntityByPath` and `getNavigation` permissions for the API token.
 
 #### Fetch route
 
