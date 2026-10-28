@@ -1,5 +1,6 @@
 import type { Route } from '../../../types'
 import { waRoute } from '../../../utils'
+import { getPublishedDocumentIds } from './'
 
 type BreadcrumbEntry = Pick<Route, 'path' | 'canonicalPath' | 'slug' | 'uidPath' | 'title'>
 
@@ -22,8 +23,14 @@ function toBreadcrumbEntry(route: Route): BreadcrumbEntry {
  *
  * The hierarchy comes from `canonicalPath`, which is built from the entity titles and therefore
  * unaffected by an overridden `path`.
+ *
+ * Ancestors without a published entry are left out, unless drafts are requested.
  */
-export async function addWebatlasBreadcrumb(data: any, route: Route): Promise<any> {
+export async function addWebatlasBreadcrumb(
+	data: any,
+	route: Route,
+	status: 'draft' | 'published' = 'published',
+): Promise<any> {
 	if (!data?.webatlas || !route) return data
 
 	// "page-1/page-2/page-3" -> ["page-1", "page-1/page-2"]
@@ -33,14 +40,30 @@ export async function addWebatlasBreadcrumb(data: any, route: Route): Promise<an
 	const ancestors = ancestorPaths.length
 		? ((await strapi.db.query(waRoute).findMany({
 				where: { canonicalPath: { $in: ancestorPaths } },
-				select: ['path', 'canonicalPath', 'slug', 'uidPath', 'title'],
+				select: [
+					'path',
+					'canonicalPath',
+					'slug',
+					'uidPath',
+					'title',
+					'relatedContentType',
+					'relatedDocumentId',
+				],
 			})) as Route[])
 		: []
+
+	const publishedDocumentIds =
+		status === 'published' ? await getPublishedDocumentIds(ancestors) : null
+
+	const isVisible = (ancestor: Route) =>
+		!publishedDocumentIds ||
+		!ancestor.relatedContentType ||
+		publishedDocumentIds.has(ancestor.relatedDocumentId)
 
 	// The single query returns the ancestors unordered, so walk the prefixes to sort them by depth
 	const orderedAncestors = ancestorPaths
 		.map((path) => ancestors.find((ancestor) => ancestor.canonicalPath === path))
-		.filter(Boolean) as Route[]
+		.filter((ancestor) => ancestor && isVisible(ancestor)) as Route[]
 
 	data.webatlas.breadcrumb = [...orderedAncestors, route].map(toBreadcrumbEntry)
 

@@ -1,4 +1,5 @@
 import { waRoute } from '../../../utils'
+import { getPublishedDocumentIds } from './'
 
 /**
  * Helper function to check if a value is an external URL
@@ -93,6 +94,9 @@ function enrichEntity(entity: any, uid: string, routeMap: Map<string, any>): any
 							`Wrapper route detected in route-picker field '${key}'. Wrapper routes cannot be used as page links. Setting to null.`,
 						)
 						entity[key] = null
+					} else if (route.isUnpublished) {
+						// Do not expose the path of an unpublished page
+						entity[key] = null
 					} else {
 						entity[key] = route.canonicalPath || route.path || value
 					}
@@ -140,8 +144,13 @@ function enrichEntity(entity: any, uid: string, routeMap: Map<string, any>): any
  * Recursively enrich route-picker fields in the data
  * Uses a two-pass approach: first collect all IDs, then fetch routes once, then enrich
  * Accepts a single entity or an array of entities, the routes are fetched with a single query
+ * Links to pages without a published entry are set to null, unless drafts are requested
  */
-export async function enrichRoutePickerFields(data: any, contentTypeUid: string): Promise<any> {
+export async function enrichRoutePickerFields(
+	data: any,
+	contentTypeUid: string,
+	status: 'draft' | 'published' = 'published',
+): Promise<any> {
 	if (!data || typeof data !== 'object') return data
 
 	// First pass: Collect all route-picker documentIds from all nested levels
@@ -158,11 +167,32 @@ export async function enrichRoutePickerFields(data: any, contentTypeUid: string)
 		where: {
 			documentId: { $in: uniqueDocumentIds },
 		},
-		select: ['documentId', 'path', 'canonicalPath', 'type'],
+		select: [
+			'documentId',
+			'path',
+			'canonicalPath',
+			'type',
+			'relatedContentType',
+			'relatedDocumentId',
+		],
 	})
 
+	const publishedDocumentIds =
+		status === 'published' ? await getPublishedDocumentIds(routes || []) : null
+
 	// Create a map for quick lookup
-	const routeMap = new Map(routes?.map((route: any) => [route.documentId, route]) || [])
+	const routeMap = new Map(
+		routes?.map((route: any) => [
+			route.documentId,
+			{
+				...route,
+				isUnpublished:
+					publishedDocumentIds &&
+					route.relatedContentType &&
+					!publishedDocumentIds.has(route.relatedDocumentId),
+			},
+		]) || [],
+	)
 
 	// Second pass: Recursively enrich all entities using the route map
 	return Array.isArray(data)

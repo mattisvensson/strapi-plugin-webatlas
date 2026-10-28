@@ -1,5 +1,5 @@
-import type { UID } from '@strapi/strapi'
 import type { NestedNavItem } from '../../../types'
+import { getPublishedDocumentIds } from './'
 
 /**
  * Removes navigation items whose route points to an entry without a published version, so titles and
@@ -9,27 +9,7 @@ import type { NestedNavItem } from '../../../types'
 export default async function removeUnpublishedNavItems(
 	items: NestedNavItem[],
 ): Promise<NestedNavItem[]> {
-	// Group the linked entries by content type to fetch them with one query per content type
-	const documentIdsByUid = new Map<string, string[]>()
-	for (const { route } of items) {
-		if (!route?.relatedContentType) continue
-		const documentIds = documentIdsByUid.get(route.relatedContentType) ?? []
-		documentIds.push(route.relatedDocumentId)
-		documentIdsByUid.set(route.relatedContentType, documentIds)
-	}
-
-	const publishedDocumentIds = new Set<string>()
-	for (const [uid, documentIds] of documentIdsByUid) {
-		// Routes of content types that no longer exist are treated as unpublished
-		if (!strapi.contentTypes[uid]) continue
-
-		const entries = await strapi.documents(uid as UID.ContentType).findMany({
-			filters: { documentId: { $in: documentIds } },
-			fields: ['documentId'],
-			status: 'published',
-		})
-		entries.forEach((entry) => publishedDocumentIds.add(entry.documentId))
-	}
+	const publishedDocumentIds = await getPublishedDocumentIds(items.map((item) => item.route))
 
 	const removedItemIds = new Set(
 		items
