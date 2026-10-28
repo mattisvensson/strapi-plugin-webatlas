@@ -9,7 +9,7 @@
 
 import { Check, Plus } from '@strapi/icons'
 import { Flex, Button } from '@strapi/design-system'
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import {
 	NavOverview,
@@ -22,8 +22,8 @@ import {
 	WrapperItem,
 } from '../../components/modals'
 import { EmptyBox, Center, FullLoader } from '../../components/UI'
-import { ModalContext, SelectedNavigationContext } from '../../contexts'
-import type { NestedNavigation, NestedNavItem } from '../../../../types'
+import { ModalContext, SelectedNavigationContext, EntitiesContext } from '../../contexts'
+import type { GroupedEntities, NestedNavigation, NestedNavItem } from '../../../../types'
 import { useApi, useErrorMessage, usePluginConfig } from '../../hooks/'
 import { getTranslation, isAbortError, syncNavItemPaths } from '../../utils'
 import { useIntl } from 'react-intl'
@@ -68,10 +68,12 @@ const Navigation = () => {
 		}, [])
 	const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>()
 	const [actionItemParent, setActionItemParent] = useState<NestedNavItem | null>(null)
-	const { getNavigation, updateNavigationItemStructure } = useApi()
+	const { getNavigation, updateNavigationItemStructure, fetchAllEntities } = useApi()
 	const [isSavingNavigation, setIsSavingNavigation] = useState(false)
 	const [loading, setLoading] = useState(true)
 	const cachedNavigations = useRef<NestedNavigation[] | null>(null)
+	const [entities, setEntities] = useState<GroupedEntities[]>([])
+	const entitiesRequestRef = useRef<Promise<void> | null>(null)
 	const { config } = usePluginConfig()
 
 	const [projected, setProjected] = useState<Projected | null>(null)
@@ -135,6 +137,21 @@ const Navigation = () => {
 		initialNavigationItemsRef.current = cloneDeep(selectedNav.items) || null
 		setNavigationItems(selectedNav.items || [])
 	}
+
+	// The entries are only needed by the item modals, so they are loaded once when the first modal opens
+	const loadEntities = useCallback(() => {
+		if (entitiesRequestRef.current) return
+
+		entitiesRequestRef.current = fetchAllEntities()
+			.then(setEntities)
+			.catch((error) => {
+				// Allow the next modal to retry
+				entitiesRequestRef.current = null
+				if (!isAbortError(error)) console.error('Error fetching entities: ', error)
+			})
+	}, [])
+
+	const entitiesContextValue = useMemo(() => ({ entities, loadEntities }), [entities, loadEntities])
 
 	useEffect(() => {
 		async function fetchNavigations() {
@@ -342,226 +359,228 @@ const Navigation = () => {
 
 	return (
 		<ModalContext.Provider value={{ modalType, setModalType }}>
-			<SelectedNavigationContext.Provider value={{ selectedNavigation, setSelectedNavigation }}>
-				<PageWrapper navigations={navigations}>
-					{selectedNavigation && (
-						<Flex gap={4} paddingBottom={6} justifyContent="flex-end">
-							<Button
-								variant="secondary"
-								startIcon={<Plus />}
-								onClick={() => setModalType('ItemCreate')}
-							>
-								{formatMessage({
-									id: getTranslation('navigation.page.newItemButton'),
-									defaultMessage: 'New Item',
-								})}
-							</Button>
-							<Button
-								onClick={() => saveNavigation()}
-								loading={isSavingNavigation}
-								variant="default"
-								startIcon={<Check />}
-								disabled={
-									JSON.stringify(navigationItems) ===
-									JSON.stringify(initialNavigationItemsRef.current)
-								}
-							>
-								{formatMessage({
-									id: getTranslation('save'),
-									defaultMessage: 'Save',
-								})}
-							</Button>
-						</Flex>
-					)}
-					{selectedNavigation && navigationItems && navigationItems.length > 0 && (
-						<Flex direction="column" alignItems="stretch" gap={4}>
-							<DndContext
-								collisionDetection={(e) => closestCenter(e)}
-								onDragStart={(e) => handleDragStart(e)}
-								onDragMove={(e) => handleDragMove(e)}
-								onDragOver={(e) => handleDragOver(e)}
-								onDragEnd={(e) => handleDragEnd(e)}
-								onDragCancel={() => handleDragCancel()}
-								measuring={measuring}
-							>
-								<SortableContext items={navigationItems} strategy={verticalListSortingStrategy}>
-									{navigationItems.map((item, index) => {
-										const initialItem = initialNavigationItemsRef.current?.find(
-											(i) => i.documentId === item.documentId,
-										)
-										return (
-											config?.navigation.maxDepth && (
-												<SortableRouteItem
-													key={item.documentId || index}
-													item={item}
-													initialItem={initialItem}
-													setActionItemParent={setActionItemParent}
-													setActionItem={setActionItem}
-													setNavigationItems={setNavigationItems}
-													indentationWidth={indentationWidth}
-													depth={item.id === activeId && projected ? projected.depth : item.depth}
-													maxDepth={config.navigation.maxDepth}
-													navigationItems={navigationItems}
-												/>
-											)
-										)
+			<EntitiesContext.Provider value={entitiesContextValue}>
+				<SelectedNavigationContext.Provider value={{ selectedNavigation, setSelectedNavigation }}>
+					<PageWrapper navigations={navigations}>
+						{selectedNavigation && (
+							<Flex gap={4} paddingBottom={6} justifyContent="flex-end">
+								<Button
+									variant="secondary"
+									startIcon={<Plus />}
+									onClick={() => setModalType('ItemCreate')}
+								>
+									{formatMessage({
+										id: getTranslation('navigation.page.newItemButton'),
+										defaultMessage: 'New Item',
 									})}
-									{createPortal(
-										<DragOverlay>
-											{activeId && activeItem
-												? config?.navigation.maxDepth && (
-														<SortableRouteItem
-															item={activeItem}
-															setActionItemParent={setActionItemParent}
-															setActionItem={setActionItem}
-															setNavigationItems={setNavigationItems}
-															maxDepth={config.navigation.maxDepth}
-															navigationItems={navigationItems}
-														/>
-													)
-												: null}
-										</DragOverlay>,
-										document.body,
-									)}
-								</SortableContext>
-							</DndContext>
-						</Flex>
+								</Button>
+								<Button
+									onClick={() => saveNavigation()}
+									loading={isSavingNavigation}
+									variant="default"
+									startIcon={<Check />}
+									disabled={
+										JSON.stringify(navigationItems) ===
+										JSON.stringify(initialNavigationItemsRef.current)
+									}
+								>
+									{formatMessage({
+										id: getTranslation('save'),
+										defaultMessage: 'Save',
+									})}
+								</Button>
+							</Flex>
+						)}
+						{selectedNavigation && navigationItems && navigationItems.length > 0 && (
+							<Flex direction="column" alignItems="stretch" gap={4}>
+								<DndContext
+									collisionDetection={(e) => closestCenter(e)}
+									onDragStart={(e) => handleDragStart(e)}
+									onDragMove={(e) => handleDragMove(e)}
+									onDragOver={(e) => handleDragOver(e)}
+									onDragEnd={(e) => handleDragEnd(e)}
+									onDragCancel={() => handleDragCancel()}
+									measuring={measuring}
+								>
+									<SortableContext items={navigationItems} strategy={verticalListSortingStrategy}>
+										{navigationItems.map((item, index) => {
+											const initialItem = initialNavigationItemsRef.current?.find(
+												(i) => i.documentId === item.documentId,
+											)
+											return (
+												config?.navigation.maxDepth && (
+													<SortableRouteItem
+														key={item.documentId || index}
+														item={item}
+														initialItem={initialItem}
+														setActionItemParent={setActionItemParent}
+														setActionItem={setActionItem}
+														setNavigationItems={setNavigationItems}
+														indentationWidth={indentationWidth}
+														depth={item.id === activeId && projected ? projected.depth : item.depth}
+														maxDepth={config.navigation.maxDepth}
+														navigationItems={navigationItems}
+													/>
+												)
+											)
+										})}
+										{createPortal(
+											<DragOverlay>
+												{activeId && activeItem
+													? config?.navigation.maxDepth && (
+															<SortableRouteItem
+																item={activeItem}
+																setActionItemParent={setActionItemParent}
+																setActionItem={setActionItem}
+																setNavigationItems={setNavigationItems}
+																maxDepth={config.navigation.maxDepth}
+																navigationItems={navigationItems}
+															/>
+														)
+													: null}
+											</DragOverlay>,
+											document.body,
+										)}
+									</SortableContext>
+								</DndContext>
+							</Flex>
+						)}
+						{navigations?.length === 0 && (
+							<Center height={400}>
+								<EmptyBox
+									msg={formatMessage({
+										id: getTranslation('navigation.page.emptyNavigation'),
+										defaultMessage: 'You have no navigations yet...',
+									})}
+								/>
+								<Button variant="default" onClick={() => setModalType('NavCreate')}>
+									{formatMessage({
+										id: getTranslation('navigation.page.createNewNavigation'),
+										defaultMessage: 'Create new navigation',
+									})}
+								</Button>
+							</Center>
+						)}
+						{navigations && navigationItems?.length === 0 && (
+							<Center height={400}>
+								<EmptyBox msg="Your navigation is empty..." />
+								<Button variant="default" onClick={() => setModalType('ItemCreate')}>
+									{formatMessage({
+										id: getTranslation('navigation.page.createNewItem'),
+										defaultMessage: 'Create new item',
+									})}
+								</Button>
+							</Center>
+						)}
+					</PageWrapper>
+					{modalType === 'NavOverview' && (
+						<NavOverview navigations={navigations} setActionItem={setActionItem} />
 					)}
-					{navigations?.length === 0 && (
-						<Center height={400}>
-							<EmptyBox
-								msg={formatMessage({
-									id: getTranslation('navigation.page.emptyNavigation'),
-									defaultMessage: 'You have no navigations yet...',
-								})}
-							/>
-							<Button variant="default" onClick={() => setModalType('NavCreate')}>
-								{formatMessage({
-									id: getTranslation('navigation.page.createNewNavigation'),
-									defaultMessage: 'Create new navigation',
-								})}
-							</Button>
-						</Center>
-					)}
-					{navigations && navigationItems?.length === 0 && (
-						<Center height={400}>
-							<EmptyBox msg="Your navigation is empty..." />
-							<Button variant="default" onClick={() => setModalType('ItemCreate')}>
-								{formatMessage({
-									id: getTranslation('navigation.page.createNewItem'),
-									defaultMessage: 'Create new item',
-								})}
-							</Button>
-						</Center>
-					)}
-				</PageWrapper>
-				{modalType === 'NavOverview' && (
-					<NavOverview navigations={navigations} setActionItem={setActionItem} />
-				)}
-				{modalType === 'NavCreate' && <NavCreate />}
-				{modalType === 'NavDelete' && (
-					<Delete
-						variant="NavDelete"
-						item={actionItem as NestedNavigation}
-						onDelete={(deletedItem) => {
-							cachedNavigations.current = null
-							const remaining = navigations.filter((nav) => nav.id !== deletedItem.id)
-							setNavigations(remaining)
+					{modalType === 'NavCreate' && <NavCreate />}
+					{modalType === 'NavDelete' && (
+						<Delete
+							variant="NavDelete"
+							item={actionItem as NestedNavigation}
+							onDelete={(deletedItem) => {
+								cachedNavigations.current = null
+								const remaining = navigations.filter((nav) => nav.id !== deletedItem.id)
+								setNavigations(remaining)
 
-							// Nur umleiten, wenn die gelöschte Navigation gerade angezeigt wird
-							if (deletedItem.documentId === navigationId) {
-								navigate(
-									remaining.length > 0
-										? `/plugins/${PLUGIN_ID}/navigation/${remaining[0].documentId}`
-										: `/plugins/${PLUGIN_ID}/navigation`,
+								// Nur umleiten, wenn die gelöschte Navigation gerade angezeigt wird
+								if (deletedItem.documentId === navigationId) {
+									navigate(
+										remaining.length > 0
+											? `/plugins/${PLUGIN_ID}/navigation/${remaining[0].documentId}`
+											: `/plugins/${PLUGIN_ID}/navigation`,
+									)
+								}
+							}}
+						/>
+					)}
+					{modalType === 'NavEdit' && (
+						<NavEdit
+							item={actionItem as NestedNavigation}
+							onEdit={(editedNavigation: NestedNavigation) => {
+								setNavigations((navs) =>
+									navs?.map((nav) => (nav.id === editedNavigation.id ? editedNavigation : nav)),
 								)
-							}
-						}}
-					/>
-				)}
-				{modalType === 'NavEdit' && (
-					<NavEdit
-						item={actionItem as NestedNavigation}
-						onEdit={(editedNavigation: NestedNavigation) => {
-							setNavigations((navs) =>
-								navs?.map((nav) => (nav.id === editedNavigation.id ? editedNavigation : nav)),
-							)
-						}}
-					/>
-				)}
-				{modalType === 'ItemCreate' && (
-					<ItemCreate
-						actionItemParent={actionItemParent}
-						navigationItems={navigationItems || []}
-						navigations={navigations}
-						onCreate={(newItem) => {
-							handleSoftAddedItem(newItem)
-						}}
-					/>
-				)}
-				{modalType === 'ItemDelete' && (
-					<Delete
-						variant="ItemDelete"
-						item={actionItem as NestedNavItem}
-						onDelete={(deletedItem) => {
-							setNavigationItems((items) =>
-								items?.map((item) => (item.id === deletedItem.id ? deletedItem : item)),
-							)
-						}}
-					/>
-				)}
-				{modalType === 'ItemEdit' && (
-					<ItemEdit
-						item={actionItem as NestedNavItem}
-						navigationItems={navigationItems || []}
-						onEdit={(editedItem) => {
-							setNavigationItems((items) =>
-								items?.map((item) => (item.id === editedItem.id ? editedItem : item)),
-							)
-						}}
-					/>
-				)}
-				{modalType === 'ExternalCreate' && (
-					<ExternalItem
-						variant={modalType}
-						actionItemParentId={actionItemParent?.documentId}
-						onCreate={(newItem) => {
-							handleSoftAddedItem(newItem)
-						}}
-					/>
-				)}
-				{modalType === 'ExternalEdit' && (
-					<ExternalItem
-						variant={modalType}
-						item={actionItem as NestedNavItem}
-						onSave={(editedItem) => {
-							setNavigationItems((items) =>
-								items?.map((item) => (item.id === editedItem.id ? editedItem : item)),
-							)
-						}}
-					/>
-				)}
-				{modalType === 'WrapperCreate' && (
-					<WrapperItem
-						variant={modalType}
-						actionItemParentId={actionItemParent?.documentId}
-						onCreate={(newItem) => {
-							handleSoftAddedItem(newItem)
-						}}
-					/>
-				)}
-				{modalType === 'WrapperEdit' && (
-					<WrapperItem
-						variant={modalType}
-						item={actionItem as NestedNavItem}
-						onSave={(editedItem) => {
-							setNavigationItems((items) =>
-								items?.map((item) => (item.id === editedItem.id ? editedItem : item)),
-							)
-						}}
-					/>
-				)}
-			</SelectedNavigationContext.Provider>
+							}}
+						/>
+					)}
+					{modalType === 'ItemCreate' && (
+						<ItemCreate
+							actionItemParent={actionItemParent}
+							navigationItems={navigationItems || []}
+							navigations={navigations}
+							onCreate={(newItem) => {
+								handleSoftAddedItem(newItem)
+							}}
+						/>
+					)}
+					{modalType === 'ItemDelete' && (
+						<Delete
+							variant="ItemDelete"
+							item={actionItem as NestedNavItem}
+							onDelete={(deletedItem) => {
+								setNavigationItems((items) =>
+									items?.map((item) => (item.id === deletedItem.id ? deletedItem : item)),
+								)
+							}}
+						/>
+					)}
+					{modalType === 'ItemEdit' && (
+						<ItemEdit
+							item={actionItem as NestedNavItem}
+							navigationItems={navigationItems || []}
+							onEdit={(editedItem) => {
+								setNavigationItems((items) =>
+									items?.map((item) => (item.id === editedItem.id ? editedItem : item)),
+								)
+							}}
+						/>
+					)}
+					{modalType === 'ExternalCreate' && (
+						<ExternalItem
+							variant={modalType}
+							actionItemParentId={actionItemParent?.documentId}
+							onCreate={(newItem) => {
+								handleSoftAddedItem(newItem)
+							}}
+						/>
+					)}
+					{modalType === 'ExternalEdit' && (
+						<ExternalItem
+							variant={modalType}
+							item={actionItem as NestedNavItem}
+							onSave={(editedItem) => {
+								setNavigationItems((items) =>
+									items?.map((item) => (item.id === editedItem.id ? editedItem : item)),
+								)
+							}}
+						/>
+					)}
+					{modalType === 'WrapperCreate' && (
+						<WrapperItem
+							variant={modalType}
+							actionItemParentId={actionItemParent?.documentId}
+							onCreate={(newItem) => {
+								handleSoftAddedItem(newItem)
+							}}
+						/>
+					)}
+					{modalType === 'WrapperEdit' && (
+						<WrapperItem
+							variant={modalType}
+							item={actionItem as NestedNavItem}
+							onSave={(editedItem) => {
+								setNavigationItems((items) =>
+									items?.map((item) => (item.id === editedItem.id ? editedItem : item)),
+								)
+							}}
+						/>
+					)}
+				</SelectedNavigationContext.Provider>
+			</EntitiesContext.Provider>
 		</ModalContext.Provider>
 	)
 }
