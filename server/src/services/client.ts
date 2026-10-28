@@ -9,6 +9,7 @@ import {
 	enrichWebatlasData,
 	enrichRoutePickerFields,
 	addWebatlasBreadcrumb,
+	removeUnpublishedNavItems,
 } from '../utils'
 import { waRoute, waNavigation } from '../../../utils'
 
@@ -167,6 +168,8 @@ export default ({ strapi }) => ({
 		}
 
 		if (!navigation) return null
+
+		if (navigation.items) navigation.items = await removeUnpublishedNavItems(navigation.items)
 
 		const structured = buildStructuredNavigation(navigation, variant)
 
