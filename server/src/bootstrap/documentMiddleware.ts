@@ -46,6 +46,16 @@ export function documentMiddleware(
 
 		const ctSettings = config.selectedContentTypes.find((ct) => ct.uid === context.uid)
 
+		// Routes may only be created or moved from the admin panel or by server-side code without a
+		// request (e.g. scripts or cron jobs). Route data sent through any other request, like the
+		// Content API, is dropped so it can neither claim paths nor move routes of other entries.
+		const requestContext = strapi.requestContext.get()
+		const isRouteDataAllowed =
+			!requestContext || requestContext.state?.route?.info?.type === 'admin'
+		if ((context.action === 'create' || context.action === 'update') && !isRouteDataAllowed) {
+			delete (context.params.data as WebatlasDocumentData | undefined)?.webatlas
+		}
+
 		if (context.action === 'create') {
 			const data = context.params.data as WebatlasDocumentData
 			const { webatlas } = data
