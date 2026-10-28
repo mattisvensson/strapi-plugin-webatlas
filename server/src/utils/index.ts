@@ -29,6 +29,7 @@ import normalizeRouteBlacklist from './normalizeRouteBlacklist'
 import { addWebatlasBreadcrumb } from './addWebatlasBreadcrumb'
 import removeUnpublishedNavItems from './removeUnpublishedNavItems'
 import getPublishedDocumentIds from './getPublishedDocumentIds'
+import getDocumentStatuses from './getDocumentStatuses'
 
 export {
 	duplicateCheck,
@@ -66,4 +67,5 @@ export {
 	addWebatlasBreadcrumb,
 	removeUnpublishedNavItems,
 	getPublishedDocumentIds,
+	getDocumentStatuses,
 }

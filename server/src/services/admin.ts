@@ -19,6 +19,7 @@ import {
 	normalizeRouteBlacklist,
 	getRouteBlacklist,
 	isBlacklistedPath,
+	getDocumentStatuses,
 } from '../utils'
 
 export default ({ strapi }) => ({
@@ -153,6 +154,18 @@ export default ({ strapi }) => ({
 				)
 			}
 		}
+
+		// Attach the entry status so the admin panel does not need to fetch it per item
+		const navigations: NestedNavigation[] = Array.isArray(navigation) ? navigation : [navigation]
+		const statuses = await getDocumentStatuses(
+			navigations.flatMap((nav) => (nav.items ?? []).map((item) => item.route)),
+		)
+		navigations.forEach((nav) =>
+			nav.items?.forEach((item) => {
+				const status = statuses.get(item.route?.relatedDocumentId)
+				if (status) item.status = status
+			}),
+		)
 
 		return navigation
 	},

@@ -27,7 +27,7 @@ import type { NestedNavigation, NestedNavItem } from '../../../../types'
 import { useApi, useErrorMessage, usePluginConfig } from '../../hooks/'
 import { getTranslation, isAbortError } from '../../utils'
 import { useIntl } from 'react-intl'
-import { useNotification, useFetchClient } from '@strapi/strapi/admin'
+import { useNotification } from '@strapi/strapi/admin'
 import {
 	DndContext,
 	closestCenter,
@@ -75,36 +75,16 @@ const Navigation = () => {
 	const { formatMessage } = useIntl()
 	const { toggleNotification } = useNotification()
 	const getErrorMessage = useErrorMessage()
-	const { get } = useFetchClient()
 	const { navigationId } = useParams()
 	const navigate = useNavigate()
 
 	async function loadNavigations() {
 		try {
-			const data = await getNavigation({ variant: 'flat' })
-			const updatedNavigations = await Promise.all(
-				data.map(async (nav: NestedNavigation) => {
-					const updatedItems = await Promise.all(
-						nav.items.map(async (item) => {
-							const ct = item.route?.relatedContentType
-							const id = item.route?.relatedDocumentId
-							if (!ct || !id) return item
-							try {
-								const { data } = await get(`/content-manager/collection-types/${ct}/${id}`)
-								return { ...item, status: data.data.status }
-							} catch (err) {
-								console.error(err)
-								return item
-							}
-						}),
-					)
-					return { ...nav, items: updatedItems }
-				}),
-			)
+			const updatedNavigations: NestedNavigation[] = await getNavigation({ variant: 'flat' })
 
 			let selectedNav = updatedNavigations.find((nav) => nav.documentId === navigationId)
 
-			if (!selectedNav && navigationId) {
+			if (!selectedNav) {
 				selectedNav = updatedNavigations[0]
 
 				toggleNotification({
