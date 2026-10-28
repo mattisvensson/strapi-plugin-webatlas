@@ -97,9 +97,9 @@ export default ({ strapi }) => ({
 
 		cleanEntity = await enrichWebatlasData(cleanEntity, route.relatedContentType)
 		if (breadcrumb) {
-			cleanEntity = await addWebatlasBreadcrumb(cleanEntity, route)
+			cleanEntity = await addWebatlasBreadcrumb(cleanEntity, route, status)
 		}
-		cleanEntity = await enrichRoutePickerFields(cleanEntity, contentTypeKey)
+		cleanEntity = await enrichRoutePickerFields(cleanEntity, contentTypeKey, status)
 
 		return {
 			contentType: contentType.info.singularName,

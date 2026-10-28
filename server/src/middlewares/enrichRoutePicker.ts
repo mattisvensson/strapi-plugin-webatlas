@@ -34,12 +34,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
 		const [contentTypeUid] = contentTypeEntry
 
+		// Links to unpublished pages are only kept when drafts are requested
+		const status = ctx.query?.status === 'draft' ? 'draft' : 'published'
+
 		// Handle both single and paginated responses, arrays are enriched with a single query
 		if (ctx.body.data) {
-			ctx.body.data = await enrichRoutePickerFields(ctx.body.data, contentTypeUid)
+			ctx.body.data = await enrichRoutePickerFields(ctx.body.data, contentTypeUid, status)
 		} else if (typeof ctx.body === 'object') {
 			// Direct object or array response
-			ctx.body = await enrichRoutePickerFields(ctx.body, contentTypeUid)
+			ctx.body = await enrichRoutePickerFields(ctx.body, contentTypeUid, status)
 		}
 	}
 }
