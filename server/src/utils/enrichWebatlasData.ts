@@ -3,6 +3,7 @@ import { waRoute } from '../../../utils'
 /**
  * Enriches response data with webatlas fields for all enabled content types
  * Works recursively to handle nested relations, components, and dynamic zones
+ * Accepts a single entity or an array of entities, the routes are fetched with a single query
  */
 export async function enrichWebatlasData(data: any, contentTypeUid?: string): Promise<any> {
 	if (!data || typeof data !== 'object') return data
@@ -57,7 +58,8 @@ export async function enrichWebatlasData(data: any, contentTypeUid?: string): Pr
 		return ids
 	}
 
-	const documentIds = collectDocumentIds(data, contentTypeUid)
+	const items = Array.isArray(data) ? data : [data]
+	const documentIds = items.flatMap((item) => collectDocumentIds(item, contentTypeUid))
 
 	if (documentIds.length === 0) return data
 
@@ -135,5 +137,7 @@ export async function enrichWebatlasData(data: any, contentTypeUid?: string): Pr
 		return entity
 	}
 
-	return enrichEntity(data, contentTypeUid)
+	return Array.isArray(data)
+		? data.map((item) => enrichEntity(item, contentTypeUid))
+		: enrichEntity(data, contentTypeUid)
 }

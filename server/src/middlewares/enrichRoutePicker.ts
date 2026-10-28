@@ -34,24 +34,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
 		const [contentTypeUid] = contentTypeEntry
 
-		// Handle both single and paginated responses
+		// Handle both single and paginated responses, arrays are enriched with a single query
 		if (ctx.body.data) {
-			if (Array.isArray(ctx.body.data)) {
-				// Collection response
-				ctx.body.data = await Promise.all(
-					ctx.body.data.map((item) => enrichRoutePickerFields(item, contentTypeUid)),
-				)
-			} else {
-				// Single response
-				ctx.body.data = await enrichRoutePickerFields(ctx.body.data, contentTypeUid)
-			}
-		} else if (Array.isArray(ctx.body)) {
-			// Direct array response
-			ctx.body = await Promise.all(
-				ctx.body.map((item) => enrichRoutePickerFields(item, contentTypeUid)),
-			)
+			ctx.body.data = await enrichRoutePickerFields(ctx.body.data, contentTypeUid)
 		} else if (typeof ctx.body === 'object') {
-			// Direct object response
+			// Direct object or array response
 			ctx.body = await enrichRoutePickerFields(ctx.body, contentTypeUid)
 		}
 	}

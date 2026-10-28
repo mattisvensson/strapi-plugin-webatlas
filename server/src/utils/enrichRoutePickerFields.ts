@@ -139,12 +139,14 @@ function enrichEntity(entity: any, uid: string, routeMap: Map<string, any>): any
 /**
  * Recursively enrich route-picker fields in the data
  * Uses a two-pass approach: first collect all IDs, then fetch routes once, then enrich
+ * Accepts a single entity or an array of entities, the routes are fetched with a single query
  */
 export async function enrichRoutePickerFields(data: any, contentTypeUid: string): Promise<any> {
 	if (!data || typeof data !== 'object') return data
 
 	// First pass: Collect all route-picker documentIds from all nested levels
-	const documentIds = collectRoutePickerIds(data, contentTypeUid)
+	const items = Array.isArray(data) ? data : [data]
+	const documentIds = items.flatMap((item) => collectRoutePickerIds(item, contentTypeUid))
 
 	if (documentIds.length === 0) return data
 
@@ -163,6 +165,7 @@ export async function enrichRoutePickerFields(data: any, contentTypeUid: string)
 	const routeMap = new Map(routes?.map((route: any) => [route.documentId, route]) || [])
 
 	// Second pass: Recursively enrich all entities using the route map
-	const enriched = enrichEntity(data, contentTypeUid, routeMap)
-	return enriched
+	return Array.isArray(data)
+		? data.map((item) => enrichEntity(item, contentTypeUid, routeMap))
+		: enrichEntity(data, contentTypeUid, routeMap)
 }
