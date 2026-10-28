@@ -6,9 +6,8 @@ import type {
 	modalSharedLogic,
 	ValidationState,
 } from '../../types'
-import { useState, useRef, useReducer, useCallback, useContext, useMemo } from 'react'
-import { ModalContext, SelectedNavigationContext } from '../../contexts'
-import { useAllEntities } from '../../hooks'
+import { useState, useRef, useReducer, useCallback, useContext, useMemo, useEffect } from 'react'
+import { ModalContext, SelectedNavigationContext, EntitiesContext } from '../../contexts'
 import { debounce, duplicateCheck } from '../../utils'
 import { useFetchClient } from '@strapi/strapi/admin'
 
@@ -75,8 +74,8 @@ export function useModalSharedLogic() {
 	const [selectedContentType, setSelectedContentType] = useState<GroupedEntities>()
 	const [validationState, setValidationState] = useState<ValidationState>('initial')
 	const [isBlacklisted, setIsBlacklisted] = useState(false)
-	// TODO: Fetch entities only once and share between modals
-	const { entities } = useAllEntities()
+	const { entities, loadEntities } = useContext(EntitiesContext)
+	useEffect(() => loadEntities(), [loadEntities])
 	const { get } = useFetchClient()
 
 	// Without a route source field no route can be generated, so the content type cannot be selected
