@@ -9,7 +9,7 @@
 
 import { Check, Plus } from '@strapi/icons'
 import { Flex, Button } from '@strapi/design-system'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import {
 	NavOverview,
@@ -25,7 +25,7 @@ import { EmptyBox, Center, FullLoader } from '../../components/UI'
 import { ModalContext, SelectedNavigationContext } from '../../contexts'
 import type { NestedNavigation, NestedNavItem } from '../../../../types'
 import { useApi, useErrorMessage, usePluginConfig } from '../../hooks/'
-import { getTranslation, isAbortError } from '../../utils'
+import { getTranslation, isAbortError, syncNavItemPaths } from '../../utils'
 import { useIntl } from 'react-intl'
 import { useNotification } from '@strapi/strapi/admin'
 import {
@@ -56,8 +56,16 @@ const Navigation = () => {
 	const [navigations, setNavigations] = useState<NestedNavigation[]>([])
 	const [modalType, setModalType] = useState<string>('')
 	const [selectedNavigation, setSelectedNavigation] = useState<NestedNavigation>()
-	const [navigationItems, setNavigationItems] = useState<NestedNavItem[]>()
+	const [navigationItems, setSyncedNavigationItems] = useState<NestedNavItem[]>()
 	const initialNavigationItemsRef = useRef<NestedNavItem[] | null>(null)
+	// Every change of the items keeps the paths of the internal items in sync in a single pass
+	const setNavigationItems: React.Dispatch<React.SetStateAction<NestedNavItem[] | undefined>> =
+		useCallback((action) => {
+			setSyncedNavigationItems((items) => {
+				const nextItems = typeof action === 'function' ? action(items) : action
+				return nextItems && syncNavItemPaths(nextItems, initialNavigationItemsRef.current)
+			})
+		}, [])
 	const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>()
 	const [actionItemParent, setActionItemParent] = useState<NestedNavItem | null>(null)
 	const { getNavigation, updateNavigationItemStructure } = useApi()
@@ -123,8 +131,9 @@ const Navigation = () => {
 	function switchNavigation(selectedNav: NestedNavigation, updatedNavigations: NestedNavigation[]) {
 		setNavigations(updatedNavigations)
 		setSelectedNavigation(selectedNav)
-		setNavigationItems(selectedNav.items || [])
+		// Set before the items, the path sync compares against the initial items
 		initialNavigationItemsRef.current = cloneDeep(selectedNav.items) || null
+		setNavigationItems(selectedNav.items || [])
 	}
 
 	useEffect(() => {
