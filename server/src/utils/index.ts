@@ -27,6 +27,7 @@ import assertPathAllowed, { getRouteBlacklist } from './assertPathAllowed'
 import assertDescendantPathsAllowed from './assertDescendantPathsAllowed'
 import normalizeRouteBlacklist from './normalizeRouteBlacklist'
 import { addWebatlasBreadcrumb } from './addWebatlasBreadcrumb'
+import removeUnpublishedNavItems from './removeUnpublishedNavItems'
 
 export {
 	duplicateCheck,
@@ -62,4 +63,5 @@ export {
 	assertDescendantPathsAllowed,
 	normalizeRouteBlacklist,
 	addWebatlasBreadcrumb,
+	removeUnpublishedNavItems,
 }
