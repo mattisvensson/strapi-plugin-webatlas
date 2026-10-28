@@ -7,6 +7,7 @@ import findParentNavItem from './findParentNavItem'
 import buildBreadcrumbString from './buildBreadcrumbString'
 import getRouteSourceFields from './getRouteSourceFields'
 import isAbortError from './isAbortError'
+import syncNavItemPaths, { getNavItemPath } from './syncNavItemPaths'
 
 export {
 	debounce,
@@ -19,4 +20,6 @@ export {
 	buildBreadcrumbString,
 	getRouteSourceFields,
 	isAbortError,
+	syncNavItemPaths,
+	getNavItemPath,
 }
