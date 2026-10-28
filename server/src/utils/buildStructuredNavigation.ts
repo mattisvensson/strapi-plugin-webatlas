@@ -65,6 +65,10 @@ export default function buildStructuredNavigation(
 					itemsProcessed.add(item.documentId)
 				})
 
+				// Items whose parent is missing or part of a cycle can never be processed. Stop instead of
+				// looping forever, they are dropped like in the nested variant.
+				if (remainingItems.length === itemsToProcess.length) break
+
 				itemsToProcess = remainingItems
 			}
 			// Flatten and sort the items
