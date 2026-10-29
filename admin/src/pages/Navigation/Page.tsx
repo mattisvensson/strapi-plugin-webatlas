@@ -8,7 +8,7 @@
  */
 
 import { Check, Plus } from '@strapi/icons'
-import { Flex, Button } from '@strapi/design-system'
+import { Flex, Button, Box, Searchbar, Typography } from '@strapi/design-system'
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import {
@@ -38,8 +38,18 @@ import {
 	DragOverEvent,
 	UniqueIdentifier,
 } from '@dnd-kit/core'
-import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { getProjection, measuring, indentationWidth } from '../../utils/dnd'
+import {
+	getCollapsedVisibleItems,
+	getItemsWithChildren,
+	getMovedItemIds,
+	getParentItem,
+	getSearchVisibleItems,
+	getSubtreeDepth,
+	moveNavItem,
+} from '../../utils/navTree'
+import useCollapsedItems, { removeCollapsedItems } from './useCollapsedItems'
 import SortableRouteItem from './SortableRouteItem'
 import { RouteItem } from './RouteItem'
 import PageWrapper from './PageWrapper'
@@ -80,6 +90,12 @@ const Navigation = () => {
 	const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
 	const [overId, setOverId] = useState<UniqueIdentifier | null>(null)
 	const [offsetLeft, setOffsetLeft] = useState(0)
+
+	const [searchQuery, setSearchQuery] = useState('')
+	const isSearching = searchQuery.trim() !== ''
+	const { collapsedIds, toggleCollapsed, expand, setCollapsedIds } = useCollapsedItems(
+		selectedNavigation?.documentId,
+	)
 
 	const { formatMessage } = useIntl()
 	const { toggleNotification } = useNotification()
@@ -181,6 +197,10 @@ const Navigation = () => {
 	}, [navigationId])
 
 	useEffect(() => {
+		setSearchQuery('')
+	}, [selectedNavigation?.documentId])
+
+	useEffect(() => {
 		if (modalType === 'NavOverview' || modalType === '') {
 			setActionItem(undefined)
 			setActionItemParent(null)
@@ -207,6 +227,8 @@ const Navigation = () => {
 				(item) => item.documentId === newItem.clientModifications?.parent,
 			)
 			if (parentIndex !== undefined && parentIndex >= 0) {
+				// Show the new item, even if it is added to a collapsed item
+				expand(newItem.clientModifications.parent)
 				const parentDepth = navigationItems ? navigationItems[parentIndex].depth || 0 : 0
 				newItem.depth = parentDepth + 1
 				const updatedItems = navigationItems
@@ -294,28 +316,18 @@ const Navigation = () => {
 		resetState()
 
 		if (projected && over && navigationItems) {
-			const { depth } = projected
+			const movedItems = moveNavItem(
+				navigationItems,
+				visibleItems,
+				active.id,
+				over.id,
+				projected.depth,
+			)
+			setNavigationItems(movedItems)
 
-			// Update the depth of the active item
-			const overIndex = navigationItems.findIndex(({ id }) => id === over.id)
-			const activeIndex = navigationItems.findIndex(({ id }) => id === active.id)
-			const activeTreeItem = navigationItems[activeIndex]
-
-			navigationItems[activeIndex] = { ...activeTreeItem, depth }
-
-			const sortedItems = arrayMove(navigationItems, activeIndex, overIndex)
-
-			// Fix potential depth issues
-			const fixedItems = [...sortedItems]
-			fixedItems[0].depth = 0
-			for (let i = 1; i < fixedItems.length; i++) {
-				const prev = fixedItems[i - 1].depth ?? 0
-				let curr = fixedItems[i].depth ?? 0
-				if (curr < 0) curr = 0
-				if (curr > prev + 1) curr = prev + 1
-				fixedItems[i].depth = curr
-			}
-			setNavigationItems(fixedItems)
+			// Show the moved item, even if it is dropped into a collapsed item
+			const parentItem = getParentItem(movedItems, active.id)
+			if (parentItem) expand(parentItem.documentId)
 		}
 	}
 
@@ -327,19 +339,37 @@ const Navigation = () => {
 		document.body.style.setProperty('cursor', '')
 	}
 
-	const projected = useMemo<Projected | null>(
-		() =>
-			activeId && overId
-				? getProjection(
-						navigationItems,
-						activeId,
-						overId,
-						offsetLeft,
-						config?.navigation.maxDepth || 3,
-					)
-				: null,
-		[activeId, overId, offsetLeft, navigationItems, config],
+	const visibleItems = useMemo(() => {
+		if (!navigationItems) return []
+		return isSearching
+			? getSearchVisibleItems(navigationItems, searchQuery)
+			: getCollapsedVisibleItems(navigationItems, collapsedIds)
+	}, [navigationItems, isSearching, searchQuery, collapsedIds])
+
+	const itemsWithChildren = useMemo(
+		() => getItemsWithChildren(navigationItems ?? []),
+		[navigationItems],
 	)
+
+	const projected = useMemo<Projected | null>(() => {
+		if (!activeId || !overId || !navigationItems) return null
+
+		// A collapsed item takes its children along, they must not exceed the maximum depth either
+		const activeIndex = navigationItems.findIndex(({ id }) => id === activeId)
+		const activeItemToMove = navigationItems[activeIndex]
+		const childLevels =
+			activeItemToMove && collapsedIds.has(activeItemToMove.documentId)
+				? getSubtreeDepth(navigationItems, activeIndex)
+				: 0
+
+		return getProjection(
+			visibleItems,
+			activeId,
+			overId,
+			offsetLeft,
+			Math.max(0, (config?.navigation.maxDepth || 3) - childLevels),
+		)
+	}, [activeId, overId, offsetLeft, navigationItems, visibleItems, collapsedIds, config])
 
 	const activeItem = useMemo(
 		() => (activeId ? navigationItems?.find(({ id }) => id === activeId) : undefined),
@@ -352,8 +382,9 @@ const Navigation = () => {
 		[navigationItems],
 	)
 
-	const initialItemsById = useMemo(
-		() => new Map(initialNavigationItemsRef.current?.map((item) => [item.documentId, item])),
+	// The initial items only change together with the items when a navigation is (re)loaded
+	const movedItemIds = useMemo(
+		() => getMovedItemIds(initialNavigationItemsRef.current ?? [], navigationItems ?? []),
 		[navigationItems],
 	)
 
@@ -374,33 +405,97 @@ const Navigation = () => {
 				<SelectedNavigationContext.Provider value={{ selectedNavigation, setSelectedNavigation }}>
 					<PageWrapper navigations={navigations}>
 						{selectedNavigation && (
-							<Flex gap={4} paddingBottom={6} justifyContent="flex-end">
-								<Button
-									variant="secondary"
-									startIcon={<Plus />}
-									onClick={() => setModalType('ItemCreate')}
-								>
-									{formatMessage({
-										id: getTranslation('navigation.page.newItemButton'),
-										defaultMessage: 'New Item',
-									})}
-								</Button>
-								<Button
-									onClick={() => saveNavigation()}
-									loading={isSavingNavigation}
-									variant="default"
-									startIcon={<Check />}
-									disabled={!hasUnsavedChanges}
-								>
-									{formatMessage({
-										id: getTranslation('save'),
-										defaultMessage: 'Save',
-									})}
-								</Button>
+							<Flex
+								gap={4}
+								paddingBottom={4}
+								justifyContent="space-between"
+								alignItems="flex-start"
+							>
+								<Flex gap={2} alignItems="center">
+									<Box width="30rem">
+										<Searchbar
+											name="navigation-item-search"
+											value={searchQuery}
+											onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+												setSearchQuery(e.target.value)
+											}
+											onClear={() => setSearchQuery('')}
+											clearLabel={formatMessage({
+												id: getTranslation('navigation.page.search.clear'),
+												defaultMessage: 'Clear search',
+											})}
+											placeholder={formatMessage({
+												id: getTranslation('navigation.page.search.placeholder'),
+												defaultMessage: 'Search by title or path',
+											})}
+										>
+											{formatMessage({
+												id: getTranslation('navigation.page.search.placeholder'),
+												defaultMessage: 'Search by title or path',
+											})}
+										</Searchbar>
+									</Box>
+									<Button
+										variant="tertiary"
+										size="S"
+										onClick={() => setCollapsedIds(new Set(itemsWithChildren))}
+										disabled={isSearching}
+									>
+										{formatMessage({
+											id: getTranslation('navigation.page.collapseAll'),
+											defaultMessage: 'Collapse all',
+										})}
+									</Button>
+									<Button
+										variant="tertiary"
+										size="S"
+										onClick={() => setCollapsedIds(new Set())}
+										disabled={isSearching}
+									>
+										{formatMessage({
+											id: getTranslation('navigation.page.expandAll'),
+											defaultMessage: 'Expand all',
+										})}
+									</Button>
+								</Flex>
+								<Flex gap={4}>
+									<Button
+										variant="secondary"
+										startIcon={<Plus />}
+										onClick={() => setModalType('ItemCreate')}
+									>
+										{formatMessage({
+											id: getTranslation('navigation.page.newItemButton'),
+											defaultMessage: 'New Item',
+										})}
+									</Button>
+									<Button
+										onClick={() => saveNavigation()}
+										loading={isSavingNavigation}
+										variant="default"
+										startIcon={<Check />}
+										disabled={!hasUnsavedChanges}
+									>
+										{formatMessage({
+											id: getTranslation('save'),
+											defaultMessage: 'Save',
+										})}
+									</Button>
+								</Flex>
 							</Flex>
 						)}
+						{isSearching && (
+							<Box paddingBottom={2}>
+								<Typography variant="pi" textColor="neutral600">
+									{formatMessage({
+										id: getTranslation('navigation.page.search.dragDisabled'),
+										defaultMessage: 'Drag and drop is disabled while searching.',
+									})}
+								</Typography>
+							</Box>
+						)}
 						{selectedNavigation && navigationItems && navigationItems.length > 0 && (
-							<Flex direction="column" alignItems="stretch" gap={4}>
+							<Box hasRadius overflow="hidden">
 								<DndContext
 									collisionDetection={(e) => closestCenter(e)}
 									onDragStart={(e) => handleDragStart(e)}
@@ -410,15 +505,18 @@ const Navigation = () => {
 									onDragCancel={() => handleDragCancel()}
 									measuring={measuring}
 								>
-									<SortableContext items={navigationItems} strategy={verticalListSortingStrategy}>
-										{navigationItems.map((item, index) => {
-											const initialItem = initialItemsById.get(item.documentId)
+									<SortableContext
+										items={visibleItems}
+										strategy={verticalListSortingStrategy}
+										disabled={isSearching}
+									>
+										{visibleItems.map((item, index) => {
 											return (
 												config?.navigation.maxDepth && (
 													<SortableRouteItem
 														key={item.documentId || index}
 														item={item}
-														initialItem={initialItem}
+														isMoved={movedItemIds.has(item.documentId)}
 														setActionItemParent={setActionItemParent}
 														setActionItem={setActionItem}
 														setNavigationItems={setNavigationItems}
@@ -426,10 +524,23 @@ const Navigation = () => {
 														depth={item.id === activeId && projected ? projected.depth : item.depth}
 														maxDepth={config.navigation.maxDepth}
 														navigationItems={navigationItems}
+														hasChildren={itemsWithChildren.has(item.documentId)}
+														collapsed={collapsedIds.has(item.documentId)}
+														onToggleCollapse={isSearching ? undefined : toggleCollapsed}
 													/>
 												)
 											)
 										})}
+										{isSearching && visibleItems.length === 0 && (
+											<Box padding={4}>
+												<Typography textColor="neutral600">
+													{formatMessage({
+														id: getTranslation('navigation.page.search.noResults'),
+														defaultMessage: 'No items found',
+													})}
+												</Typography>
+											</Box>
+										)}
 										{createPortal(
 											<DragOverlay>
 												{/* Must not use useSortable, a second sortable with the same id breaks dnd-kit */}
@@ -443,6 +554,8 @@ const Navigation = () => {
 																setNavigationItems={setNavigationItems}
 																maxDepth={config.navigation.maxDepth}
 																navigationItems={navigationItems}
+																hasChildren={itemsWithChildren.has(activeItem.documentId)}
+																collapsed={collapsedIds.has(activeItem.documentId)}
 															/>
 														)
 													: null}
@@ -451,7 +564,7 @@ const Navigation = () => {
 										)}
 									</SortableContext>
 								</DndContext>
-							</Flex>
+							</Box>
 						)}
 						{navigations?.length === 0 && (
 							<Center height={400}>
@@ -491,6 +604,7 @@ const Navigation = () => {
 							item={actionItem as NestedNavigation}
 							onDelete={(deletedItem) => {
 								cachedNavigations.current = null
+								removeCollapsedItems(deletedItem.documentId)
 								const remaining = navigations.filter((nav) => nav.id !== deletedItem.id)
 								setNavigations(remaining)
 

@@ -8,7 +8,7 @@ export const measuring = {
 	},
 }
 
-export const indentationWidth = 48
+export const indentationWidth = 32
 
 export function getProjection(
 	items: NestedNavItem[] | undefined,

@@ -10,8 +10,6 @@ export default function SortableRouteItem({
 	setNavigationItems,
 	...props
 }: RouteItemProps) {
-	if (!item) return null
-
 	const {
 		isDragging,
 		isSorting,

@@ -1,13 +1,15 @@
-import { Box, Typography, Flex } from '@strapi/design-system'
+import { Box, Typography, Flex, IconButton } from '@strapi/design-system'
 import { RouteItemProps } from '../../types'
 import { ModalContext } from '../../contexts'
 import { useContext, forwardRef, memo, useMemo } from 'react'
-import { Drag } from '@strapi/icons'
+import { Drag, ChevronDown, ChevronRight } from '@strapi/icons'
 import RouteItemMenu from './RouteItemMenu'
 import RouteItemStatus from './RouteItemStatus'
 import RouteItemIcon from './RouteItemIcon'
 import RouteItemBadge from './RouteItemBadge'
-import { getNavItemPath } from '../../utils'
+import { getNavItemPath, getTranslation } from '../../utils'
+import { indentationWidth as defaultIndentationWidth } from '../../utils/dnd'
+import { useIntl } from 'react-intl'
 
 // Memoized because all items re-render on every drag event otherwise. Keep the props stable
 // (state setters, useCallback, useMemo), new objects or inline functions disable the memoization.
@@ -16,7 +18,7 @@ export const RouteItem = memo(
 		(
 			{
 				item,
-				initialItem,
+				isMoved = false,
 				setActionItemParent,
 				setActionItem,
 				setNavigationItems,
@@ -27,16 +29,15 @@ export const RouteItem = memo(
 				wrapperRef,
 				handleProps,
 				navigationItems,
+				indentationWidth = defaultIndentationWidth,
+				hasChildren = false,
+				collapsed = false,
+				onToggleCollapse,
 			}: RouteItemProps,
 			ref,
 		) => {
 			const { setModalType } = useContext(ModalContext)
-
-			const hasStructureChanges = useMemo(() => {
-				if (!initialItem) return false
-
-				return initialItem.order !== item.order || initialItem.depth !== item.depth
-			}, [initialItem, item.order, item.depth])
+			const { formatMessage } = useIntl()
 
 			// clientModifications.path is kept in sync centrally by the navigation page (syncNavItemPaths)
 			const itemPath = useMemo(
@@ -81,9 +82,10 @@ export const RouteItem = memo(
 				)
 			}
 
+			const isDeleted = item.clientModifications?.type === 'delete'
+
 			const elStyle = {
-				marginLeft: depth !== undefined ? depth * 48 : 0,
-				opacity: ghost || item.clientModifications?.type === 'delete' ? 0.5 : 1,
+				opacity: ghost || isDeleted ? 0.5 : 1,
 				...style,
 			}
 
@@ -91,46 +93,73 @@ export const RouteItem = memo(
 
 			return (
 				<Box ref={wrapperRef} style={elStyle}>
-					<Box
-						background="neutral0"
-						borderColor={item.clientModifications?.type === 'delete' ? 'danger500' : 'neutral150'}
-						hasRadius
-						paddingBottom={4}
-						paddingLeft={4}
-						paddingRight={4}
-						paddingTop={4}
-						shadow="tableShadow"
-						ref={ref}
-					>
-						<Flex justifyContent="space-between" gap={4}>
-							<Flex gap={4}>
-								<Drag color="neutral800" {...handleProps} />
-								<Box width="1px" height="32px" background="neutral150" />
-								<RouteItemIcon type={item.route.type} />
-								<Flex gap={2}>
-									<Typography fontWeight="bold">
-										{item.clientModifications?.title
-											? item.clientModifications.title
-											: item.route.title}
-									</Typography>
-									{itemPath && <Typography textColor="neutral400">/{itemPath}</Typography>}
-								</Flex>
-								<RouteItemStatus item={item} isUpdated={hasStructureChanges} />
+					<Flex alignItems="stretch">
+						{/* Indentation outside of the row, so the hierarchy shows in the background of the list */}
+						<Box flex={`0 0 ${(depth ?? 0) * indentationWidth}px`} />
+						<Flex
+							ref={ref}
+							flex="1"
+							minWidth={0}
+							alignItems="stretch"
+							background={isDeleted ? 'danger100' : 'neutral0'}
+							borderColor="neutral150"
+							borderStyle="solid"
+							borderWidth="0 0 1px 0"
+						>
+							<Flex paddingLeft={3} paddingRight={2}>
+								<Drag color="neutral600" style={{ cursor: 'grab' }} {...handleProps} />
 							</Flex>
-							<Flex direction="row" gap={4}>
-								<RouteItemBadge item={item} />
-								<RouteItemMenu
-									item={item}
-									depth={depth}
-									maxDepth={maxDepth}
-									handleEdit={handleEdit}
-									handleAddChildren={handleAddChildren}
-									handleDelete={handleDelete}
-									handleRestore={handleRestore}
-								/>
+							<Flex flex="1" minWidth={0} gap={2} paddingTop={2} paddingBottom={2} paddingRight={3}>
+								<Flex flex={`0 0 ${indentationWidth}px`} justifyContent="center">
+									{hasChildren && onToggleCollapse && (
+										<IconButton
+											variant="ghost"
+											size="S"
+											withTooltip={false}
+											label={formatMessage(
+												collapsed
+													? {
+															id: getTranslation('navigation.page.navItem.expand'),
+															defaultMessage: 'Expand',
+														}
+													: {
+															id: getTranslation('navigation.page.navItem.collapse'),
+															defaultMessage: 'Collapse',
+														},
+											)}
+											onClick={() => onToggleCollapse(item.documentId)}
+										>
+											{collapsed ? <ChevronRight /> : <ChevronDown />}
+										</IconButton>
+									)}
+								</Flex>
+								<RouteItemIcon type={item.route.type} />
+								<Typography fontWeight="bold" ellipsis style={{ flex: 'none', maxWidth: '40%' }}>
+									{item.clientModifications?.title
+										? item.clientModifications.title
+										: item.route.title}
+								</Typography>
+								{itemPath && (
+									<Typography textColor="neutral500" ellipsis>
+										/{itemPath}
+									</Typography>
+								)}
+								<RouteItemStatus item={item} isUpdated={isMoved} />
+								<Flex marginLeft="auto" gap={2} flex="none">
+									<RouteItemBadge item={item} />
+									<RouteItemMenu
+										item={item}
+										depth={depth}
+										maxDepth={maxDepth}
+										handleEdit={handleEdit}
+										handleAddChildren={handleAddChildren}
+										handleDelete={handleDelete}
+										handleRestore={handleRestore}
+									/>
+								</Flex>
 							</Flex>
 						</Flex>
-					</Box>
+					</Flex>
 				</Box>
 			)
 		},
