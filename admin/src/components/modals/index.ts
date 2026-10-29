@@ -9,6 +9,7 @@ import { ItemCreate } from './internalItem/internalItemCreate'
 import { ItemEdit } from './internalItem/internalItemEdit'
 import { WrapperItem } from './wrapperItem'
 import NavModal from './NavModal'
+import SaveConfirm from './SaveConfirm'
 
 export {
 	Delete,
@@ -22,4 +23,5 @@ export {
 	ItemEdit,
 	WrapperItem,
 	NavModal,
+	SaveConfirm,
 }
