@@ -1,4 +1,4 @@
-import { CSSProperties } from 'react'
+import { CSSProperties, useMemo } from 'react'
 import { CSS } from '@dnd-kit/utilities'
 import { useSortable } from '@dnd-kit/sortable'
 import { RouteItem } from './RouteItem'
@@ -22,9 +22,10 @@ export default function SortableRouteItem({
 		listeners,
 	} = useSortable({ id: item.id })
 
-	const style: CSSProperties = {
-		transform: transform ? CSS.Translate.toString(transform) : undefined,
-	}
+	// Memoized, so RouteItem only re-renders when the transform or the handle actually changes
+	const transformString = transform ? CSS.Translate.toString(transform) : undefined
+	const style: CSSProperties = useMemo(() => ({ transform: transformString }), [transformString])
+	const handleProps = useMemo(() => ({ ...attributes, ...listeners }), [attributes, listeners])
 
 	return (
 		<RouteItem
@@ -36,10 +37,7 @@ export default function SortableRouteItem({
 			disableInteraction={isSorting}
 			ghost={isDragging}
 			depth={depth}
-			handleProps={{
-				...attributes,
-				...listeners,
-			}}
+			handleProps={handleProps}
 			{...props}
 		/>
 	)

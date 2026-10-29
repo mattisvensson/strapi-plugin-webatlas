@@ -41,6 +41,7 @@ import {
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { getProjection, measuring, indentationWidth } from '../../utils/dnd'
 import SortableRouteItem from './SortableRouteItem'
+import { RouteItem } from './RouteItem'
 import PageWrapper from './PageWrapper'
 import cloneDeep from 'lodash/cloneDeep'
 import { useParams, useNavigate } from 'react-router-dom'
@@ -76,8 +77,6 @@ const Navigation = () => {
 	const entitiesRequestRef = useRef<Promise<void> | null>(null)
 	const { config } = usePluginConfig()
 
-	const [projected, setProjected] = useState<Projected | null>(null)
-	const [activeItem, setActiveItem] = useState<NestedNavItem | undefined>()
 	const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
 	const [overId, setOverId] = useState<UniqueIdentifier | null>(null)
 	const [offsetLeft, setOffsetLeft] = useState(0)
@@ -202,13 +201,6 @@ const Navigation = () => {
 		)
 	}, [setNavigations, navigationItems, selectedNavigation])
 
-	useEffect(() => {
-		if (!activeId || !navigationItems) return
-
-		const item = navigationItems.find(({ id }) => id === activeId)
-		setActiveItem(item)
-	}, [navigationItems, activeId])
-
 	function handleSoftAddedItem(newItem: NestedNavItem) {
 		if (newItem.clientModifications?.parent) {
 			const parentIndex = navigationItems?.findIndex(
@@ -285,7 +277,8 @@ const Navigation = () => {
 	}
 
 	function handleDragMove({ delta }: DragMoveEvent) {
-		setOffsetLeft(delta.x)
+		// Snap to the indentation steps, so the page only re-renders when the projected depth can change
+		setOffsetLeft(Math.round(delta.x / indentationWidth) * indentationWidth)
 	}
 
 	function handleDragOver({ over }: DragOverEvent) {
@@ -334,8 +327,8 @@ const Navigation = () => {
 		document.body.style.setProperty('cursor', '')
 	}
 
-	useEffect(() => {
-		const projection =
+	const projected = useMemo<Projected | null>(
+		() =>
 			activeId && overId
 				? getProjection(
 						navigationItems,
@@ -344,10 +337,28 @@ const Navigation = () => {
 						offsetLeft,
 						config?.navigation.maxDepth || 3,
 					)
-				: null
+				: null,
+		[activeId, overId, offsetLeft, navigationItems, config],
+	)
 
-		setProjected(projection)
-	}, [activeId, overId, offsetLeft, navigationItems])
+	const activeItem = useMemo(
+		() => (activeId ? navigationItems?.find(({ id }) => id === activeId) : undefined),
+		[navigationItems, activeId],
+	)
+
+	// The initial items only change together with the items when a navigation is (re)loaded
+	const hasUnsavedChanges = useMemo(
+		() => JSON.stringify(navigationItems) !== JSON.stringify(initialNavigationItemsRef.current),
+		[navigationItems],
+	)
+
+	const initialItemsById = useMemo(
+		() => new Map(initialNavigationItemsRef.current?.map((item) => [item.documentId, item])),
+		[navigationItems],
+	)
+
+	// Stable context value, otherwise every page render re-renders all memoized route items
+	const modalContextValue = useMemo(() => ({ modalType, setModalType }), [modalType])
 
 	if (loading) {
 		return (
@@ -358,7 +369,7 @@ const Navigation = () => {
 	}
 
 	return (
-		<ModalContext.Provider value={{ modalType, setModalType }}>
+		<ModalContext.Provider value={modalContextValue}>
 			<EntitiesContext.Provider value={entitiesContextValue}>
 				<SelectedNavigationContext.Provider value={{ selectedNavigation, setSelectedNavigation }}>
 					<PageWrapper navigations={navigations}>
@@ -379,10 +390,7 @@ const Navigation = () => {
 									loading={isSavingNavigation}
 									variant="default"
 									startIcon={<Check />}
-									disabled={
-										JSON.stringify(navigationItems) ===
-										JSON.stringify(initialNavigationItemsRef.current)
-									}
+									disabled={!hasUnsavedChanges}
 								>
 									{formatMessage({
 										id: getTranslation('save'),
@@ -404,9 +412,7 @@ const Navigation = () => {
 								>
 									<SortableContext items={navigationItems} strategy={verticalListSortingStrategy}>
 										{navigationItems.map((item, index) => {
-											const initialItem = initialNavigationItemsRef.current?.find(
-												(i) => i.documentId === item.documentId,
-											)
+											const initialItem = initialItemsById.get(item.documentId)
 											return (
 												config?.navigation.maxDepth && (
 													<SortableRouteItem
@@ -426,10 +432,12 @@ const Navigation = () => {
 										})}
 										{createPortal(
 											<DragOverlay>
+												{/* Must not use useSortable, a second sortable with the same id breaks dnd-kit */}
 												{activeId && activeItem
 													? config?.navigation.maxDepth && (
-															<SortableRouteItem
+															<RouteItem
 																item={activeItem}
+																ghost
 																setActionItemParent={setActionItemParent}
 																setActionItem={setActionItem}
 																setNavigationItems={setNavigationItems}
