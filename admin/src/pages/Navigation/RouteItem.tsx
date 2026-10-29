@@ -1,4 +1,4 @@
-import { Box, Typography, Flex, IconButton } from '@strapi/design-system'
+import { Box, Typography, Flex, IconButton, Badge } from '@strapi/design-system'
 import { RouteItemProps } from '../../types'
 import { ModalContext } from '../../contexts'
 import { useContext, forwardRef, memo, useMemo } from 'react'
@@ -19,6 +19,7 @@ export const RouteItem = memo(
 			{
 				item,
 				isMoved = false,
+				movedChildCount = 0,
 				setActionItemParent,
 				setActionItem,
 				setNavigationItems,
@@ -145,6 +146,17 @@ export const RouteItem = memo(
 									</Typography>
 								)}
 								<RouteItemStatus item={item} isUpdated={isMoved} />
+								{movedChildCount > 0 && (
+									<Badge flex="none">
+										{formatMessage(
+											{
+												id: getTranslation('navigation.page.navItem.movedChildren'),
+												defaultMessage: '+{count} {count, plural, one {child} other {children}}',
+											},
+											{ count: movedChildCount },
+										)}
+									</Badge>
+								)}
 								<Flex marginLeft="auto" gap={2} flex="none">
 									<RouteItemBadge item={item} />
 									<RouteItemMenu

@@ -136,6 +136,17 @@ export function getSubtreeDepth(items: NestedNavItem[], index: number): number {
 }
 
 /**
+ * Returns the number of descendants of the item, including grandchildren.
+ */
+export function getDescendantCount(items: NestedNavItem[], index: number): number {
+	const depth = items[index].depth ?? 0
+	let end = index + 1
+	while (end < items.length && (items[end].depth ?? 0) > depth) end++
+
+	return end - index - 1
+}
+
+/**
  * Returns the closest item above the given item with a lower depth.
  */
 export function getParentItem(

@@ -16,6 +16,7 @@
 	"webatlas.navigation.page.expandAll": "Expand all",
 	"webatlas.navigation.page.navItem.collapse": "Collapse",
 	"webatlas.navigation.page.navItem.expand": "Expand",
+	"webatlas.navigation.page.navItem.movedChildren": "+{count} {count, plural, one {child} other {children}}",
 
 	"webatlas.paths.page.title": "Paths",
 	"webatlas.paths.page.subtitle": "Overview of all existing paths",
