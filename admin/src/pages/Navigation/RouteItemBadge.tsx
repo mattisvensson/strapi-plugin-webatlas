@@ -43,6 +43,7 @@ export default function RouteItemBadge({ item }: { item: NestedNavItem }) {
 			backgroundColor={itemStatusOptions[item.status].backgroundColor}
 			textColor={itemStatusOptions[item.status].textColor}
 			borderColor={itemStatusOptions[item.status].borderColor}
+			size="S"
 		>
 			<Typography fontWeight="bold">{itemStatusOptions[item.status].status}</Typography>
 		</Badge>
