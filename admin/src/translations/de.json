@@ -17,6 +17,7 @@
 	"webatlas.navigation.page.navItem.collapse": "Einklappen",
 	"webatlas.navigation.page.navItem.expand": "Ausklappen",
 	"webatlas.navigation.page.navItem.movedChildren": "+{count} {count, plural, one {Unterelement} other {Unterelemente}}",
+	"webatlas.navigation.page.navItem.insertBelow": "Element darunter einfügen",
 
 	"webatlas.paths.page.title": "Pfad",
 	"webatlas.paths.page.subtitle": "Übersicht aller vorhandenen Pfade",

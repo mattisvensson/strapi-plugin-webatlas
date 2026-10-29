@@ -1,8 +1,8 @@
 import { Box, Typography, Flex, IconButton, Badge } from '@strapi/design-system'
 import { RouteItemProps } from '../../types'
 import { ModalContext } from '../../contexts'
-import { useContext, forwardRef, memo, useMemo } from 'react'
-import { Drag, ChevronDown, ChevronRight } from '@strapi/icons'
+import { useContext, forwardRef, memo, useMemo, useState } from 'react'
+import { Drag, ChevronDown, ChevronRight, Plus } from '@strapi/icons'
 import RouteItemMenu from './RouteItemMenu'
 import RouteItemStatus from './RouteItemStatus'
 import RouteItemIcon from './RouteItemIcon'
@@ -20,6 +20,8 @@ export const RouteItem = memo(
 				item,
 				isMoved = false,
 				movedChildCount = 0,
+				onInsertBelow,
+				disableInteraction,
 				setActionItemParent,
 				setActionItem,
 				setNavigationItems,
@@ -39,6 +41,8 @@ export const RouteItem = memo(
 		) => {
 			const { setModalType } = useContext(ModalContext)
 			const { formatMessage } = useIntl()
+			const [isHovered, setIsHovered] = useState(false)
+			const [isInsertButtonActive, setIsInsertButtonActive] = useState(false)
 
 			// clientModifications.path is kept in sync centrally by the navigation page (syncNavItemPaths)
 			const itemPath = useMemo(
@@ -87,13 +91,29 @@ export const RouteItem = memo(
 
 			const elStyle = {
 				opacity: ghost || isDeleted ? 0.5 : 1,
+				position: 'relative' as const,
+				// Lift the hovered row, so its insert button overlaps the row below
+				zIndex: isHovered ? 1 : undefined,
 				...style,
 			}
+
+			const insertBelowLabel = formatMessage({
+				id: getTranslation('navigation.page.navItem.insertBelow'),
+				defaultMessage: 'Add item below',
+			})
 
 			if (!item || !item.route) return null
 
 			return (
-				<Box ref={wrapperRef} style={elStyle}>
+				<Box
+					ref={wrapperRef}
+					style={elStyle}
+					onMouseEnter={() => setIsHovered(true)}
+					onMouseLeave={() => {
+						setIsHovered(false)
+						setIsInsertButtonActive(false)
+					}}
+				>
 					<Flex alignItems="stretch">
 						{/* Indentation outside of the row, so the hierarchy shows in the background of the list */}
 						<Box flex={`0 0 ${(depth ?? 0) * indentationWidth}px`} />
@@ -172,6 +192,36 @@ export const RouteItem = memo(
 							</Flex>
 						</Flex>
 					</Flex>
+					{isHovered && onInsertBelow && !disableInteraction && !ghost && (
+						// Sits on the border below the row, centered below the collapse toggle
+						<Flex
+							tag="button"
+							type="button"
+							aria-label={insertBelowLabel}
+							title={insertBelowLabel}
+							onClick={() => onInsertBelow(item)}
+							// Highlighted on hover and keyboard focus
+							onMouseEnter={() => setIsInsertButtonActive(true)}
+							onMouseLeave={() => setIsInsertButtonActive(false)}
+							onFocus={() => setIsInsertButtonActive(true)}
+							onBlur={() => setIsInsertButtonActive(false)}
+							position="absolute"
+							bottom="-1rem"
+							left={`calc(${(depth ?? 0) * indentationWidth}px + 3.6rem + ${indentationWidth / 2}px - 1rem)`}
+							width="2rem"
+							height="2rem"
+							justifyContent="center"
+							background={isInsertButtonActive ? 'primary700' : 'primary600'}
+							transform={isInsertButtonActive ? 'scale(1.2)' : undefined}
+							transition="transform 0.15s ease, background-color 0.15s ease"
+							borderRadius="50%"
+							borderStyle="none"
+							cursor="pointer"
+							zIndex={1}
+						>
+							<Plus width="1.2rem" height="1.2rem" fill="neutral0" />
+						</Flex>
+					)}
 				</Box>
 			)
 		},

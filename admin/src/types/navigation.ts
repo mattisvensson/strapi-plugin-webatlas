@@ -7,6 +7,8 @@ export type RouteItemProps = {
 	isMoved?: boolean
 	// Number of hidden children that are dragged along with a collapsed item, shown in the drag overlay
 	movedChildCount?: number
+	// Omitted to hide the insert button below the row, e.g. while searching
+	onInsertBelow?: (item: NestedNavItem) => void
 	setActionItemParent: (item: NestedNavItem | null) => void
 	setActionItem: React.Dispatch<React.SetStateAction<NestedNavItem | NestedNavigation | undefined>>
 	setNavigationItems: React.Dispatch<React.SetStateAction<NestedNavItem[] | undefined>>

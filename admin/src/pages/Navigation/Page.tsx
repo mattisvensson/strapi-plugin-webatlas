@@ -80,6 +80,8 @@ const Navigation = () => {
 		}, [])
 	const [actionItem, setActionItem] = useState<NestedNavItem | NestedNavigation>()
 	const [actionItemParent, setActionItemParent] = useState<NestedNavItem | null>(null)
+	// Item below which a new item is inserted via the insert button of a row
+	const [insertBelowItem, setInsertBelowItem] = useState<NestedNavItem | null>(null)
 	const { getNavigation, updateNavigationItemStructure, fetchAllEntities } = useApi()
 	const [isSavingNavigation, setIsSavingNavigation] = useState(false)
 	const [loading, setLoading] = useState(true)
@@ -205,8 +207,14 @@ const Navigation = () => {
 		if (modalType === 'NavOverview' || modalType === '') {
 			setActionItem(undefined)
 			setActionItemParent(null)
+			setInsertBelowItem(null)
 		}
 	}, [modalType])
+
+	const handleInsertBelow = useCallback((item: NestedNavItem) => {
+		setInsertBelowItem(item)
+		setModalType('ItemCreate')
+	}, [])
 
 	useEffect(() => {
 		if (!selectedNavigation || !navigationItems) return
@@ -223,6 +231,16 @@ const Navigation = () => {
 	}, [setNavigations, navigationItems, selectedNavigation])
 
 	function handleSoftAddedItem(newItem: NestedNavItem) {
+		if (insertTarget && navigationItems) {
+			newItem.depth = insertTarget.depth
+			setNavigationItems([
+				...navigationItems.slice(0, insertTarget.index),
+				newItem,
+				...navigationItems.slice(insertTarget.index),
+			])
+			return
+		}
+
 		if (newItem.clientModifications?.parent) {
 			const parentIndex = navigationItems?.findIndex(
 				(item) => item.documentId === newItem.clientModifications?.parent,
@@ -351,6 +369,33 @@ const Navigation = () => {
 		() => getItemsWithChildren(navigationItems ?? []),
 		[navigationItems],
 	)
+
+	// A new item inserted below an item appears directly below it: as first child of an expanded item
+	// with children, otherwise as next sibling behind the (collapsed) children
+	const insertTarget = useMemo(() => {
+		if (!insertBelowItem || !navigationItems) return null
+
+		const index = navigationItems.findIndex(
+			({ documentId }) => documentId === insertBelowItem.documentId,
+		)
+		if (index === -1) return null
+
+		const depth = insertBelowItem.depth ?? 0
+		if (
+			itemsWithChildren.has(insertBelowItem.documentId) &&
+			!collapsedIds.has(insertBelowItem.documentId)
+		) {
+			return { index: index + 1, depth: depth + 1, parent: insertBelowItem }
+		}
+
+		return {
+			index: index + 1 + getDescendantCount(navigationItems, index),
+			depth,
+			parent: getParentItem(navigationItems, insertBelowItem.id) ?? null,
+		}
+	}, [insertBelowItem, navigationItems, itemsWithChildren, collapsedIds])
+
+	const createItemParent = insertTarget ? insertTarget.parent : actionItemParent
 
 	const projected = useMemo<Projected | null>(() => {
 		if (!activeId || !overId || !navigationItems) return null
@@ -502,7 +547,7 @@ const Navigation = () => {
 							</Box>
 						)}
 						{selectedNavigation && navigationItems && navigationItems.length > 0 && (
-							<Box hasRadius overflow="hidden">
+							<Box>
 								<DndContext
 									collisionDetection={(e) => closestCenter(e)}
 									onDragStart={(e) => handleDragStart(e)}
@@ -534,6 +579,7 @@ const Navigation = () => {
 														hasChildren={itemsWithChildren.has(item.documentId)}
 														collapsed={collapsedIds.has(item.documentId)}
 														onToggleCollapse={isSearching ? undefined : toggleCollapsed}
+														onInsertBelow={isSearching ? undefined : handleInsertBelow}
 													/>
 												)
 											)
@@ -639,7 +685,7 @@ const Navigation = () => {
 					)}
 					{modalType === 'ItemCreate' && (
 						<ItemCreate
-							actionItemParent={actionItemParent}
+							actionItemParent={createItemParent}
 							navigationItems={navigationItems || []}
 							navigations={navigations}
 							onCreate={(newItem) => {
@@ -672,7 +718,7 @@ const Navigation = () => {
 					{modalType === 'ExternalCreate' && (
 						<ExternalItem
 							variant={modalType}
-							actionItemParentId={actionItemParent?.documentId}
+							actionItemParentId={createItemParent?.documentId}
 							onCreate={(newItem) => {
 								handleSoftAddedItem(newItem)
 							}}
@@ -692,7 +738,7 @@ const Navigation = () => {
 					{modalType === 'WrapperCreate' && (
 						<WrapperItem
 							variant={modalType}
-							actionItemParentId={actionItemParent?.documentId}
+							actionItemParentId={createItemParent?.documentId}
 							onCreate={(newItem) => {
 								handleSoftAddedItem(newItem)
 							}}
