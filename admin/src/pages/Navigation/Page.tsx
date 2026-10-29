@@ -216,19 +216,16 @@ const Navigation = () => {
 		setModalType('ItemCreate')
 	}, [])
 
-	useEffect(() => {
-		if (!selectedNavigation || !navigationItems) return
-
-		setNavigations(
-			navigations.map((nav) => {
-				if (nav.documentId !== selectedNavigation.documentId) return nav
-				return {
-					...nav,
-					items: navigationItems,
-				}
-			}),
-		)
-	}, [setNavigations, navigationItems, selectedNavigation])
+	// The navigations with the unsaved items of the selected one, derived instead of synced into the state
+	const navigationsWithCurrentItems = useMemo(
+		() =>
+			navigations.map((nav) =>
+				nav.documentId === selectedNavigation?.documentId && navigationItems
+					? { ...nav, items: navigationItems }
+					: nav,
+			),
+		[navigations, selectedNavigation?.documentId, navigationItems],
+	)
 
 	function handleSoftAddedItem(newItem: NestedNavItem) {
 		if (insertTarget && navigationItems) {
@@ -687,7 +684,7 @@ const Navigation = () => {
 						<ItemCreate
 							actionItemParent={createItemParent}
 							navigationItems={navigationItems || []}
-							navigations={navigations}
+							navigations={navigationsWithCurrentItems}
 							onCreate={(newItem) => {
 								handleSoftAddedItem(newItem)
 							}}
