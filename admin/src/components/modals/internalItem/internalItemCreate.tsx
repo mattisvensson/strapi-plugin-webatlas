@@ -1,19 +1,31 @@
-import type { Entity, GroupedEntities, Route } from '../../../../../types'
-import type { ModalItem_VariantCreate } from '../../../types'
-import { SingleSelect, SingleSelectOption, Box, Divider, Grid, Field } from '@strapi/design-system'
+import type { ConfigContentType, Entity, Route } from '../../../../../types'
+import type { ExtendedPanelPathState, ModalItem_VariantCreate } from '../../../types'
+import { Box, Button, Divider, Field, Flex } from '@strapi/design-system'
 import { withModalSharedLogic } from '../withModalSharedLogic'
 import { useEffect, useMemo, useState } from 'react'
 import { useModalSharedLogic } from '../useModalSharedLogic'
 import { NavModal } from '../'
 import { useIntl } from 'react-intl'
-import { getTranslation, createTempNavItemObject, isAbortError } from '../../../utils'
+import {
+	getTranslation,
+	createTempNavItemObject,
+	isAbortError,
+	buildBreadcrumbString,
+} from '../../../utils'
 import { FullLoader } from '../../UI'
 import { useApi, useErrorMessage } from '../../../hooks'
 import { useNotification } from '@strapi/strapi/admin'
 import ItemDetails from './ItemDetails'
+import EntrySelection, { getSelectionKey } from './EntrySelection'
+import type { SelectedEntry } from './EntrySelection'
+import MultiItemReview, { isRowValid } from './MultiItemReview'
+import type { ReviewRow } from './MultiItemReview'
+
+// Select entries first, then edit a single entry in the details form or review several entries
+type Step = 'select' | 'details' | 'review'
 
 function ItemCreateComponent({
-	availableEntities,
+	availableContentTypes,
 	selectedContentType,
 	setSelectedContentType,
 	validationState,
@@ -23,6 +35,7 @@ function ItemCreateComponent({
 	path,
 	dispatchPath,
 	debouncedCheckUrl,
+	cancelUrlCheck,
 	debouncedCheckBlacklist,
 	setModalType,
 	selectedNavigation,
@@ -31,6 +44,11 @@ function ItemCreateComponent({
 	navigationItems,
 	navigations,
 }: ModalItem_VariantCreate & ReturnType<typeof useModalSharedLogic>) {
+	const [step, setStep] = useState<Step>('select')
+	const [searchContentType, setSearchContentType] = useState<ConfigContentType>()
+	const [query, setQuery] = useState('')
+	const [selectedEntries, setSelectedEntries] = useState<Map<string, SelectedEntry>>(new Map())
+	const [reviewRows, setReviewRows] = useState<ReviewRow[]>([])
 	const [route, setRoute] = useState<Route | null>(null)
 	const [entity, setEntity] = useState<Entity | null>(null)
 	const [loadingRoute, setLoadingRoute] = useState(true)
@@ -39,23 +57,81 @@ function ItemCreateComponent({
 	const { toggleNotification } = useNotification()
 	const getErrorMessage = useErrorMessage()
 
-	const sortedEntities = useMemo(() => {
-		if (!selectedContentType || !selectedContentType.entities) return []
+	const selectedEntryList = useMemo(() => [...selectedEntries.values()], [selectedEntries])
 
-		return [...selectedContentType.entities].sort((a, b) => {
-			const field = selectedContentType.contentType.routeSourceField
-			if (!field) return 0
+	useEffect(() => {
+		if (!searchContentType && availableContentTypes.length > 0) {
+			setSearchContentType(availableContentTypes[0])
+		}
+	}, [availableContentTypes])
 
-			const aValue = String(a[field] ?? '')
-			const bValue = String(b[field] ?? '')
+	const positionText = useMemo(() => {
+		if (!actionItemParent) return null
+		return buildBreadcrumbString({ navigationItems, targetItem: actionItemParent })
+	}, [actionItemParent, navigationItems])
 
-			return aValue.localeCompare(bValue, undefined, { sensitivity: 'base', numeric: true })
+	// Navigations in which an entry is already used, by the documentId of the entry
+	const usageByDocumentId = useMemo(() => {
+		const usage = new Map<string, string>()
+		navigations?.forEach((navigation) =>
+			navigation.items.forEach((item) => {
+				const documentId = item.route?.relatedDocumentId
+				if (!documentId || usage.has(documentId)) return
+				usage.set(
+					documentId,
+					navigation.documentId === selectedNavigation?.documentId
+						? formatMessage({
+								id: getTranslation('modal.entrySelection.usedHere'),
+								defaultMessage: 'Already in this navigation',
+							})
+						: formatMessage(
+								{
+									id: getTranslation('modal.entrySelection.usedIn'),
+									defaultMessage: 'In "{navigationName}"',
+								},
+								{ navigationName: navigation.name },
+							),
+				)
+			}),
+		)
+		return usage
+	}, [navigations, selectedNavigation])
+
+	const toggleEntry = (selectedEntry: SelectedEntry) =>
+		setSelectedEntries((current) => {
+			const next = new Map(current)
+			const key = getSelectionKey(selectedEntry.contentType, selectedEntry.entry)
+			if (!next.delete(key)) next.set(key, selectedEntry)
+			return next
 		})
-	}, [selectedContentType])
+
+	const goToNextStep = () => {
+		if (selectedEntryList.length === 1) {
+			const [{ entry, contentType }] = selectedEntryList
+			setSelectedContentType(contentType)
+			setEntity(entry)
+			setStep('details')
+		} else if (selectedEntryList.length > 1) {
+			setStep('review')
+		}
+	}
+
+	const goBack = () => {
+		if (step === 'review') {
+			// Entries removed in the review are removed from the selection as well
+			const remainingKeys = new Set(reviewRows.map(({ key }) => key))
+			setSelectedEntries(
+				(current) => new Map([...current].filter(([key]) => remainingKeys.has(key))),
+			)
+		}
+		setEntity(null)
+		setRoute(null)
+		setStep('select')
+	}
 
 	useEffect(() => {
 		async function fetchRoute() {
-			if (!selectedContentType?.contentType || !entity?.documentId) return setLoadingRoute(false)
+			if (!selectedContentType || !entity?.documentId) return setLoadingRoute(false)
 
 			setLoadingRoute(true)
 			try {
@@ -107,14 +183,16 @@ function ItemCreateComponent({
 	const addItem = async () => {
 		try {
 			if (
-				!selectedContentType?.contentType ||
+				!selectedContentType ||
 				!entity?.documentId ||
 				!path ||
 				!path.value?.trim() ||
 				!navItemState.title ||
 				!navItemState.title?.trim() ||
 				!selectedNavigation ||
-				!route
+				!route ||
+				// The path is not checked yet
+				validationState === 'checking'
 			)
 				return
 
@@ -127,7 +205,7 @@ function ItemCreateComponent({
 				selectedContentType,
 				path,
 			})
-			onCreate(newItem)
+			onCreate([newItem])
 
 			setModalType('')
 		} catch (err) {
@@ -135,21 +213,58 @@ function ItemCreateComponent({
 		}
 	}
 
-	if (availableEntities && availableEntities.length === 0) {
+	const canAddReviewedItems = reviewRows.length > 0 && reviewRows.every(isRowValid)
+
+	const addReviewedItems = () => {
+		if (!canAddReviewedItems || !selectedNavigation) return
+
+		const newItems = reviewRows.map((row) =>
+			createTempNavItemObject({
+				actionItemParentId: actionItemParent?.documentId,
+				entityRoute: row.route,
+				selectedNavigation,
+				navItemState: {
+					title: row.title,
+					active: row.route?.active,
+					isOverride: row.route?.isOverride,
+				},
+				selectedEntity: row.entry,
+				selectedContentType: row.contentType,
+				path: {
+					needsUrlCheck: false,
+					value: row.path,
+					prevValue: '',
+					slug: row.slug,
+					replacement: null,
+					uidPath: '',
+					canonicalPath: row.route?.canonicalPath ?? '',
+					initialPath: row.route?.path ?? '',
+				} satisfies ExtendedPanelPathState,
+			}),
+		)
+		onCreate(newItems)
+
+		setModalType('')
+	}
+
+	const titleText = formatMessage({
+		id: getTranslation('modal.internalItem.titleText.create'),
+		defaultMessage: 'Add new navigation item',
+	})
+	const closeText = formatMessage({
+		id: getTranslation('cancel'),
+		defaultMessage: 'Cancel',
+	})
+
+	if (availableContentTypes.length === 0) {
 		return (
 			<NavModal
 				confirmText={formatMessage({
 					id: getTranslation('add'),
 					defaultMessage: 'Add',
 				})}
-				closeText={formatMessage({
-					id: getTranslation('cancel'),
-					defaultMessage: 'Cancel',
-				})}
-				titleText={formatMessage({
-					id: getTranslation('modal.internalItem.titleText.create'),
-					defaultMessage: 'Add new navigation item',
-				})}
+				closeText={closeText}
+				titleText={titleText}
 				footer={<></>}
 			>
 				<FullLoader height={50} />
@@ -157,145 +272,144 @@ function ItemCreateComponent({
 		)
 	}
 
+	const backButton = (
+		<Button variant="tertiary" type="button" onClick={goBack}>
+			{formatMessage({
+				id: getTranslation('back'),
+				defaultMessage: 'Back',
+			})}
+		</Button>
+	)
+
+	if (step === 'review') {
+		return (
+			<NavModal
+				confirmText=""
+				closeText={closeText}
+				titleText={titleText}
+				onConfirm={addReviewedItems}
+				footer={
+					<>
+						{backButton}
+						<Button type="submit" disabled={!canAddReviewedItems}>
+							{formatMessage(
+								{
+									id: getTranslation('modal.multiItem.confirm'),
+									defaultMessage: 'Add {count, plural, one {# item} other {# items}}',
+								},
+								{ count: reviewRows.length },
+							)}
+						</Button>
+					</>
+				}
+			>
+				<MultiItemReview
+					selectedEntries={selectedEntryList}
+					parentNavItem={actionItemParent}
+					onRowsChange={setReviewRows}
+				/>
+			</NavModal>
+		)
+	}
+
+	if (step === 'details') {
+		return (
+			<NavModal
+				confirmText=""
+				closeText={closeText}
+				titleText={titleText}
+				onConfirm={addItem}
+				footer={
+					<>
+						{backButton}
+						<Button
+							type="submit"
+							disabled={
+								!selectedContentType ||
+								!entity?.documentId ||
+								!path ||
+								!path.value?.trim() ||
+								!path.slug?.trim() ||
+								!navItemState.title ||
+								!navItemState.title?.trim() ||
+								isBlacklisted ||
+								validationState === 'checking'
+							}
+						>
+							{formatMessage({
+								id: getTranslation('add'),
+								defaultMessage: 'Add',
+							})}
+						</Button>
+					</>
+				}
+			>
+				{loadingRoute || !route ? (
+					<FullLoader height={50} />
+				) : (
+					<ItemDetails
+						navItemState={navItemState}
+						dispatchNavItemState={dispatchNavItemState}
+						path={path}
+						dispatchPath={dispatchPath}
+						validationState={validationState}
+						isBlacklisted={isBlacklisted}
+						parentNavItem={actionItemParent}
+						navigationItems={navigationItems}
+						navigations={navigations}
+						debouncedCheckUrl={debouncedCheckUrl}
+						cancelUrlCheck={cancelUrlCheck}
+						debouncedCheckBlacklist={debouncedCheckBlacklist}
+						route={route}
+						modalVariant="create"
+					/>
+				)}
+			</NavModal>
+		)
+	}
+
 	return (
 		<NavModal
-			confirmText={formatMessage({
-				id: getTranslation('add'),
-				defaultMessage: 'Add',
-			})}
-			closeText={formatMessage({
-				id: getTranslation('cancel'),
-				defaultMessage: 'Cancel',
-			})}
-			titleText={formatMessage({
-				id: getTranslation('modal.internalItem.titleText.create'),
-				defaultMessage: 'Add new navigation item',
-			})}
-			loadingText={formatMessage({
-				id: getTranslation('modal.internalItem.loadingText.create'),
-				defaultMessage: 'Creating',
-			})}
-			onConfirm={addItem}
+			confirmText={formatMessage(
+				{
+					id: getTranslation('modal.entrySelection.next'),
+					defaultMessage: 'Next ({count})',
+				},
+				{ count: selectedEntries.size },
+			)}
+			closeText={closeText}
+			titleText={titleText}
+			onConfirm={goToNextStep}
 			modalToOpen=""
 			currentModalType="ItemCreate"
-			currentModalMode={'create'}
-			disabled={
-				!selectedContentType?.contentType ||
-				!entity?.documentId ||
-				!path ||
-				!path.value?.trim() ||
-				!path.slug?.trim() ||
-				!navItemState.title ||
-				!navItemState.title?.trim() ||
-				isBlacklisted
-			}
+			currentModalMode="create"
+			disabled={selectedEntries.size === 0}
 		>
-			<Grid.Root gap={4}>
-				<Grid.Item col={6} s={12}>
-					<Box width="100%">
-						<Field.Root>
-							<Field.Label>
-								{formatMessage({
-									id: getTranslation('modal.internalItem.contentType.label'),
-									defaultMessage: 'Content Type',
-								})}
-							</Field.Label>
-							<SingleSelect
-								value={selectedContentType ? selectedContentType.contentType.label : ''}
-								placeholder={formatMessage({
-									id: getTranslation('modal.internalItem.contentType.placeholder'),
-									defaultMessage: 'Select a content type',
-								})}
-								onChange={(value: string | number) => {
-									const [contentType] = availableEntities.filter(
-										(group: GroupedEntities) => group.contentType.label === value,
-									)
-									if (contentType) {
-										setSelectedContentType(contentType)
-										setEntity(null)
-									}
-								}}
-								disabled={availableEntities && availableEntities.length === 0}
-							>
-								{availableEntities &&
-									availableEntities.map((group: GroupedEntities, index: number) => (
-										<SingleSelectOption key={index} value={group.contentType.label}>
-											{group.contentType.label}
-										</SingleSelectOption>
-									))}
-							</SingleSelect>
-						</Field.Root>
-					</Box>
-				</Grid.Item>
-				<Grid.Item col={6} s={12}>
-					<Box width="100%">
-						<Field.Root>
-							<Field.Label>
-								{formatMessage({
-									id: getTranslation('modal.internalItem.entity.label'),
-									defaultMessage: 'Entity',
-								})}
-							</Field.Label>
-							<SingleSelect
-								value={entity ? entity.documentId : ''}
-								placeholder={formatMessage({
-									id: getTranslation('modal.internalItem.entity.placeholder'),
-									defaultMessage: 'Select an entity',
-								})}
-								onChange={(value: string | number) => {
-									const flatEntities = availableEntities.flatMap(
-										(group: GroupedEntities) => group.entities,
-									)
-									const route = flatEntities.find(
-										(route: Entity) => route.documentId === String(value),
-									)
-									if (route) setEntity(route)
-								}}
-								disabled={
-									!selectedContentType ||
-									(selectedContentType?.entities && selectedContentType?.entities.length === 0)
-								}
-							>
-								{selectedContentType &&
-									sortedEntities.map((entity: Entity) => {
-										if (!selectedContentType.contentType.routeSourceField) return null
-										return (
-											<SingleSelectOption key={entity.id} value={entity.documentId}>
-												{entity[selectedContentType.contentType.routeSourceField]}
-											</SingleSelectOption>
-										)
-									})}
-							</SingleSelect>
-						</Field.Root>
-					</Box>
-				</Grid.Item>
-			</Grid.Root>
-			{entity && selectedContentType && (
-				<>
-					<Box paddingBottom={6} paddingTop={6}>
-						<Divider />
-					</Box>
-					{loadingRoute || !route ? (
-						<FullLoader height={50} />
-					) : (
-						<ItemDetails
-							navItemState={navItemState}
-							dispatchNavItemState={dispatchNavItemState}
-							path={path}
-							dispatchPath={dispatchPath}
-							validationState={validationState}
-							isBlacklisted={isBlacklisted}
-							parentNavItem={actionItemParent}
-							navigationItems={navigationItems}
-							navigations={navigations}
-							debouncedCheckUrl={debouncedCheckUrl}
-							debouncedCheckBlacklist={debouncedCheckBlacklist}
-							route={route}
-							modalVariant="create"
-						/>
-					)}
-				</>
-			)}
+			<Flex direction="column" alignItems="stretch" gap={4}>
+				<Box width="100%">
+					<Field.Root>
+						<Field.Label>
+							{formatMessage({
+								id: getTranslation('modal.item.navigationPosition.label'),
+								defaultMessage: 'Navigation Position',
+							})}
+						</Field.Label>
+						<Field.Input name="navigationPosition" value={positionText || 'Root'} disabled />
+					</Field.Root>
+				</Box>
+				<Divider />
+				<EntrySelection
+					contentTypes={availableContentTypes}
+					contentType={searchContentType}
+					setContentType={setSearchContentType}
+					query={query}
+					setQuery={setQuery}
+					selectedEntries={selectedEntries}
+					onToggle={toggleEntry}
+					onClear={() => setSelectedEntries(new Map())}
+					getUsage={(entry) => usageByDocumentId.get(entry.documentId) ?? null}
+				/>
+			</Flex>
 		</NavModal>
 	)
 }

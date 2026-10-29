@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, createContext } from 'react'
-import { GroupedEntities, NestedNavigation } from '../../../types'
+import { ConfigContentType, NestedNavigation } from '../../../types'
 
 type ModalContextType = {
 	modalType: string
@@ -11,9 +11,8 @@ type SelectedNavigationContextType = {
 	setSelectedNavigation: Dispatch<SetStateAction<NestedNavigation | undefined>>
 }
 
-type EntitiesContextType = {
-	entities: GroupedEntities[]
-	loadEntities: () => void
+type ContentTypesContextType = {
+	contentTypes: ConfigContentType[]
 }
 
 export const ModalContext = createContext<ModalContextType>({
@@ -24,7 +23,6 @@ export const SelectedNavigationContext = createContext<SelectedNavigationContext
 	selectedNavigation: undefined,
 	setSelectedNavigation: () => {},
 })
-export const EntitiesContext = createContext<EntitiesContextType>({
-	entities: [],
-	loadEntities: () => {},
+export const ContentTypesContext = createContext<ContentTypesContextType>({
+	contentTypes: [],
 })

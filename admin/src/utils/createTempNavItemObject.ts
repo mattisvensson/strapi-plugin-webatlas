@@ -1,11 +1,12 @@
 import type {
 	NestedNavItem,
 	Entity,
-	GroupedEntities,
+	ConfigContentType,
 	RouteType,
 	ClientModifications,
 } from '../../../types'
 import type { ExtendedPanelPathState } from '../types'
+import { transformToUrl } from '../../../utils'
 
 type CreateTempNavItemObjectParams = {
 	actionItemParentId: string | undefined
@@ -21,10 +22,13 @@ type CreateTempNavItemObjectParams = {
 		title?: string
 	}
 	selectedEntity: Entity | undefined | null
-	selectedContentType: GroupedEntities | undefined | null
+	selectedContentType: ConfigContentType | undefined | null
 	path?: ExtendedPanelPathState
 	type?: RouteType
 }
+
+// Several items can be created in the same millisecond, so the timestamp alone is not unique
+let tempItemCounter = 0
 
 export default function createTempNavItemObject({
 	actionItemParentId,
@@ -45,7 +49,7 @@ export default function createTempNavItemObject({
 
 	const tempNavItem: NestedNavItem = {
 		id: Math.floor(Math.random() * -1000000), // Temporary negative ID
-		documentId: `temp-${Date.now()}`,
+		documentId: `temp-${Date.now()}-${tempItemCounter++}`,
 		createdAt: new Date().toISOString(),
 		updatedAt: new Date().toISOString(),
 		depth: 0,
@@ -64,10 +68,10 @@ export default function createTempNavItemObject({
 			id: 0,
 			type: type,
 			isOverride: navItemState.isOverride || false,
-			relatedContentType: selectedContentType ? selectedContentType.contentType.uid : '',
+			relatedContentType: selectedContentType ? selectedContentType.uid : '',
 			relatedDocumentId: selectedEntity ? selectedEntity.documentId : '',
 			relatedId: selectedEntity ? selectedEntity.id : 0,
-			slug: path?.slug || '',
+			slug: transformToUrl(path?.slug || ''),
 			title: navItemState.title || '',
 			uidPath: path?.uidPath || '',
 			updatedAt: new Date().toISOString(),

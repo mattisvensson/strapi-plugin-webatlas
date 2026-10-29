@@ -6,6 +6,7 @@ import { useEffect, useMemo } from 'react'
 import { useModalSharedLogic } from '../useModalSharedLogic'
 import { useIntl } from 'react-intl'
 import { buildBreadcrumbString, getTranslation } from '../../../utils'
+import { transformToUrl } from '../../../../../utils'
 import Tooltip from '../../Tooltip'
 import { WarningBox } from '../../UI'
 
@@ -18,6 +19,7 @@ type ItemDetailsProps = Pick<
 	| 'validationState'
 	| 'isBlacklisted'
 	| 'debouncedCheckUrl'
+	| 'cancelUrlCheck'
 	| 'debouncedCheckBlacklist'
 > & {
 	route: Route
@@ -39,6 +41,7 @@ export default function ItemDetails({
 	navigationItems,
 	navigations,
 	debouncedCheckUrl,
+	cancelUrlCheck,
 	debouncedCheckBlacklist,
 	item,
 	route,
@@ -70,16 +73,23 @@ export default function ItemDetails({
 	}, [navigations, route, navigationItems])
 
 	useEffect(() => {
-		if (path.needsUrlCheck && path.value) {
-			if (path.uidPath === path.value || path.initialPath === path.value) return
-			debouncedCheckUrl({
-				url: path.value,
-				routeDocumentId: route.documentId,
-				withoutTransform: true,
-			})
-			dispatchPath({ type: 'SET_URL_CHECK_FLAG' })
-		}
-	}, [path.needsUrlCheck, route.documentId])
+		if (!path.needsUrlCheck || !path.value) return
+
+		// Reset first, so later path changes without a check request (e.g. a replaced path) are not
+		// checked again
+		dispatchPath({ type: 'SET_URL_CHECK_FLAG' })
+
+		// The route keeps its current path, so there is nothing to check or replace
+		if (path.uidPath === path.value || path.initialPath === path.value) return cancelUrlCheck()
+
+		debouncedCheckUrl({
+			url: path.value,
+			routeDocumentId: route.documentId,
+			withoutTransform: true,
+		})
+		// path.value as dependency: two updates of the flag in one render (reset and set again) would
+		// otherwise look unchanged and no further check would run
+	}, [path.value, path.needsUrlCheck, route.documentId])
 
 	// Unlike the duplicate check, this has to run on every path change: an unchanged path can become
 	// blocked by an edited slug or by moving the item to a different parent
@@ -91,7 +101,11 @@ export default function ItemDetails({
 		if (!path.slug) return
 
 		const parentPath = parentNavItem?.clientModifications?.path || parentNavItem?.route.path || ''
-		const newPath = parentPath ? `${parentPath}/${path.slug}` : path.slug
+		// Always the normalized slug, otherwise e.g. "Page-1" would be checked instead of "page-1"
+		const slug = transformToUrl(path.slug)
+		const newPath = parentPath ? `${parentPath}/${slug}` : slug
+		// E.g. after a replaced path updated the slug, checking the same path again is not needed
+		if (newPath === path.value) return
 
 		dispatchPath({ type: 'DEFAULT', payload: newPath })
 	}, [path.slug, parentNavItem])
@@ -187,8 +201,9 @@ export default function ItemDetails({
 							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
 								dispatchPath({ type: 'SET_SLUG', payload: e.target.value })
 							}
+							// Normalized on blur only, while typing e.g. a space would be removed immediately
 							onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-								dispatchPath({ type: 'SET_SLUG', payload: e.target.value })
+								dispatchPath({ type: 'SET_SLUG', payload: transformToUrl(e.target.value) })
 							}}
 						/>
 					</Field.Root>

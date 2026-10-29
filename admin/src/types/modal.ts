@@ -1,5 +1,5 @@
 import type {
-	GroupedEntities,
+	ConfigContentType,
 	NestedNavItem,
 	NestedNavigation,
 	RouteSettings,
@@ -10,7 +10,8 @@ export type ModalItem_VariantCreate = {
 	actionItemParent: NestedNavItem | null
 	navigationItems?: NestedNavItem[] | null
 	navigations: NestedNavigation[] | null
-	onCreate: (newItem: NestedNavItem) => void
+	// All created items share the same parent and are inserted in this order
+	onCreate: (newItems: NestedNavItem[]) => void
 }
 
 export type ModalItem_VariantEdit = {
@@ -20,10 +21,10 @@ export type ModalItem_VariantEdit = {
 }
 
 export type modalSharedLogic = {
-	availableEntities: GroupedEntities[]
-	selectedContentType: GroupedEntities | undefined
-	setSelectedContentType: (value: GroupedEntities) => void
-	entities: GroupedEntities[]
+	availableContentTypes: ConfigContentType[]
+	selectedContentType: ConfigContentType | undefined
+	setSelectedContentType: (value: ConfigContentType) => void
+	contentTypes: ConfigContentType[]
 	validationState: ValidationState
 	setValidationState: (value: ValidationState) => void
 	isBlacklisted: boolean
@@ -41,6 +42,7 @@ export type modalSharedLogic = {
 		routeDocumentId?: string | null
 		withoutTransform?: boolean
 	}) => void
+	cancelUrlCheck: () => void
 	debouncedCheckBlacklist: ({ url }: { url: string }) => void
 	modalType: string
 	setModalType: (value: string) => void
