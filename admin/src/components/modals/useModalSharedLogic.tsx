@@ -1,4 +1,4 @@
-import type { GroupedEntities, RouteSettings } from '../../../../types'
+import type { ConfigContentType, RouteSettings } from '../../../../types'
 import type {
 	ExtendedPanelPathState,
 	ExtendedPanelAction,
@@ -6,8 +6,8 @@ import type {
 	modalSharedLogic,
 	ValidationState,
 } from '../../types'
-import { useState, useRef, useReducer, useCallback, useContext, useMemo, useEffect } from 'react'
-import { ModalContext, SelectedNavigationContext, EntitiesContext } from '../../contexts'
+import { useState, useRef, useReducer, useCallback, useContext, useMemo } from 'react'
+import { ModalContext, SelectedNavigationContext, ContentTypesContext } from '../../contexts'
 import { debounce, duplicateCheck } from '../../utils'
 import { useFetchClient } from '@strapi/strapi/admin'
 
@@ -71,18 +71,17 @@ function pathReducer(
 }
 
 export function useModalSharedLogic() {
-	const [selectedContentType, setSelectedContentType] = useState<GroupedEntities>()
+	const [selectedContentType, setSelectedContentType] = useState<ConfigContentType>()
 	const [validationState, setValidationState] = useState<ValidationState>('initial')
 	const [isBlacklisted, setIsBlacklisted] = useState(false)
-	const { entities, loadEntities } = useContext(EntitiesContext)
-	useEffect(() => loadEntities(), [loadEntities])
+	const { contentTypes } = useContext(ContentTypesContext)
 	const { get } = useFetchClient()
 
 	// Without a route source field no route can be generated, so the content type cannot be selected
-	const availableEntities = useMemo(() => {
-		if (!entities) return []
-		return entities.filter((group) => group.contentType.routeSourceField)
-	}, [entities])
+	const availableContentTypes = useMemo(
+		() => contentTypes.filter((contentType) => contentType.routeSourceField),
+		[contentTypes],
+	)
 
 	const initialState: React.RefObject<RouteSettings> = useRef({
 		title: '',
@@ -103,8 +102,23 @@ export function useModalSharedLogic() {
 		canonicalPath: '',
 		initialPath: '',
 	})
+	// Only the latest requested check counts, results of older checks are ignored
+	const requestedUrlRef = useRef<string | null>(null)
+	const debouncedRunUrlCheck = useCallback(debounce(checkUrl, 500), [])
 
-	const debouncedCheckUrl = useCallback(debounce(checkUrl, 500), [])
+	// Marks the path as being checked right away, so it cannot be saved before the delayed check ran
+	const debouncedCheckUrl = useCallback((args: Parameters<typeof checkUrl>[0]) => {
+		requestedUrlRef.current = args.url
+		setValidationState('checking')
+		debouncedRunUrlCheck(args)
+	}, [])
+
+	// For paths that need no check, e.g. the initial path: a pending check must not apply anymore
+	const cancelUrlCheck = useCallback(() => {
+		requestedUrlRef.current = null
+		setValidationState('initial')
+		dispatchPath({ type: 'SET_REPLACEMENT', payload: null })
+	}, [])
 	const debouncedCheckBlacklist = useCallback(debounce(checkBlacklist, 500), [])
 
 	const { modalType, setModalType } = useContext(ModalContext)
@@ -119,8 +133,7 @@ export function useModalSharedLogic() {
 		routeDocumentId?: string | null
 		withoutTransform?: boolean
 	}) {
-		if (!url) return
-		setValidationState('checking')
+		if (!url || requestedUrlRef.current !== url) return
 		dispatchPath({ type: 'SET_REPLACEMENT', payload: '' })
 
 		try {
@@ -131,17 +144,21 @@ export function useModalSharedLogic() {
 				withoutTransform,
 			})
 
+			// The path changed while the check ran, a newer check is responsible
+			if (requestedUrlRef.current !== url) return
+
 			setIsBlacklisted(blacklisted)
-			if (blacklisted) return
-
-			if (!uniquePath || uniquePath === url) return
-
-			dispatchPath({ type: 'NO_URL_CHECK', payload: uniquePath })
-			dispatchPath({ type: 'SET_REPLACEMENT', payload: uniquePath })
-		} catch (err) {
-			console.error(err)
-		} finally {
+			if (!blacklisted && uniquePath && uniquePath !== url) {
+				dispatchPath({ type: 'NO_URL_CHECK', payload: uniquePath })
+				dispatchPath({ type: 'SET_REPLACEMENT', payload: uniquePath })
+				// The path of an item is built from its slug, so the slug has to match the replaced path
+				dispatchPath({ type: 'SET_SLUG', payload: uniquePath.split('/').pop() ?? '' })
+			}
 			setValidationState('done')
+		} catch (err) {
+			if (requestedUrlRef.current !== url) return
+			console.error(err)
+			setValidationState('initial')
 		}
 	}
 
@@ -167,10 +184,10 @@ export function useModalSharedLogic() {
 	}
 
 	const modalSharedLogic: modalSharedLogic = {
-		availableEntities,
+		availableContentTypes,
 		selectedContentType,
 		setSelectedContentType,
-		entities,
+		contentTypes,
 		validationState,
 		setValidationState,
 		isBlacklisted,
@@ -180,6 +197,7 @@ export function useModalSharedLogic() {
 		path,
 		dispatchPath,
 		debouncedCheckUrl,
+		cancelUrlCheck,
 		debouncedCheckBlacklist,
 		modalType,
 		setModalType,

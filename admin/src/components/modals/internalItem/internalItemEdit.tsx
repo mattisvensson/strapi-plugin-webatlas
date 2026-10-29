@@ -1,4 +1,3 @@
-import type { GroupedEntities } from '../../../../../types'
 import type { ModalItem_VariantEdit } from '../../../types'
 import { Box, Divider, Grid, Field } from '@strapi/design-system'
 import { withModalSharedLogic } from '../withModalSharedLogic'
@@ -8,13 +7,14 @@ import { NavModal } from '../'
 import { isEqual } from 'lodash'
 import { useIntl } from 'react-intl'
 import { getTranslation, findParentNavItem } from '../../../utils'
+import { transformToUrl } from '../../../../../utils'
 import ItemDetails from './ItemDetails'
 
 function ItemEditComponent({
 	item,
 	selectedContentType,
 	setSelectedContentType,
-	entities,
+	contentTypes,
 	validationState,
 	isBlacklisted,
 	initialState,
@@ -23,6 +23,7 @@ function ItemEditComponent({
 	path,
 	dispatchPath,
 	debouncedCheckUrl,
+	cancelUrlCheck,
 	debouncedCheckBlacklist,
 	setModalType,
 	navigationItems,
@@ -40,7 +41,8 @@ function ItemEditComponent({
 
 	useEffect(() => {
 		const parentPath = parentNavItem?.clientModifications?.path || parentNavItem?.route.path || ''
-		const initialPath = `${parentPath}/${item.route.slug}`
+		// Built like in ItemDetails, root items have no leading slash
+		const initialPath = parentPath ? `${parentPath}/${item.route.slug}` : item.route.slug
 
 		dispatchPath({ type: 'DEFAULT', payload: initialPath })
 		dispatchPath({ type: 'SET_SLUG', payload: item.route.slug })
@@ -68,28 +70,15 @@ function ItemEditComponent({
 	}, [navigationItems, item, parentNavItem])
 
 	useEffect(() => {
-		if (!entities) return
-
-		const contentType = entities.find(
-			(group: GroupedEntities) => group.contentType.uid === item.route.relatedContentType,
-		)
+		const contentType = contentTypes.find(({ uid }) => uid === item.route.relatedContentType)
 		if (contentType) setSelectedContentType(contentType)
-	}, [entities])
-
-	useEffect(() => {
-		if (path.needsUrlCheck && path.value) {
-			if (path.uidPath === path.value || path.initialPath === path.value) return
-			debouncedCheckUrl({
-				url: path.value,
-				routeDocumentId: item.route.documentId,
-			})
-			dispatchPath({ type: 'SET_URL_CHECK_FLAG' })
-		}
-	}, [path.needsUrlCheck, item.route.documentId])
+	}, [contentTypes])
 
 	const updateItem = async () => {
 		try {
 			if (isEqual(navItemState, initialState.current) && path.value === path.initialPath) return
+			// The path is not checked yet
+			if (validationState === 'checking') return
 
 			const isOverride = path.value !== item.route.path ? true : navItemState.isOverride
 
@@ -98,7 +87,7 @@ function ItemEditComponent({
 				clientModifications: {
 					type: 'update',
 					title: navItemState.title,
-					slug: path.slug,
+					slug: transformToUrl(path.slug || ''),
 					path: path.value,
 					isOverride,
 				},
@@ -121,7 +110,7 @@ function ItemEditComponent({
 				id: getTranslation('cancel'),
 				defaultMessage: 'Cancel',
 			})}
-			titleText={`${formatMessage({ id: getTranslation('edit'), defaultMessage: 'Edit' })} ${selectedContentType.contentType.label} "${item.route.title}"`}
+			titleText={`${formatMessage({ id: getTranslation('edit'), defaultMessage: 'Edit' })} ${selectedContentType.label} "${item.route.title}"`}
 			loadingText={formatMessage({
 				id: getTranslation('modal.internalItem.loadingText.edit'),
 				defaultMessage: 'Saving',
@@ -132,7 +121,8 @@ function ItemEditComponent({
 			currentModalMode="edit"
 			disabled={
 				(isEqual(navItemState, initialState.current) && path.value === path.initialPath) ||
-				isBlacklisted
+				isBlacklisted ||
+				validationState === 'checking'
 			}
 		>
 			<Grid.Root gap={8}>
@@ -145,7 +135,7 @@ function ItemEditComponent({
 									defaultMessage: 'Content Type',
 								})}
 							</Field.Label>
-							<Field.Input value={selectedContentType.contentType.label} disabled />
+							<Field.Input value={selectedContentType.label} disabled />
 						</Field.Root>
 					</Box>
 				</Grid.Item>
@@ -178,6 +168,7 @@ function ItemEditComponent({
 						parentNavItem={parentNavItem}
 						navigationItems={navigationItems}
 						debouncedCheckUrl={debouncedCheckUrl}
+						cancelUrlCheck={cancelUrlCheck}
 						debouncedCheckBlacklist={debouncedCheckBlacklist}
 						item={item}
 						route={item.route}

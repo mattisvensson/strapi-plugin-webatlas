@@ -23,8 +23,8 @@ import {
 	SaveConfirm,
 } from '../../components/modals'
 import { EmptyBox, Center, FullLoader } from '../../components/UI'
-import { ModalContext, SelectedNavigationContext, EntitiesContext } from '../../contexts'
-import type { GroupedEntities, NestedNavigation, NestedNavItem } from '../../../../types'
+import { ModalContext, SelectedNavigationContext, ContentTypesContext } from '../../contexts'
+import type { NestedNavigation, NestedNavItem } from '../../../../types'
 import { useApi, useErrorMessage, usePluginConfig } from '../../hooks/'
 import { getTranslation, isAbortError, syncNavItemPaths } from '../../utils'
 import { useIntl } from 'react-intl'
@@ -83,12 +83,10 @@ const Navigation = () => {
 	const [actionItemParent, setActionItemParent] = useState<NestedNavItem | null>(null)
 	// Item below which a new item is inserted via the insert button of a row
 	const [insertBelowItem, setInsertBelowItem] = useState<NestedNavItem | null>(null)
-	const { getNavigation, updateNavigationItemStructure, fetchAllEntities } = useApi()
+	const { getNavigation, updateNavigationItemStructure } = useApi()
 	const [isSavingNavigation, setIsSavingNavigation] = useState(false)
 	const [loading, setLoading] = useState(true)
 	const cachedNavigations = useRef<NestedNavigation[] | null>(null)
-	const [entities, setEntities] = useState<GroupedEntities[]>([])
-	const entitiesRequestRef = useRef<Promise<void> | null>(null)
 	const { config } = usePluginConfig()
 
 	const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
@@ -157,20 +155,12 @@ const Navigation = () => {
 		setNavigationItems(selectedNav.items || [])
 	}
 
-	// The entries are only needed by the item modals, so they are loaded once when the first modal opens
-	const loadEntities = useCallback(() => {
-		if (entitiesRequestRef.current) return
-
-		entitiesRequestRef.current = fetchAllEntities()
-			.then(setEntities)
-			.catch((error) => {
-				// Allow the next modal to retry
-				entitiesRequestRef.current = null
-				if (!isAbortError(error)) console.error('Error fetching entities: ', error)
-			})
-	}, [])
-
-	const entitiesContextValue = useMemo(() => ({ entities, loadEntities }), [entities, loadEntities])
+	// The entries of the content types are searched page by page in the item modals, so only the
+	// content types are provided here
+	const contentTypesContextValue = useMemo(
+		() => ({ contentTypes: config?.selectedContentTypes ?? [] }),
+		[config],
+	)
 
 	useEffect(() => {
 		async function fetchNavigations() {
@@ -228,38 +218,32 @@ const Navigation = () => {
 		[navigations, selectedNavigation?.documentId, navigationItems],
 	)
 
-	function handleSoftAddedItem(newItem: NestedNavItem) {
-		if (insertTarget && navigationItems) {
-			newItem.depth = insertTarget.depth
-			setNavigationItems([
-				...navigationItems.slice(0, insertTarget.index),
-				newItem,
-				...navigationItems.slice(insertTarget.index),
+	// All new items share the same parent and are inserted in the given order
+	function handleSoftAddedItems(newItems: NestedNavItem[]) {
+		if (newItems.length === 0) return
+
+		const insertAt = (index: number, depth: number) => {
+			newItems.forEach((newItem) => (newItem.depth = depth))
+			setNavigationItems((items) => [
+				...(items ?? []).slice(0, index),
+				...newItems,
+				...(items ?? []).slice(index),
 			])
-			return
 		}
 
-		if (newItem.clientModifications?.parent) {
-			const parentIndex = navigationItems?.findIndex(
-				(item) => item.documentId === newItem.clientModifications?.parent,
-			)
-			if (parentIndex !== undefined && parentIndex >= 0) {
-				// Show the new item, even if it is added to a collapsed item
-				expand(newItem.clientModifications.parent)
-				const parentDepth = navigationItems ? navigationItems[parentIndex].depth || 0 : 0
-				newItem.depth = parentDepth + 1
-				const updatedItems = navigationItems
-					? [
-							...navigationItems.slice(0, parentIndex + 1),
-							newItem,
-							...navigationItems.slice(parentIndex + 1),
-						]
-					: [newItem]
-				setNavigationItems(updatedItems)
-				return
-			}
+		if (insertTarget) return insertAt(insertTarget.index, insertTarget.depth)
+
+		const parentId = newItems[0].clientModifications?.parent
+		const parentIndex = parentId
+			? (navigationItems?.findIndex((item) => item.documentId === parentId) ?? -1)
+			: -1
+		if (parentId && navigationItems && parentIndex >= 0) {
+			// Show the new items, even if they are added to a collapsed item
+			expand(parentId)
+			return insertAt(parentIndex + 1, (navigationItems[parentIndex].depth || 0) + 1)
 		}
-		setNavigationItems((items) => (items ? [...items, newItem] : [newItem]))
+
+		setNavigationItems((items) => [...(items ?? []), ...newItems])
 	}
 
 	async function saveNavigation() {
@@ -456,7 +440,7 @@ const Navigation = () => {
 
 	return (
 		<ModalContext.Provider value={modalContextValue}>
-			<EntitiesContext.Provider value={entitiesContextValue}>
+			<ContentTypesContext.Provider value={contentTypesContextValue}>
 				<SelectedNavigationContext.Provider value={{ selectedNavigation, setSelectedNavigation }}>
 					<PageWrapper navigations={navigations}>
 						{selectedNavigation && (
@@ -693,9 +677,7 @@ const Navigation = () => {
 							actionItemParent={createItemParent}
 							navigationItems={navigationItems || []}
 							navigations={navigationsWithCurrentItems}
-							onCreate={(newItem) => {
-								handleSoftAddedItem(newItem)
-							}}
+							onCreate={handleSoftAddedItems}
 						/>
 					)}
 					{modalType === 'SaveConfirm' && (
@@ -725,9 +707,7 @@ const Navigation = () => {
 						<ExternalItem
 							variant={modalType}
 							actionItemParentId={createItemParent?.documentId}
-							onCreate={(newItem) => {
-								handleSoftAddedItem(newItem)
-							}}
+							onCreate={(newItem) => handleSoftAddedItems([newItem])}
 						/>
 					)}
 					{modalType === 'ExternalEdit' && (
@@ -745,9 +725,7 @@ const Navigation = () => {
 						<WrapperItem
 							variant={modalType}
 							actionItemParentId={createItemParent?.documentId}
-							onCreate={(newItem) => {
-								handleSoftAddedItem(newItem)
-							}}
+							onCreate={(newItem) => handleSoftAddedItems([newItem])}
 						/>
 					)}
 					{modalType === 'WrapperEdit' && (
@@ -762,7 +740,7 @@ const Navigation = () => {
 						/>
 					)}
 				</SelectedNavigationContext.Provider>
-			</EntitiesContext.Provider>
+			</ContentTypesContext.Provider>
 		</ModalContext.Provider>
 	)
 }
