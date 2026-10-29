@@ -5,6 +5,8 @@ export type RouteItemProps = {
 	// Whether the depth or the position among the previous siblings differs from the loaded state,
 	// path changes are marked by clientModifications
 	isMoved?: boolean
+	// Number of hidden children that are dragged along with a collapsed item, shown in the drag overlay
+	movedChildCount?: number
 	setActionItemParent: (item: NestedNavItem | null) => void
 	setActionItem: React.Dispatch<React.SetStateAction<NestedNavItem | NestedNavigation | undefined>>
 	setNavigationItems: React.Dispatch<React.SetStateAction<NestedNavItem[] | undefined>>

@@ -42,6 +42,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { getProjection, measuring, indentationWidth } from '../../utils/dnd'
 import {
 	getCollapsedVisibleItems,
+	getDescendantCount,
 	getItemsWithChildren,
 	getMovedItemIds,
 	getParentItem,
@@ -376,6 +377,12 @@ const Navigation = () => {
 		[navigationItems, activeId],
 	)
 
+	// Only collapsed items take their children along when dragged
+	const movedChildCount = useMemo(() => {
+		if (!activeItem || !navigationItems || !collapsedIds.has(activeItem.documentId)) return 0
+		return getDescendantCount(navigationItems, navigationItems.indexOf(activeItem))
+	}, [activeItem, navigationItems, collapsedIds])
+
 	// The initial items only change together with the items when a navigation is (re)loaded
 	const hasUnsavedChanges = useMemo(
 		() => JSON.stringify(navigationItems) !== JSON.stringify(initialNavigationItemsRef.current),
@@ -556,6 +563,7 @@ const Navigation = () => {
 																navigationItems={navigationItems}
 																hasChildren={itemsWithChildren.has(activeItem.documentId)}
 																collapsed={collapsedIds.has(activeItem.documentId)}
+																movedChildCount={movedChildCount}
 															/>
 														)
 													: null}
