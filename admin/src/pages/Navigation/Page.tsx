@@ -20,6 +20,7 @@ import {
 	ItemEdit,
 	ExternalItem,
 	WrapperItem,
+	SaveConfirm,
 } from '../../components/modals'
 import { EmptyBox, Center, FullLoader } from '../../components/UI'
 import { ModalContext, SelectedNavigationContext, EntitiesContext } from '../../contexts'
@@ -367,6 +368,11 @@ const Navigation = () => {
 		[navigationItems],
 	)
 
+	const deletedItems = useMemo(
+		() => (navigationItems ?? []).filter((item) => item.clientModifications?.type === 'delete'),
+		[navigationItems],
+	)
+
 	// A new item inserted below an item appears directly below it: as first child of an expanded item
 	// with children, otherwise as next sibling behind the (collapsed) children
 	const insertTarget = useMemo(() => {
@@ -519,7 +525,10 @@ const Navigation = () => {
 										})}
 									</Button>
 									<Button
-										onClick={() => saveNavigation()}
+										// Items are only soft deleted until saving, so the deletion is confirmed here
+										onClick={() =>
+											deletedItems.length > 0 ? setModalType('SaveConfirm') : saveNavigation()
+										}
 										loading={isSavingNavigation}
 										variant="default"
 										startIcon={<Check />}
@@ -651,7 +660,6 @@ const Navigation = () => {
 					{modalType === 'NavCreate' && <NavCreate />}
 					{modalType === 'NavDelete' && (
 						<Delete
-							variant="NavDelete"
 							item={actionItem as NestedNavigation}
 							onDelete={(deletedItem) => {
 								cachedNavigations.current = null
@@ -690,14 +698,15 @@ const Navigation = () => {
 							}}
 						/>
 					)}
-					{modalType === 'ItemDelete' && (
-						<Delete
-							variant="ItemDelete"
-							item={actionItem as NestedNavItem}
-							onDelete={(deletedItem) => {
-								setNavigationItems((items) =>
-									items?.map((item) => (item.id === deletedItem.id ? deletedItem : item)),
-								)
+					{modalType === 'SaveConfirm' && (
+						<SaveConfirm
+							deletedItems={deletedItems}
+							hasOrphanedChildren={deletedItems.some((item) =>
+								itemsWithChildren.has(item.documentId),
+							)}
+							onConfirm={() => {
+								setModalType('')
+								saveNavigation()
 							}}
 						/>
 					)}

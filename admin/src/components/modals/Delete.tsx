@@ -2,29 +2,20 @@ import { ModalContext } from '../../contexts'
 import { useContext, useRef, useState } from 'react'
 import { Dialog, Typography, Button } from '@strapi/design-system'
 import { Trash } from '@strapi/icons'
-import { NestedNavigation, NestedNavItem } from '../../../../types'
+import { NestedNavigation } from '../../../../types'
 import { useIntl } from 'react-intl'
 import { getTranslation, isAbortError } from '../../utils'
 import { useApi, useErrorMessage } from '../../hooks'
 import { useNotification } from '@strapi/strapi/admin'
 
-type NavDelete = {
-	variant: 'NavDelete'
+type DeleteProps = {
 	item: NestedNavigation
 	onDelete: (editedItem: NestedNavigation) => void
 }
 
-type ItemDelete = {
-	variant: 'ItemDelete'
-	item: NestedNavItem
-	onDelete: (editedItem: NestedNavItem) => void
-}
-
-type DeleteProps = NavDelete | ItemDelete
-
-export default function Delete({ variant, item, onDelete }: DeleteProps) {
-	const itemName = useRef(variant === 'NavDelete' ? item.name : item.route.title)
-	const closeModalState = useRef(variant === 'NavDelete' ? 'NavOverview' : '')
+export default function Delete({ item, onDelete }: DeleteProps) {
+	const itemName = useRef(item.name)
+	const closeModalState = useRef('NavOverview')
 
 	const { setModalType } = useContext(ModalContext)
 	const { formatMessage } = useIntl()
@@ -36,19 +27,8 @@ export default function Delete({ variant, item, onDelete }: DeleteProps) {
 	const handleDelete = async () => {
 		setIsDeleting(true)
 		try {
-			if (variant === 'NavDelete') {
-				await deleteNavigation(item.documentId)
-				onDelete(item)
-			} else if (variant === 'ItemDelete') {
-				const editedItem = {
-					...item,
-					clientModifications: {
-						...item.clientModifications,
-						type: 'delete' as const,
-					},
-				}
-				onDelete(editedItem)
-			}
+			await deleteNavigation(item.documentId)
+			onDelete(item)
 		} catch (err) {
 			if (isAbortError(err)) return
 
@@ -89,15 +69,10 @@ export default function Delete({ variant, item, onDelete }: DeleteProps) {
 							id: getTranslation('modal.delete.message.start'),
 							defaultMessage: 'You are about to delete the following',
 						})}{' '}
-						{variant === 'ItemDelete'
-							? formatMessage({
-									id: getTranslation('modal.delete.message.navItem'),
-									defaultMessage: 'navigation item',
-								})
-							: formatMessage({
-									id: getTranslation('modal.delete.message.navigation'),
-									defaultMessage: 'navigation',
-								})}
+						{formatMessage({
+							id: getTranslation('modal.delete.message.navigation'),
+							defaultMessage: 'navigation',
+						})}
 					</Typography>
 					<Typography
 						textAlign="center"

@@ -65,9 +65,18 @@ export const RouteItem = memo(
 				setModalType(newModal)
 			}
 
+			// Only marks the item, it is deleted when saving after a confirmation
 			const handleDelete = () => {
-				setActionItem(item)
-				setModalType('ItemDelete')
+				setNavigationItems((navItems) =>
+					navItems?.map((navItem) =>
+						navItem.documentId === item.documentId
+							? {
+									...navItem,
+									clientModifications: { ...navItem.clientModifications, type: 'delete' },
+								}
+							: navItem,
+					),
+				)
 			}
 
 			const handleRestore = () => {
