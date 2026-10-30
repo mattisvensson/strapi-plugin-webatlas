@@ -54,7 +54,8 @@ export default function SaveConfirm({
 										{item.clientModifications?.title || item.route?.title}
 									</Typography>{' '}
 									<Typography textColor="neutral500">
-										/{item.clientModifications?.path || item.route?.path}
+										{item.route?.type === 'internal' ? '/' : ''}
+										{item.clientModifications?.path || item.route?.path}
 									</Typography>
 								</li>
 							))}
