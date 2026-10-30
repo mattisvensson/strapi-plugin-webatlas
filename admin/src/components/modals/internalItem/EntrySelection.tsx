@@ -48,7 +48,10 @@ export default function EntrySelection({
 	getUsage: (entry: Entity) => string | null
 }) {
 	const { formatMessage } = useIntl()
-	const { entries, loading, hasError, hasMore, loadMore } = useEntrySearch(contentType, query)
+	const { entries, paths, loading, hasError, hasMore, loadMore } = useEntrySearch(
+		contentType,
+		query,
+	)
 	const titleField = contentType?.routeSourceField
 
 	return (
@@ -123,6 +126,7 @@ export default function EntrySelection({
 					{entries.map((entry) => {
 						const selectionKey = getSelectionKey(contentType, entry)
 						const usage = getUsage(entry)
+						const path = paths.get(entry.documentId)
 						return (
 							<Flex
 								key={selectionKey}
@@ -144,6 +148,17 @@ export default function EntrySelection({
 								<Typography ellipsis>
 									{(titleField && entry[titleField]) || `#${entry.id}`}
 								</Typography>
+								{/* Distinguishes entries with the same title, undefined while loading */}
+								{path !== undefined && (
+									<Typography textColor="neutral500" ellipsis>
+										{path === null
+											? formatMessage({
+													id: getTranslation('modal.entrySelection.noRoute'),
+													defaultMessage: 'No route',
+												})
+											: `/${path}`}
+									</Typography>
+								)}
 								{usage && (
 									<Badge marginLeft="auto" flex="none">
 										{usage}

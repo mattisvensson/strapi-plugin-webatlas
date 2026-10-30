@@ -31,6 +31,19 @@ const admin = () => ({
 		return await getAdminService().getRelatedRoute(documentId)
 	},
 
+	async getRelatedRoutes(ctx) {
+		const documentIds = String(ctx.query.documentIds || '')
+			.split(',')
+			.filter(Boolean)
+
+		if (documentIds.length === 0) throw new errors.ValidationError('documentIds are required')
+		// One page of the entry selection, the limit keeps the query small
+		if (documentIds.length > 100)
+			throw new errors.ValidationError('At most 100 documentIds are allowed')
+
+		return await getAdminService().getRelatedRoutes(documentIds)
+	},
+
 	async getProhibitedRouteIds(ctx) {
 		const { documentId } = ctx.params
 

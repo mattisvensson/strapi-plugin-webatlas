@@ -108,6 +108,7 @@
 	"webatlas.modal.entrySelection.usedHere": "Already in this navigation",
 	"webatlas.modal.entrySelection.usedIn": "In \"{navigationName}\"",
 	"webatlas.modal.entrySelection.next": "Next ({count})",
+	"webatlas.modal.entrySelection.noRoute": "No route",
 	"webatlas.modal.multiItem.status": "Status",
 	"webatlas.modal.multiItem.status.ok": "OK",
 	"webatlas.modal.multiItem.status.replaced": "Path was taken, replaced",
