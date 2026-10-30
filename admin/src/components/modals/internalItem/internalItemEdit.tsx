@@ -38,31 +38,36 @@ function ItemEditComponent({
 		})
 	}, [navigationItems, item])
 
+	// The current state of the item, including changes that are not saved yet
+	const currentTitle = item.clientModifications?.title || item.route.title
+	const currentSlug = item.clientModifications?.slug || item.route.slug
+	const currentIsOverride = item.clientModifications?.isOverride ?? item.route.isOverride
+
 	useEffect(() => {
 		const parentPath = parentNavItem?.clientModifications?.path || parentNavItem?.route.path || ''
 		// Built like in ItemDetails, root items have no leading slash
-		const initialPath = parentPath ? `${parentPath}/${item.route.slug}` : item.route.slug
+		const initialPath = parentPath ? `${parentPath}/${currentSlug}` : currentSlug
 
 		dispatchPath({ type: 'DEFAULT', payload: initialPath })
-		dispatchPath({ type: 'SET_SLUG', payload: item.route.slug })
+		dispatchPath({ type: 'SET_SLUG', payload: currentSlug })
 		dispatchPath({ type: 'SET_INITIALPATH', payload: initialPath })
 		dispatchPath({
 			type: 'SET_CANONICALPATH',
 			payload: item.route.canonicalPath,
 		})
 
-		dispatchNavItemState({ type: 'SET_TITLE', payload: item.route.title })
+		dispatchNavItemState({ type: 'SET_TITLE', payload: currentTitle })
 		dispatchNavItemState({ type: 'SET_ACTIVE', payload: item.route.active })
 		dispatchNavItemState({
 			type: 'SET_OVERRIDE',
-			payload: item.route.isOverride,
+			payload: currentIsOverride,
 		})
 
 		const initialValues = {
-			title: item.route.title,
+			title: currentTitle,
 			active: item.route.active,
-			isOverride: item.route.isOverride,
-			slug: item.route.slug,
+			isOverride: currentIsOverride,
+			slug: currentSlug,
 		}
 
 		initialState.current = initialValues
@@ -117,7 +122,7 @@ function ItemEditComponent({
 				id: getTranslation('cancel'),
 				defaultMessage: 'Cancel',
 			})}
-			titleText={`${formatMessage({ id: getTranslation('edit'), defaultMessage: 'Edit' })} ${selectedContentType.label} "${item.route.title}"`}
+			titleText={`${formatMessage({ id: getTranslation('edit'), defaultMessage: 'Edit' })} ${selectedContentType.label} "${currentTitle}"`}
 			loadingText={formatMessage({
 				id: getTranslation('modal.internalItem.loadingText.edit'),
 				defaultMessage: 'Saving',

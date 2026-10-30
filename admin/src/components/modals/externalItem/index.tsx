@@ -46,20 +46,25 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
 
 	const { formatMessage } = useIntl()
 
+	// The current state of the item, including changes that are not saved yet. An edited URL is
+	// stored as slug of the client modifications
+	const currentTitle = item?.clientModifications?.title || item?.route.title
+	const currentUrl = item?.clientModifications?.slug || item?.route.path
+
 	useEffect(() => {
 		if (variant !== 'ExternalEdit' || !item) return
 
-		dispatchNavItemState({ type: 'SET_TITLE', payload: item.route.title })
+		dispatchNavItemState({ type: 'SET_TITLE', payload: currentTitle ?? '' })
 		dispatchNavItemState({ type: 'SET_ACTIVE', payload: item.route.active })
-		dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.path })
+		dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: currentUrl ?? '' })
 	}, [variant, item, dispatchNavItemState, dispatchPath])
 
 	// When editing, saving is only possible once the title or the URL differ from the initial values
 	const hasChanges =
 		variant !== 'ExternalEdit' ||
 		!item ||
-		navItemState.title !== item.route.title ||
-		path.value !== item.route.path
+		navItemState.title !== currentTitle ||
+		path.value !== currentUrl
 
 	const handleConfirm = async () => {
 		try {
