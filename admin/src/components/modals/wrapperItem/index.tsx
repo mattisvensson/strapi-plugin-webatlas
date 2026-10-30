@@ -53,9 +53,12 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
 		dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.path })
 	}, [])
 
+	// When editing, saving is only possible once the title differs from the initial value
+	const hasChanges = variant !== 'WrapperEdit' || !item || navItemState.title !== item.route.title
+
 	const onConfirm = async () => {
 		try {
-			if (!navItemState.title || !selectedNavigation) return
+			if (!navItemState.title || !selectedNavigation || !hasChanges) return
 
 			if (variant === 'WrapperEdit' && item && onSave) {
 				onSave({
@@ -125,7 +128,7 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
 			modalToOpen=""
 			currentModalType="WrapperCreate"
 			currentModalMode={variant === 'WrapperCreate' ? 'create' : 'edit'}
-			disabled={!navItemState.title || navItemState.title.trim() === ''}
+			disabled={!navItemState.title || navItemState.title.trim() === '' || !hasChanges}
 		>
 			<Grid.Root gap={8}>
 				<Grid.Item col={6} s={12}>

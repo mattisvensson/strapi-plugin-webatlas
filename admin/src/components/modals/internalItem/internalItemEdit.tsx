@@ -4,7 +4,6 @@ import { withModalSharedLogic } from '../withModalSharedLogic'
 import { useEffect, useMemo } from 'react'
 import { useModalSharedLogic } from '../useModalSharedLogic'
 import { NavModal } from '../'
-import { isEqual } from 'lodash'
 import { useIntl } from 'react-intl'
 import { getTranslation, findParentNavItem } from '../../../utils'
 import { transformToUrl } from '../../../../../utils'
@@ -74,9 +73,17 @@ function ItemEditComponent({
 		if (contentType) setSelectedContentType(contentType)
 	}, [contentTypes])
 
+	// Compares only the fields the modal can change, the slug is part of the path. The whole state
+	// cannot be compared, it contains fields the initial values do not have (e.g. the type)
+	const hasChanges =
+		navItemState.title !== initialState.current.title ||
+		navItemState.active !== initialState.current.active ||
+		navItemState.isOverride !== initialState.current.isOverride ||
+		path.value !== path.initialPath
+
 	const updateItem = async () => {
 		try {
-			if (isEqual(navItemState, initialState.current) && path.value === path.initialPath) return
+			if (!hasChanges) return
 			// The path is not checked yet
 			if (validationState === 'checking') return
 
@@ -119,11 +126,7 @@ function ItemEditComponent({
 			modalToOpen=""
 			currentModalType="ItemCreate"
 			currentModalMode="edit"
-			disabled={
-				(isEqual(navItemState, initialState.current) && path.value === path.initialPath) ||
-				isBlacklisted ||
-				validationState === 'checking'
-			}
+			disabled={!hasChanges || isBlacklisted || validationState === 'checking'}
 		>
 			<Grid.Root gap={8}>
 				<Grid.Item col={6} s={12}>
