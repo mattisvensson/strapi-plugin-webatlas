@@ -52,6 +52,7 @@ import {
 	moveNavItem,
 } from '../../utils/navTree'
 import useCollapsedItems, { removeCollapsedItems } from './useCollapsedItems'
+import UnsavedChangesBlocker from './UnsavedChangesBlocker'
 import SortableRouteItem from './SortableRouteItem'
 import { RouteItem } from './RouteItem'
 import PageWrapper from './PageWrapper'
@@ -87,6 +88,8 @@ const Navigation = () => {
 	const [isSavingNavigation, setIsSavingNavigation] = useState(false)
 	const [loading, setLoading] = useState(true)
 	const cachedNavigations = useRef<NestedNavigation[] | null>(null)
+	// Set before navigating away from a deleted navigation, its unsaved changes are obsolete
+	const skipUnsavedChangesWarningRef = useRef(false)
 	const { config } = usePluginConfig()
 
 	const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
@@ -148,6 +151,7 @@ const Navigation = () => {
 	}
 
 	function switchNavigation(selectedNav: NestedNavigation, updatedNavigations: NestedNavigation[]) {
+		skipUnsavedChangesWarningRef.current = false
 		setNavigations(updatedNavigations)
 		setSelectedNavigation(selectedNav)
 		// Set before the items, the path sync compares against the initial items
@@ -638,6 +642,7 @@ const Navigation = () => {
 							</Center>
 						)}
 					</PageWrapper>
+					<UnsavedChangesBlocker when={hasUnsavedChanges} skipRef={skipUnsavedChangesWarningRef} />
 					{modalType === 'NavOverview' && (
 						<NavOverview navigations={navigations} setActionItem={setActionItem} />
 					)}
@@ -653,6 +658,7 @@ const Navigation = () => {
 
 								// Nur umleiten, wenn die gelöschte Navigation gerade angezeigt wird
 								if (deletedItem.documentId === navigationId) {
+									skipUnsavedChangesWarningRef.current = true
 									navigate(
 										remaining.length > 0
 											? `/plugins/${PLUGIN_ID}/navigation/${remaining[0].documentId}`
