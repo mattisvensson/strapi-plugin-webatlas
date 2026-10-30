@@ -171,7 +171,7 @@ export const RouteItem = memo(
 								</Typography>
 								{itemPath && (
 									<Typography textColor="neutral500" ellipsis>
-										/{itemPath}
+										{item.route.type === 'internal' ? `/${itemPath}` : itemPath}
 									</Typography>
 								)}
 								<RouteItemStatus item={item} isUpdated={isMoved} />

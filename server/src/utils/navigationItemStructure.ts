@@ -1,6 +1,5 @@
-import type { UID } from '@strapi/strapi'
 import type { NestedNavItem, Route } from '../../../types'
-import { waRoute } from '../../../utils'
+import { waRoute, transformToUrl } from '../../../utils'
 import {
 	buildNavigationPath,
 	createExternalRoute,
@@ -13,6 +12,23 @@ import {
 	assertPathAllowed,
 	getRouteBlacklist,
 } from './'
+
+/**
+ * Builds the path of an internal item from its slug and parent. The path gets a suffix when it is
+ * already taken, the returned slug is its last segment, so slug and path of the route always match.
+ */
+async function buildItemPath({
+	slug,
+	routeDocumentId,
+	calculatedParent,
+}: {
+	slug: string
+	routeDocumentId: string
+	calculatedParent: string | null
+}) {
+	const path = await buildNavigationPath({ slug, routeDocumentId, calculatedParent })
+	return { path, slug: path.split('/').pop() ?? slug }
+}
 
 export async function handleItemDeletion(navigationItems: NestedNavItem[]) {
 	const errors: string[] = []
@@ -124,8 +140,9 @@ export async function handleItemUpdate({
 			if (!route)
 				throw new Error(`Related route not found for new navigation item '${item.route.title}'`)
 
-			const path = await buildNavigationPath({
-				slug: item.route.slug,
+			// The slug comes from the client, so it is normalized like in the admin panel
+			const { path, slug } = await buildItemPath({
+				slug: transformToUrl(item.route.slug),
 				routeDocumentId: route.documentId,
 				calculatedParent,
 			})
@@ -134,7 +151,7 @@ export async function handleItemUpdate({
 
 			await updateRoute(route.documentId, {
 				title: item.route.title,
-				slug: item.route.slug,
+				slug,
 				path,
 				isOverride: path !== route.canonicalPath,
 			})
@@ -168,14 +185,22 @@ export async function handleItemUpdate({
 			if (!route)
 				throw new Error(`Related route not found for navigation item '${item.route.title}'`)
 
-			const slug = item.clientModifications?.slug || item.route.slug
-			const path = isInternal
-				? await buildNavigationPath({
-						slug,
+			// Only a slug changed by the client is normalized: every internal item is saved again, so
+			// normalizing stored slugs would change the paths of untouched routes. External items keep
+			// their slug as it is, it is their URL
+			const changedSlug = item.clientModifications?.slug
+			const requestedSlug = changedSlug
+				? isInternal
+					? transformToUrl(changedSlug)
+					: changedSlug
+				: item.route.slug
+			const { path, slug } = isInternal
+				? await buildItemPath({
+						slug: requestedSlug,
 						routeDocumentId: route.documentId,
 						calculatedParent,
 					})
-				: slug
+				: { path: requestedSlug, slug: requestedSlug }
 
 			const isOverride = path !== route.canonicalPath
 
