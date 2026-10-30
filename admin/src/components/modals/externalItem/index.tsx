@@ -54,6 +54,13 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
 		dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.path })
 	}, [variant, item, dispatchNavItemState, dispatchPath])
 
+	// When editing, saving is only possible once the title or the URL differ from the initial values
+	const hasChanges =
+		variant !== 'ExternalEdit' ||
+		!item ||
+		navItemState.title !== item.route.title ||
+		path.value !== item.route.path
+
 	const handleConfirm = async () => {
 		try {
 			if (
@@ -61,7 +68,8 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
 				path.value?.trim() === '' ||
 				!navItemState.title ||
 				navItemState.title?.trim() === '' ||
-				!selectedNavigation
+				!selectedNavigation ||
+				!hasChanges
 			)
 				return
 
@@ -135,7 +143,13 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
 			modalToOpen=""
 			currentModalType="ExternalCreate"
 			currentModalMode={variant === 'ExternalCreate' ? 'create' : 'edit'}
-			disabled={!path || !path.value?.trim() || !navItemState.title || !navItemState.title?.trim()}
+			disabled={
+				!path ||
+				!path.value?.trim() ||
+				!navItemState.title ||
+				!navItemState.title?.trim() ||
+				!hasChanges
+			}
 		>
 			<Grid.Root gap={8}>
 				<Grid.Item col={6} s={12}>
