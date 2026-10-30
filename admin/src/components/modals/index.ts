@@ -10,6 +10,7 @@ import { ItemEdit } from './internalItem/internalItemEdit'
 import { WrapperItem } from './wrapperItem'
 import NavModal from './NavModal'
 import SaveConfirm from './SaveConfirm'
+import DiscardChanges from './DiscardChanges'
 
 export {
 	Delete,
@@ -24,4 +25,5 @@ export {
 	WrapperItem,
 	NavModal,
 	SaveConfirm,
+	DiscardChanges,
 }

@@ -21,6 +21,7 @@ import {
 	ExternalItem,
 	WrapperItem,
 	SaveConfirm,
+	DiscardChanges,
 } from '../../components/modals'
 import { EmptyBox, Center, FullLoader } from '../../components/UI'
 import { ModalContext, SelectedNavigationContext, ContentTypesContext } from '../../contexts'
@@ -446,7 +447,40 @@ const Navigation = () => {
 		<ModalContext.Provider value={modalContextValue}>
 			<ContentTypesContext.Provider value={contentTypesContextValue}>
 				<SelectedNavigationContext.Provider value={{ selectedNavigation, setSelectedNavigation }}>
-					<PageWrapper navigations={navigations}>
+					<PageWrapper
+						navigations={navigations}
+						actions={
+							selectedNavigation && (
+								<>
+									<Button
+										variant="tertiary"
+										onClick={() => setModalType('DiscardChanges')}
+										disabled={!hasUnsavedChanges || isSavingNavigation}
+									>
+										{formatMessage({
+											id: getTranslation('navigation.page.discardChanges'),
+											defaultMessage: 'Discard changes',
+										})}
+									</Button>
+									<Button
+										// Items are only soft deleted until saving, so the deletion is confirmed here
+										onClick={() =>
+											deletedItems.length > 0 ? setModalType('SaveConfirm') : saveNavigation()
+										}
+										loading={isSavingNavigation}
+										variant="default"
+										startIcon={<Check />}
+										disabled={!hasUnsavedChanges}
+									>
+										{formatMessage({
+											id: getTranslation('save'),
+											defaultMessage: 'Save',
+										})}
+									</Button>
+								</>
+							)
+						}
+					>
 						{selectedNavigation && (
 							<Flex
 								gap={4}
@@ -510,21 +544,6 @@ const Navigation = () => {
 										{formatMessage({
 											id: getTranslation('navigation.page.newItemButton'),
 											defaultMessage: 'New Item',
-										})}
-									</Button>
-									<Button
-										// Items are only soft deleted until saving, so the deletion is confirmed here
-										onClick={() =>
-											deletedItems.length > 0 ? setModalType('SaveConfirm') : saveNavigation()
-										}
-										loading={isSavingNavigation}
-										variant="default"
-										startIcon={<Check />}
-										disabled={!hasUnsavedChanges}
-									>
-										{formatMessage({
-											id: getTranslation('save'),
-											defaultMessage: 'Save',
 										})}
 									</Button>
 								</Flex>
@@ -632,7 +651,12 @@ const Navigation = () => {
 						)}
 						{navigations && navigationItems?.length === 0 && (
 							<Center height={400}>
-								<EmptyBox msg="Your navigation is empty..." />
+								<EmptyBox
+									msg={formatMessage({
+										id: getTranslation('navigation.page.emptyItems'),
+										defaultMessage: 'Your navigation is empty...',
+									})}
+								/>
 								<Button variant="default" onClick={() => setModalType('ItemCreate')}>
 									{formatMessage({
 										id: getTranslation('navigation.page.createNewItem'),
@@ -684,6 +708,14 @@ const Navigation = () => {
 							navigationItems={navigationItems || []}
 							navigations={navigationsWithCurrentItems}
 							onCreate={handleSoftAddedItems}
+						/>
+					)}
+					{modalType === 'DiscardChanges' && (
+						<DiscardChanges
+							onConfirm={() => {
+								setNavigationItems(cloneDeep(initialNavigationItemsRef.current) ?? [])
+								setModalType('')
+							}}
 						/>
 					)}
 					{modalType === 'SaveConfirm' && (

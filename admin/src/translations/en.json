@@ -18,6 +18,8 @@
 	"webatlas.navigation.page.navItem.expand": "Expand",
 	"webatlas.navigation.page.navItem.movedChildren": "+{count} {count, plural, one {child} other {children}}",
 	"webatlas.navigation.page.navItem.insertBelow": "Add item below",
+	"webatlas.navigation.page.discardChanges": "Discard changes",
+	"webatlas.navigation.page.emptyItems": "Your navigation is empty...",
 
 	"webatlas.paths.page.title": "Paths",
 	"webatlas.paths.page.subtitle": "Overview of all existing paths",
@@ -118,6 +120,7 @@
 	"webatlas.modal.multiItem.status.error": "Check failed",
 	"webatlas.modal.multiItem.remove": "Remove from selection",
 	"webatlas.modal.multiItem.confirm": "Add {count, plural, one {# item} other {# items}}",
+	"webatlas.modal.discardChanges.message": "All unsaved changes of this navigation will be discarded. This can not be undone.",
 
 	"webatlas.components.pathInfo.checking": "Checking if path is available...",
 	"webatlas.components.pathInfo.available": "Path is available",

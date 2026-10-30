@@ -18,6 +18,8 @@
 	"webatlas.navigation.page.navItem.expand": "Ausklappen",
 	"webatlas.navigation.page.navItem.movedChildren": "+{count} {count, plural, one {Unterelement} other {Unterelemente}}",
 	"webatlas.navigation.page.navItem.insertBelow": "Element darunter einfügen",
+	"webatlas.navigation.page.discardChanges": "Änderungen verwerfen",
+	"webatlas.navigation.page.emptyItems": "Ihre Navigation ist leer...",
 
 	"webatlas.paths.page.title": "Pfad",
 	"webatlas.paths.page.subtitle": "Übersicht aller vorhandenen Pfade",
@@ -118,6 +120,7 @@
 	"webatlas.modal.multiItem.status.error": "Prüfung fehlgeschlagen",
 	"webatlas.modal.multiItem.remove": "Aus Auswahl entfernen",
 	"webatlas.modal.multiItem.confirm": "{count, plural, one {# Element} other {# Elemente}} hinzufügen",
+	"webatlas.modal.discardChanges.message": "Alle ungespeicherten Änderungen dieser Navigation werden verworfen. Dies kann nicht rückgängig gemacht werden.",
 
 	"webatlas.components.pathInfo.checking": "Überprüfe, ob der Pfad verfügbar ist...",
 	"webatlas.components.pathInfo.available": "Pfad ist verfügbar",
