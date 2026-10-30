@@ -100,6 +100,14 @@ export default ({ strapi }) => ({
 		})
 	},
 
+	// Path of the routes linked to the given entries, with one query
+	async getRelatedRoutes(documentIds: string[]) {
+		return await strapi.db?.query(waRoute).findMany({
+			where: { relatedDocumentId: { $in: documentIds } },
+			select: ['relatedDocumentId', 'path'],
+		})
+	},
+
 	async getProhibitedRouteIds(documentId: string | undefined) {
 		let route: Route | null = null
 		if (documentId) {

@@ -108,6 +108,7 @@
 	"webatlas.modal.entrySelection.usedHere": "Bereits in dieser Navigation",
 	"webatlas.modal.entrySelection.usedIn": "In „{navigationName}“",
 	"webatlas.modal.entrySelection.next": "Weiter ({count})",
+	"webatlas.modal.entrySelection.noRoute": "Keine Route",
 	"webatlas.modal.multiItem.status": "Status",
 	"webatlas.modal.multiItem.status.ok": "OK",
 	"webatlas.modal.multiItem.status.replaced": "Pfad vergeben, ersetzt",

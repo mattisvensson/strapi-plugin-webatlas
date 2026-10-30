@@ -80,6 +80,22 @@ export default {
 		},
 		{
 			method: 'GET',
+			path: '/route/related/batch',
+			handler: 'admin.getRelatedRoutes',
+			config: {
+				policies: [
+					'admin::isAuthenticatedAdmin',
+					{
+						name: `plugin::${PLUGIN_ID}.has-permissions`,
+						config: {
+							actions: [`plugin::${PLUGIN_ID}.page.navigation`],
+						},
+					},
+				],
+			},
+		},
+		{
+			method: 'GET',
 			path: '/route/prohibitedIds/:documentId?',
 			handler: 'admin.getProhibitedRouteIds',
 			config: {
