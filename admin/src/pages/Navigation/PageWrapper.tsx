@@ -18,10 +18,13 @@ import { PLUGIN_ID } from '../../../../utils'
 export default function PageWrapper({
 	navigations,
 	loading = false,
+	actions,
 	children,
 }: {
 	navigations: NestedNavigation[]
 	loading?: boolean
+	// Shown in the header, which Strapi keeps visible at the top while scrolling
+	actions?: React.ReactNode
 	children: React.ReactNode
 }) {
 	const { formatMessage } = useIntl()
@@ -75,6 +78,7 @@ export default function PageWrapper({
 									</SingleSelectOption>
 								))}
 							</SingleSelect>
+							{actions}
 						</Flex>
 					)
 				}
