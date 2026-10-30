@@ -45,16 +45,19 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
 
 	const { formatMessage } = useIntl()
 
+	// The current title of the item, including changes that are not saved yet
+	const currentTitle = item?.clientModifications?.title || item?.route.title
+
 	useEffect(() => {
 		if (variant !== 'WrapperEdit' || !item) return
 
-		dispatchNavItemState({ type: 'SET_TITLE', payload: item.route.title })
+		dispatchNavItemState({ type: 'SET_TITLE', payload: currentTitle ?? '' })
 		dispatchNavItemState({ type: 'SET_ACTIVE', payload: item.route.active })
 		dispatchPath({ type: 'NO_TRANSFORM_AND_CHECK', payload: item.route.path })
 	}, [])
 
 	// When editing, saving is only possible once the title differs from the initial value
-	const hasChanges = variant !== 'WrapperEdit' || !item || navItemState.title !== item.route.title
+	const hasChanges = variant !== 'WrapperEdit' || !item || navItemState.title !== currentTitle
 
 	const onConfirm = async () => {
 		try {
