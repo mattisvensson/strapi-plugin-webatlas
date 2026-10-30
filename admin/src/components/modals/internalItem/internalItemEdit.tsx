@@ -93,17 +93,32 @@ function ItemEditComponent({
 			if (validationState === 'checking') return
 
 			const isOverride = path.value !== item.route.path ? true : navItemState.isOverride
+			const slug = transformToUrl(path.slug || '')
 
-			onEdit({
-				...item,
-				clientModifications: {
-					type: 'update',
-					title: navItemState.title,
-					slug: transformToUrl(path.slug || ''),
-					path: path.value,
-					isOverride,
-				},
-			})
+			// A new item is created from its route when saving, so its changes go there and it stays new
+			if (item.clientModifications?.type === 'create') {
+				onEdit({
+					...item,
+					route: {
+						...item.route,
+						title: navItemState.title ?? item.route.title,
+						slug,
+						path: path.value ?? item.route.path,
+						isOverride: isOverride ?? item.route.isOverride,
+					},
+				})
+			} else {
+				onEdit({
+					...item,
+					clientModifications: {
+						type: 'update',
+						title: navItemState.title,
+						slug,
+						path: path.value,
+						isOverride,
+					},
+				})
+			}
 			setModalType('')
 		} catch (err) {
 			console.error(err)

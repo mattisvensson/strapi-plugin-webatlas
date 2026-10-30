@@ -78,7 +78,22 @@ function ExternalItemComponent(props: externalItemProps & ReturnType<typeof useM
 			)
 				return
 
-			if (variant === 'ExternalEdit' && item && onSave) {
+			// A new item is created from its route when saving, so its changes go there and it stays new
+			if (
+				variant === 'ExternalEdit' &&
+				item &&
+				onSave &&
+				item.clientModifications?.type === 'create'
+			) {
+				onSave({
+					...item,
+					route: {
+						...item.route,
+						title: navItemState.title ?? item.route.title,
+						path: path.value ?? item.route.path,
+					},
+				})
+			} else if (variant === 'ExternalEdit' && item && onSave) {
 				onSave({
 					...item,
 					clientModifications: {
