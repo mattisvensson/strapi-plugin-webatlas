@@ -63,7 +63,15 @@ function WrapperItemComponent(props: wrapperItemProps & ReturnType<typeof useMod
 		try {
 			if (!navItemState.title || !selectedNavigation || !hasChanges) return
 
-			if (variant === 'WrapperEdit' && item && onSave) {
+			// A new item is created from its route when saving, so its changes go there and it stays new
+			if (
+				variant === 'WrapperEdit' &&
+				item &&
+				onSave &&
+				item.clientModifications?.type === 'create'
+			) {
+				onSave({ ...item, route: { ...item.route, title: navItemState.title } })
+			} else if (variant === 'WrapperEdit' && item && onSave) {
 				onSave({
 					...item,
 					clientModifications: {
