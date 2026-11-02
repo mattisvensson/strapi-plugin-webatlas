@@ -25,4 +25,6 @@ export type RouteItemProps = {
 	collapsed?: boolean
 	// Omitted to hide the collapse toggle, e.g. while searching
 	onToggleCollapse?: (documentId: string) => void
+	// Hides the drag handle and the item actions, if the user may not edit the items
+	readOnly?: boolean
 }

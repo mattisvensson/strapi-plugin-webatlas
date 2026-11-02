@@ -36,6 +36,7 @@ export const RouteItem = memo(
 				hasChildren = false,
 				collapsed = false,
 				onToggleCollapse,
+				readOnly = false,
 			}: RouteItemProps,
 			ref,
 		) => {
@@ -159,7 +160,12 @@ export const RouteItem = memo(
 							borderWidth="0 0 1px 0"
 						>
 							<Flex paddingLeft={3} paddingRight={2}>
-								<Drag color="neutral600" style={{ cursor: 'grab' }} {...handleProps} />
+								{/* Keeps the space of the handle, so the rows stay aligned */}
+								<Drag
+									color="neutral600"
+									style={{ cursor: 'grab', visibility: readOnly ? 'hidden' : undefined }}
+									{...handleProps}
+								/>
 							</Flex>
 							<Flex flex="1" minWidth={0} gap={2} paddingTop={2} paddingBottom={2} paddingRight={3}>
 								<Flex flex={`0 0 ${indentationWidth}px`} justifyContent="center">
@@ -214,6 +220,7 @@ export const RouteItem = memo(
 										item={item}
 										depth={depth}
 										maxDepth={maxDepth}
+										readOnly={readOnly}
 										handleEdit={handleEdit}
 										handleAddChildren={handleAddChildren}
 										handleDelete={handleDelete}

@@ -10,7 +10,7 @@
 import type { ContentType, ConfigContentType, PluginConfig } from '../../../../../types'
 import { useEffect, useState, useReducer, useRef, useMemo } from 'react'
 import { Accordion, Field } from '@strapi/design-system'
-import { useNotification, Page } from '@strapi/strapi/admin'
+import { useNotification, Page, useRBAC } from '@strapi/strapi/admin'
 import {
 	useAllContentTypes,
 	useErrorMessage,
@@ -76,6 +76,10 @@ const Settings = () => {
 	const [blacklistInput, setBlacklistInput] = useState('')
 	const initialConfig = useRef<PluginConfig | null>(fetchedConfig)
 	const { entities, loading: entitiesLoading, error: entitiesError } = useAllEntities()
+	const {
+		isLoading: isLoadingPermissions,
+		allowedActions: { canUpdate },
+	} = useRBAC(pluginPermissions['settings.general.update'])
 
 	// Without a route source field no route can be generated, so the content type is not selectable as parent
 	const selectableEntities = useMemo(
@@ -171,7 +175,7 @@ const Settings = () => {
 		}
 	}
 
-	if (loading) {
+	if (loading || isLoadingPermissions) {
 		return (
 			<PageWrapper
 				isSaving={isSaving}
@@ -187,9 +191,10 @@ const Settings = () => {
 	}
 
 	return (
-		<Page.Protect permissions={pluginPermissions['settings.general']}>
+		<Page.Protect permissions={pluginPermissions['settings.general.read']}>
 			<PageWrapper
-				save={save}
+				// Without the permission to update, the settings are only shown
+				save={canUpdate ? save : undefined}
 				isSaving={isSaving}
 				subtitle={formatMessage({
 					id: getTranslation('settings.page.general.subtitle'),
@@ -229,6 +234,7 @@ const Settings = () => {
 											dispatch={dispatch}
 											allGroupedEntities={selectableEntities}
 											entitiesLoading={entitiesLoading}
+											disabled={!canUpdate}
 										/>
 									)
 								})}
@@ -277,6 +283,7 @@ const Settings = () => {
 									defaultMessage: 'Enter comma-separated URL segments to block',
 								})}
 								value={blacklistInput}
+								disabled={!canUpdate}
 								onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
 									setBlacklistInput(e.target.value)
 								}

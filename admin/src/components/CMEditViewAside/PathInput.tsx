@@ -12,9 +12,17 @@ type PathInputProps = {
 	isOverride: boolean
 	config: ConfigContentType
 	hasUserInteracted: React.RefObject<boolean>
+	disabled?: boolean
 }
 
-function PathInput({ path, dispatchPath, isOverride, config, hasUserInteracted }: PathInputProps) {
+function PathInput({
+	path,
+	dispatchPath,
+	isOverride,
+	config,
+	hasUserInteracted,
+	disabled,
+}: PathInputProps) {
 	const { formatMessage } = useIntl()
 
 	const displayedPath =
@@ -64,7 +72,7 @@ function PathInput({ path, dispatchPath, isOverride, config, hasUserInteracted }
 					hasUserInteracted.current = true
 					dispatchPath({ type: 'SET_OVERRIDEPATH', payload: e.target.value })
 				}}
-				disabled={!isOverride}
+				disabled={!isOverride || disabled}
 				onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
 					dispatchPath({
 						type: 'SET_OVERRIDEPATH',

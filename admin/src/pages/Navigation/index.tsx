@@ -6,7 +6,7 @@ import pluginPermissions from '../../permissions'
 
 const App = () => {
 	return (
-		<Page.Protect permissions={pluginPermissions['page.navigation']}>
+		<Page.Protect permissions={pluginPermissions['navigation.read']}>
 			<Routes>
 				<Route path="/" element={<Navigation />} />
 				<Route path="/:navigationId" element={<Navigation />} />

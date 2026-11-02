@@ -29,6 +29,35 @@ export type DocumentResult = {
 	documentId: string
 	[key: string]: any
 }
+
+// The route an entry gets without (permitted) route data: generated from the source field and
+// placed below the default parent route of the content type. Read from the store, since the
+// default parent route can change at runtime.
+async function getDefaultRouteData(
+	strapi: Core.Strapi,
+	uid: string,
+	data: WebatlasDocumentData,
+): Promise<WebatlasDocumentData['webatlas']> {
+	const pluginStore = strapi.store({ type: 'plugin', name: PLUGIN_ID })
+	const currentConfig = (await pluginStore.get({ key: 'config' })) as PluginConfig | null
+	const ctSettings = currentConfig?.selectedContentTypes.find((ct) => ct.uid === uid)
+
+	const sourceValue = ctSettings?.routeSourceField ? data[ctSettings.routeSourceField] : undefined
+	if (typeof sourceValue !== 'string' || !sourceValue.trim()) return undefined
+
+	const defaultParent = ctSettings.defaultParentRoute
+		? ((await strapi.documents(waRoute).findFirst({
+				filters: { relatedDocumentId: ctSettings.defaultParentRoute },
+			})) as Route | null)
+		: null
+
+	return {
+		slug: transformToUrl(sourceValue),
+		parentDocumentId: defaultParent?.documentId ?? null,
+		isOverride: false,
+	}
+}
+
 export function documentMiddleware(
 	strapi: Core.Strapi,
 	enabledContentTypes: ContentType[],
@@ -52,13 +81,26 @@ export function documentMiddleware(
 		const requestContext = strapi.requestContext.get()
 		const isRouteDataAllowed =
 			!requestContext || requestContext.state?.route?.info?.type === 'admin'
-		if ((context.action === 'create' || context.action === 'update') && !isRouteDataAllowed) {
+		// Admin users additionally need the permissions of the aside panel, requests without a user
+		// (scripts, cron jobs) are trusted
+		const userAbility = requestContext?.state?.userAbility
+		const canUseAside = !userAbility || userAbility.can(`plugin::${PLUGIN_ID}.cm.aside`)
+		const canEditPath = !userAbility || userAbility.can(`plugin::${PLUGIN_ID}.cm.edit-path`)
+		if (
+			(context.action === 'create' || context.action === 'update') &&
+			(!isRouteDataAllowed || !canUseAside)
+		) {
 			delete (context.params.data as WebatlasDocumentData | undefined)?.webatlas
 		}
 
 		if (context.action === 'create') {
 			const data = context.params.data as WebatlasDocumentData
-			const { webatlas } = data
+			// Every entry gets a route. Without route data or the permission to edit the path, it is
+			// generated automatically.
+			const webatlas =
+				data.webatlas && canEditPath
+					? data.webatlas
+					: await getDefaultRouteData(strapi, context.uid, data)
 			const { slug, parentDocumentId, isOverride } = webatlas || {}
 			const transformedSlug = slug ? transformToUrl(slug, !isOverride) : null
 
@@ -130,19 +172,39 @@ export function documentMiddleware(
 		if (context.action === 'update') {
 			const data = context.params.data as WebatlasDocumentData
 			const { documentId } = context.params
-			const { webatlas } = data
+
+			const relatedRoute = (await strapi.documents(waRoute).findFirst({
+				filters: {
+					relatedDocumentId: documentId,
+				},
+				populate: ['parent'],
+			})) as Route | null
+
+			let webatlas = data.webatlas
+			if (!relatedRoute && (!webatlas || !canEditPath)) {
+				// Entries without a route get one as soon as their source field has a value
+				webatlas = await getDefaultRouteData(strapi, context.uid, data)
+			} else if (relatedRoute && webatlas && !canEditPath) {
+				// Without the permission to edit the path, only the automatic path follows the source
+				// field, the parent route and an overridden path are kept
+				const sourceValue = ctSettings?.routeSourceField
+					? data[ctSettings.routeSourceField]
+					: undefined
+				webatlas =
+					!relatedRoute.isOverride && typeof sourceValue === 'string' && sourceValue.trim()
+						? {
+								slug: transformToUrl(sourceValue),
+								parentDocumentId: relatedRoute.parent?.documentId ?? null,
+								isOverride: false,
+							}
+						: undefined
+			}
 			const { slug, parentDocumentId, isOverride } = webatlas || {}
 
 			if (!slug) {
 				const result = await next()
 				return result
 			}
-
-			const relatedRoute = (await strapi.documents(waRoute).findFirst({
-				filters: {
-					relatedDocumentId: documentId,
-				},
-			})) as Route | null
 
 			let parent: Route | null = null
 			let isValid = false

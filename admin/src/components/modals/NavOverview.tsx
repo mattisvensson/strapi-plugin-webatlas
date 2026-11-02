@@ -1,4 +1,4 @@
-import { Flex, Box, Typography, Divider, Button } from '@strapi/design-system'
+import { Flex, Box, Typography, Divider, Button, Modal } from '@strapi/design-system'
 import { Check, Pencil, Trash } from '@strapi/icons'
 import { ModalContext, SelectedNavigationContext } from '../../contexts'
 import { useContext } from 'react'
@@ -13,9 +13,18 @@ import { PLUGIN_ID } from '../../../../utils'
 type NavOverviewProps = {
 	navigations: NestedNavigation[]
 	setActionItem: React.Dispatch<React.SetStateAction<NestedNavItem | NestedNavigation | undefined>>
+	canCreate: boolean
+	canUpdate: boolean
+	canDelete: boolean
 }
 
-export default function NavOverview({ navigations, setActionItem }: NavOverviewProps) {
+export default function NavOverview({
+	navigations,
+	setActionItem,
+	canCreate,
+	canUpdate,
+	canDelete,
+}: NavOverviewProps) {
 	const { setModalType } = useContext(ModalContext)
 	const { selectedNavigation } = useContext(SelectedNavigationContext)
 	const { formatMessage } = useIntl()
@@ -36,16 +45,18 @@ export default function NavOverview({ navigations, setActionItem }: NavOverviewP
 		setModalType('NavDelete')
 	}
 
+	const closeText = formatMessage({
+		id: getTranslation('modal.navOverview.closeText'),
+		defaultMessage: 'Cancel',
+	})
+
 	return (
 		<NavModal
 			confirmText={formatMessage({
 				id: getTranslation('modal.navOverview.confirmText'),
 				defaultMessage: 'New navigation',
 			})}
-			closeText={formatMessage({
-				id: getTranslation('modal.navOverview.closeText'),
-				defaultMessage: 'Cancel',
-			})}
+			closeText={closeText}
 			titleText={formatMessage({
 				id: getTranslation('modal.navOverview.titleText'),
 				defaultMessage: 'Navigation overview',
@@ -55,6 +66,16 @@ export default function NavOverview({ navigations, setActionItem }: NavOverviewP
 				defaultMessage: 'Creating',
 			})}
 			modalToOpen="NavCreate"
+			// Without the permission to create navigations, only the close button is shown
+			footer={
+				!canCreate && (
+					<Modal.Close>
+						<Button variant="tertiary" type="button">
+							{closeText}
+						</Button>
+					</Modal.Close>
+				)
+			}
 		>
 			{navigations.length > 0 ? (
 				navigations.map((nav, index) => (
@@ -62,22 +83,30 @@ export default function NavOverview({ navigations, setActionItem }: NavOverviewP
 						<Flex justifyContent="space-between" key={`box-${nav.slug}`}>
 							<Typography textColor="neutral800">{nav.name}</Typography>
 							<Flex gap={2}>
-								<Button
-									startIcon={<Trash />}
-									variant="danger-light"
-									onClick={() => handleDelete(nav)}
-								>
-									{formatMessage({
-										id: getTranslation('delete'),
-										defaultMessage: 'Delete',
-									})}
-								</Button>
-								<Button startIcon={<Pencil />} variant="secondary" onClick={() => handleEdit(nav)}>
-									{formatMessage({
-										id: getTranslation('edit'),
-										defaultMessage: 'Edit',
-									})}
-								</Button>
+								{canDelete && (
+									<Button
+										startIcon={<Trash />}
+										variant="danger-light"
+										onClick={() => handleDelete(nav)}
+									>
+										{formatMessage({
+											id: getTranslation('delete'),
+											defaultMessage: 'Delete',
+										})}
+									</Button>
+								)}
+								{canUpdate && (
+									<Button
+										startIcon={<Pencil />}
+										variant="secondary"
+										onClick={() => handleEdit(nav)}
+									>
+										{formatMessage({
+											id: getTranslation('edit'),
+											defaultMessage: 'Edit',
+										})}
+									</Button>
+								)}
 								<Button
 									startIcon={<Check />}
 									variant="default"
