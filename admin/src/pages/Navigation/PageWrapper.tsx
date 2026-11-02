@@ -18,11 +18,13 @@ import { PLUGIN_ID } from '../../../../utils'
 export default function PageWrapper({
 	navigations,
 	loading = false,
+	itemCount,
 	actions,
 	children,
 }: {
 	navigations: NestedNavigation[]
 	loading?: boolean
+	itemCount?: number
 	// Shown in the header, which Strapi keeps visible at the top while scrolling
 	actions?: React.ReactNode
 	children: React.ReactNode
@@ -44,7 +46,14 @@ export default function PageWrapper({
 				subtitle={
 					<Typography textColor="neutral500">
 						{selectedNavigation
-							? `ID: ${selectedNavigation.id} | DocumentID : ${selectedNavigation.documentId}`
+							? itemCount !== undefined &&
+								formatMessage(
+									{
+										id: getTranslation('navigation.page.itemCount'),
+										defaultMessage: '{count, plural, one {# item} other {# items}}',
+									},
+									{ count: itemCount },
+								)
 							: formatMessage({
 									id: getTranslation('navigation.page.subtitle.noNavigationSelected'),
 									defaultMessage: 'No navigation selected',

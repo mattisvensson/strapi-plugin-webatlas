@@ -449,6 +449,7 @@ const Navigation = () => {
 				<SelectedNavigationContext.Provider value={{ selectedNavigation, setSelectedNavigation }}>
 					<PageWrapper
 						navigations={navigations}
+						itemCount={(navigationItems?.length ?? 0) - deletedItems.length}
 						actions={
 							selectedNavigation && (
 								<>

@@ -79,6 +79,28 @@ export const RouteItem = memo(
 				)
 			}
 
+			// Restores a deleted item together with the changes it had before it was deleted
+			const handleUndoDelete = () => {
+				setNavigationItems((navItems) =>
+					navItems?.map((navItem) => {
+						if (navItem.documentId !== item.documentId || !navItem.clientModifications)
+							return navItem
+
+						// New items keep their changes in the route, their initial modifications mark them as new
+						if (navItem.initialClientModifications) {
+							return { ...navItem, clientModifications: navItem.initialClientModifications }
+						}
+
+						const { type: _, ...modifications } = navItem.clientModifications
+						const { clientModifications: __, ...rest } = navItem
+						return modifications.title || modifications.slug || modifications.path
+							? { ...navItem, clientModifications: { ...modifications, type: 'update' } }
+							: rest
+					}),
+				)
+			}
+
+			// Resets the changes made in the edit modal, a moved item keeps its new position
 			const handleRestore = () => {
 				setNavigationItems((navItems) =>
 					navItems?.map((navItem) => {
@@ -196,6 +218,7 @@ export const RouteItem = memo(
 										handleAddChildren={handleAddChildren}
 										handleDelete={handleDelete}
 										handleRestore={handleRestore}
+										handleUndoDelete={handleUndoDelete}
 									/>
 								</Flex>
 							</Flex>
