@@ -25,7 +25,7 @@ export default {
 				defaultMessage: 'Navigation',
 			},
 			Component: () => import('./pages/Navigation'),
-			permissions: [pluginPermissions['page.navigation'][0]],
+			permissions: [pluginPermissions['navigation.read'][0]],
 		})
 		app.addSettingsLink(
 			{
@@ -43,7 +43,7 @@ export default {
 				id: `${PLUGIN_ID}-general`,
 				to: `${PLUGIN_ID}/general`,
 				Component: () => import('./pages/Settings/General'),
-				permissions: [pluginPermissions['settings.general'][0]],
+				permissions: [pluginPermissions['settings.general.read'][0]],
 			},
 		)
 		app.addSettingsLink(PLUGIN_ID, {
@@ -54,7 +54,7 @@ export default {
 			id: `${PLUGIN_ID}-navigation`,
 			to: `${PLUGIN_ID}/navigation`,
 			Component: () => import('./pages/Settings/Navigation'),
-			permissions: [pluginPermissions['settings.navigation'][0]],
+			permissions: [pluginPermissions['settings.navigation.read'][0]],
 		})
 		app.customFields.register({
 			name: 'route-picker',

@@ -29,7 +29,8 @@ import type { NestedNavigation, NestedNavItem } from '../../../../types'
 import { useApi, useErrorMessage, usePluginConfig } from '../../hooks/'
 import { getTranslation, isAbortError, syncNavItemPaths } from '../../utils'
 import { useIntl } from 'react-intl'
-import { useNotification } from '@strapi/strapi/admin'
+import { useNotification, useRBAC } from '@strapi/strapi/admin'
+import pluginPermissions from '../../permissions'
 import {
 	DndContext,
 	closestCenter,
@@ -92,6 +93,15 @@ const Navigation = () => {
 	// Set before navigating away from a deleted navigation, its unsaved changes are obsolete
 	const skipUnsavedChangesWarningRef = useRef(false)
 	const { config } = usePluginConfig()
+	const {
+		isLoading: isLoadingPermissions,
+		allowedActions: { canCreate, canUpdate, canDelete, canEditItems },
+	} = useRBAC([
+		...pluginPermissions['navigation.create'],
+		...pluginPermissions['navigation.update'],
+		...pluginPermissions['navigation.delete'],
+		...pluginPermissions['navigation.edit-items'],
+	])
 
 	const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null)
 	const [overId, setOverId] = useState<UniqueIdentifier | null>(null)
@@ -438,7 +448,7 @@ const Navigation = () => {
 	// Stable context value, otherwise every page render re-renders all memoized route items
 	const modalContextValue = useMemo(() => ({ modalType, setModalType }), [modalType])
 
-	if (loading) {
+	if (loading || isLoadingPermissions) {
 		return (
 			<PageWrapper navigations={navigations} loading={loading}>
 				<FullLoader />
@@ -454,7 +464,8 @@ const Navigation = () => {
 						navigations={navigations}
 						itemCount={(navigationItems?.length ?? 0) - deletedItems.length}
 						actions={
-							selectedNavigation && (
+							selectedNavigation &&
+							canEditItems && (
 								<>
 									<Button
 										variant="tertiary"
@@ -539,18 +550,20 @@ const Navigation = () => {
 										})}
 									</Button>
 								</Flex>
-								<Flex gap={4}>
-									<Button
-										variant="secondary"
-										startIcon={<Plus />}
-										onClick={() => setModalType('ItemCreate')}
-									>
-										{formatMessage({
-											id: getTranslation('navigation.page.newItemButton'),
-											defaultMessage: 'New Item',
-										})}
-									</Button>
-								</Flex>
+								{canEditItems && (
+									<Flex gap={4}>
+										<Button
+											variant="secondary"
+											startIcon={<Plus />}
+											onClick={() => setModalType('ItemCreate')}
+										>
+											{formatMessage({
+												id: getTranslation('navigation.page.newItemButton'),
+												defaultMessage: 'New Item',
+											})}
+										</Button>
+									</Flex>
+								)}
 							</Flex>
 						)}
 						{isSearching && (
@@ -577,7 +590,7 @@ const Navigation = () => {
 									<SortableContext
 										items={visibleItems}
 										strategy={verticalListSortingStrategy}
-										disabled={isSearching}
+										disabled={isSearching || !canEditItems}
 									>
 										{visibleItems.map((item, index) => {
 											return (
@@ -595,7 +608,10 @@ const Navigation = () => {
 													hasChildren={itemsWithChildren.has(item.documentId)}
 													collapsed={collapsedIds.has(item.documentId)}
 													onToggleCollapse={isSearching ? undefined : toggleCollapsed}
-													onInsertBelow={isSearching ? undefined : handleInsertBelow}
+													onInsertBelow={
+														isSearching || !canEditItems ? undefined : handleInsertBelow
+													}
+													readOnly={!canEditItems}
 												/>
 											)
 										})}
@@ -641,12 +657,14 @@ const Navigation = () => {
 										defaultMessage: 'You have no navigations yet...',
 									})}
 								/>
-								<Button variant="default" onClick={() => setModalType('NavCreate')}>
-									{formatMessage({
-										id: getTranslation('navigation.page.createNewNavigation'),
-										defaultMessage: 'Create new navigation',
-									})}
-								</Button>
+								{canCreate && (
+									<Button variant="default" onClick={() => setModalType('NavCreate')}>
+										{formatMessage({
+											id: getTranslation('navigation.page.createNewNavigation'),
+											defaultMessage: 'Create new navigation',
+										})}
+									</Button>
+								)}
 							</Center>
 						)}
 						{navigations && navigationItems?.length === 0 && (
@@ -657,18 +675,26 @@ const Navigation = () => {
 										defaultMessage: 'Your navigation is empty...',
 									})}
 								/>
-								<Button variant="default" onClick={() => setModalType('ItemCreate')}>
-									{formatMessage({
-										id: getTranslation('navigation.page.createNewItem'),
-										defaultMessage: 'Create new item',
-									})}
-								</Button>
+								{canEditItems && (
+									<Button variant="default" onClick={() => setModalType('ItemCreate')}>
+										{formatMessage({
+											id: getTranslation('navigation.page.createNewItem'),
+											defaultMessage: 'Create new item',
+										})}
+									</Button>
+								)}
 							</Center>
 						)}
 					</PageWrapper>
 					<UnsavedChangesBlocker when={hasUnsavedChanges} skipRef={skipUnsavedChangesWarningRef} />
 					{modalType === 'NavOverview' && (
-						<NavOverview navigations={navigations} setActionItem={setActionItem} />
+						<NavOverview
+							navigations={navigations}
+							setActionItem={setActionItem}
+							canCreate={canCreate}
+							canUpdate={canUpdate}
+							canDelete={canDelete}
+						/>
 					)}
 					{modalType === 'NavCreate' && <NavCreate />}
 					{modalType === 'NavDelete' && (

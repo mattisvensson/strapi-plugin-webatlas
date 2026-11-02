@@ -13,12 +13,14 @@ export default function ContentTypeAccordion({
 	dispatch,
 	allGroupedEntities,
 	entitiesLoading,
+	disabled,
 }: {
 	contentType: ContentType | undefined
 	contentTypeSettings: ConfigContentType
 	dispatch: React.Dispatch<any>
 	allGroupedEntities: GroupedEntities[]
 	entitiesLoading: boolean
+	disabled?: boolean
 }) {
 	const { formatMessage } = useIntl()
 	const [selectedContentType, setSelectedContentType] = useState<GroupedEntities | null>(null)
@@ -125,7 +127,7 @@ export default function ContentTypeAccordion({
 										payload: { ctUid: contentType.uid, field: String(value) },
 									})
 								}
-								disabled={filteredAttributes.length === 0}
+								disabled={disabled || filteredAttributes.length === 0}
 							>
 								{filteredAttributes.map(([key], index) => {
 									return (
@@ -182,6 +184,7 @@ export default function ContentTypeAccordion({
 												),
 												defaultMessage: 'Select a content type',
 											})}
+											disabled={disabled}
 										>
 											{allGroupedEntities.map((groupedEntity) => {
 												return (
@@ -221,6 +224,7 @@ export default function ContentTypeAccordion({
 												})
 											}
 											disabled={
+												disabled ||
 												!selectedContentType ||
 												selectedContentType.entities.length === 0 ||
 												!selectedContentType.contentType.routeSourceField

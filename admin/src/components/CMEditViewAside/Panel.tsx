@@ -17,6 +17,7 @@ import NewPathInfo from './NewPathInfo'
 import UidPathDisplay from './UidPathDisplay'
 import PathInput from './PathInput'
 import RouteStructure from './RouteStructure'
+import pluginPermissions from '../../permissions'
 
 function buildPath(type: 'canonical' | 'path', slug: string, parent: Route | null) {
 	const parentSlug = type === 'canonical' ? parent?.canonicalPath : parent?.path
@@ -76,8 +77,9 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 	const { formatMessage } = useIntl()
 	const { get } = useFetchClient()
 	const {
-		allowedActions: { canUpdate, canCreate },
+		allowedActions: { canUpdate, canCreate, canEditPath },
 	} = useRBAC([
+		...pluginPermissions['cm.edit-path'],
 		{
 			action: 'plugin::content-manager.explorer.update',
 			subject: model,
@@ -427,6 +429,8 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 					prohibitedRouteIds={prohibitedRouteIds}
 					defaultParentRoute={config.defaultParentRoute || ''}
 					isCreatingEntry={!initialValues.documentId}
+					// The server keeps the parent route and an overridden path without this permission
+					disabled={!canEditPath}
 				/>
 				<Divider marginTop={2} marginBottom={2} />
 				<Box>
@@ -436,6 +440,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 						isOverride={isOverride}
 						config={config}
 						hasUserInteracted={hasUserInteracted}
+						disabled={!canEditPath}
 					/>
 					{(validationState !== 'initial' || isBlacklisted) && (
 						<PathInfo
@@ -453,7 +458,7 @@ const Panel = ({ config }: { config: ConfigContentType }) => {
 							dispatchPath({ type: 'SET_URL_CHECK_FLAG', payload: true })
 						setIsOverride(val)
 					}}
-					disabledCondition={!canCreate && !canUpdate}
+					disabledCondition={(!canCreate && !canUpdate) || !canEditPath}
 				/>
 				{path.uidPath && (
 					<>

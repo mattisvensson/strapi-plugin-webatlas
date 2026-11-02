@@ -13,6 +13,7 @@ function RouteStructure({
 	prohibitedRouteIds,
 	defaultParentRoute,
 	isCreatingEntry,
+	disabled,
 }: RouteStructureProps) {
 	const { formatMessage } = useIntl()
 
@@ -56,7 +57,7 @@ function RouteStructure({
 						defaultMessage: 'Place under',
 					})}
 				</Field.Label>
-				<SingleSelect value={selectValue} onValueChange={handleSelectParent}>
+				<SingleSelect value={selectValue} onValueChange={handleSelectParent} disabled={disabled}>
 					<SingleSelectOption value="">
 						{formatMessage({
 							id: getTranslation('components.CMEditViewAside.path.input.parentSelect.rootPath'),

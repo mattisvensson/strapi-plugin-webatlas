@@ -30,6 +30,7 @@ export type RouteStructureProps = {
 	prohibitedRouteIds?: string[]
 	defaultParentRoute?: string
 	isCreatingEntry: boolean
+	disabled?: boolean
 }
 
 export type ValidationState = 'initial' | 'checking' | 'done' | 'idle'

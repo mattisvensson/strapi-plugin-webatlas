@@ -8,7 +8,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { Field, RawTable, Tbody, Td, Th, Thead, Tr, Typography } from '@strapi/design-system'
-import { useNotification, Page } from '@strapi/strapi/admin'
+import { useNotification, Page, useRBAC } from '@strapi/strapi/admin'
 import useApi from '../../../hooks/useApi'
 import useErrorMessage from '../../../hooks/useErrorMessage'
 import type { NavigationDepth } from '../../../../../types'
@@ -30,6 +30,10 @@ const Settings = () => {
 	const [levels, setLevels] = useState<Record<string, string>>({})
 	const [loading, setLoading] = useState(true)
 	const [isSaving, setIsSaving] = useState(false)
+	const {
+		isLoading: isLoadingPermissions,
+		allowedActions: { canUpdate },
+	} = useRBAC(pluginPermissions['settings.navigation.update'])
 
 	const applyDepths = (nextDepths: NavigationDepth[]) => {
 		setDepths(nextDepths)
@@ -110,7 +114,7 @@ const Settings = () => {
 		}
 	}
 
-	if (loading) {
+	if (loading || isLoadingPermissions) {
 		return (
 			<PageWrapper
 				isSaving={isSaving}
@@ -126,9 +130,10 @@ const Settings = () => {
 	}
 
 	return (
-		<Page.Protect permissions={pluginPermissions['settings.navigation']}>
+		<Page.Protect permissions={pluginPermissions['settings.navigation.read']}>
 			<PageWrapper
-				save={save}
+				// Without the permission to update, the settings are only shown
+				save={canUpdate ? save : undefined}
 				isSaving={isSaving}
 				subtitle={formatMessage({
 					id: getTranslation('settings.page.navigation.subtitle'),
@@ -203,6 +208,7 @@ const Settings = () => {
 														defaultMessage: 'Maximum levels',
 													})}
 													value={levels[documentId] ?? ''}
+													disabled={!canUpdate}
 													onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
 														setLevels((current) => ({ ...current, [documentId]: e.target.value }))
 													}

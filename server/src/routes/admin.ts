@@ -15,9 +15,9 @@ export default {
 						name: `plugin::${PLUGIN_ID}.has-permissions`,
 						config: {
 							actions: [
-								`plugin::${PLUGIN_ID}.settings.general`,
-								`plugin::${PLUGIN_ID}.settings.navigation`,
-								`plugin::${PLUGIN_ID}.page.navigation`,
+								`plugin::${PLUGIN_ID}.settings.general.read`,
+								`plugin::${PLUGIN_ID}.settings.navigation.read`,
+								`plugin::${PLUGIN_ID}.navigation.read`,
 								`plugin::${PLUGIN_ID}.cm.aside`,
 							],
 						},
@@ -35,10 +35,7 @@ export default {
 					{
 						name: `plugin::${PLUGIN_ID}.has-permissions`,
 						config: {
-							actions: [
-								`plugin::${PLUGIN_ID}.settings.general`,
-								`plugin::${PLUGIN_ID}.settings.navigation`,
-							],
+							actions: [`plugin::${PLUGIN_ID}.settings.general.update`],
 						},
 					},
 				],
@@ -72,7 +69,7 @@ export default {
 					{
 						name: `plugin::${PLUGIN_ID}.has-permissions`,
 						config: {
-							actions: [`plugin::${PLUGIN_ID}.cm.aside`, `plugin::${PLUGIN_ID}.page.navigation`],
+							actions: [`plugin::${PLUGIN_ID}.cm.aside`, `plugin::${PLUGIN_ID}.navigation.read`],
 						},
 					},
 				],
@@ -89,7 +86,7 @@ export default {
 					{
 						name: `plugin::${PLUGIN_ID}.has-permissions`,
 						config: {
-							actions: [`plugin::${PLUGIN_ID}.settings.navigation`],
+							actions: [`plugin::${PLUGIN_ID}.settings.navigation.read`],
 						},
 					},
 				],
@@ -105,7 +102,7 @@ export default {
 					{
 						name: `plugin::${PLUGIN_ID}.has-permissions`,
 						config: {
-							actions: [`plugin::${PLUGIN_ID}.settings.navigation`],
+							actions: [`plugin::${PLUGIN_ID}.settings.navigation.update`],
 						},
 					},
 				],
@@ -121,7 +118,7 @@ export default {
 					{
 						name: `plugin::${PLUGIN_ID}.has-permissions`,
 						config: {
-							actions: [`plugin::${PLUGIN_ID}.page.navigation`],
+							actions: [`plugin::${PLUGIN_ID}.navigation.read`],
 						},
 					},
 				],
@@ -153,7 +150,7 @@ export default {
 					{
 						name: `plugin::${PLUGIN_ID}.has-permissions`,
 						config: {
-							actions: [`plugin::${PLUGIN_ID}.page.navigation`],
+							actions: [`plugin::${PLUGIN_ID}.navigation.read`],
 						},
 					},
 				],
@@ -171,7 +168,7 @@ export default {
 					{
 						name: `plugin::${PLUGIN_ID}.has-permissions`,
 						config: {
-							actions: [`plugin::${PLUGIN_ID}.page.navigation`],
+							actions: [`plugin::${PLUGIN_ID}.navigation.read`],
 						},
 					},
 				],
@@ -187,7 +184,7 @@ export default {
 					{
 						name: `plugin::${PLUGIN_ID}.has-permissions`,
 						config: {
-							actions: [`plugin::${PLUGIN_ID}.page.navigation`],
+							actions: [`plugin::${PLUGIN_ID}.navigation.create`],
 						},
 					},
 				],
@@ -203,7 +200,7 @@ export default {
 					{
 						name: `plugin::${PLUGIN_ID}.has-permissions`,
 						config: {
-							actions: [`plugin::${PLUGIN_ID}.page.navigation`],
+							actions: [`plugin::${PLUGIN_ID}.navigation.update`],
 						},
 					},
 				],
@@ -219,7 +216,7 @@ export default {
 					{
 						name: `plugin::${PLUGIN_ID}.has-permissions`,
 						config: {
-							actions: [`plugin::${PLUGIN_ID}.page.navigation`],
+							actions: [`plugin::${PLUGIN_ID}.navigation.edit-items`],
 						},
 					},
 				],
@@ -235,7 +232,7 @@ export default {
 					{
 						name: `plugin::${PLUGIN_ID}.has-permissions`,
 						config: {
-							actions: [`plugin::${PLUGIN_ID}.page.navigation`],
+							actions: [`plugin::${PLUGIN_ID}.navigation.delete`],
 						},
 					},
 				],
@@ -253,7 +250,7 @@ export default {
 					{
 						name: `plugin::${PLUGIN_ID}.has-permissions`,
 						config: {
-							actions: [`plugin::${PLUGIN_ID}.cm.aside`, `plugin::${PLUGIN_ID}.page.navigation`],
+							actions: [`plugin::${PLUGIN_ID}.cm.aside`, `plugin::${PLUGIN_ID}.navigation.read`],
 						},
 					},
 				],

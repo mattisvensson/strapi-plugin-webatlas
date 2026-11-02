@@ -90,6 +90,48 @@ Use the settings page to configure the plugin.
 - **Generate path from:** Select a field from which the slug will automatically be generated. For example, use the 'title' field or a dedicated slug field. Content types without a text field cannot generate a path, so no field can be selected and Webatlas stays disabled for them until you add one.
 - **Default parent route:** Optionally select an entry that new entries of this content type should be placed under by default. Pick the content type first, then the specific entry. For example, set a "News overview" page as the default parent for your "News" collection, so a new article is created at `/news/some-article` without the editor having to select the parent manually. The preselection can still be changed (or reset to the root path) per entry in the content editor. If the selected entry is deleted, the setting is cleared automatically.
 
+### Admin permissions
+
+Access to the plugin in the admin panel is controlled per role in **Settings → Administration Panel → Roles → Plugins → Webatlas**. The Super Admin role has all permissions.
+
+**Navigation**
+
+| Permission            | Allows                                                                      |
+| --------------------- | --------------------------------------------------------------------------- |
+| Read navigations      | Open the navigation page and view all navigations and their items           |
+| Create navigations    | Create new navigations                                                      |
+| Edit navigations      | Change the name and visibility of a navigation                              |
+| Delete navigations    | Delete navigations                                                          |
+| Edit navigation items | Add, edit, move and delete navigation items and save or discard the changes |
+
+Without **Edit navigation items**, the navigation page is read-only: drag and drop is disabled and the item menu only offers to open the related entry.
+
+**Pages**
+
+| Permission  | Allows                                     |
+| ----------- | ------------------------------------------ |
+| Routes page | View the overview of all registered routes |
+
+**Settings**
+
+| Permission                 | Allows                                                                 |
+| -------------------------- | ---------------------------------------------------------------------- |
+| Read general settings      | View the general settings                                              |
+| Update general settings    | Change the path source fields, default parent routes and URL blacklist |
+| Read navigation settings   | View the navigation settings                                           |
+| Update navigation settings | Change the maximum depth of the navigations                            |
+
+Without the update permission, the settings are shown read-only.
+
+**Content Manager**
+
+| Permission                            | Allows                                                                             |
+| ------------------------------------- | ---------------------------------------------------------------------------------- |
+| Aside panel                           | View the webatlas panel in the content editor                                      |
+| Edit path (parent route and override) | Select the parent route and override the automatically generated path in the panel |
+
+Routes are generated automatically regardless of these permissions, see [Path Generation & Hierarchy](#path-generation--hierarchy). The permissions are also enforced by the server, so route data sent without them is ignored.
+
 ## 📖 Usage
 
 ### Path Generation & Hierarchy
@@ -105,6 +147,10 @@ After selecting the source field for path generation in settings, you'll see the
 **Canonical Path (Canonical Path)**: Shows the complete URL based on content structure - automatically updates when you change the slug or parent relationship. Changes cascade to all child pages.
 
 **UID Path (UID Path)**: A permanent identifier path that never changes, used as a backup URL.
+
+**Automatic routes**: Every entry gets a route as soon as its source field has a value, even if it is created without the panel (e.g. by an editor without the _Aside panel_ permission or through the Content API). The path is generated from the source field and placed under the default parent route of the content type. Existing routes are only changed through the panel.
+
+Editors with the _Aside panel_ but without the _Edit path_ permission cannot change the parent route or override the path. Their changes to the source field still update the automatically generated path, an overridden path is kept.
 
 ### RoutePicker Custom Field
 
@@ -157,7 +203,6 @@ One of these query parameters (`documentId`, `slug`, `name`, or `id`) are mandat
 
 ## 🧩 Roadmap
 
-- More fine-grained RBAC
 - Internationalization
 - Redirects management
 
