@@ -44,6 +44,18 @@ const admin = () => ({
 		return await getAdminService().getRelatedRoutes(documentIds)
 	},
 
+	async getNavigationDepths(ctx) {
+		return await getAdminService().getNavigationDepths()
+	},
+
+	async updateNavigationDepths(ctx) {
+		const { data } = ctx.request.body
+
+		if (!Array.isArray(data)) throw new errors.ValidationError('Navigation depths are required')
+
+		return await getAdminService().updateNavigationDepths(data)
+	},
+
 	async getProhibitedRouteIds(ctx) {
 		const { documentId } = ctx.params
 

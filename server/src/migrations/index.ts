@@ -4,6 +4,7 @@ import { PLUGIN_ID } from '../../../utils'
 import migration_001_canonical_path from './001-canonical-path'
 import migration_002_webatlas_json_field from './002-webatlas-json-field'
 import migration_003_route_source_field from './003-route-source-field'
+import migration_004_navigation_max_depth from './004-navigation-max-depth'
 
 interface Migration {
 	version: string
@@ -15,6 +16,7 @@ const migrations: Migration[] = [
 	migration_001_canonical_path,
 	migration_002_webatlas_json_field,
 	migration_003_route_source_field,
+	migration_004_navigation_max_depth,
 ]
 
 export const runMigrations = async (strapi: Core.Strapi) => {

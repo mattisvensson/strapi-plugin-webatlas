@@ -8,13 +8,14 @@ export async function syncConfig(strapi: Core.Strapi, enabledContentTypes: Conte
 		key: 'config',
 	})) as PluginConfig
 
+	// The max depth is set per navigation now, migration 004 moved the former global value there
+	const { navigation: _legacyNavigation, ...currentConfig } = (config ?? {}) as PluginConfig & {
+		navigation?: unknown
+	}
+
 	let newConfig: PluginConfig = {
-		...config,
+		...currentConfig,
 		selectedContentTypes: [],
-		navigation: {
-			maxDepth: config?.navigation?.maxDepth || 1,
-			...config?.navigation,
-		},
 		migrationVersion: config?.migrationVersion || '0',
 	}
 

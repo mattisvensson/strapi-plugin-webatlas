@@ -37,9 +37,19 @@ export type NestedNavigation = {
 	name: string
 	slug: string
 	visible: boolean
+	// Depth index of the deepest allowed level, 0 = root only
+	maxDepth?: number
 	items: NestedNavItem[]
 	updatedAt: string
 	createdAt: string
+}
+
+export type NavigationDepth = {
+	documentId: string
+	name: string
+	maxDepth: number
+	// Depth index of the deepest existing item, -1 for an empty navigation
+	deepestDepth: number
 }
 
 export type NestedNavItem = {

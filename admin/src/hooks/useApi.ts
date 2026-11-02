@@ -1,12 +1,11 @@
 import {
-	ContentType,
 	Route,
 	GroupedEntities,
-	RouteSettings,
 	ConfigContentType,
 	StructuredNavigationVariant,
 	NavigationInput,
 	NestedNavItem,
+	NavigationDepth,
 } from '../../../types'
 import { useFetchClient } from '@strapi/strapi/admin'
 import { PLUGIN_ID } from '../../../utils'
@@ -128,6 +127,18 @@ export default function useApi() {
 		return data
 	}
 
+	const getNavigationDepths = async (): Promise<NavigationDepth[]> => {
+		const { data } = await get(`/${PLUGIN_ID}/settings/navigation-depths`)
+		return data
+	}
+
+	const updateNavigationDepths = async (
+		depths: { documentId: string; maxDepth: number }[],
+	): Promise<NavigationDepth[]> => {
+		const { data } = await put(`/${PLUGIN_ID}/settings/navigation-depths`, { data: depths })
+		return data
+	}
+
 	return {
 		fetchAllContentTypes,
 		fetchAllEntities,
@@ -140,5 +151,7 @@ export default function useApi() {
 		deleteNavigation,
 		updateNavigation,
 		updateNavigationItemStructure,
+		getNavigationDepths,
+		updateNavigationDepths,
 	}
 }
