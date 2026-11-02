@@ -2,79 +2,98 @@
  *
  * Settings
  * This file contains the navigation settings page for the Webatlas plugin.
- * It allows users to set the max depth of the navigation tree.
+ * It allows users to set the max depth of every navigation.
  *
  */
 
-import { useEffect, useState, useReducer, useRef } from 'react'
-import { Field } from '@strapi/design-system'
+import { useEffect, useMemo, useState } from 'react'
+import { Field, RawTable, Tbody, Td, Th, Thead, Tr, Typography } from '@strapi/design-system'
 import { useNotification, Page } from '@strapi/strapi/admin'
-import usePluginConfig from '../../../hooks/usePluginConfig'
+import useApi from '../../../hooks/useApi'
 import useErrorMessage from '../../../hooks/useErrorMessage'
-import type { PluginConfig } from '../../../../../types'
-import { getTranslation } from '../../../utils'
+import type { NavigationDepth } from '../../../../../types'
+import { getTranslation, isAbortError } from '../../../utils'
 import { useIntl } from 'react-intl'
 import { FullLoader } from '../../../components/UI'
-import { PageWrapper, ContentBox, SettingTitle } from '../'
+import { PageWrapper, ContentBox } from '../'
 import pluginPermissions from '../../../permissions'
 
-type Action =
-	| { type: 'SET_MAX_DEPTH'; payload: number }
-	| { type: 'SET_CONFIG'; payload: PluginConfig }
-
-function reducer(newConfig: PluginConfig | null, action: Action): PluginConfig | null {
-	switch (action.type) {
-		case 'SET_MAX_DEPTH':
-			if (!newConfig) return null
-			return {
-				...newConfig,
-				navigation: { ...newConfig.navigation, maxDepth: action.payload },
-				selectedContentTypes: newConfig.selectedContentTypes || [],
-			}
-		case 'SET_CONFIG':
-			return action.payload
-		default:
-			throw new Error()
-	}
-}
+// The inputs show levels (1 = root only), the navigations store the depth index (0 = root only)
+const toLevels = (maxDepth: number) => String(maxDepth + 1)
 
 const Settings = () => {
-	const { config: fetchedConfig, setConfig, loading, fetchError } = usePluginConfig()
-	const [config, dispatch] = useReducer(reducer, fetchedConfig)
+	const { getNavigationDepths, updateNavigationDepths } = useApi()
 	const { toggleNotification } = useNotification()
 	const getErrorMessage = useErrorMessage()
 	const { formatMessage } = useIntl()
+	const [depths, setDepths] = useState<NavigationDepth[]>([])
+	const [levels, setLevels] = useState<Record<string, string>>({})
+	const [loading, setLoading] = useState(true)
 	const [isSaving, setIsSaving] = useState(false)
-	const initialConfig = useRef<PluginConfig | null>(fetchedConfig)
+
+	const applyDepths = (nextDepths: NavigationDepth[]) => {
+		setDepths(nextDepths)
+		setLevels(
+			Object.fromEntries(nextDepths.map((depth) => [depth.documentId, toLevels(depth.maxDepth)])),
+		)
+	}
+
+	const showError = (error: unknown) =>
+		toggleNotification({
+			type: 'danger',
+			message: getErrorMessage(
+				error,
+				formatMessage({
+					id: getTranslation('notification.error'),
+					defaultMessage: 'An error occurred',
+				}),
+			),
+		})
 
 	useEffect(() => {
-		initialConfig.current = fetchedConfig
-
-		if (fetchedConfig) dispatch({ type: 'SET_CONFIG', payload: fetchedConfig })
-	}, [fetchedConfig])
-
-	useEffect(() => {
-		if (fetchError) {
-			toggleNotification({
-				type: 'danger',
-				message: getErrorMessage(
-					fetchError,
-					formatMessage({
-						id: getTranslation('notification.error'),
-						defaultMessage: 'An error occurred',
-					}),
-				),
+		getNavigationDepths()
+			.then(applyDepths)
+			.catch((error) => {
+				if (isAbortError(error)) return
+				console.error(error)
+				showError(error)
 			})
-		}
-	}, [fetchError, toggleNotification, getErrorMessage, formatMessage])
+			.finally(() => setLoading(false))
+	}, [])
+
+	// Validation error per navigation, the depth cannot be lower than the deepest existing item
+	const errors = useMemo(() => {
+		const result: Record<string, string> = {}
+		depths.forEach(({ documentId, deepestDepth }) => {
+			const value = Number(levels[documentId])
+			const minLevels = Math.max(1, deepestDepth + 1)
+
+			if (!Number.isInteger(value) || value < 1) {
+				result[documentId] = formatMessage({
+					id: getTranslation('settings.page.navigation.maxDepth.invalid'),
+					defaultMessage: 'At least 1',
+				})
+			} else if (value < minLevels) {
+				result[documentId] = formatMessage(
+					{
+						id: getTranslation('settings.page.navigation.maxDepth.tooLow'),
+						defaultMessage: 'At least {count}, the navigation already has items on level {count}',
+					},
+					{ count: minLevels },
+				)
+			}
+		})
+		return result
+	}, [depths, levels, formatMessage])
+
+	const changedDepths = depths
+		.filter(({ documentId, maxDepth }) => levels[documentId] !== toLevels(maxDepth))
+		.map(({ documentId }) => ({ documentId, maxDepth: Number(levels[documentId]) - 1 }))
 
 	async function save() {
-		if (!config) return
-
 		setIsSaving(true)
 		try {
-			await setConfig({ navigation: config.navigation })
-			initialConfig.current = config
+			applyDepths(await updateNavigationDepths(changedDepths))
 
 			toggleNotification({
 				type: 'success',
@@ -83,20 +102,11 @@ const Settings = () => {
 					defaultMessage: 'Settings saved successfully',
 				}),
 			})
+		} catch (error) {
+			console.error(error)
+			showError(error)
+		} finally {
 			setIsSaving(false)
-		} catch (err) {
-			setIsSaving(false)
-			toggleNotification({
-				type: 'danger',
-				message: getErrorMessage(
-					err,
-					formatMessage({
-						id: getTranslation('notification.error'),
-						defaultMessage: 'An error occurred',
-					}),
-				),
-			})
-			console.error(err)
 		}
 	}
 
@@ -124,47 +134,92 @@ const Settings = () => {
 					id: getTranslation('settings.page.navigation.subtitle'),
 					defaultMessage: 'Configure navigation settings',
 				})}
-				disabledCondition={JSON.stringify(config) === JSON.stringify(initialConfig.current)}
+				disabledCondition={changedDepths.length === 0 || Object.keys(errors).length > 0}
 			>
 				<ContentBox
 					title={formatMessage({
-						id: getTranslation('settings.page.navigation.navigation'),
-						defaultMessage: 'Navigation',
+						id: getTranslation('settings.page.navigation.maxDepth.title'),
+						defaultMessage: 'Maximum depth',
 					})}
 				>
-					<Field.Root name="maxNavDepth">
-						<Field.Label>
-							<SettingTitle>
-								{formatMessage({
-									id: getTranslation('settings.page.navigation.maxNavDepth.label'),
-									defaultMessage: 'Max depth of navigation tree',
-								})}
-							</SettingTitle>
-						</Field.Label>
-						<Field.Input
-							id="maxNavDepth"
-							type="number"
-							min={0}
-							step={1}
-							value={
-								config?.navigation?.maxDepth !== undefined ? config.navigation.maxDepth + 1 : ''
-							}
-							onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-								dispatch({
-									type: 'SET_MAX_DEPTH',
-									payload: Number(e.target.value) - 1,
-								})
-							}
-							onBlur={(e: React.ChangeEvent<HTMLInputElement>) => {
-								if (e.target.value === '') return
-								dispatch({
-									type: 'SET_MAX_DEPTH',
-									payload: Number(e.target.value) - 1,
-								})
-							}}
-						/>
-						<Field.Hint />
-					</Field.Root>
+					<Typography textColor="neutral600" tag="p">
+						{formatMessage({
+							id: getTranslation('settings.page.navigation.maxDepth.description'),
+							defaultMessage:
+								'Sets how many levels a navigation may have. It cannot be lower than the deepest existing level.',
+						})}
+					</Typography>
+					{depths.length === 0 ? (
+						<Typography textColor="neutral600" tag="p">
+							{formatMessage({
+								id: getTranslation('settings.page.navigation.maxDepth.empty'),
+								defaultMessage: 'There are no navigations yet.',
+							})}
+						</Typography>
+					) : (
+						<RawTable colCount={3} rowCount={depths.length + 1} style={{ width: '100%' }}>
+							<Thead>
+								<Tr>
+									<Th>
+										<Typography variant="sigma">
+											{formatMessage({
+												id: getTranslation('settings.page.navigation.navigation'),
+												defaultMessage: 'Navigation',
+											})}
+										</Typography>
+									</Th>
+									<Th>
+										<Typography variant="sigma">
+											{formatMessage({
+												id: getTranslation('settings.page.navigation.maxDepth.levels'),
+												defaultMessage: 'Maximum levels',
+											})}
+										</Typography>
+									</Th>
+									<Th>
+										<Typography variant="sigma">
+											{formatMessage({
+												id: getTranslation('settings.page.navigation.maxDepth.deepest'),
+												defaultMessage: 'Current deepest level',
+											})}
+										</Typography>
+									</Th>
+								</Tr>
+							</Thead>
+							<Tbody>
+								{depths.map(({ documentId, name, deepestDepth }) => (
+									<Tr key={documentId}>
+										<Td>
+											<Typography fontWeight="bold">{name}</Typography>
+										</Td>
+										<Td>
+											<Field.Root error={errors[documentId]}>
+												<Field.Input
+													type="number"
+													min={1}
+													step={1}
+													aria-label={formatMessage({
+														id: getTranslation('settings.page.navigation.maxDepth.levels'),
+														defaultMessage: 'Maximum levels',
+													})}
+													value={levels[documentId] ?? ''}
+													onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+														setLevels((current) => ({ ...current, [documentId]: e.target.value }))
+													}
+												/>
+												<Field.Error />
+											</Field.Root>
+										</Td>
+										<Td>
+											<Typography textColor="neutral600">
+												{deepestDepth < 0 ? '–' : deepestDepth + 1}
+											</Typography>
+										</Td>
+									</Tr>
+								))}
+							</Tbody>
+						</RawTable>
+					)}
 				</ContentBox>
 			</PageWrapper>
 		</Page.Protect>

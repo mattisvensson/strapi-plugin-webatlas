@@ -1,5 +1,6 @@
 import type {
 	NavigationInput,
+	NavigationDepth,
 	NestedNavigation,
 	NestedNavItem,
 	Route,
@@ -7,7 +8,14 @@ import type {
 	StructuredNavigationVariant,
 } from '../../../types'
 import { errors } from '@strapi/utils'
-import { transformToUrl, waRoute, waNavigation, waNavItem, PLUGIN_ID } from '../../../utils'
+import {
+	transformToUrl,
+	waRoute,
+	waNavigation,
+	waNavItem,
+	PLUGIN_ID,
+	DEFAULT_NAVIGATION_MAX_DEPTH,
+} from '../../../utils'
 import {
 	handleItemDeletion,
 	handleItemUpdate,
@@ -21,6 +29,42 @@ import {
 	isBlacklistedPath,
 	getDocumentStatuses,
 } from '../utils'
+
+// The max depth of every navigation with the depth of its deepest item, for the plugin settings
+async function getNavigationDepths(): Promise<NavigationDepth[]> {
+	const navigations = await strapi.documents(waNavigation).findMany({
+		populate: ['items', 'items.parent'],
+	})
+
+	return navigations.map((navigation: NestedNavigation) => {
+		const { items } = buildStructuredNavigation(navigation, 'flat') as NestedNavigation
+		return {
+			documentId: navigation.documentId,
+			name: navigation.name,
+			maxDepth: navigation.maxDepth ?? DEFAULT_NAVIGATION_MAX_DEPTH,
+			deepestDepth: Math.max(-1, ...(items ?? []).map((item) => item.depth ?? 0)),
+		}
+	})
+}
+
+// The admin panel prevents deeper items, this also covers direct API requests
+async function assertItemDepths(navigationId: string, navigationItems: NestedNavItem[]) {
+	const navigation = await strapi.documents(waNavigation).findOne({
+		documentId: navigationId,
+		fields: ['maxDepth'],
+	})
+	if (!navigation) throw new errors.NotFoundError('Navigation not found')
+
+	const maxDepth = navigation.maxDepth ?? DEFAULT_NAVIGATION_MAX_DEPTH
+	const tooDeepItem = navigationItems.find(
+		(item) => item.clientModifications?.type !== 'delete' && (item.depth ?? 0) > maxDepth,
+	)
+	if (tooDeepItem) {
+		throw new errors.ValidationError(
+			`'${tooDeepItem.clientModifications?.title || tooDeepItem.route?.title}' is deeper than the ${maxDepth + 1} level(s) allowed in this navigation`,
+		)
+	}
+}
 
 export default ({ strapi }) => ({
 	async updateConfig(newConfig: Partial<PluginConfig>) {
@@ -72,10 +116,6 @@ export default ({ strapi }) => ({
 		config = {
 			...defaultConfig,
 			...config,
-			navigation: {
-				...defaultConfig.navigation,
-				...config?.navigation,
-			},
 		}
 
 		return config
@@ -198,6 +238,35 @@ export default ({ strapi }) => ({
 		})
 	},
 
+	async getNavigationDepths() {
+		return await getNavigationDepths()
+	},
+
+	async updateNavigationDepths(depths: { documentId: string; maxDepth: number }[]) {
+		const currentDepths = await getNavigationDepths()
+
+		for (const { documentId, maxDepth } of depths) {
+			const current = currentDepths.find((navigation) => navigation.documentId === documentId)
+			if (!current) throw new errors.NotFoundError('Navigation not found')
+
+			if (!Number.isInteger(maxDepth) || maxDepth < 0) {
+				throw new errors.ValidationError(`Invalid max depth for the navigation '${current.name}'`)
+			}
+			// Existing items must stay valid, so the depth cannot be lower than the deepest item
+			if (maxDepth < current.deepestDepth) {
+				throw new errors.ValidationError(
+					`The navigation '${current.name}' already has items on level ${current.deepestDepth + 1}`,
+				)
+			}
+		}
+
+		for (const { documentId, maxDepth } of depths) {
+			await strapi.documents(waNavigation).update({ documentId, data: { maxDepth } })
+		}
+
+		return await getNavigationDepths()
+	},
+
 	async deleteNavigation(documentId: string) {
 		const navigation = await strapi.documents(waNavigation).findOne({
 			documentId: documentId,
@@ -219,6 +288,8 @@ export default ({ strapi }) => ({
 
 	async updateNavigationItemStructure(navigationId: string, navigationItems: NestedNavItem[]) {
 		if (!navigationId || !navigationItems) return
+
+		await assertItemDepths(navigationId, navigationItems)
 
 		const errors: string[] = []
 		let newNavItemsMap = new Map<string, NestedNavItem>()

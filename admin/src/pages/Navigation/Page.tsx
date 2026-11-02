@@ -59,7 +59,7 @@ import { RouteItem } from './RouteItem'
 import PageWrapper from './PageWrapper'
 import cloneDeep from 'lodash/cloneDeep'
 import { useParams, useNavigate } from 'react-router-dom'
-import { PLUGIN_ID } from '../../../../utils'
+import { PLUGIN_ID, DEFAULT_NAVIGATION_MAX_DEPTH } from '../../../../utils'
 
 type Projected = {
 	depth: number
@@ -345,6 +345,9 @@ const Navigation = () => {
 		document.body.style.setProperty('cursor', '')
 	}
 
+	// Set per navigation in the plugin settings
+	const maxDepth = selectedNavigation?.maxDepth ?? DEFAULT_NAVIGATION_MAX_DEPTH
+
 	const visibleItems = useMemo(() => {
 		if (!navigationItems) return []
 		return isSearching
@@ -405,9 +408,9 @@ const Navigation = () => {
 			activeId,
 			overId,
 			offsetLeft,
-			Math.max(0, (config?.navigation.maxDepth || 3) - childLevels),
+			Math.max(0, maxDepth - childLevels),
 		)
-	}, [activeId, overId, offsetLeft, navigationItems, visibleItems, collapsedIds, config])
+	}, [activeId, overId, offsetLeft, navigationItems, visibleItems, collapsedIds, maxDepth])
 
 	const activeItem = useMemo(
 		() => (activeId ? navigationItems?.find(({ id }) => id === activeId) : undefined),
@@ -578,24 +581,22 @@ const Navigation = () => {
 									>
 										{visibleItems.map((item, index) => {
 											return (
-												config?.navigation.maxDepth && (
-													<SortableRouteItem
-														key={item.documentId || index}
-														item={item}
-														isMoved={movedItemIds.has(item.documentId)}
-														setActionItemParent={setActionItemParent}
-														setActionItem={setActionItem}
-														setNavigationItems={setNavigationItems}
-														indentationWidth={indentationWidth}
-														depth={item.id === activeId && projected ? projected.depth : item.depth}
-														maxDepth={config.navigation.maxDepth}
-														navigationItems={navigationItems}
-														hasChildren={itemsWithChildren.has(item.documentId)}
-														collapsed={collapsedIds.has(item.documentId)}
-														onToggleCollapse={isSearching ? undefined : toggleCollapsed}
-														onInsertBelow={isSearching ? undefined : handleInsertBelow}
-													/>
-												)
+												<SortableRouteItem
+													key={item.documentId || index}
+													item={item}
+													isMoved={movedItemIds.has(item.documentId)}
+													setActionItemParent={setActionItemParent}
+													setActionItem={setActionItem}
+													setNavigationItems={setNavigationItems}
+													indentationWidth={indentationWidth}
+													depth={item.id === activeId && projected ? projected.depth : item.depth}
+													maxDepth={maxDepth}
+													navigationItems={navigationItems}
+													hasChildren={itemsWithChildren.has(item.documentId)}
+													collapsed={collapsedIds.has(item.documentId)}
+													onToggleCollapse={isSearching ? undefined : toggleCollapsed}
+													onInsertBelow={isSearching ? undefined : handleInsertBelow}
+												/>
 											)
 										})}
 										{isSearching && visibleItems.length === 0 && (
@@ -611,22 +612,20 @@ const Navigation = () => {
 										{createPortal(
 											<DragOverlay>
 												{/* Must not use useSortable, a second sortable with the same id breaks dnd-kit */}
-												{activeId && activeItem
-													? config?.navigation.maxDepth && (
-															<RouteItem
-																item={activeItem}
-																ghost
-																setActionItemParent={setActionItemParent}
-																setActionItem={setActionItem}
-																setNavigationItems={setNavigationItems}
-																maxDepth={config.navigation.maxDepth}
-																navigationItems={navigationItems}
-																hasChildren={itemsWithChildren.has(activeItem.documentId)}
-																collapsed={collapsedIds.has(activeItem.documentId)}
-																movedChildCount={movedChildCount}
-															/>
-														)
-													: null}
+												{activeId && activeItem ? (
+													<RouteItem
+														item={activeItem}
+														ghost
+														setActionItemParent={setActionItemParent}
+														setActionItem={setActionItem}
+														setNavigationItems={setNavigationItems}
+														maxDepth={maxDepth}
+														navigationItems={navigationItems}
+														hasChildren={itemsWithChildren.has(activeItem.documentId)}
+														collapsed={collapsedIds.has(activeItem.documentId)}
+														movedChildCount={movedChildCount}
+													/>
+												) : null}
 											</DragOverlay>,
 											document.body,
 										)}

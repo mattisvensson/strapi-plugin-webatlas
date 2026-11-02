@@ -78,6 +78,39 @@ export default {
 				],
 			},
 		},
+		// The max depth is a structural setting, so it is only changed in the plugin settings
+		{
+			method: 'GET',
+			path: '/settings/navigation-depths',
+			handler: 'admin.getNavigationDepths',
+			config: {
+				policies: [
+					'admin::isAuthenticatedAdmin',
+					{
+						name: `plugin::${PLUGIN_ID}.has-permissions`,
+						config: {
+							actions: [`plugin::${PLUGIN_ID}.settings.navigation`],
+						},
+					},
+				],
+			},
+		},
+		{
+			method: 'PUT',
+			path: '/settings/navigation-depths',
+			handler: 'admin.updateNavigationDepths',
+			config: {
+				policies: [
+					'admin::isAuthenticatedAdmin',
+					{
+						name: `plugin::${PLUGIN_ID}.has-permissions`,
+						config: {
+							actions: [`plugin::${PLUGIN_ID}.settings.navigation`],
+						},
+					},
+				],
+			},
+		},
 		{
 			method: 'GET',
 			path: '/route/related/batch',

@@ -40,3 +40,4 @@ Migrates existing route titles to canonical paths using the `transformToUrl` uti
 ## Version History
 
 - `001`: Initial canonical path migration from title field (February 2026)
+- `004`: Move the global navigation max depth of the config to every navigation (November 2026)
