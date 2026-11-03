@@ -129,6 +129,10 @@ export const RouteItem = memo(
 				...style,
 			}
 
+			// Same rule as the insert target of the navigation page: first child of an expanded item
+			// with children, otherwise next sibling
+			const insertDepth = (depth ?? 0) + (hasChildren && !collapsed ? 1 : 0)
+
 			const insertBelowLabel = formatMessage({
 				id: getTranslation('navigation.page.navItem.insertBelow'),
 				defaultMessage: 'Add item below',
@@ -231,6 +235,18 @@ export const RouteItem = memo(
 							</Flex>
 						</Flex>
 					</Flex>
+					{isInsertButtonActive && onInsertBelow && !disableInteraction && !ghost && (
+						// Shows where the new item is inserted, indented to its future depth
+						<Box
+							position="absolute"
+							bottom="-1px"
+							left={`${insertDepth * indentationWidth}px`}
+							right={0}
+							height="2px"
+							background="primary600"
+							style={{ pointerEvents: 'none' }}
+						/>
+					)}
 					{isHovered && onInsertBelow && !disableInteraction && !ghost && (
 						// Sits on the border below the row, centered below the collapse toggle
 						<Flex
