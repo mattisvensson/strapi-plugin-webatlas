@@ -29,12 +29,16 @@ export default function buildBreadcrumbString({
 
 	if (targetIndex === -1) return null
 	const parts: string[] = []
+	// Only items with a lower depth than the last found ancestor are ancestors, skip siblings and their children
+	let currentDepth = targetItem.depth
 
 	for (let i = targetIndex - 1; i >= 0; i--) {
 		const candidate = navigationItems[i]
 		if (candidate.clientModifications?.type === 'delete') continue
+		if (typeof candidate.depth !== 'number' || candidate.depth >= currentDepth) continue
 		parts.unshift(candidate.route.title)
-		if (typeof candidate.depth === 'number' && candidate.depth === 0) break
+		currentDepth = candidate.depth
+		if (currentDepth === 0) break
 	}
 
 	if (includeTarget) {
