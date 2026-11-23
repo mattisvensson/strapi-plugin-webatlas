@@ -11,7 +11,7 @@ type PathInputProps = {
 	dispatchPath: React.Dispatch<PanelAction>
 	isOverride: boolean
 	config: ConfigContentType
-	hasUserInteracted: React.RefObject<boolean>
+	hasUserInteracted: React.MutableRefObject<boolean>
 	disabled?: boolean
 }
 

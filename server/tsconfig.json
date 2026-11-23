@@ -5,6 +5,8 @@
 		"module": "ESNext",
 		"moduleResolution": "Bundler",
 		"lib": ["ES2020"],
+		// Only load @types/node globally, the stub @types/parse-path (via @strapi/sdk-plugin) has no type definitions
+		"types": ["node"],
 		"target": "ES2019",
 		"strict": false,
 		"skipLibCheck": true,

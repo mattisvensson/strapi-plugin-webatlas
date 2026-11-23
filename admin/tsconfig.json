@@ -14,6 +14,8 @@
 		"resolveJsonModule": true,
 		"noEmit": true,
 		"jsx": "react-jsx",
+		// Only load @types/node globally, the stub @types/parse-path (via @strapi/sdk-plugin) has no type definitions
+		"types": ["node"],
 		"rootDir": "../"
 	},
 	"include": ["./src", "./custom.d.ts"]
