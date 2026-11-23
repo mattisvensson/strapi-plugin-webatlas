@@ -1,21 +1,65 @@
 import type { Route } from '../../../../types'
-import { Typography, Tr, Td, Flex, LinkButton } from '@strapi/design-system'
+import { Typography, Tr, Td, Flex, LinkButton, Badge } from '@strapi/design-system'
 import { getTranslation } from '../../utils'
 import { useIntl } from 'react-intl'
 import { Pencil } from '@strapi/icons'
+import Tooltip from '../../components/Tooltip'
 
 export default function TableRow({ route, isSingleType }: { route: Route; isSingleType: boolean }) {
 	const { formatMessage } = useIntl()
+	// The canonical path only adds information if the navigation or an override moved the route
+	const hasDeviation = !!route.canonicalPath && route.canonicalPath !== route.path
 
 	return (
 		<Tr>
-			{[route.title, route.canonicalPath, route.path].map((field, index) => (
-				<Td key={index}>
-					<Typography title={field} textColor="neutral800">
-						{field || '-'}
-					</Typography>
-				</Td>
-			))}
+			<Td>
+				<Typography title={route.title} textColor="neutral800">
+					{route.title || '-'}
+				</Typography>
+			</Td>
+			<Td>
+				<Flex direction="column" alignItems="flex-start" gap={1}>
+					<Flex gap={2}>
+						<Typography title={route.path} textColor="neutral800">
+							{route.path || '-'}
+						</Typography>
+						{/* isOverride is set for every deviation, so the cause (navigation or manual override) is not known */}
+						{hasDeviation && (
+							<>
+								<Badge
+									backgroundColor="secondary100"
+									textColor="secondary600"
+									borderColor="secondary200"
+								>
+									{formatMessage({
+										id: getTranslation('paths.page.deviation'),
+										defaultMessage: 'Differs',
+									})}
+								</Badge>
+								<Tooltip
+									description={formatMessage({
+										id: getTranslation('paths.page.deviation.description'),
+										defaultMessage:
+											'The path differs from the content structure, due to the position in the navigation or a manual override',
+									})}
+								/>
+							</>
+						)}
+					</Flex>
+					{hasDeviation && (
+						<Typography title={route.canonicalPath} variant="pi" textColor="neutral600">
+							↳{' '}
+							{formatMessage(
+								{
+									id: getTranslation('paths.page.canonicalPathHint'),
+									defaultMessage: 'Canonical Path: {path}',
+								},
+								{ path: route.canonicalPath },
+							)}
+						</Typography>
+					)}
+				</Flex>
+			</Td>
 			<Td>
 				<Typography title={route.type} textColor="neutral800">
 					{formatMessage({

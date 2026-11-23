@@ -21,7 +21,7 @@ function PathTable({
 }) {
 	const { formatMessage } = useIntl()
 
-	const TABLE_COL_COUNT = 5
+	const TABLE_COL_COUNT = 4
 
 	return (
 		<Table colCount={TABLE_COL_COUNT} rowCount={routes.length}>
