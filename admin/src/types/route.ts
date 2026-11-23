@@ -3,4 +3,4 @@ import type { Route } from '../../../types/'
 export type RouteSortKey = keyof Pick<Route, 'title' | 'path' | 'type'> | 'contentType'
 
 // URL search param keys of the filters on the paths page
-export type RouteFilterKey = 'contentType' | 'type' | 'deviation' | 'navigation'
+export type RouteFilterKey = 'contentType' | 'type' | 'deviation' | 'navigation' | 'issue'

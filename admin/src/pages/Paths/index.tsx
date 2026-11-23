@@ -6,9 +6,9 @@
  *
  */
 
-import type { Route } from '../../../../types'
+import type { HealthCheck, HealthIssue, HealthReport, Route } from '../../../../types'
 import type { RouteFilterKey, RouteSortKey } from '../../types'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useApi, useErrorMessage } from '../../hooks'
 import useAllContentTypes from '../../hooks/useAllContentTypes'
 import { FullLoader } from '../../components/UI'
@@ -25,12 +25,13 @@ import pluginPermissions from '../../permissions'
 import SearchInput from './SearchInput'
 import PathTable from './PathTable'
 import PathFilters from './PathFilters'
+import HealthSummary from './HealthSummary'
 import { Box, Flex } from '@strapi/design-system'
 
 const DEFAULT_PAGE_SIZE = 20
 
 const Paths = () => {
-	const { getAllRoutes } = useApi()
+	const { getAllRoutes, getHealthReport } = useApi()
 	const { formatMessage } = useIntl()
 	const { toggleNotification } = useNotification()
 	const getErrorMessage = useErrorMessage()
@@ -44,6 +45,8 @@ const Paths = () => {
 	const [searchQuery, setSearchQuery] = useState(initialQuery)
 	const [sortKey, setSortKey] = useState<RouteSortKey>('path')
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+	const [healthReport, setHealthReport] = useState<HealthReport | null>(null)
+	const [healthLoading, setHealthLoading] = useState(true)
 
 	// Filters live in the URL only, so filtered views can be shared and survive a reload
 	const contentTypeFilter = searchParams.getAll('contentType')
@@ -51,6 +54,15 @@ const Paths = () => {
 	const typeFilter = searchParams.get('type')
 	const deviationFilter = searchParams.get('deviation')
 	const navigationFilter = searchParams.get('navigation')
+	const issueFilter = searchParams.get('issue')
+
+	const issuesByRoute = useMemo(() => {
+		const map = new Map<string, HealthIssue[]>()
+		for (const issue of healthReport?.issues ?? []) {
+			map.set(issue.routeDocumentId, [...(map.get(issue.routeDocumentId) ?? []), issue])
+		}
+		return map
+	}, [healthReport])
 
 	useEffect(() => {
 		const query = searchQuery.toLowerCase()
@@ -62,6 +74,8 @@ const Paths = () => {
 					(!typeFilter || route.type === typeFilter) &&
 					(!deviationFilter || String(hasPathDeviation(route)) === deviationFilter) &&
 					(!navigationFilter || String(!!route.navitem?.length) === navigationFilter) &&
+					(!issueFilter ||
+						!!issuesByRoute.get(route.documentId)?.some((issue) => issue.check === issueFilter)) &&
 					(JSON.stringify(route.id).toLowerCase().includes(query) ||
 						route.title.toLowerCase().includes(query) ||
 						route.path.toLowerCase().includes(query) ||
@@ -70,7 +84,16 @@ const Paths = () => {
 						route.relatedContentType.toLowerCase().includes(query)),
 			),
 		)
-	}, [searchQuery, allRoutes, contentTypeFilterKey, typeFilter, deviationFilter, navigationFilter])
+	}, [
+		searchQuery,
+		allRoutes,
+		contentTypeFilterKey,
+		typeFilter,
+		deviationFilter,
+		navigationFilter,
+		issueFilter,
+		issuesByRoute,
+	])
 
 	const handleFilterChange = (key: RouteFilterKey, values: string[]) => {
 		setSearchParams((prev) => {
@@ -86,7 +109,13 @@ const Paths = () => {
 	const handleResetFilters = () => {
 		setSearchParams((prev) => {
 			const next = new URLSearchParams(prev)
-			const filterKeys: RouteFilterKey[] = ['contentType', 'type', 'deviation', 'navigation']
+			const filterKeys: RouteFilterKey[] = [
+				'contentType',
+				'type',
+				'deviation',
+				'navigation',
+				'issue',
+			]
 			filterKeys.forEach((key) => next.delete(key))
 			next.delete('page')
 			return next
@@ -140,6 +169,36 @@ const Paths = () => {
 		fetchRoutes()
 	}, [])
 
+	// Loaded separately from the routes, so the table is shown while the paths are checked and the
+	// page also works if the check fails
+	const loadHealthReport = useCallback(async () => {
+		setHealthLoading(true)
+		try {
+			setHealthReport(await getHealthReport())
+		} catch (err) {
+			if (isAbortError(err)) return
+
+			console.error('Failed to check paths:', err)
+			setHealthReport(null)
+			toggleNotification({
+				type: 'danger',
+				message: getErrorMessage(
+					err,
+					formatMessage({
+						id: getTranslation('notification.paths.healthFailed'),
+						defaultMessage: 'The paths could not be checked',
+					}),
+				),
+			})
+		} finally {
+			setHealthLoading(false)
+		}
+	}, [])
+
+	useEffect(() => {
+		loadHealthReport()
+	}, [loadHealthReport])
+
 	const handleSort = (key: RouteSortKey) => {
 		setSortDirection((prev) => (key === sortKey && prev === 'asc' ? 'desc' : 'asc'))
 		setSortKey(key)
@@ -162,7 +221,11 @@ const Paths = () => {
 	}, [allRoutes, contentTypes])
 
 	const hasActiveFilters =
-		contentTypeFilter.length > 0 || !!typeFilter || !!deviationFilter || !!navigationFilter
+		contentTypeFilter.length > 0 ||
+		!!typeFilter ||
+		!!deviationFilter ||
+		!!navigationFilter ||
+		!!issueFilter
 	const isFiltered = !!searchQuery || hasActiveFilters
 
 	const handleClearSearch = () => {
@@ -200,6 +263,15 @@ const Paths = () => {
 	return (
 		<Page.Protect permissions={pluginPermissions['page.routes']}>
 			<PageWrapper total={allRoutes.length} matches={isFiltered ? routes.length : undefined}>
+				<HealthSummary
+					report={healthReport}
+					loading={healthLoading}
+					activeCheck={issueFilter}
+					handleSelectCheck={(check: HealthCheck | null) =>
+						handleFilterChange('issue', check ? [check] : [])
+					}
+					handleRecheck={loadHealthReport}
+				/>
 				<Flex gap={2} wrap="wrap" marginBottom={4}>
 					{/* Extra spacing separates the free text search from the structured filters */}
 					<Box width="320px" marginRight={4}>
@@ -213,6 +285,7 @@ const Paths = () => {
 						navigation={navigationFilter}
 						handleFilterChange={handleFilterChange}
 						handleResetFilters={handleResetFilters}
+						hasActiveFilters={hasActiveFilters}
 					/>
 				</Flex>
 				<PathTable
@@ -222,6 +295,7 @@ const Paths = () => {
 					handleSort={handleSort}
 					singleTypeUids={singleTypeUids}
 					contentTypeLabels={contentTypeLabels}
+					issuesByRoute={issuesByRoute}
 					hasSearch={!!searchQuery}
 					hasActiveFilters={hasActiveFilters}
 					handleClearSearch={handleClearSearch}

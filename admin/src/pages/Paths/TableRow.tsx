@@ -1,19 +1,22 @@
-import type { Route } from '../../../../types'
+import type { HealthIssue, Route } from '../../../../types'
 import { Typography, Tr, Td, Flex, Badge } from '@strapi/design-system'
 import { getTranslation } from '../../utils'
 import { useIntl } from 'react-intl'
 import Tooltip from '../../components/Tooltip'
 import hasPathDeviation from './hasPathDeviation'
 import PathActionsMenu from './PathActionsMenu'
+import IssueBadges from './IssueBadges'
 
 export default function TableRow({
 	route,
 	isSingleType,
 	contentTypeLabel,
+	issues,
 }: {
 	route: Route
 	isSingleType: boolean
 	contentTypeLabel?: string
+	issues?: HealthIssue[]
 }) {
 	const { formatMessage } = useIntl()
 	const hasDeviation = hasPathDeviation(route)
@@ -21,9 +24,12 @@ export default function TableRow({
 	return (
 		<Tr>
 			<Td>
-				<Typography title={route.title} textColor="neutral800">
-					{route.title || '-'}
-				</Typography>
+				<Flex alignItems="flex-start" gap={2}>
+					<Typography title={route.title} textColor="neutral800">
+						{route.title || '-'}
+					</Typography>
+					{issues && issues.length > 0 && <IssueBadges issues={issues} />}
+				</Flex>
 			</Td>
 			<Td>
 				<Flex direction="column" alignItems="flex-start" gap={1}>

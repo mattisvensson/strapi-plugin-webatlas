@@ -1,4 +1,4 @@
-import type { Route } from '../../../../types'
+import type { HealthIssue, Route } from '../../../../types'
 import type { RouteSortKey } from '../../types'
 import { Table, Tbody, EmptyStateLayout, Tr, Td, Flex, Button } from '@strapi/design-system'
 import TableHeader from './TableHeader'
@@ -13,6 +13,7 @@ function PathTable({
 	handleSort,
 	singleTypeUids,
 	contentTypeLabels,
+	issuesByRoute,
 	hasSearch,
 	hasActiveFilters,
 	handleClearSearch,
@@ -24,6 +25,7 @@ function PathTable({
 	handleSort: (key: RouteSortKey) => void
 	singleTypeUids: Set<string>
 	contentTypeLabels: Map<string, string>
+	issuesByRoute: Map<string, HealthIssue[]>
 	hasSearch: boolean
 	hasActiveFilters: boolean
 	handleClearSearch: () => void
@@ -44,6 +46,7 @@ function PathTable({
 							route={route}
 							isSingleType={singleTypeUids.has(route.relatedContentType)}
 							contentTypeLabel={contentTypeLabels.get(route.relatedContentType)}
+							issues={issuesByRoute.get(route.documentId)}
 						/>
 					))
 				) : (

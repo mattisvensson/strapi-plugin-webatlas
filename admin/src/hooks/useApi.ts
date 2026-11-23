@@ -6,6 +6,7 @@ import {
 	NavigationInput,
 	NestedNavItem,
 	NavigationDepth,
+	HealthReport,
 } from '../../../types'
 import { useFetchClient } from '@strapi/strapi/admin'
 import { PLUGIN_ID } from '../../../utils'
@@ -71,6 +72,11 @@ export default function useApi() {
 
 	const getAllRoutes = async (): Promise<Route[]> => {
 		const { data } = await get(`/${PLUGIN_ID}/route`)
+		return data
+	}
+
+	const getHealthReport = async (): Promise<HealthReport> => {
+		const { data } = await get(`/${PLUGIN_ID}/health`)
 		return data
 	}
 
@@ -145,6 +151,7 @@ export default function useApi() {
 		getRelatedRoute,
 		getRoute,
 		getAllRoutes,
+		getHealthReport,
 		getProhibitedRouteIds,
 		getNavigation,
 		createNavigation,
