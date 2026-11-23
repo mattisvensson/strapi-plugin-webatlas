@@ -28,7 +28,7 @@ export type modalSharedLogic = {
 	validationState: ValidationState
 	setValidationState: (value: ValidationState) => void
 	isBlacklisted: boolean
-	initialState: React.RefObject<RouteSettings>
+	initialState: React.MutableRefObject<RouteSettings>
 	navItemState: RouteSettings
 	dispatchNavItemState: React.Dispatch<any>
 	path: ExtendedPanelPathState

@@ -83,7 +83,7 @@ export function useModalSharedLogic() {
 		[contentTypes],
 	)
 
-	const initialState: React.RefObject<RouteSettings> = useRef({
+	const initialState: React.MutableRefObject<RouteSettings> = useRef({
 		title: '',
 		slug: '',
 		active: true,
