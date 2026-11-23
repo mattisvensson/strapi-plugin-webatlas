@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { useIntl } from 'react-intl'
 import { getTranslation } from '../../utils'
 import { PLUGIN_ID } from '../../../../utils'
+import { useClipboard, useNotification } from '@strapi/strapi/admin'
 
 // The navigation page highlights the item and expands its parents
 const getNavigationPath = (navigationDocumentId: string, navItemDocumentId: string) =>
@@ -30,6 +31,24 @@ export default function PathActionsMenu({
 }) {
 	const { formatMessage } = useIntl()
 	const navigate = useNavigate()
+	const { copy } = useClipboard()
+	const { toggleNotification } = useNotification()
+
+	const handleCopyPath = async () => {
+		const success = await copy(route.path)
+		toggleNotification({
+			type: success ? 'success' : 'danger',
+			message: success
+				? formatMessage({
+						id: getTranslation('notification.paths.pathCopied'),
+						defaultMessage: 'Path copied',
+					})
+				: formatMessage({
+						id: getTranslation('notification.paths.pathCopyFailed'),
+						defaultMessage: 'Path could not be copied',
+					}),
+		})
+	}
 
 	const editPath =
 		route.type === 'internal'
@@ -56,7 +75,7 @@ export default function PathActionsMenu({
 	const navigations = [...navigationsById.values()]
 
 	// No menu without actions, e.g. for a wrapper route that is in no navigation
-	if (!editPath && !externalUrl && navigations.length === 0) return null
+	if (!editPath && !externalUrl && !route.path && navigations.length === 0) return null
 
 	return (
 		<SimpleMenu
@@ -80,6 +99,14 @@ export default function PathActionsMenu({
 					{formatMessage({
 						id: getTranslation('paths.page.action.openLink'),
 						defaultMessage: 'Open link',
+					})}
+				</MenuItem>
+			)}
+			{route.path && (
+				<MenuItem onClick={handleCopyPath}>
+					{formatMessage({
+						id: getTranslation('paths.page.action.copyPath'),
+						defaultMessage: 'Copy path',
 					})}
 				</MenuItem>
 			)}
