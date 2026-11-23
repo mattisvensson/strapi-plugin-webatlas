@@ -37,6 +37,7 @@ export const RouteItem = memo(
 				collapsed = false,
 				onToggleCollapse,
 				readOnly = false,
+				highlighted = false,
 			}: RouteItemProps,
 			ref,
 		) => {
@@ -144,6 +145,8 @@ export const RouteItem = memo(
 				<Box
 					ref={wrapperRef}
 					style={elStyle}
+					// Used by the navigation page to scroll to a highlighted item
+					data-navitem-id={item.documentId}
 					onMouseEnter={() => setIsHovered(true)}
 					onMouseLeave={() => {
 						setIsHovered(false)
@@ -158,7 +161,9 @@ export const RouteItem = memo(
 							flex="1"
 							minWidth={0}
 							alignItems="stretch"
-							background={isDeleted ? 'danger100' : 'neutral0'}
+							background={isDeleted ? 'danger100' : highlighted ? 'primary100' : 'neutral0'}
+							// Fades the highlight in and out
+							transition="background-color 0.6s ease"
 							borderColor="neutral150"
 							borderStyle="solid"
 							borderWidth="0 0 1px 0"

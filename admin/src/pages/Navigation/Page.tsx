@@ -59,7 +59,7 @@ import SortableRouteItem from './SortableRouteItem'
 import { RouteItem } from './RouteItem'
 import PageWrapper from './PageWrapper'
 import cloneDeep from 'lodash/cloneDeep'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { PLUGIN_ID, DEFAULT_NAVIGATION_MAX_DEPTH } from '../../../../utils'
 
 type Projected = {
@@ -118,6 +118,11 @@ const Navigation = () => {
 	const getErrorMessage = useErrorMessage()
 	const { navigationId } = useParams()
 	const navigate = useNavigate()
+	const [searchParams, setSearchParams] = useSearchParams()
+	// documentId of an item to highlight, e.g. when the navigation is opened from the paths page
+	const highlightParam = searchParams.get('highlight')
+	const [highlightedId, setHighlightedId] = useState<string | null>(null)
+	const scrolledToHighlightRef = useRef<string | null>(null)
 
 	async function loadNavigations() {
 		try {
@@ -216,6 +221,41 @@ const Navigation = () => {
 			setInsertBelowItem(null)
 		}
 	}, [modalType])
+
+	// Shows the item to highlight as soon as the items of its navigation are loaded: its parents are
+	// expanded and the param is removed, so a reload does not highlight it again
+	useEffect(() => {
+		if (!highlightParam || !navigationItems) return
+
+		const item = navigationItems.find(({ documentId }) => documentId === highlightParam)
+		if (!item) return
+
+		for (
+			let parent = getParentItem(navigationItems, item.id);
+			parent;
+			parent = getParentItem(navigationItems, parent.id)
+		) {
+			expand(parent.documentId)
+		}
+
+		scrolledToHighlightRef.current = null
+		setHighlightedId(item.documentId)
+		setSearchParams(
+			(prev) => {
+				const next = new URLSearchParams(prev)
+				next.delete('highlight')
+				return next
+			},
+			{ replace: true },
+		)
+	}, [highlightParam, navigationItems, expand, setSearchParams])
+
+	// The highlight fades out after a few seconds
+	useEffect(() => {
+		if (!highlightedId) return
+		const timeout = setTimeout(() => setHighlightedId(null), 3000)
+		return () => clearTimeout(timeout)
+	}, [highlightedId])
 
 	const handleInsertBelow = useCallback((item: NestedNavItem) => {
 		setInsertBelowItem(item)
@@ -364,6 +404,17 @@ const Navigation = () => {
 			? getSearchVisibleItems(navigationItems, searchQuery)
 			: getCollapsedVisibleItems(navigationItems, collapsedIds)
 	}, [navigationItems, isSearching, searchQuery, collapsedIds])
+
+	// Scrolls once to the highlighted item, as soon as it is rendered after its parents are expanded
+	useEffect(() => {
+		if (!highlightedId || scrolledToHighlightRef.current === highlightedId) return
+
+		const element = document.querySelector(`[data-navitem-id="${CSS.escape(highlightedId)}"]`)
+		if (!element) return
+
+		scrolledToHighlightRef.current = highlightedId
+		element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+	}, [highlightedId, visibleItems])
 
 	const itemsWithChildren = useMemo(
 		() => getItemsWithChildren(navigationItems ?? []),
@@ -612,6 +663,7 @@ const Navigation = () => {
 														isSearching || !canEditItems ? undefined : handleInsertBelow
 													}
 													readOnly={!canEditItems}
+													highlighted={item.documentId === highlightedId}
 												/>
 											)
 										})}
