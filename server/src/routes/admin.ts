@@ -61,6 +61,22 @@ export default {
 		},
 		{
 			method: 'GET',
+			path: '/health',
+			handler: 'admin.getHealthReport',
+			config: {
+				policies: [
+					'admin::isAuthenticatedAdmin',
+					{
+						name: `plugin::${PLUGIN_ID}.has-permissions`,
+						config: {
+							actions: [`plugin::${PLUGIN_ID}.page.routes`],
+						},
+					},
+				],
+			},
+		},
+		{
+			method: 'GET',
 			path: '/route/related',
 			handler: 'admin.getRelatedRoute',
 			config: {

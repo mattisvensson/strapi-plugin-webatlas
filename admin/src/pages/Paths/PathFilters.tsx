@@ -22,6 +22,7 @@ export default function PathFilters({
 	navigation,
 	handleFilterChange,
 	handleResetFilters,
+	hasActiveFilters,
 }: {
 	contentTypeOptions: { uid: string; label: string }[]
 	selectedContentTypes: string[]
@@ -30,9 +31,10 @@ export default function PathFilters({
 	navigation: string | null
 	handleFilterChange: (key: RouteFilterKey, values: string[]) => void
 	handleResetFilters: () => void
+	// Also includes the issue filter, which is set in the health summary
+	hasActiveFilters: boolean
 }) {
 	const { formatMessage } = useIntl()
-	const hasActiveFilters = selectedContentTypes.length > 0 || !!type || !!deviation || !!navigation
 
 	const clearLabel = formatMessage({
 		id: getTranslation('paths.page.filter.clear'),

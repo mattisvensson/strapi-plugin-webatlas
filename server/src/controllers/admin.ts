@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils'
-import { getAdminService } from '../utils/pluginHelpers'
+import { getAdminService, getHealthService } from '../utils/pluginHelpers'
 
 const admin = () => ({
 	async updateConfig(ctx) {
@@ -21,6 +21,10 @@ const admin = () => ({
 
 	async getAllRoutes(ctx) {
 		return await getAdminService().getAllRoutes()
+	},
+
+	async getHealthReport(ctx) {
+		return await getHealthService().getHealthReport()
 	},
 
 	async getRelatedRoute(ctx) {

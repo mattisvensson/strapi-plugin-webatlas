@@ -8,3 +8,7 @@ export function getAdminService(): Core.Service {
 export function getClientService(): Core.Service {
 	return strapi.plugin(PLUGIN_ID)?.service('client')
 }
+
+export function getHealthService(): Core.Service {
+	return strapi.plugin(PLUGIN_ID)?.service('health')
+}
