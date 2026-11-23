@@ -14,7 +14,7 @@ import useAllContentTypes from '../../hooks/useAllContentTypes'
 import { FullLoader } from '../../components/UI'
 import { getTranslation, isAbortError } from '../../utils'
 import { useIntl } from 'react-intl'
-import { useNotification, Page, Pagination } from '@strapi/strapi/admin'
+import { useNotification, Page, Pagination, useRBAC, useAuth } from '@strapi/strapi/admin'
 import PageWrapper from './PageWrapper'
 import { useSearchParams } from 'react-router-dom'
 import debounce from '../../utils/debounce'
@@ -36,6 +36,27 @@ const Paths = () => {
 	const { toggleNotification } = useNotification()
 	const getErrorMessage = useErrorMessage()
 	const { contentTypes } = useAllContentTypes()
+
+	// Actions leading to pages the user may not open are hidden, also while the permissions load
+	const {
+		isLoading: isLoadingNavigationPermission,
+		allowedActions: { canRead },
+	} = useRBAC(pluginPermissions['navigation.read'])
+	const canReadNavigation = !isLoadingNavigationPermission && canRead
+	// The content manager grants the read permission per content type, so the subjects are needed
+	const userPermissions = useAuth('Paths', (state) => state.permissions)
+	const readableContentTypes = useMemo(
+		() =>
+			new Set(
+				userPermissions
+					.filter(
+						(permission) =>
+							permission.action === 'plugin::content-manager.explorer.read' && permission.subject,
+					)
+					.map((permission) => permission.subject as string),
+			),
+		[userPermissions],
+	)
 
 	const [allRoutes, setAllRoutes] = useState<Route[]>([])
 	const [routes, setRoutes] = useState<Route[]>([])
@@ -296,6 +317,8 @@ const Paths = () => {
 					singleTypeUids={singleTypeUids}
 					contentTypeLabels={contentTypeLabels}
 					issuesByRoute={issuesByRoute}
+					canReadNavigation={canReadNavigation}
+					readableContentTypes={readableContentTypes}
 					hasSearch={!!searchQuery}
 					hasActiveFilters={hasActiveFilters}
 					handleClearSearch={handleClearSearch}

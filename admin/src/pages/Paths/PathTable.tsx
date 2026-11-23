@@ -14,6 +14,8 @@ function PathTable({
 	singleTypeUids,
 	contentTypeLabels,
 	issuesByRoute,
+	canReadNavigation,
+	readableContentTypes,
 	hasSearch,
 	hasActiveFilters,
 	handleClearSearch,
@@ -26,6 +28,8 @@ function PathTable({
 	singleTypeUids: Set<string>
 	contentTypeLabels: Map<string, string>
 	issuesByRoute: Map<string, HealthIssue[]>
+	canReadNavigation: boolean
+	readableContentTypes: Set<string>
 	hasSearch: boolean
 	hasActiveFilters: boolean
 	handleClearSearch: () => void
@@ -47,6 +51,8 @@ function PathTable({
 							isSingleType={singleTypeUids.has(route.relatedContentType)}
 							contentTypeLabel={contentTypeLabels.get(route.relatedContentType)}
 							issues={issuesByRoute.get(route.documentId)}
+							canReadNavigation={canReadNavigation}
+							canEdit={readableContentTypes.has(route.relatedContentType)}
 						/>
 					))
 				) : (

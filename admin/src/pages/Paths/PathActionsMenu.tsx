@@ -25,9 +25,14 @@ function getSafeExternalUrl(path: string) {
 export default function PathActionsMenu({
 	route,
 	isSingleType,
+	canReadNavigation,
+	canEdit,
 }: {
 	route: Route
 	isSingleType: boolean
+	// Without the permissions, the actions would only lead to a "no permission" page
+	canReadNavigation: boolean
+	canEdit: boolean
 }) {
 	const { formatMessage } = useIntl()
 	const navigate = useNavigate()
@@ -51,7 +56,7 @@ export default function PathActionsMenu({
 	}
 
 	const editPath =
-		route.type === 'internal'
+		route.type === 'internal' && canEdit
 			? isSingleType
 				? `/content-manager/single-types/${route.relatedContentType}`
 				: `/content-manager/collection-types/${route.relatedContentType}/${route.relatedDocumentId}`
@@ -72,7 +77,7 @@ export default function PathActionsMenu({
 			})
 		}
 	}
-	const navigations = [...navigationsById.values()]
+	const navigations = canReadNavigation ? [...navigationsById.values()] : []
 
 	// No menu without actions, e.g. for a wrapper route that is in no navigation
 	if (!editPath && !externalUrl && !route.path && navigations.length === 0) return null

@@ -12,11 +12,15 @@ export default function TableRow({
 	isSingleType,
 	contentTypeLabel,
 	issues,
+	canReadNavigation,
+	canEdit,
 }: {
 	route: Route
 	isSingleType: boolean
 	contentTypeLabel?: string
 	issues?: HealthIssue[]
+	canReadNavigation: boolean
+	canEdit: boolean
 }) {
 	const { formatMessage } = useIntl()
 	const hasDeviation = hasPathDeviation(route)
@@ -90,7 +94,12 @@ export default function TableRow({
 			</Td>
 			<Td>
 				<Flex justifyContent="end">
-					<PathActionsMenu route={route} isSingleType={isSingleType} />
+					<PathActionsMenu
+						route={route}
+						isSingleType={isSingleType}
+						canReadNavigation={canReadNavigation}
+						canEdit={canEdit}
+					/>
 				</Flex>
 			</Td>
 		</Tr>
