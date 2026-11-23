@@ -12,16 +12,18 @@ function PathTable({
 	sortDirection,
 	handleSort,
 	singleTypeUids,
+	contentTypeLabels,
 }: {
 	routes: Route[]
 	sortKey: RouteSortKey
 	sortDirection: 'asc' | 'desc'
 	handleSort: (key: RouteSortKey) => void
 	singleTypeUids: Set<string>
+	contentTypeLabels: Map<string, string>
 }) {
 	const { formatMessage } = useIntl()
 
-	const TABLE_COL_COUNT = 4
+	const TABLE_COL_COUNT = 5
 
 	return (
 		<Table colCount={TABLE_COL_COUNT} rowCount={routes.length}>
@@ -33,6 +35,7 @@ function PathTable({
 							key={route.id}
 							route={route}
 							isSingleType={singleTypeUids.has(route.relatedContentType)}
+							contentTypeLabel={contentTypeLabels.get(route.relatedContentType)}
 						/>
 					))
 				) : (

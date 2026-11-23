@@ -31,6 +31,7 @@
 	"webatlas.paths.page.subtitle": "Overview of all existing paths",
 	"webatlas.paths.page.emptyPaths": "No paths found",
 	"webatlas.paths.page.column.type": "Type",
+	"webatlas.paths.page.column.contentType": "Content Type",
 	"webatlas.paths.page.canonicalPathHint": "Canonical Path: {path}",
 	"webatlas.paths.page.deviation": "Differs",
 	"webatlas.paths.page.deviation.description": "The path differs from the content structure, due to the position in the navigation or a manual override",
