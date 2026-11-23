@@ -41,7 +41,7 @@ const Paths = () => {
 	const [searchParams, setSearchParams] = useSearchParams()
 	const initialQuery = searchParams.get('search') || ''
 	const [searchQuery, setSearchQuery] = useState(initialQuery)
-	const [sortKey, setSortKey] = useState<RouteSortKey>('canonicalPath')
+	const [sortKey, setSortKey] = useState<RouteSortKey>('path')
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
 	// Filters live in the URL only, so filtered views can be shared and survive a reload
