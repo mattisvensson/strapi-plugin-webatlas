@@ -2,16 +2,19 @@ import type { RouteSortKey } from '../../types'
 import { Typography, Thead, Tr, Th, VisuallyHidden } from '@strapi/design-system'
 import { getTranslation } from '../../utils'
 import { useIntl } from 'react-intl'
-import { ChevronDown } from '@strapi/icons'
+import { ChevronDown, ChevronUp } from '@strapi/icons'
 
 export default function TableHeader({
 	sortKey,
+	sortDirection,
 	handleSort,
 }: {
 	sortKey: RouteSortKey
+	sortDirection: 'asc' | 'desc'
 	handleSort: (key: RouteSortKey) => void
 }) {
 	const { formatMessage } = useIntl()
+	const SortIcon = sortDirection === 'asc' ? ChevronUp : ChevronDown
 
 	return (
 		<Thead>
@@ -23,7 +26,7 @@ export default function TableHeader({
 							defaultMessage: 'Title',
 						})}
 					</Typography>
-					{sortKey === 'title' && <ChevronDown />}
+					{sortKey === 'title' && <SortIcon />}
 				</Th>
 				<Th onClick={() => handleSort('canonicalPath')} cursor="pointer">
 					<Typography variant="sigma">
@@ -32,7 +35,7 @@ export default function TableHeader({
 							defaultMessage: 'Canonical Path',
 						})}
 					</Typography>
-					{sortKey === 'canonicalPath' && <ChevronDown />}
+					{sortKey === 'canonicalPath' && <SortIcon />}
 				</Th>
 				<Th onClick={() => handleSort('path')} cursor="pointer">
 					<Typography variant="sigma">
@@ -41,7 +44,7 @@ export default function TableHeader({
 							defaultMessage: 'Path',
 						})}
 					</Typography>
-					{sortKey === 'path' && <ChevronDown />}
+					{sortKey === 'path' && <SortIcon />}
 				</Th>
 				<Th onClick={() => handleSort('type')} cursor="pointer">
 					<Typography variant="sigma">
@@ -50,7 +53,7 @@ export default function TableHeader({
 							defaultMessage: 'Type',
 						})}
 					</Typography>
-					{sortKey === 'type' && <ChevronDown />}
+					{sortKey === 'type' && <SortIcon />}
 				</Th>
 				<Th>
 					<VisuallyHidden>

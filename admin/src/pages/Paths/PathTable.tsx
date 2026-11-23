@@ -9,11 +9,15 @@ import { getTranslation } from '../../utils'
 function PathTable({
 	routes,
 	sortKey,
+	sortDirection,
 	handleSort,
+	singleTypeUids,
 }: {
 	routes: Route[]
 	sortKey: RouteSortKey
+	sortDirection: 'asc' | 'desc'
 	handleSort: (key: RouteSortKey) => void
+	singleTypeUids: Set<string>
 }) {
 	const { formatMessage } = useIntl()
 
@@ -21,10 +25,16 @@ function PathTable({
 
 	return (
 		<Table colCount={TABLE_COL_COUNT} rowCount={routes.length}>
-			<TableHeader sortKey={sortKey} handleSort={handleSort} />
+			<TableHeader sortKey={sortKey} sortDirection={sortDirection} handleSort={handleSort} />
 			<Tbody>
 				{routes.length > 0 ? (
-					routes.map((route: Route) => <TableRow key={route.id} route={route} />)
+					routes.map((route: Route) => (
+						<TableRow
+							key={route.id}
+							route={route}
+							isSingleType={singleTypeUids.has(route.relatedContentType)}
+						/>
+					))
 				) : (
 					<Tr>
 						<Td colSpan={TABLE_COL_COUNT}>
