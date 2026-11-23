@@ -18,7 +18,7 @@ export default function PathFilters({
 	contentTypeOptions,
 	selectedContentTypes,
 	type,
-	override,
+	deviation,
 	navigation,
 	handleFilterChange,
 	handleResetFilters,
@@ -26,13 +26,13 @@ export default function PathFilters({
 	contentTypeOptions: { uid: string; label: string }[]
 	selectedContentTypes: string[]
 	type: string | null
-	override: string | null
+	deviation: string | null
 	navigation: string | null
 	handleFilterChange: (key: RouteFilterKey, values: string[]) => void
 	handleResetFilters: () => void
 }) {
 	const { formatMessage } = useIntl()
-	const hasActiveFilters = selectedContentTypes.length > 0 || !!type || !!override || !!navigation
+	const hasActiveFilters = selectedContentTypes.length > 0 || !!type || !!deviation || !!navigation
 
 	const clearLabel = formatMessage({
 		id: getTranslation('paths.page.filter.clear'),
@@ -46,9 +46,9 @@ export default function PathFilters({
 		id: getTranslation('paths.page.filter.type'),
 		defaultMessage: 'Type',
 	})
-	const overridePlaceholder = formatMessage({
-		id: getTranslation('paths.page.filter.override.placeholder'),
-		defaultMessage: 'Override',
+	const deviationPlaceholder = formatMessage({
+		id: getTranslation('paths.page.filter.deviation.placeholder'),
+		defaultMessage: 'Deviation',
 	})
 	const navigationPlaceholder = formatMessage({
 		id: getTranslation('paths.page.filter.navigation.placeholder'),
@@ -99,23 +99,23 @@ export default function PathFilters({
 			</Box>
 			<Box width={FILTER_WIDTH}>
 				<SingleSelect
-					aria-label={overridePlaceholder}
-					placeholder={overridePlaceholder}
-					value={override ?? ''}
-					onChange={(value: string | number) => handleFilterChange('override', [String(value)])}
-					onClear={() => handleFilterChange('override', [])}
+					aria-label={deviationPlaceholder}
+					placeholder={deviationPlaceholder}
+					value={deviation ?? ''}
+					onChange={(value: string | number) => handleFilterChange('deviation', [String(value)])}
+					onClear={() => handleFilterChange('deviation', [])}
 					clearLabel={clearLabel}
 				>
 					<SingleSelectOption value="true">
 						{formatMessage({
-							id: getTranslation('paths.page.filter.override.true'),
-							defaultMessage: 'With override',
+							id: getTranslation('paths.page.filter.deviation.true'),
+							defaultMessage: 'Differs',
 						})}
 					</SingleSelectOption>
 					<SingleSelectOption value="false">
 						{formatMessage({
-							id: getTranslation('paths.page.filter.override.false'),
-							defaultMessage: 'Without override',
+							id: getTranslation('paths.page.filter.deviation.false'),
+							defaultMessage: 'Matches',
 						})}
 					</SingleSelectOption>
 				</SingleSelect>

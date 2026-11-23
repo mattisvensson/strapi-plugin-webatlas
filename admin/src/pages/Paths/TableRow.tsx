@@ -4,11 +4,11 @@ import { getTranslation } from '../../utils'
 import { useIntl } from 'react-intl'
 import { Pencil } from '@strapi/icons'
 import Tooltip from '../../components/Tooltip'
+import hasPathDeviation from './hasPathDeviation'
 
 export default function TableRow({ route, isSingleType }: { route: Route; isSingleType: boolean }) {
 	const { formatMessage } = useIntl()
-	// The canonical path only adds information if the navigation or an override moved the route
-	const hasDeviation = !!route.canonicalPath && route.canonicalPath !== route.path
+	const hasDeviation = hasPathDeviation(route)
 
 	return (
 		<Tr>
