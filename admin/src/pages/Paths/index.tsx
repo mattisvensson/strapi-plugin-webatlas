@@ -10,6 +10,7 @@ import type { Route } from '../../../../types'
 import type { RouteSortKey } from '../../types'
 import { useState, useEffect } from 'react'
 import { useApi, useErrorMessage } from '../../hooks'
+import useAllContentTypes from '../../hooks/useAllContentTypes'
 import { FullLoader } from '../../components/UI'
 import { getTranslation, isAbortError } from '../../utils'
 import { useIntl } from 'react-intl'
@@ -28,6 +29,7 @@ const Paths = () => {
 	const { formatMessage } = useIntl()
 	const { toggleNotification } = useNotification()
 	const getErrorMessage = useErrorMessage()
+	const { contentTypes } = useAllContentTypes()
 
 	const [allRoutes, setAllRoutes] = useState<Route[]>([])
 	const [routes, setRoutes] = useState<Route[]>([])
@@ -46,6 +48,7 @@ const Paths = () => {
 					JSON.stringify(route.id).toLowerCase().includes(query) ||
 					route.title.toLowerCase().includes(query) ||
 					route.path.toLowerCase().includes(query) ||
+					route.canonicalPath?.toLowerCase().includes(query) ||
 					route.relatedDocumentId.toLowerCase().includes(query) ||
 					route.relatedContentType.toLowerCase().includes(query),
 			),
@@ -94,9 +97,14 @@ const Paths = () => {
 	}, [])
 
 	const handleSort = (key: RouteSortKey) => {
-		setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
+		setSortDirection((prev) => (key === sortKey && prev === 'asc' ? 'desc' : 'asc'))
 		setSortKey(key)
 	}
+
+	const singleTypeUids = useMemo(
+		() => new Set(contentTypes.filter((ct) => ct.kind === 'singleType').map((ct) => ct.uid)),
+		[contentTypes],
+	)
 
 	const sortedRoutes = useMemo(() => {
 		return sortKey ? [...routes].sort(compareBy(sortKey, sortDirection)) : routes
@@ -114,7 +122,13 @@ const Paths = () => {
 		<Page.Protect permissions={pluginPermissions['page.routes']}>
 			<PageWrapper>
 				<SearchInput handleSearchChange={handleSearchChange} searchQuery={searchQuery} />
-				<PathTable routes={sortedRoutes} sortKey={sortKey} handleSort={handleSort} />
+				<PathTable
+					routes={sortedRoutes}
+					sortKey={sortKey}
+					sortDirection={sortDirection}
+					handleSort={handleSort}
+					singleTypeUids={singleTypeUids}
+				/>
 			</PageWrapper>
 		</Page.Protect>
 	)

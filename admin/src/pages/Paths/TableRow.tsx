@@ -4,7 +4,7 @@ import { getTranslation } from '../../utils'
 import { useIntl } from 'react-intl'
 import { Pencil } from '@strapi/icons'
 
-export default function TableRow({ route }: { route: Route }) {
+export default function TableRow({ route, isSingleType }: { route: Route; isSingleType: boolean }) {
 	const { formatMessage } = useIntl()
 
 	return (
@@ -30,7 +30,11 @@ export default function TableRow({ route }: { route: Route }) {
 						<LinkButton
 							variant="secondary"
 							startIcon={<Pencil />}
-							href={`/admin/content-manager/collection-types/${route.relatedContentType}/${route.relatedDocumentId}`}
+							href={
+								isSingleType
+									? `/admin/content-manager/single-types/${route.relatedContentType}`
+									: `/admin/content-manager/collection-types/${route.relatedContentType}/${route.relatedDocumentId}`
+							}
 						>
 							{formatMessage({
 								id: getTranslation('edit'),
