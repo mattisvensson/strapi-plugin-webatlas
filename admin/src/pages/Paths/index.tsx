@@ -20,6 +20,7 @@ import { useSearchParams } from 'react-router-dom'
 import debounce from '../../utils/debounce'
 import { useMemo } from 'react'
 import compareBy from './compareBy'
+import hasPathDeviation from './hasPathDeviation'
 import pluginPermissions from '../../permissions'
 import SearchInput from './SearchInput'
 import PathTable from './PathTable'
@@ -48,7 +49,7 @@ const Paths = () => {
 	const contentTypeFilter = searchParams.getAll('contentType')
 	const contentTypeFilterKey = contentTypeFilter.join(',')
 	const typeFilter = searchParams.get('type')
-	const overrideFilter = searchParams.get('override')
+	const deviationFilter = searchParams.get('deviation')
 	const navigationFilter = searchParams.get('navigation')
 
 	useEffect(() => {
@@ -59,7 +60,7 @@ const Paths = () => {
 					(contentTypeFilter.length === 0 ||
 						contentTypeFilter.includes(route.relatedContentType)) &&
 					(!typeFilter || route.type === typeFilter) &&
-					(!overrideFilter || String(route.isOverride) === overrideFilter) &&
+					(!deviationFilter || String(hasPathDeviation(route)) === deviationFilter) &&
 					(!navigationFilter || String(!!route.navitem?.length) === navigationFilter) &&
 					(JSON.stringify(route.id).toLowerCase().includes(query) ||
 						route.title.toLowerCase().includes(query) ||
@@ -69,7 +70,7 @@ const Paths = () => {
 						route.relatedContentType.toLowerCase().includes(query)),
 			),
 		)
-	}, [searchQuery, allRoutes, contentTypeFilterKey, typeFilter, overrideFilter, navigationFilter])
+	}, [searchQuery, allRoutes, contentTypeFilterKey, typeFilter, deviationFilter, navigationFilter])
 
 	const handleFilterChange = (key: RouteFilterKey, values: string[]) => {
 		setSearchParams((prev) => {
@@ -85,7 +86,7 @@ const Paths = () => {
 	const handleResetFilters = () => {
 		setSearchParams((prev) => {
 			const next = new URLSearchParams(prev)
-			const filterKeys: RouteFilterKey[] = ['contentType', 'type', 'override', 'navigation']
+			const filterKeys: RouteFilterKey[] = ['contentType', 'type', 'deviation', 'navigation']
 			filterKeys.forEach((key) => next.delete(key))
 			next.delete('page')
 			return next
@@ -194,7 +195,7 @@ const Paths = () => {
 						contentTypeOptions={contentTypeOptions}
 						selectedContentTypes={contentTypeFilter}
 						type={typeFilter}
-						override={overrideFilter}
+						deviation={deviationFilter}
 						navigation={navigationFilter}
 						handleFilterChange={handleFilterChange}
 						handleResetFilters={handleResetFilters}
