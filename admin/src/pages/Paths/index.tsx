@@ -14,7 +14,7 @@ import useAllContentTypes from '../../hooks/useAllContentTypes'
 import { FullLoader } from '../../components/UI'
 import { getTranslation, isAbortError } from '../../utils'
 import { useIntl } from 'react-intl'
-import { useNotification, Page } from '@strapi/strapi/admin'
+import { useNotification, Page, Pagination } from '@strapi/strapi/admin'
 import PageWrapper from './PageWrapper'
 import { useSearchParams } from 'react-router-dom'
 import debounce from '../../utils/debounce'
@@ -23,6 +23,8 @@ import compareBy from './compareBy'
 import pluginPermissions from '../../permissions'
 import SearchInput from './SearchInput'
 import PathTable from './PathTable'
+
+const DEFAULT_PAGE_SIZE = 20
 
 const Paths = () => {
 	const { getAllRoutes } = useApi()
@@ -58,7 +60,13 @@ const Paths = () => {
 	const debouncedSetSearchParams = useMemo(
 		() =>
 			debounce((value: string) => {
-				value ? setSearchParams({ search: value }) : setSearchParams({})
+				setSearchParams((prev) => {
+					const next = new URLSearchParams(prev)
+					value ? next.set('search', value) : next.delete('search')
+					// A new search result starts on the first page, the page size is kept
+					next.delete('page')
+					return next
+				})
 			}, 300),
 		[setSearchParams],
 	)
@@ -110,6 +118,16 @@ const Paths = () => {
 		return sortKey ? [...routes].sort(compareBy(sortKey, sortDirection)) : routes
 	}, [routes, sortKey, sortDirection])
 
+	const pageSize = Math.max(1, Number(searchParams.get('pageSize')) || DEFAULT_PAGE_SIZE)
+	const pageCount = Math.max(1, Math.ceil(sortedRoutes.length / pageSize))
+	// Clamp, so a stale or manually edited page param never shows an empty table
+	const page = Math.min(Math.max(1, Number(searchParams.get('page')) || 1), pageCount)
+
+	const paginatedRoutes = useMemo(
+		() => sortedRoutes.slice((page - 1) * pageSize, page * pageSize),
+		[sortedRoutes, page, pageSize],
+	)
+
 	if (loading) {
 		return (
 			<PageWrapper>
@@ -123,12 +141,20 @@ const Paths = () => {
 			<PageWrapper>
 				<SearchInput handleSearchChange={handleSearchChange} searchQuery={searchQuery} />
 				<PathTable
-					routes={sortedRoutes}
+					routes={paginatedRoutes}
 					sortKey={sortKey}
 					sortDirection={sortDirection}
 					handleSort={handleSort}
 					singleTypeUids={singleTypeUids}
 				/>
+				<Pagination.Root
+					pageCount={pageCount}
+					total={sortedRoutes.length}
+					defaultPageSize={DEFAULT_PAGE_SIZE}
+				>
+					<Pagination.PageSize />
+					<Pagination.Links />
+				</Pagination.Root>
 			</PageWrapper>
 		</Page.Protect>
 	)
