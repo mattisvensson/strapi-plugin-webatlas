@@ -128,7 +128,10 @@ export default ({ strapi }) => ({
 	},
 
 	async getAllRoutes() {
-		return await strapi.documents(waRoute).findMany()
+		// navitem is needed to show whether a route is used in a navigation
+		return await strapi.documents(waRoute).findMany({
+			populate: { navitem: { fields: ['documentId'] } },
+		})
 	},
 
 	async getRelatedRoute(documentId: string) {

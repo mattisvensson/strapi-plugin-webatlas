@@ -7,7 +7,7 @@
  */
 
 import type { Route } from '../../../../types'
-import type { RouteSortKey } from '../../types'
+import type { RouteFilterKey, RouteSortKey } from '../../types'
 import { useState, useEffect } from 'react'
 import { useApi, useErrorMessage } from '../../hooks'
 import useAllContentTypes from '../../hooks/useAllContentTypes'
@@ -23,6 +23,8 @@ import compareBy from './compareBy'
 import pluginPermissions from '../../permissions'
 import SearchInput from './SearchInput'
 import PathTable from './PathTable'
+import PathFilters from './PathFilters'
+import { Box, Flex } from '@strapi/design-system'
 
 const DEFAULT_PAGE_SIZE = 20
 
@@ -42,20 +44,53 @@ const Paths = () => {
 	const [sortKey, setSortKey] = useState<RouteSortKey>('canonicalPath')
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
 
+	// Filters live in the URL only, so filtered views can be shared and survive a reload
+	const contentTypeFilter = searchParams.getAll('contentType')
+	const contentTypeFilterKey = contentTypeFilter.join(',')
+	const typeFilter = searchParams.get('type')
+	const overrideFilter = searchParams.get('override')
+	const navigationFilter = searchParams.get('navigation')
+
 	useEffect(() => {
 		const query = searchQuery.toLowerCase()
 		setRoutes(
 			allRoutes.filter(
 				(route) =>
-					JSON.stringify(route.id).toLowerCase().includes(query) ||
-					route.title.toLowerCase().includes(query) ||
-					route.path.toLowerCase().includes(query) ||
-					route.canonicalPath?.toLowerCase().includes(query) ||
-					route.relatedDocumentId.toLowerCase().includes(query) ||
-					route.relatedContentType.toLowerCase().includes(query),
+					(contentTypeFilter.length === 0 ||
+						contentTypeFilter.includes(route.relatedContentType)) &&
+					(!typeFilter || route.type === typeFilter) &&
+					(!overrideFilter || String(route.isOverride) === overrideFilter) &&
+					(!navigationFilter || String(!!route.navitem?.length) === navigationFilter) &&
+					(JSON.stringify(route.id).toLowerCase().includes(query) ||
+						route.title.toLowerCase().includes(query) ||
+						route.path.toLowerCase().includes(query) ||
+						route.canonicalPath?.toLowerCase().includes(query) ||
+						route.relatedDocumentId.toLowerCase().includes(query) ||
+						route.relatedContentType.toLowerCase().includes(query)),
 			),
 		)
-	}, [searchQuery, allRoutes])
+	}, [searchQuery, allRoutes, contentTypeFilterKey, typeFilter, overrideFilter, navigationFilter])
+
+	const handleFilterChange = (key: RouteFilterKey, values: string[]) => {
+		setSearchParams((prev) => {
+			const next = new URLSearchParams(prev)
+			next.delete(key)
+			values.filter(Boolean).forEach((value) => next.append(key, value))
+			// A new filter result starts on the first page, the page size is kept
+			next.delete('page')
+			return next
+		})
+	}
+
+	const handleResetFilters = () => {
+		setSearchParams((prev) => {
+			const next = new URLSearchParams(prev)
+			const filterKeys: RouteFilterKey[] = ['contentType', 'type', 'override', 'navigation']
+			filterKeys.forEach((key) => next.delete(key))
+			next.delete('page')
+			return next
+		})
+	}
 
 	const debouncedSetSearchParams = useMemo(
 		() =>
@@ -114,6 +149,17 @@ const Paths = () => {
 		[contentTypes],
 	)
 
+	// Only content types that actually have routes, external and wrapper routes have none
+	const contentTypeOptions = useMemo(() => {
+		const uids = [...new Set(allRoutes.map((route) => route.relatedContentType).filter(Boolean))]
+		return uids
+			.map((uid) => ({
+				uid,
+				label: contentTypes.find((ct) => ct.uid === uid)?.info.displayName ?? uid,
+			}))
+			.sort((a, b) => a.label.localeCompare(b.label))
+	}, [allRoutes, contentTypes])
+
 	const sortedRoutes = useMemo(() => {
 		return sortKey ? [...routes].sort(compareBy(sortKey, sortDirection)) : routes
 	}, [routes, sortKey, sortDirection])
@@ -139,7 +185,21 @@ const Paths = () => {
 	return (
 		<Page.Protect permissions={pluginPermissions['page.routes']}>
 			<PageWrapper>
-				<SearchInput handleSearchChange={handleSearchChange} searchQuery={searchQuery} />
+				<Flex gap={2} wrap="wrap" marginBottom={4}>
+					{/* Extra spacing separates the free text search from the structured filters */}
+					<Box width="320px" marginRight={4}>
+						<SearchInput handleSearchChange={handleSearchChange} searchQuery={searchQuery} />
+					</Box>
+					<PathFilters
+						contentTypeOptions={contentTypeOptions}
+						selectedContentTypes={contentTypeFilter}
+						type={typeFilter}
+						override={overrideFilter}
+						navigation={navigationFilter}
+						handleFilterChange={handleFilterChange}
+						handleResetFilters={handleResetFilters}
+					/>
+				</Flex>
 				<PathTable
 					routes={paginatedRoutes}
 					sortKey={sortKey}
