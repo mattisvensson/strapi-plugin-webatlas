@@ -27,4 +27,6 @@ export type RouteItemProps = {
 	onToggleCollapse?: (documentId: string) => void
 	// Hides the drag handle and the item actions, if the user may not edit the items
 	readOnly?: boolean
+	// Temporarily marks the item, e.g. when it was opened from the paths page
+	highlighted?: boolean
 }

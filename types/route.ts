@@ -13,10 +13,17 @@ export type Route = {
 	active: boolean
 	isOverride: boolean
 	// oneToMany relation, only populated by the admin getAllRoutes endpoint
-	navitem?: {
-		id: number
-		documentId: string
-	}[] | null
+	navitem?:
+		| {
+				id: number
+				documentId: string
+				navigation?: {
+					id: number
+					documentId: string
+					name: string
+				} | null
+		  }[]
+		| null
 	parent?: Route
 	children?: Route[]
 	createdAt: string

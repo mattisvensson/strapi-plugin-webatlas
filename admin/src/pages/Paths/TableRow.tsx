@@ -1,21 +1,10 @@
 import type { Route } from '../../../../types'
-import { Typography, Tr, Td, Flex, LinkButton, Badge, IconButton } from '@strapi/design-system'
+import { Typography, Tr, Td, Flex, Badge } from '@strapi/design-system'
 import { getTranslation } from '../../utils'
 import { useIntl } from 'react-intl'
-import { Pencil, ExternalLink } from '@strapi/icons'
 import Tooltip from '../../components/Tooltip'
 import hasPathDeviation from './hasPathDeviation'
-
-// The path of an external route is user input. Only http(s) URLs are linked, so for example a
-// javascript: URL can never be executed by clicking the button
-function getSafeExternalUrl(path: string) {
-	try {
-		const url = new URL(path)
-		return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : null
-	} catch {
-		return null
-	}
-}
+import PathActionsMenu from './PathActionsMenu'
 
 export default function TableRow({
 	route,
@@ -28,7 +17,6 @@ export default function TableRow({
 }) {
 	const { formatMessage } = useIntl()
 	const hasDeviation = hasPathDeviation(route)
-	const externalUrl = route.type === 'external' ? getSafeExternalUrl(route.path) : null
 
 	return (
 		<Tr>
@@ -95,38 +83,8 @@ export default function TableRow({
 				</Typography>
 			</Td>
 			<Td>
-				<Flex gap={2} justifyContent="end">
-					{externalUrl && (
-						<IconButton
-							tag="a"
-							href={externalUrl}
-							target="_blank"
-							rel="noopener noreferrer"
-							variant="secondary"
-							label={formatMessage({
-								id: getTranslation('paths.page.action.openLink'),
-								defaultMessage: 'Open link',
-							})}
-						>
-							<ExternalLink />
-						</IconButton>
-					)}
-					{route.type === 'internal' && (
-						<LinkButton
-							variant="secondary"
-							startIcon={<Pencil />}
-							href={
-								isSingleType
-									? `/admin/content-manager/single-types/${route.relatedContentType}`
-									: `/admin/content-manager/collection-types/${route.relatedContentType}/${route.relatedDocumentId}`
-							}
-						>
-							{formatMessage({
-								id: getTranslation('edit'),
-								defaultMessage: 'Edit',
-							})}
-						</LinkButton>
-					)}
+				<Flex justifyContent="end">
+					<PathActionsMenu route={route} isSingleType={isSingleType} />
 				</Flex>
 			</Td>
 		</Tr>
