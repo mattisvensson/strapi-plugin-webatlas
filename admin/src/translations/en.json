@@ -32,6 +32,8 @@
 	"webatlas.paths.page.total": "{count, plural, one {# path} other {# paths}} total",
 	"webatlas.paths.page.matches": "{count, plural, one {# match} other {# matches}}",
 	"webatlas.paths.page.emptyPaths": "No paths found",
+	"webatlas.paths.page.emptyFiltered": "No paths match the current search or filters",
+	"webatlas.paths.page.clearSearch": "Clear search",
 	"webatlas.paths.page.column.type": "Type",
 	"webatlas.paths.page.column.contentType": "Content Type",
 	"webatlas.paths.page.canonicalPathHint": "Canonical Path: {path}",

@@ -161,12 +161,14 @@ const Paths = () => {
 			.sort((a, b) => a.label.localeCompare(b.label))
 	}, [allRoutes, contentTypes])
 
-	const isFiltered =
-		!!searchQuery ||
-		contentTypeFilter.length > 0 ||
-		!!typeFilter ||
-		!!deviationFilter ||
-		!!navigationFilter
+	const hasActiveFilters =
+		contentTypeFilter.length > 0 || !!typeFilter || !!deviationFilter || !!navigationFilter
+	const isFiltered = !!searchQuery || hasActiveFilters
+
+	const handleClearSearch = () => {
+		setSearchQuery('')
+		debouncedSetSearchParams('')
+	}
 
 	const contentTypeLabels = useMemo(
 		() => new Map(contentTypeOptions.map((option) => [option.uid, option.label])),
@@ -220,6 +222,10 @@ const Paths = () => {
 					handleSort={handleSort}
 					singleTypeUids={singleTypeUids}
 					contentTypeLabels={contentTypeLabels}
+					hasSearch={!!searchQuery}
+					hasActiveFilters={hasActiveFilters}
+					handleClearSearch={handleClearSearch}
+					handleResetFilters={handleResetFilters}
 				/>
 				<Pagination.Root
 					pageCount={pageCount}
