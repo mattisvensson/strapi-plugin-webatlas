@@ -161,6 +161,13 @@ const Paths = () => {
 			.sort((a, b) => a.label.localeCompare(b.label))
 	}, [allRoutes, contentTypes])
 
+	const isFiltered =
+		!!searchQuery ||
+		contentTypeFilter.length > 0 ||
+		!!typeFilter ||
+		!!deviationFilter ||
+		!!navigationFilter
+
 	const contentTypeLabels = useMemo(
 		() => new Map(contentTypeOptions.map((option) => [option.uid, option.label])),
 		[contentTypeOptions],
@@ -190,7 +197,7 @@ const Paths = () => {
 
 	return (
 		<Page.Protect permissions={pluginPermissions['page.routes']}>
-			<PageWrapper>
+			<PageWrapper total={allRoutes.length} matches={isFiltered ? routes.length : undefined}>
 				<Flex gap={2} wrap="wrap" marginBottom={4}>
 					{/* Extra spacing separates the free text search from the structured filters */}
 					<Box width="320px" marginRight={4}>
