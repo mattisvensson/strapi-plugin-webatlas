@@ -34,6 +34,7 @@
 	"webatlas.paths.page.emptyPaths": "Es wurden keine Pfade gefunden",
 	"webatlas.paths.page.emptyFiltered": "Keine Pfade entsprechen der aktuellen Suche oder den Filtern",
 	"webatlas.paths.page.clearSearch": "Suche leeren",
+	"webatlas.paths.page.action.openLink": "Link öffnen",
 	"webatlas.paths.page.column.type": "Typ",
 	"webatlas.paths.page.column.contentType": "Inhaltstyp",
 	"webatlas.paths.page.canonicalPathHint": "Kanonischer Pfad: {path}",
