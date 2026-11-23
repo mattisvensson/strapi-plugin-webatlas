@@ -1,6 +1,6 @@
 import type { Route } from '../../../../types'
 import type { RouteSortKey } from '../../types'
-import { Table, Tbody, EmptyStateLayout, Tr, Td } from '@strapi/design-system'
+import { Table, Tbody, EmptyStateLayout, Tr, Td, Flex, Button } from '@strapi/design-system'
 import TableHeader from './TableHeader'
 import TableRow from './TableRow'
 import { useIntl } from 'react-intl'
@@ -13,6 +13,10 @@ function PathTable({
 	handleSort,
 	singleTypeUids,
 	contentTypeLabels,
+	hasSearch,
+	hasActiveFilters,
+	handleClearSearch,
+	handleResetFilters,
 }: {
 	routes: Route[]
 	sortKey: RouteSortKey
@@ -20,6 +24,10 @@ function PathTable({
 	handleSort: (key: RouteSortKey) => void
 	singleTypeUids: Set<string>
 	contentTypeLabels: Map<string, string>
+	hasSearch: boolean
+	hasActiveFilters: boolean
+	handleClearSearch: () => void
+	handleResetFilters: () => void
 }) {
 	const { formatMessage } = useIntl()
 
@@ -41,13 +49,43 @@ function PathTable({
 				) : (
 					<Tr>
 						<Td colSpan={TABLE_COL_COUNT}>
-							<EmptyStateLayout
-								shadow="none"
-								content={formatMessage({
-									id: getTranslation('paths.page.emptyPaths'),
-									defaultMessage: 'No paths found',
-								})}
-							/>
+							{hasSearch || hasActiveFilters ? (
+								<EmptyStateLayout
+									shadow="none"
+									content={formatMessage({
+										id: getTranslation('paths.page.emptyFiltered'),
+										defaultMessage: 'No paths match the current search or filters',
+									})}
+									action={
+										<Flex gap={2}>
+											{hasActiveFilters && (
+												<Button variant="secondary" onClick={handleResetFilters}>
+													{formatMessage({
+														id: getTranslation('paths.page.filter.reset'),
+														defaultMessage: 'Reset filters',
+													})}
+												</Button>
+											)}
+											{hasSearch && (
+												<Button variant="secondary" onClick={handleClearSearch}>
+													{formatMessage({
+														id: getTranslation('paths.page.clearSearch'),
+														defaultMessage: 'Clear search',
+													})}
+												</Button>
+											)}
+										</Flex>
+									}
+								/>
+							) : (
+								<EmptyStateLayout
+									shadow="none"
+									content={formatMessage({
+										id: getTranslation('paths.page.emptyPaths'),
+										defaultMessage: 'No paths found',
+									})}
+								/>
+							)}
 						</Td>
 					</Tr>
 				)}
