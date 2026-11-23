@@ -29,6 +29,8 @@
 
 	"webatlas.paths.page.title": "Paths",
 	"webatlas.paths.page.subtitle": "Overview of all existing paths",
+	"webatlas.paths.page.total": "{count, plural, one {# path} other {# paths}} total",
+	"webatlas.paths.page.matches": "{count, plural, one {# match} other {# matches}}",
 	"webatlas.paths.page.emptyPaths": "No paths found",
 	"webatlas.paths.page.column.type": "Type",
 	"webatlas.paths.page.column.contentType": "Content Type",

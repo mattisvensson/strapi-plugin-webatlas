@@ -27,8 +27,10 @@
 	"webatlas.navigation.page.navItem.draftHint": "Erscheint erst im Frontend, wenn die Seite veröffentlicht ist.",
 	"webatlas.navigation.page.navItem.modifiedHint": "Die letzten Änderungen der Seite sind noch nicht veröffentlicht.",
 
-	"webatlas.paths.page.title": "Pfad",
+	"webatlas.paths.page.title": "Pfade",
 	"webatlas.paths.page.subtitle": "Übersicht aller vorhandenen Pfade",
+	"webatlas.paths.page.total": "{count, plural, one {# Pfad} other {# Pfade}} insgesamt",
+	"webatlas.paths.page.matches": "{count, plural, one {# Treffer} other {# Treffer}}",
 	"webatlas.paths.page.emptyPaths": "Es wurden keine Pfade gefunden",
 	"webatlas.paths.page.column.type": "Typ",
 	"webatlas.paths.page.column.contentType": "Inhaltstyp",
