@@ -161,9 +161,14 @@ const Paths = () => {
 			.sort((a, b) => a.label.localeCompare(b.label))
 	}, [allRoutes, contentTypes])
 
+	const contentTypeLabels = useMemo(
+		() => new Map(contentTypeOptions.map((option) => [option.uid, option.label])),
+		[contentTypeOptions],
+	)
+
 	const sortedRoutes = useMemo(() => {
-		return sortKey ? [...routes].sort(compareBy(sortKey, sortDirection)) : routes
-	}, [routes, sortKey, sortDirection])
+		return sortKey ? [...routes].sort(compareBy(sortKey, sortDirection, contentTypeLabels)) : routes
+	}, [routes, sortKey, sortDirection, contentTypeLabels])
 
 	const pageSize = Math.max(1, Number(searchParams.get('pageSize')) || DEFAULT_PAGE_SIZE)
 	const pageCount = Math.max(1, Math.ceil(sortedRoutes.length / pageSize))
@@ -207,6 +212,7 @@ const Paths = () => {
 					sortDirection={sortDirection}
 					handleSort={handleSort}
 					singleTypeUids={singleTypeUids}
+					contentTypeLabels={contentTypeLabels}
 				/>
 				<Pagination.Root
 					pageCount={pageCount}

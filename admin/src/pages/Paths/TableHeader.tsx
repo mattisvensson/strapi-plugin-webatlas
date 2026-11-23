@@ -37,6 +37,15 @@ export default function TableHeader({
 					</Typography>
 					{sortKey === 'path' && <SortIcon />}
 				</Th>
+				<Th onClick={() => handleSort('contentType')} cursor="pointer">
+					<Typography variant="sigma">
+						{formatMessage({
+							id: getTranslation('paths.page.column.contentType'),
+							defaultMessage: 'Content Type',
+						})}
+					</Typography>
+					{sortKey === 'contentType' && <SortIcon />}
+				</Th>
 				<Th onClick={() => handleSort('type')} cursor="pointer">
 					<Typography variant="sigma">
 						{formatMessage({

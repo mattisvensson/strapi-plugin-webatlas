@@ -6,7 +6,15 @@ import { Pencil } from '@strapi/icons'
 import Tooltip from '../../components/Tooltip'
 import hasPathDeviation from './hasPathDeviation'
 
-export default function TableRow({ route, isSingleType }: { route: Route; isSingleType: boolean }) {
+export default function TableRow({
+	route,
+	isSingleType,
+	contentTypeLabel,
+}: {
+	route: Route
+	isSingleType: boolean
+	contentTypeLabel?: string
+}) {
 	const { formatMessage } = useIntl()
 	const hasDeviation = hasPathDeviation(route)
 
@@ -59,6 +67,12 @@ export default function TableRow({ route, isSingleType }: { route: Route; isSing
 						</Typography>
 					)}
 				</Flex>
+			</Td>
+			<Td>
+				{/* External and wrapper routes have no content type */}
+				<Typography title={route.relatedContentType} textColor="neutral800">
+					{contentTypeLabel || '-'}
+				</Typography>
 			</Td>
 			<Td>
 				<Typography title={route.type} textColor="neutral800">
